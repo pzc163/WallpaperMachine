@@ -61,6 +61,11 @@ enum WallpaperPlaybackPreflight {
     ) async throws {
         let folder = library.appendingPathComponent(wallpaperID, isDirectory: true)
         let manifest = try Manifest(folder: folder)
+        if CreatorRuntimeRegistry.isCandidate(folder) {
+            guard manifest.kind == "web", manifest.entry == "index.html" else { throw CreatorTemplate.Failure.invalidBundle }
+            _ = try await Task.detached(priority: .userInitiated) { try CreatorRuntimeRegistry.readForPlayback(folder) }.value
+            try Task.checkCancellation()
+        }
         switch manifest.kind {
         case "video":
             let file = folder.appendingPathComponent(manifest.entry)
@@ -80,10 +85,6 @@ enum WallpaperPlaybackPreflight {
             // backup, a chosen folder that went away), so the renderer is pointed at it again.
             ClientPaths.exportAssetsRoot(assets)
         case "web":
-            if wallpaperID.hasPrefix(CreatorTemplate.idPrefix) {
-                _ = try await Task.detached(priority: .userInitiated) { try CreatorDraftStore.read(folder) }.value
-                try Task.checkCancellation()
-            }
             guard !manifest.entry.isEmpty,
                   FileManager.default.fileExists(atPath: folder.appendingPathComponent(manifest.entry).path) else {
                 throw Failure.missingWebEntry

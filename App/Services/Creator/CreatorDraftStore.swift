@@ -7,7 +7,15 @@ actor CreatorDraftStore {
         let specification: CreatorTemplate.Specification
         let files: [String: Data]
         let digest: String
-        var wallpaperID: String { specification.wallpaperID }
+        var manifest: CreatorBundleManifest? = nil
+        var bundleVersion: Int { manifest?.bundleVersion ?? 1 }
+        var wallpaperID: String { manifest == nil ? specification.wallpaperID : "ai-" + specification.projectID.uuidString.lowercased() }
+        var renderDigest: String {
+            get throws {
+                if manifest == nil { return digest }
+                return CreatorTemplate.digest(try CreatorBundleManifest.files(for: specification))
+            }
+        }
     }
 
     let root: URL
@@ -41,36 +49,7 @@ actor CreatorDraftStore {
 
     /// Also used on library copies; the in-memory snapshot never rereads files while rendering.
     nonisolated static func read(_ directory: URL, expectedDigest: String? = nil) throws -> Snapshot {
-        try Task.checkCancellation()
-        var info = stat()
-        guard lstat(directory.path, &info) == 0, info.st_mode & S_IFMT == S_IFDIR else {
-            throw CreatorTemplate.Failure.invalidPath
-        }
-        let urls = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
-        let expectedNames: Set<String> = ["project.json", "index.html", CreatorTemplate.metadataFile]
-        guard Set(urls.map(\.lastPathComponent)) == expectedNames else { throw CreatorTemplate.Failure.invalidBundle }
-        var files: [String: Data] = [:]
-        for url in urls {
-            try Task.checkCancellation()
-            // O_NOFOLLOW and fstat apply to the same opened object, not a separate path check.
-            let descriptor = open(url.path, O_RDONLY | O_NOFOLLOW | O_CLOEXEC)
-            guard descriptor >= 0 else { throw CreatorTemplate.Failure.invalidPath }
-            defer { close(descriptor) }
-            guard fstat(descriptor, &info) == 0, info.st_mode & S_IFMT == S_IFREG,
-                  info.st_nlink == 1, info.st_size > 0, info.st_size <= 256 * 1024 else {
-                throw CreatorTemplate.Failure.invalidBundle
-            }
-            let handle = FileHandle(fileDescriptor: descriptor, closeOnDealloc: false)
-            let data = try handle.read(upToCount: 256 * 1024 + 1) ?? Data()
-            guard data.count <= 256 * 1024 else { throw CreatorTemplate.Failure.invalidBundle }
-            files[url.lastPathComponent] = data
-        }
-        let spec = try JSONDecoder().decode(CreatorTemplate.Specification.self, from: files[CreatorTemplate.metadataFile]!)
-        guard directory.lastPathComponent == spec.wallpaperID else { throw CreatorTemplate.Failure.invalidPath }
-        guard try CreatorTemplate.files(for: spec) == files else { throw CreatorTemplate.Failure.changedContent }
-        let digest = CreatorTemplate.digest(files)
-        if let expectedDigest, expectedDigest != digest { throw CreatorTemplate.Failure.changedContent }
-        return Snapshot(specification: spec, files: files, digest: digest)
+        try CreatorBundleManifest.read(directory, expectedDigest: expectedDigest)
     }
 
     nonisolated static func write(_ files: [String: Data], to directory: URL) throws {

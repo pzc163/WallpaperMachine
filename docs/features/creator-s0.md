@@ -7,9 +7,10 @@ not install, launch or change the desktop as part of verification.
 The [S1 and S4 follow-up plan](../plans/2026-11-10-creator-s1-s4.md) adds the future
 parameter-only contract, native covers and download/process gates. The
 [S1.0 parameterized templates](creator-templates.md) now extend this service
-workflow while preserving legacy bundle bytes. The proposed four-file format
-and download guard remain unimplemented; the results below are the recorded S0
-results, not a reclassification of unrestricted-code safety.
+workflow while preserving legacy bundle bytes. [S1.1 revision storage](creator-revisions.md)
+adds immutable history, versioned records and a four-file format boundary; cover
+capture and the download guard remain unimplemented. The results below are the
+recorded S0 results, not a reclassification of unrestricted-code safety.
 
 ## Storage and existing author protocol
 

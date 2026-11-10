@@ -25,6 +25,19 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-10 — Creator S1.1 immutable revision storage
+
+S1.1 adds immutable creator revision storage, content-bound structural reports, job cancellation/recovery and strict package routing. No UI, model API, cover capture or desktop changes.
+
+- Safety baseline: local `feat/ai-creator` commit `e3a190c613ce2a95cff2816876b1c94319415f3f`; S1.1 remains uncommitted; no push.
+- `python3 scripts/test.py --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests` — exit 0; 214 passed, 0 failed, 3 known S0 probe skips.
+- `python3 scripts/test.py` — one final full run, exit 0; Python 687 passed (32 modules); native 4,794 passed, 0 failed, 69 skipped of 4,863. All 27 new cases passed.
+- Skips: 3 unresolved S0 unrestricted-source probes, 62 opt-in media/device cases, 3 live Steam cases, 1 reference-render case.
+- Two existing main-thread runtime warnings: `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()` and `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`; source locations absent.
+- Legacy generators and golden digest assertions are unchanged. Tests use temporary stores, synthetic JPEGs and an unattached WKWebView; no visible window or desktop capture.
+- Structural reports explicitly leave runtime/poster capture unchecked; v2 publication, model transport, UI and S4 remain pending. Creator history is not yet in backup/storage-move transactions.
+- Rust/renderer checks and Release build not run: no changes in those domains and no application delivery requested. No install, push or wallpaper activation.
+
 ## 2026-11-10 — Creator S1.0 parameterized templates
 
 S1.0 adds native-owned parameterized templates on the existing S0 host; no model API or desktop activation.
@@ -131,17 +144,3 @@ Requested Release build and repeat desktop test for [issue #177](https://github.
 - The user reported visible stuttering in reply to the baseline question after the updated app had started. That observation lacks a timestamp identifying the binary/transition, and no separate updated-build manual verdict was received. Page callback timing cannot exclude a compositor-held frame. Current main also includes earlier changes absent from installed 1.9.3, so this is not an isolated patch A/B.
 - The unchanged candidate code previously passed the full routine gate: 32 Python suites, XcodeGen, 4,659 native passed, zero failed, 66 skipped. The gate was not repeated for this build/test-only follow-up. Wallpaper Engine comparison remains **not done**: the available VM's captures did not contain Belle; no pixel metrics are claimed.
 - Restored Lost Tower on the primary display and Stage Manager off, retained the internal display wallpaper, moved the temporary import to Trash and cleared the search. The updated Release build remains running. No commit, push or issue closure.
-
-## 2026-11-08 — Desktop web scheduling during window visibility changes
-
-Investigation of [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The change repairs an independently reproduced window-visibility scheduling gap; its connection to the reporter's exact Stage Manager transition remains unconfirmed.
-
-- The attached video holds different last frames for roughly 0.6 s on repeated returns to the desktop. The attached logs show no matching host presentation suspension; the CPU sample was taken later with another wallpaper active.
-- WebKit checks window visibility separately from occlusion. An attached desktop page now remains schedulable until the host suspends it; no wallpaper identification, timer, polling loop or extra render pass was added.
-- Before the fix, `python3 scripts/test.py --only WebWallpaperSuspensionTests/testDesktopPageSchedulingFollowsHostSuspensionWithoutAnOrderedWindow` failed: zero animation frames while the host permitted playback.
-- After the fix, `python3 scripts/test.py --only WebWallpaperSuspensionTests --only WebWallpaperHostLifecycleTests --only WebWallpaperFramePacingTests` passed: 74 tests, no failures or skips. The regression also measures stopped frames during explicit suspension and resumed frames without reloading.
-- `python3 scripts/test.py` passed: all 32 Python suites, XcodeGen, and 4,659 native tests; zero failures, 66 skipped of 4,725. Skips: 62 opt-in video/media asset cases, one live Steam install, two Workshop cases and the opt-in web reference renderer.
-- One runtime warning came from `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`: a method called on the main thread may cause UI unresponsiveness. No warning was attributed to the new scheduling regression.
-- Wallpaper Engine comparison **not done**. The Windows VM was available, but two muted `scripts/we_reference.py capture` attempts produced a black desktop with the Start menu, not Belle. The attempted native reference render also failed with `DecodingError.typeMismatch`; no valid before/after pixel metrics are claimed.
-- Authorized desktop probing of installed 1.9.3 on macOS 27.0.1 did not reproduce the reporter's repeatable macOS 27.2 stall. This is not confirmation of the changed app's visual behavior. The previous wallpaper and Stage Manager setting were restored, the temporary import was removed, and the VM was suspended again.
-- Updated the [web runtime description](../features/web-wallpapers.md#runtime-shape) and [test coverage](coverage.md#webwallpaper). No renderer/Rust changes or corresponding gates; no Release build, installation, commit or push.

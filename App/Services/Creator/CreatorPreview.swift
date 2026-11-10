@@ -8,6 +8,21 @@ enum CreatorPreview {
         -> (snapshot: CreatorDraftStore.Snapshot, surface: WebWallpaperPreviewSurface) {
         let snapshot = try await store.snapshot(directory, expectedDigest: expectedDigest)
         try Task.checkCancellation()
+        guard snapshot.bundleVersion == 1 else { throw CreatorPersistence.Failure.incompleteBundle }
+        return try makeSurface(snapshot: snapshot, directory: directory)
+    }
+
+    static func make(projectID: UUID, revisionID: UUID, store: CreatorRevisionStore) async throws
+        -> (snapshot: CreatorDraftStore.Snapshot, surface: WebWallpaperPreviewSurface) {
+        let snapshot = try await store.snapshot(projectID: projectID, revisionID: revisionID)
+        try Task.checkCancellation()
+        let result = try makeSurface(snapshot: snapshot, directory: store.bundleURL(projectID: projectID, revisionID: revisionID))
+        result.surface.page.creatorSnapshotLoader = { try await store.snapshot(projectID: projectID, revisionID: revisionID) }
+        return result
+    }
+
+    private static func makeSurface(snapshot: CreatorDraftStore.Snapshot, directory: URL) throws
+        -> (snapshot: CreatorDraftStore.Snapshot, surface: WebWallpaperPreviewSurface) {
         let specification = snapshot.specification
         let properties: [String: Any]
         let title: String

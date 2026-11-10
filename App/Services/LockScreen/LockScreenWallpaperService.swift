@@ -984,8 +984,8 @@ private enum LockScreenAssetPublisher {
       }
       let source = project.deletingLastPathComponent()
       // The extension has no creator snapshot host; do not downgrade a prototype to its file host.
-      guard !input.wallpaperID.hasPrefix(CreatorTemplate.idPrefix),
-        !source.lastPathComponent.hasPrefix(CreatorTemplate.idPrefix)
+      guard !CreatorRuntimeRegistry.isCreatorID(input.wallpaperID),
+        !CreatorRuntimeRegistry.isCandidate(source)
       else {
         throw LockScreenWallpaperFailure(
           message: String(localized: "This wallpaper type cannot be presented by the native wallpaper provider."))

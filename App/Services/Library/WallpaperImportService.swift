@@ -145,6 +145,11 @@ actor WallpaperImportService {
         }
 
         let isDirectory = try downloadMetadata(at: candidate).st_mode & S_IFMT == S_IFDIR
+        let creator: CreatorDraftStore.Snapshot?
+        if isDirectory, CreatorRuntimeRegistry.isCandidate(candidate) {
+            creator = try CreatorDraftStore.read(candidate)
+            guard creator?.bundleVersion == 1 else { throw CreatorPersistence.Failure.incompleteBundle }
+        } else { creator = nil }
         let ext = candidate.pathExtension.lowercased()
         let kind: CandidateKind
         var id = name
@@ -222,6 +227,10 @@ actor WallpaperImportService {
         }
 
         try validateProject(at: built)
+        if let creator {
+            guard id == creator.wallpaperID else { throw CreatorTemplate.Failure.invalidPath }
+            _ = try CreatorBundleManifest.read(built, scopedRevision: true, expectedDigest: creator.digest)
+        }
         try Task.checkCancellation()
         if replacing {
             try requireInstalledProject(destination)

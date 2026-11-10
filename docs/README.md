@@ -33,6 +33,8 @@ live under `testing/`.
 
 | Document | Purpose |
 |---|---|
+| [plans/02-creator-prd.md](plans/02-creator-prd.md) | Creator product requirements and acceptance criteria (02) |
+| [plans/03-creator-technical-plan.md](plans/03-creator-technical-plan.md) | Creator architecture, contracts, stages and implemented storage boundaries (03) |
 | [plans/2026-11-10-creator-s0.md](plans/2026-11-10-creator-s0.md) | Creator S0 implementation scope, steps and verification gates |
 | [plans/2026-11-10-creator-s1-s4.md](plans/2026-11-10-creator-s1-s4.md) | Creator template parameters, native covers, staged model contracts and gates for unrestricted source |
 | [conventions.md](conventions.md) | Code, test, documentation, commit and pull-request rules |
@@ -75,6 +77,7 @@ file; pass `rg -u` to search them deliberately.
 
 | Document | Purpose |
 |---|---|
+| [features/creator-revisions.md](features/creator-revisions.md) | S1.1 immutable revision storage, content-bound evidence, cancellation, recovery and policy routing |
 | [features/creator-templates.md](features/creator-templates.md) | S1.0 native parameter catalog, richer Canvas2D templates, bounded rendering and legacy compatibility |
 | [features/creator-s0.md](features/creator-s0.md) | Local creator prototype: trusted templates, draft preview, restricted resources, library import and recovery |
 | [features/control-panel.md](features/control-panel.md) | The native window: language, tabs, toolbar, grid and inspector, pages and Settings, selection versus apply, Now Playing, target display, filtering and local collections, recently used, deleting, downloads and import |

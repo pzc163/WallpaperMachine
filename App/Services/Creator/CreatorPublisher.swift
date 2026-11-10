@@ -47,6 +47,7 @@ actor CreatorPublisher {
         defer { close(descriptor) }
         guard !FileManager.default.fileExists(atPath: active.path) else { throw CreatorTemplate.Failure.busy }
         let snapshot = try CreatorDraftStore.read(directory, expectedDigest: expectedDigest)
+        guard snapshot.bundleVersion == 1 else { throw CreatorPersistence.Failure.incompleteBundle }
         let installed = library.appendingPathComponent(snapshot.wallpaperID, isDirectory: true)
         let previous = FileManager.default.fileExists(atPath: installed.path) ? try CreatorDraftStore.read(installed) : nil
         try FileManager.default.createDirectory(at: active, withIntermediateDirectories: false)

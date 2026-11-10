@@ -43,7 +43,7 @@ use an injected test clock without adding a production script-execution seam.
 
 ## Compatibility and publication
 
-The S0 three-file bundle remains the only package format in this step:
+The S0 three-file bundle remained the only package format in S1.0:
 `creator.json`, `project.json`, `index.html`. The specification's existing
 `version: 1` is the **bundle/policy version**, not the suffix of a template ID.
 Optional `templateID` and `parameters` select a catalog template. Without either,
@@ -62,8 +62,9 @@ templates. The existing publisher imports them and can recover the exact legacy
 bundle after an interrupted replacement. No migration is performed in place. Once persisted, changes to a kernel, budget
 or serialized control contract require a new template ID and retention of the
 old generator.
-Production revision history, four-file packages, native JPEG covers and separate
-runtime registration remain in S1.1/S1.4.
+[S1.1 revision storage](creator-revisions.md) now adds immutable history, versioned
+records, explicit v2 package boundaries and legacy runtime registration. Native
+cover capture and publication of new v2 packages remain in S1.4.
 
 ## Resource and lifecycle limits
 

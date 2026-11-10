@@ -282,6 +282,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     private let creatorPermissions: CreatorWebPermissions?
     private var creatorLoadTask: Task<Void, Never>?
     var expectedCreatorDigest: String?
+    var creatorSnapshotLoader: (@Sendable () async throws -> CreatorDraftStore.Snapshot)?
     /// Raised when the page's audio subscription actually changes, so the host
     /// can open and close the capture tap on real demand.
     var onAudioDemandChanged: (@MainActor (Bool) -> Void)?
@@ -365,7 +366,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         self.timing = timing
         self.now = now ?? { ContinuousClock.now }
         self.wait = wait ?? { try await Task.sleep(for: $0) }
-        let isCreator = projectURL.lastPathComponent.hasPrefix(CreatorTemplate.idPrefix)
+        let isCreator = CreatorRuntimeRegistry.isCandidate(projectURL)
         let creatorResources = isCreator ? CreatorWebResources() : nil
         self.creatorResources = creatorResources
         self.creatorPermissions = isCreator ? CreatorWebPermissions() : nil
@@ -454,11 +455,17 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
             let generation = documentGeneration
             let directory = projectURL
             let digest = expectedCreatorDigest
+            let loader = creatorSnapshotLoader
             creatorLoadTask = Task { @MainActor [weak self] in
                 do {
-                    let snapshot = try await Task.detached(priority: .userInitiated) {
-                        try CreatorDraftStore.read(directory, expectedDigest: digest)
-                    }.value
+                    let snapshot: CreatorDraftStore.Snapshot
+                    if let loader {
+                        snapshot = try await loader()
+                    } else {
+                        snapshot = try await Task.detached(priority: .userInitiated) {
+                            try CreatorRuntimeRegistry.readForPlayback(directory, expectedDigest: digest)
+                        }.value
+                    }
                     let rules = try await CreatorWebResources.offlineRules()
                     try Task.checkCancellation()
                     guard let self, self.documentGeneration == generation else { return }

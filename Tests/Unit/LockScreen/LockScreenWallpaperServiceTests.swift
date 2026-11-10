@@ -204,6 +204,36 @@ final class LockScreenWallpaperServiceTests: XCTestCase {
   }
 
   @MainActor
+  func testRevisionDraftAndRenamedCreatorAreRefusedByBothExtensionModes() async throws {
+    let spec = CreatorTemplate.Specification(projectID: UUID(), kind: .stars)
+    for name in ["ai-" + spec.projectID.uuidString.lowercased(), "renamed-creator"] {
+      let directory = root.appendingPathComponent(name)
+      try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: false)
+      for (file, data) in try CreatorBundleManifest.files(for: spec) {
+        try data.write(to: directory.appendingPathComponent(file))
+      }
+      var record = scene()
+      record.displayId = 1
+      record.wallpaperId = name
+      record.projectPath = directory.appendingPathComponent("project.json").path
+      let service = LockScreenWallpaperService(prepareExtension: {}, notifyConfigurationChanged: {}, scenes: { [record] },
+        selection: LockScreenWallpaperSelection(storeURL: store, journalURL: journal, reload: {}),
+        exchange: exchange, defaults: defaults, scheduleMonitor: scheduleMonitor, displayUUID: { _ in "one" })
+      service.setEnabled(true)
+      await waitFor("revision lock-screen refusal") { !service.isBusy }
+      XCTAssertNotNil(service.errorMessage)
+      XCTAssertFalse(service.isEnabled)
+      service.setScreenSaverEnabled(true)
+      await waitFor("revision screen-saver refusal") { !service.isBusy }
+      XCTAssertNotNil(service.errorMessage)
+      XCTAssertFalse(service.screenSaverEnabled)
+      XCTAssertFalse(service.ownsDesktopProvider)
+      XCTAssertEqual(try selectedProvider("Desktop"), "display-one-desktop")
+      XCTAssertEqual(try selectedProvider("Idle"), "display-one-idle")
+    }
+  }
+
+  @MainActor
   func testActivationFailureAlwaysHandsDesktopBackToPosterProvider() async throws {
     try XCTSkipIf(CGDisplayIsOnline(CGMainDisplayID()) == 0, "No online main display")
     let service = LockScreenWallpaperService(prepareExtension: {}, notifyConfigurationChanged: {}, scenes: { [self.scene()] },
