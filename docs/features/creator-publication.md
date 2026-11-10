@@ -5,11 +5,14 @@ WebKit capture, an immutable four-file revision and a recoverable library save.
 It implements the service portions of PRD AC-02/07/10/15/16. Per the requested
 scope, it adds no creator UI, startup wiring or desktop activation. The verified
 S1.3 baseline was committed locally as `ac28cf34` on `feat/ai-creator`; this S1.4
-work remains uncommitted. Nothing was pushed or installed.
+work was committed locally as `8c1480b0` before S2.1. Nothing was pushed or installed.
 
 See the [PRD](../plans/02-creator-prd.md),
 [technical contract](../plans/03-creator-technical-plan.md#19-s14-原生运行封闭与发布实施合同)
 and [stage plan](../plans/2026-11-10-creator-s1-s4.md).
+
+[S2.1](creator-iteration.md) adds bounded repair and conversation bookkeeping around
+this workflow; the S1.4 gate results below remain historical.
 
 ## Ownership and flow
 

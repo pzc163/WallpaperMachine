@@ -9,6 +9,15 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-09 — Issue #177 rebuilt candidate rejected
+
+- The user tested the Release app from local commit 5cb12719 and reported that the issue was not fixed. Its prior passing gate and manual flag-toggle trials do not establish a fix.
+- Read-only process inspection confirmed the running executable was build/Build/Products/Release/WallpaperMachine.app/Contents/MacOS/WallpaperMachine.
+- WindowServer readback acknowledged tag 55 on both the Built-in Retina Display and DELL U2725QE web windows. The debugger detached after inspection; no window policy was changed.
+- The built-in window contained its live web view. The Dell window contained an NSImageView suspension poster; session logs recorded repeated presentation suspend/resume decisions for display 3.
+- The foreground-app rule was Keep running, covered-desktop behavior was the default Pause, and the power source was External. The relationship between this pause and the reported stutter remains unconfirmed; a controlled manual retest with the coverage rule disabled is pending authorization.
+- No new fix, desktop automation, app restart or settings mutation was performed. The candidate remains local and must not be treated as resolving #177.
+
 ## 2026-11-09 — Web transition composition final review (#177)
 
 - Reviewed the web-window transition policy and live-resize restoration against current main; retained the general fix without wallpaper-specific behavior or per-frame work.

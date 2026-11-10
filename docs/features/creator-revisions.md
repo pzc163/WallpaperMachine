@@ -302,3 +302,10 @@ part of `StorageLocation.movedItems`; storage migration of creator history is
 unsupported in this service-only stage. Do not use the existing storage move or
 backup operation as a creator-history backup. Integrate those transactions and
 their tests before exposing a persistent creator UI.
+
+[S2.1](creator-iteration.md) adds local versioned conversation records and a
+whole-iteration lease alongside the existing Job leases. Recovery interrupts
+abandoned turns without replaying requests. Automatic static-only attempts keep
+the last usable selection; an explicit validated-history selection remains
+possible and does not rewrite the library or activate the desktop. Optional
+iteration provenance leaves old canonical records and v1 bundle bytes unchanged.

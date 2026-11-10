@@ -2,12 +2,13 @@ import Foundation
 
 /// Immutable revisions; only project pointers, job journals and validation evidence are mutable.
 actor CreatorRevisionStore {
-    enum Checkpoint: Sendable { case afterStaging, afterRevisionMove, afterProjectCommit }
+    enum Checkpoint: Sendable { case afterStaging, afterRevisionMove, afterProjectCommit, afterIterationReservation }
     nonisolated let root: URL
     let context: ValidationReport.Context
     let checkpoint: @Sendable (Checkpoint) throws -> Void
     let checkStorage: @Sendable () throws -> Void
     var leases: [UUID: CreatorPersistence.Lease] = [:]
+    var iterationLeases: [UUID: CreatorPersistence.Lease] = [:]
 
     init(root: URL? = nil, context: ValidationReport.Context = .current,
          checkpoint: @escaping @Sendable (Checkpoint) throws -> Void = { _ in },
@@ -84,9 +85,18 @@ actor CreatorRevisionStore {
 
     /// Starts a new generation and durably fences callbacks from an older request.
     func beginJob(projectID: UUID, baseRevisionID: UUID? = nil, requestBudget: Int = 1, tokenBudget: Int = 4096,
-                  expectedBaseDigest: String? = nil, sealingLatest: Bool = false) throws -> GenerationJob.Ticket {
+                  expectedBaseDigest: String? = nil, sealingLatest: Bool = false,
+                  iteration: CreatorConversation.Ticket? = nil) throws -> GenerationJob.Ticket {
         try locked {
             try Task.checkCancellation()
+            if let iteration {
+                let turn = try activeIteration(iteration)
+                guard iteration.projectID == projectID,
+                      sealingLatest ? turn.state == .sealing && turn.attempts.last?.draftRevisionID == baseRevisionID
+                        : turn.state == .generating && turn.baseRevisionID == baseRevisionID && turn.baseRevisionDigest == expectedBaseDigest
+                else { throw CreatorPersistence.Failure.staleJob }
+            } else if !sealingLatest { try cancelActiveIteration(projectID) }
+            else if let turn = try readConversation(projectID).turns.last, !turn.state.terminal { throw CreatorPersistence.Failure.busy }
             var project = try readProject(projectID)
             if sealingLatest {
                 guard project.activeJobID == nil, project.latestRevisionID == baseRevisionID else { throw CreatorPersistence.Failure.staleJob }
@@ -98,7 +108,7 @@ actor CreatorRevisionStore {
             let job = GenerationJob(schemaVersion: 1, id: UUID(), projectID: projectID, baseRevisionID: baseRevisionID,
                                     state: .generating, attemptCount: 0, requestBudget: requestBudget, tokenBudget: tokenBudget,
                                     cancellationToken: UUID(), createdAt: CreatorPersistence.timestamp(), candidateRevisionID: nil, candidateDigest: nil,
-                                    baseRevisionDigest: expectedBaseDigest)
+                                    baseRevisionDigest: expectedBaseDigest, iterationID: iteration?.id)
             try job.validate()
             if let previous = project.activeJobID {
                 let old = try readJob(previous)
@@ -110,6 +120,7 @@ actor CreatorRevisionStore {
             let lease = try CreatorPersistence.Lease(jobURL(job.id).appendingPathComponent(".lease"))
             try save(job)
             leases[job.id] = lease
+            if let iteration { try updateIteration(iteration) { $0.currentJobID = job.id } }
             project.activeJobID = job.id
             try save(project)
             return job.ticket
@@ -119,7 +130,7 @@ actor CreatorRevisionStore {
     func recordAttempt(_ ticket: GenerationJob.Ticket) throws {
         try locked {
             var job = try activeJob(ticket)
-            guard job.state == .generating, job.attemptCount < job.requestBudget else { throw CreatorPersistence.Failure.staleJob }
+            guard job.state == .generating, job.iterationID == nil, job.attemptCount < job.requestBudget else { throw CreatorPersistence.Failure.staleJob }
             job.attemptCount += 1
             try save(job)
         }
@@ -144,6 +155,8 @@ actor CreatorRevisionStore {
                   job.reservedOutputTokens != nil || job.attemptCount == 0,
                   outputTokens > 0, outputTokens <= total - (job.reservedOutputTokens ?? 0)
             else { throw LLMFailure.budgetExhausted }
+            try reserveIterationAttempt(job, profile: profile, outputTokens: outputTokens)
+            if job.iterationID != nil { try checkpoint(.afterIterationReservation) }
             job.attemptCount += 1
             job.reservedOutputTokens = (job.reservedOutputTokens ?? 0) + outputTokens
             try save(job)
@@ -173,7 +186,9 @@ actor CreatorRevisionStore {
                 try generation.validate()
                 guard !legacy, generation.jobID == job.id, generation.attemptCount == job.attemptCount,
                       generation.reservedOutputTokens == job.reservedOutputTokens,
-                      generation.baseRevisionDigest == job.baseRevisionDigest else { throw CreatorPersistence.Failure.invalidRecord }
+                      generation.baseRevisionDigest == job.baseRevisionDigest, generation.iterationID == job.iterationID
+                else { throw CreatorPersistence.Failure.invalidRecord }
+                if let turn = try iterationForJob(job), generation.repairIndex != turn.repairCount { throw CreatorPersistence.Failure.invalidRecord }
                 try checkBase(job)
             } else if providerID != nil || modelID != nil || (legacy && presentation != nil) {
                 throw CreatorPersistence.Failure.invalidRecord
@@ -245,7 +260,7 @@ actor CreatorRevisionStore {
             project.revisionIDs.append(id)
             project.latestRevisionID = id
             project.activeJobID = nil
-            if validatingStructure || runtimeEvidence != nil {
+            if runtimeEvidence != nil || (validatingStructure && job.iterationID == nil) {
                 project.lastValidatedRevisionID = id
                 project.selectedRevisionID = id
             }
@@ -289,7 +304,9 @@ actor CreatorRevisionStore {
 
     func select(projectID: UUID, revisionID: UUID) throws {
         try locked {
+            try Task.checkCancellation()
             _ = try validReport(projectID: projectID, revisionID: revisionID)
+            try cancelActiveIteration(projectID)
             var project = try readProject(projectID)
             project.selectedRevisionID = revisionID
             try save(project)
@@ -320,6 +337,7 @@ actor CreatorRevisionStore {
         let job = try readJob(ticket.id)
         guard job.ticket == ticket, !job.isTerminal, leases[job.id] != nil,
               try readProject(job.projectID).activeJobID == job.id else { throw CreatorPersistence.Failure.staleJob }
+        _ = try iterationForJob(job)
         return job
     }
     func readRevisionDirectory(_ directory: URL) throws -> (revision: CreatorRevision, snapshot: CreatorDraftStore.Snapshot, metadataDigest: String) {

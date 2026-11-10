@@ -12,11 +12,11 @@ extension CreatorRevisionStore {
         }
     }
 
-    func seal(_ capture: CreatorRuntimeCapture) throws -> CreatorRevision {
+    func seal(_ capture: CreatorRuntimeCapture, iteration: CreatorConversation.Ticket? = nil) throws -> CreatorRevision {
         try capture.validate()
         let source = capture.sourceReport
         let ticket = try beginJob(projectID: source.projectID, baseRevisionID: source.revisionID,
-                                  expectedBaseDigest: source.revisionDigest, sealingLatest: true)
+                                  expectedBaseDigest: source.revisionDigest, sealingLatest: true, iteration: iteration)
         do {
             try locked {
                 try Task.checkCancellation()

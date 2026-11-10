@@ -23,7 +23,8 @@ actor LLMProvider {
         self.settings = settings; self.credentials = credentials; self.transport = transport; self.log = log; self.wait = wait
     }
     func generate(_ input: LLMRequest, profileID: UUID, configurationID: UUID,
-                  ticket: GenerationJob.Ticket, store: CreatorRevisionStore) async throws -> Completion {
+                  ticket: GenerationJob.Ticket, store: CreatorRevisionStore, retrying: Bool = true,
+                  disableAutomaticJSONMode: Bool = false) async throws -> Completion {
         guard active[ticket.id] == nil, active.count < 4 else { throw LLMFailure.busy }
         let cancellation = LLMCancellation()
         active[ticket.id] = (ticket, cancellation)
@@ -31,7 +32,8 @@ actor LLMProvider {
         let settings = settings, credentials = credentials, transport = transport, log = log, wait = wait
         let operation = Task {
             try await Self.run(input, profileID: profileID, configurationID: configurationID, ticket: ticket, store: store,
-                settings: settings, credentials: credentials, transport: transport, cancellation: cancellation, log: log, wait: wait)
+                settings: settings, credentials: credentials, transport: transport, cancellation: cancellation, log: log, wait: wait,
+                retrying: retrying, disableAutomaticJSONMode: disableAutomaticJSONMode)
         }
         cancellation.install { operation.cancel() }
         do {
@@ -50,11 +52,17 @@ actor LLMProvider {
         if active[ticket.id]?.ticket == ticket { active[ticket.id]?.cancellation.cancel() }
     }
 
+    func sanitizedContext(_ texts: [String], profile: ProviderProfile) async throws -> [String] {
+        guard texts.count <= 3, texts.allSatisfy({ $0.utf8.count <= 2048 }) else { throw LLMFailure.invalidInput }
+        let grant = try await credentials.resolve(for: profile, settings: settings)
+        return texts.map { CreatorConversationText.sanitize(grant.redacting($0)) }
+    }
+
     private static func run(_ input: LLMRequest, profileID: UUID, configurationID: UUID, ticket: GenerationJob.Ticket,
                             store: CreatorRevisionStore, settings: CreatorSettingsStore, credentials: ProviderCredentialStore,
                             transport: LLMStreamTransport, cancellation: LLMCancellation,
                             log: @Sendable (LLMLogEvent) -> Void,
-                            wait: @Sendable (TimeInterval) async throws -> Void) async throws -> Completion {
+                            wait: @Sendable (TimeInterval) async throws -> Void, retrying: Bool, disableAutomaticJSONMode: Bool) async throws -> Completion {
         try input.validate(); try cancellation.check()
         let profile: ProviderProfile
         do { profile = try await settings.profile(id: profileID, configurationID: configurationID) }
@@ -82,6 +90,7 @@ actor LLMProvider {
         defer { monitor.cancel() }
         let started = ContinuousClock.now
         var jsonMode = profile.capabilities.jsonMode != .disabled
+        if disableAutomaticJSONMode && (profile.capabilities.jsonMode ?? .automatic) == .automatic { jsonMode = false }
         while true {
             try cancellation.check()
             let grant = try await credentials.resolve(for: profile, settings: settings)
@@ -112,6 +121,7 @@ actor LLMProvider {
                 try cancellation.check()
                 let failure = LLMFailure.sanitized(error)
                 log(.failed(failure))
+                guard retrying else { throw failure }
                 let delay: TimeInterval
                 switch failure {
                 case .jsonModeUnsupported where profile.protocolKind == .openaiCompatible && jsonMode && (profile.capabilities.jsonMode ?? .automatic) == .automatic:

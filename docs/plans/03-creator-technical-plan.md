@@ -7,9 +7,11 @@
 
 配套文档：[S0 实测边界](../features/creator-s0.md) · [产品需求与验收编号](02-creator-prd.md)
 
-第 1～13 节描述目标架构，包含后续阶段；S0 实际实现和测试结果以第 16 节及 [S0 验证报告](../features/creator-s0.md) 为准。本次计划修订已将 S1 固定为参数生成，并把自由代码合同、下载防护和不可合作脚本的终止能力列入 S4 解锁关口；S1.0 与 S1.1 的实现见阶段计划及第 17 节；S1.2 连接层见 [实施与验证](../features/creator-llm.md)。S1.3 参数合同与原生修订链见 [实施与验证](../features/creator-generation.md)；S1.4 原生编排、运行证据、封面和发布恢复见 [原生保存闭环](../features/creator-publication.md)；真实模型联调、可见 UI 与 S4 仍未完成。执行拆分见 [S1 与 S4 开发计划](2026-11-10-creator-s1-s4.md)。
+第 1～13 节描述目标架构，包含后续阶段；S0 实际实现和测试结果以第 16 节及 [S0 验证报告](../features/creator-s0.md) 为准。本次计划修订已将 S1 固定为参数生成，并把自由代码合同、下载防护和不可合作脚本的终止能力列入 S4 解锁关口；S1.0 与 S1.1 的实现见阶段计划及第 17 节；S1.2 连接层见 [实施与验证](../features/creator-llm.md)。S1.3 参数合同与原生修订链见 [实施与验证](../features/creator-generation.md)；S1.4 原生编排、运行证据、封面和发布恢复见 [原生保存闭环](../features/creator-publication.md)；单次真实模型补充见下文，可见 UI、真实多轮修复与 S4 仍未完成。执行拆分见 [S1 与 S4 开发计划](2026-11-10-creator-s1-s4.md)。
 
 S1.4 后续真机补充：用户以 openaiCompatible / kimi-k3 显式运行 `CreatorLiveSmokeTests`，结果 1 passed、0 failed、0 skipped。进入 S2.1 前已核对本地结果摘要；仅代表该 Profile 的一次创建/封面/保存闭环，不扩展到其他供应商或多轮修复。此次核对不发新请求，临时日志与结果包按要求清理。
+
+S2.1 本轮：已将核对通过的 S1.4 代码、文档及单次 live 补充固化为本地提交 `8c1480b0`（`feat/ai-creator`，未 push），提交后工作树干净。有限参数修复、对话账本和显式回退见 [S2.1 实施与验证](../features/creator-iteration.md)。本轮仅本地 Mock、内存凭据与离屏 WebKit；完成定向、一次完整门禁及文档检查后暂停，不进入 S2.2/S4，不提交本轮实现、安装应用或触碰桌面。
 
 ## 1. 总体结构
 
@@ -98,7 +100,8 @@ libraryURL/
 | `ProviderProfile`（S1.1 元数据已实现） | `schemaVersion, id, configurationRevision, configurationID, name, protocolKind, baseURL, model, localMode, capabilities, limits`；Key 与确认目标绑定由 S1.2 的独立 Keychain 服务管理 |
 | `CreatorProject` | `schemaVersion, id, title, createdAt, latestRevisionID, lastValidatedRevisionID, publishedWallpaperID` |
 | `CreatorRevision` | `id, parentID, promptSummary, providerID, modelID, outputSchemaVersion, generation?, seal?, bundleVersion, sdkVersion, templateID, templateRevision, normalizedParameters, renderDigest, posterDigest, bundleDigest, createdAt` |
-| `GenerationJob` | `id, projectID, baseRevisionID, baseRevisionDigest?, state, attemptCount, requestBudget, tokenBudget, reservedOutputTokens?, cancellationToken` |
+| `GenerationJob` | `id, projectID, baseRevisionID, baseRevisionDigest?, state, attemptCount, requestBudget, tokenBudget, reservedOutputTokens?, cancellationToken, iterationID?` |
+| `CreatorConversation`（S2.1） | `schemaVersion, projectID, turns[]`；轮次含配置/基线绑定、预算、repairCount、attempts、原生 issue 与修订引用；本地原子 JSON + 整轮租约 |
 | `ValidationReport` | `revisionID, renderDigest, posterDigest, bundleDigest, policyVersion, templateRevision, sdkVersion, hostVersion, testProfile, results[], measuredMetrics, validatedAt` |
 | `CreatorRuntimeRegistry`（S1.1 已实现） | 版本化 `entries`，保留 v1 登记兼容；S1.4 的 v2 Binding 增加最终 ValidationReport，原子比较替换与回滚 |
 | 发布记录（S1.4） | `CreatorPublisher.Journal` 保存 candidate/previous 摘要、前后 Binding 和 prepared/installed/confirmed；`CreatorRuntimeRegistry.Binding` 保存当前发布修订 |
@@ -170,7 +173,7 @@ S1 仅接受一个完整的纯 JSON 对象，不接收 HTML、JS、CSS、GLSL、
 
 S1.3 接收协议正常结束后的完整回答。仅兼容剥离覆盖整个回答的一个 `json` 或无语言 Markdown 代码围栏（支持 CRLF）；不从说明文本搜索 JSON，不拼多段、不补括号。16 KiB 上限包含外层空白与围栏；字节解析器另限嵌套深度 8、节点数 4,096，按解码后的键拒绝重复键。标题/摘要拒绝空白、控制字符和双向文本控制；永远只作元数据，不作 HTML 或路径。
 
-缺失、类型/范围、格式、默认值不一致等归为 `malformedOutput`；未知模板/字段、版本、代码/路径/能力扩张归为 `policyViolation`。v1 只有上表六个根键，素材与能力白名单为空，`assets`、`capabilities`、`files` 即使为空也拒绝。完整静态校验通过前不创建候选包；参数错误不自动请求模型，S2.1 修复须复用任务预算。传输只提供有界进度事件，不向调用方暴露或执行流式正文片段。
+缺失、类型/范围、格式、默认值不一致等归为 `malformedOutput`；未知模板/字段、版本、代码/路径/能力扩张归为 `policyViolation`。v1 只有上表六个根键，素材与能力白名单为空，`assets`、`capabilities`、`files` 即使为空也拒绝。完整静态校验通过前不创建候选包；S1.3 单独调用不自动请求模型；S2.1 编排可在同一轮次预算内修复，见第 20 节。传输只提供有界进度事件，不向调用方暴露或执行流式正文片段。
 
 `CreatorPromptBuilder` 从目录导出类型、范围、枚举、单位、默认值、六套预设及固定资源预算，构建 System Prompt。用户描述上限 2,048 UTF-8 字节，完整请求文本上限 16 KiB。指定基线时只带该修订的参数和标题/摘要，保存其元数据摘要用于暂存/提交前复核；不偷换为最新修订，不带 Key、主机地址或本地路径。原始 S0 的两参数模板需显式升级；S1.0 的 v1 包含 v2 模板目录时可直接派生 v2 包。
 
@@ -296,7 +299,7 @@ Keychain 在模型服务专用命名空间中按 **Provider Profile 的稳定 `p
 
 S1.2 凭据服务使用 `WallpaperMachine.Creator.ProviderCredentials.v1` 命名空间、Profile UUID 作为 account；Keychain 内绑定 profileID、origin、configurationID/configurationRevision 及完整 Profile 摘要。base path、模型、能力或限额变化也要求显式重新绑定，删除后复用 ID 不能复活旧 Key。实际发送在 `CreatorSettingsStore` 同一文件锁下复核最新完整 Profile 后才 resume；同进程设置/凭据/任务变更同步取消飞行请求，其他进程或外部文件替换在有任务时每 100 ms 复核。已经发送的数据无法撤回；测试未验证跨进程系统 Keychain 通知或真实服务计费。
 
-请求预算复用 `GenerationJob`：每次发送前原子增加 attemptCount 和可选 reservedOutputTokens，旧字段缺失时保留规范 JSON 字节；已消耗次数却没有预留明细的旧任务不能获得免费重试。1～3 次请求预算包含重试与一次 JSON 模式降级，累计最大输出预留受 Profile/job 中较小预算约束。401/403 不重试；429 解析秒数或 HTTP-date 的 Retry-After，超过 30 秒直接报告且不擅自缩短；5xx 按有界退避重试。缺失用量为未知，当前只交付最后成功请求的统计，不称为整个任务账单；后续参数修复仍须沿用这份任务预算；S1.3 不自动修复参数。
+请求预算复用 `GenerationJob`：每次发送前原子增加 attemptCount 和可选 reservedOutputTokens，旧字段缺失时保留规范 JSON 字节；已消耗次数却没有预留明细的旧任务不能获得免费重试。1～3 次请求预算包含重试与一次 JSON 模式降级，累计最大输出预留受 Profile/job 中较小预算约束。401/403 不重试；429 解析秒数或 HTTP-date 的 Retry-After，超过 30 秒直接报告且不擅自缩短；5xx 按有界退避重试。缺失用量为未知，当前只交付最后成功请求的统计，不称为整个任务账单；S1.3 单独调用不自动修复参数；S2.1 编排将整轮预算上提到 CreatorConversation，关闭 Provider 内部重试，每个子 Job 只有一次请求；兼容降级和传输重试走同一个外层预算，见第 20 节。
 
 ### 4.7 S1.2 协议与凭据验收矩阵
 
@@ -396,7 +399,7 @@ P0 禁止生成项目进入锁屏、屏保等尚未适配严格策略的表面�
 
 任务持有 `jobID + baseRevisionID`。同一工程默认最多一个生成任务；用户启动新任务时撤销旧任务，晚到回调按 jobID 丢弃。传输层、解析、文件生成与验证各阶段均检查取消。
 
-S1.3 的 `CreatorGenerator` 串联提示词、`LLMProvider`、严格解析、原生编译和修订存储，每实例最多四个活跃工程。已有任务状态 `generating → staged → committing → completed` 不变；生成失败清理自有候选，保留旧版本。提交前生成结构报告，与修订目录一起移动，在同一次工程索引原子替换时生效；仅 `structure/sourceReconstruction/policy` 为 passed，`runtime/posterCapture` 为 notChecked。提交点前取消不留下可见修订；提交点之后的收尾失败保留完整修订，恢复完成日志，不回滚已提交历史。S1.4 另外创建封闭子修订及 runtime 报告；原始静态报告不升级、不覆写。下面包含 S2 的修复和 UI 状态，不表示全部实现。
+S1.3 的 `CreatorGenerator` 串联提示词、`LLMProvider`、严格解析、原生编译和修订存储，每实例最多四个活跃工程。已有任务状态 `generating → staged → committing → completed` 不变；生成失败清理自有候选，保留旧版本。提交前生成结构报告，与修订目录一起移动，在同一次工程索引原子替换时生效；仅 `structure/sourceReconstruction/policy` 为 passed，`runtime/posterCapture` 为 notChecked。提交点前取消不留下可见修订；提交点之后的收尾失败保留完整修订，恢复完成日志，不回滚已提交历史。S1.4 另外创建封闭子修订及 runtime 报告；原始静态报告不升级、不覆写。S2.1 已实现下列修复服务状态，UI 状态展示仍未接线。
 
 ```text
 Idle → Requesting → Receiving → Decoding → StaticValidation
@@ -404,16 +407,16 @@ Idle → Requesting → Receiving → Decoding → StaticValidation
                                RepairPending / Failed
 StaticValidation → RuntimeValidation → PosterCapture → FinalizeBundle → Ready
                          ↓ 失败            ↓ 失败
-                  RepairPending / Failed  Failed（保留草稿，可本地重试）
+                  RepairPending / Failed  RepairPending / Failed（同一预算）
 RepairPending → 新修订任务（预算内）
 任意执行阶段 → Cancelled
 ```
 
 修复不能通过修改“通过/失败”字段宣布成功。只有本地验证器可生成通过报告。所有模型文本、页面日志、参考素材都视为不可信数据，不允许其改变能力限制、工作目录或请求预算。
 
-基础检查不调用模型；运行测试在固定时间预算中执行。MVP 不把视觉模型裁判作为必要依赖，先让用户判断效果。重试会产生额外调用，默认首次生成 + 两次修复，最多三个请求；传输失败也计入上限。
+基础检查不调用模型；运行测试在固定时间预算中执行。MVP 不把视觉模型裁判作为必要依赖，先让用户判断效果。重试会产生额外调用；原生 maxRepairs 默认 0，可显式设为 1 或 2，首次生成计入整轮总共最多三个请求；传输失败也计入上限。
 
-S1 的模型修复针对 JSON、模板选择和参数合同，不能要求模型回传代码。模板自身运行错误进入模板修复流程；封面失败优先本地重试，不自动消费模型请求。错误分类建议：`providerAuth / providerRateLimit / network / timeout / malformedOutput / invalidParameters / policyViolation / missingAsset / runtimeError / unresponsive / posterCaptureFailed / publishFailed / applyFailed`。界面将其翻译成可理解的处理建议。
+S2.1 模型修复只针对 JSON、模板选择和参数合同；运行或封面失败也可预算内重新生成参数并重新完整检查，不能要求模型回传代码或声明检查通过。模板内核缺陷仍须原生修复，存储/封闭/发布失败不消费新模型请求。错误分类建议：`providerAuth / providerRateLimit / network / timeout / malformedOutput / invalidParameters / policyViolation / missingAsset / runtimeError / unresponsive / posterCaptureFailed / publishFailed / applyFailed`。界面将其翻译成可理解的处理建议。
 
 ## 8. 发布与回滚
 
@@ -465,7 +468,7 @@ S1 的模型修复针对 JSON、模板选择和参数合同，不能要求模型
 | S1.2 模型连接（服务层已实现） | 共享 URLSession SSE/取消/脱敏 + 三个纯逻辑 Codec + 按 Provider Profile 隔离的 Keychain | S1.1 | AC-07/12/17/18；三协议请求/用量/思维过滤、401/429/超时/截断、host 变更与重定向测试通过；实际端点联调单独进行 |
 | S1.3 参数结构化生成（服务层已实现） | 动态目录提示词、`TemplateParameterOutput v1` Schema/严格解析、参数/控件默认值一致性、原生重建及原子结构报告 | S1.2 | 拒绝代码/文件字段、未知参数、越界、重复键、截断和 v2；不执行流式片段；本地校验独立于供应商能力 |
 | S1.4 第一条端到端流程与封面（原生服务已实现） | CreatorOrchestrator：新建/指定旧修订 → 参数生成 → 静态检查 → 离屏运行 → 原生 `preview.jpg` → sealed 修订/最终报告 → 保存及登记 | S1.3 + S0.4 | Mock 三协议 × 三模板闭环、取消/恢复、库预览服务已验证；真实模型入口默认跳过，UI/真实端点未验收，AC-15、16 不宣称全部完成 |
-| S2.1 迭代与有限修复 | 参数新修订、结构化错误摘要、最多两次修复、回退 | S1.4 | 按模板模式解释 AC-02、03、07；不把内部模板缺陷转换成模型写代码 |
+| S2.1 迭代与有限修复（原生服务已实现） | 同一轮次最多 3 次请求、脱敏字段错误、每次完整运行/封面、本地 conversation、历史回退与重启恢复 | S1.4 | 覆盖 FR-07/08、AC-02/03/07 服务部分；Mock 验证，UI/真实多轮未验收；不开放模型代码 |
 | S2.2 完整创作页 | 工程列表、状态、预览入口、属性、报告和库操作 | S1.4，可在服务稳定后推进 | 无障碍、窄窗、国际化，UI 不执行领域 IO |
 | S2.3 稳定性验收 | 10 提示词基准、30 分钟模板运行、封面/参数/恢复回归 | S2.1、S2.2 | PRD AC-01～18 按阶段验收；自由代码 AC-05/06 不冒充完成，设备未测项单列 |
 | S3 本机交付 | 成功 Release 构建、本地试用记录、剩余问题 | S2.3 | 只有实际构建成功才称为交付；安装/启动/桌面体验按实际指令执行 |
@@ -500,7 +503,7 @@ S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设�
 
 ## 12. 下一轮阶段边界
 
-本轮已将通过 4,888 项原生门禁的 S1.3 固化为本地提交 `ac28cf34`。完成 S1.4 原生运行/封面/发布编排、默认跳过的单请求联调入口、定向回归及一次完整门禁后暂停，不自动进入 S2/S4，不提交本轮实现或推送。用户明确本轮不构建 UI、不切换桌面，常规门禁只用 Mock；真实 API 入口仅供后续显式运行。后续先读 AGENTS.md、PRD、本技术方案以及 `docs/features/creator-revisions.md`、`docs/features/creator-llm.md`、`docs/features/creator-generation.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
+S1.4 已固化为本地提交 `8c1480b0`；本轮完成 S2.1 有限修复、对话存储与历史回退后暂停，不进入 S2.2/S4，不提交本轮实现或推送。用户明确本轮不构建 UI、不切换桌面，常规门禁只用 Mock；真实 API 入口仅供后续显式运行。后续先读 AGENTS.md、PRD、本技术方案以及 `docs/features/creator-revisions.md`、`docs/features/creator-llm.md`、`docs/features/creator-generation.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
 
 ## 13. 首版之后的发布准备
 
@@ -583,7 +586,7 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 
 ## 18. S1.3 参数生成与封装实施合同
 
-实现与测试见 [参数生成](../features/creator-generation.md)。`CreatorGenerator` 的输入为已有工程 ID、可选 baseRevisionID、已保存的 Profile ID/configurationID、描述和最大输出 token；返回不可变修订。提示词和模型输出均无写盘能力，只有本地校验后的类型化参数才能交给模板编译器。三个协议复用 S1.2 同一预算，失败请求不返还次数或预留；参数拒绝不触发第二次调用。
+实现与测试见 [参数生成](../features/creator-generation.md)。`CreatorGenerator` 的输入为已有工程 ID、可选 baseRevisionID、已保存的 Profile ID/configurationID、描述和最大输出 token；返回不可变修订。提示词和模型输出均无写盘能力，只有本地校验后的类型化参数才能交给模板编译器。三个协议复用 S1.2 同一预算，失败请求不返还次数或预留；S1.3 单独调用在参数拒绝后不触发第二次调用；S2.1 通过第 20 节的有界编排扩展。
 
 `CreatorRevision.generation` 保存版本化来源：jobID、配置 ID/代次、协议、请求次数、输出 token 预留、耗时、最后成功请求的可选用量及基线摘要；已有 providerID/modelID/outputSchemaVersion 和 promptSummary 同步填入。`GenerationJob.baseRevisionDigest` 绑定发送上下文的版本，暂存和提交均重核；旧记录缺少这些可选字段时规范字节不变。来源与用量改变使旧报告失效，未报告用量保留未知，预留不是账单上限。
 
@@ -599,4 +602,16 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 
 `CreatorOrchestrator` 串联新建/指定旧版本修改、生成、运行、封闭、发布和工程指针；取消会停止流或页面，提交点以前不产生可见半包，已经完整提交的草稿/封闭修订保留。`recover()` 显式恢复发布日志和存储 Jobs，不发起模型请求。每实例最多四个活跃工程；发布根目录一次只允许一项事务，冲突明确报 busy，不自动重发模型。尚无应用启动/UI/备份搬迁接线。
 
-按需真实测试必须同时选择 `--only CreatorLiveSmokeTests` 与 `TEST_RUNNER_CREATOR_LIVE_LLM=1`，显式指定三协议之一/端点/模型/内存临时 Key。完整门禁拒绝 live 模式；缺开关原生测试立即 skip。运行器在启动 XcodeGen 或任何子进程前删除 Key 环境变量，通过 127.0.0.1 一次性令牌通道交给测试的内存 Keychain；Key 不进入 Xcode 保存的测试环境。requestBudget=1、输出 token 预留 2,048，不降级重试；临时库在结束时删除。结果附件保留经合同校验的真实参数、用量、报告、快照或分阶段固定失败码，不保存原始 SSE/思维/错误体。该 opt-in 路径本轮未实际调用；日常测试只有 Mock 与本机合成凭据桥，不等于真实供应商联调已通过。
+按需真实测试必须同时选择 `--only CreatorLiveSmokeTests` 与 `TEST_RUNNER_CREATOR_LIVE_LLM=1`，显式指定三协议之一/端点/模型/内存临时 Key。完整门禁拒绝 live 模式；缺开关原生测试立即 skip。运行器在启动 XcodeGen 或任何子进程前删除 Key 环境变量，通过 127.0.0.1 一次性令牌通道交给测试的内存 Keychain；Key 不进入 Xcode 保存的测试环境。requestBudget=1、输出 token 预留 2,048，不降级重试；临时库在结束时删除。结果附件保留经合同校验的真实参数、用量、报告、快照或分阶段固定失败码，不保存原始 SSE/思维/错误体。该 opt-in 路径在 S1.4 开发门禁中未调用；后续用户的一次 live 结果见开头补充。S2.1 不发新请求；日常 Mock 通过不等于真实多轮或其他供应商验收。
+
+## 20. S2.1 有限修复、对话与回退实施合同
+
+实现及验证见 [迭代服务](../features/creator-iteration.md)。CreatorOrchestrator 的 `maxRepairs` 默认 0，接受 0～2；完整轮次预算为 `min(1 + maxRepairs, Profile.requestBudget)`，最多 3。`CreatorConversation` 使用既有 checksummed Codable JSON、原子写入、store actor 与文件锁；最多 64 轮、整个记录最多 256 KiB，超限拒绝而不静默裁剪。旧工程没有 conversation 文件时只读为空，不改旧修订字节。
+
+每轮绑定原始 baseRevisionID/digest、Profile ID/configurationID 与取消 token。每次生成使用新 GenerationJob，先持久化整轮 request/token 预留，再增加子 Job 计数，最后发包；两个持久写不是单个跨文件事务，崩溃可能多计而不能少计或退款。Provider 内部重试关闭；429、5xx、超时/断流、格式/参数拒绝、运行检查失败和自动 JSON 模式降级共用同一外层次数。仅 automatic openaiCompatible 允许降级，required 不降级。大于 30 秒的 Retry-After 直接停止。401/403、供应商拒绝、过期配置、存储/封闭/导入失败及取消不修复。
+
+轮次状态为 generating → runtime → sealing → publishing → completed；前两阶段可进入 repairPending，再派生新尝试；终态另有 failed/cancelled/interrupted。CreatorRepairIssue 只保存原生枚举和目录内字段路径；unknown 键只报已知父对象，运行细分 timeout/pageFailed/invalidCapture。不复制无效回答、页面日志或异常原文。修复提示只传脱敏输入摘要、允许目录、结构错误与可选已验证参数；现用 Key 先精确替换，再过滤凭据赋值、URL、绝对路径及长 token。无任意敏感语义识别保证，且本阶段无外部素材/文件读入入口。对话不保存原始 SSE、模型推理或系统提示词，不进入发布包。
+
+每次合法参数重新静态校验、原生重建并生成不可变 renderDraft，再运行真实离屏 WKWebView、生成封面、封闭新修订和匹配报告。仅结构通过的自动尝试不替换 selected/lastValidated 指针；运行失败保留完整草稿和失败记录，继续使用旧有效版本。不能只改 report 的状态。修订 generation 新增可选 iterationID/repairIndex，缺省字段保持旧规范编码；完整轮次账本不冒充子 Job 的统计。完整响应即使参数无效也保存已返回 usage，断流无可用统计时保持未知。
+
+追问明确指定历史 base，生成草稿 parentID 保留该来源；修复运行失败草稿时可用其可信参数作上下文，但不改写来源。selectRevision 复核旧报告，取消活跃轮次/流/页面后只改工程工作和预览指针；不回写正式库或改变桌面。整轮持有跨模型请求与运行检查的文件租约；recover 跳过活跃所有者，将遗留轮次标 interrupted、清理未提交候选并恢复最后可用指针，不自动继续或重发模型请求。完整提交的历史和已 confirmed 的发布不因晚到取消而删除。应用启动恢复、备份/存储搬迁及 UI 接线仍待后续阶段。

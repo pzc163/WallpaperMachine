@@ -9,7 +9,7 @@ enum CreatorPromptBuilder {
         let title: String
         let summary: String
     }
-    static func build(prompt: String, base: Base?, maxOutputTokens: Int) throws -> LLMRequest {
+    static func build(prompt: String, base: Base?, maxOutputTokens: Int, repair: CreatorRepairIssue? = nil) throws -> LLMRequest {
         try Task.checkCancellation()
         guard !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, prompt.utf8.count <= 2048,
               prompt.unicodeScalars.allSatisfy({ $0.value >= 32 || [9, 10, 13].contains($0.value) }),
@@ -29,6 +29,17 @@ enum CreatorPromptBuilder {
         \(catalog)
         """
         var message: [String: Any] = ["request": prompt]
+        if let repair {
+            try repair.validate()
+            guard repair.repairable else { throw CreatorGenerationFailure.invalidRequest }
+            // Only allowlisted diagnostics and the same catalog are sent; never echo a malformed answer.
+            message["request"] = promptSummary(prompt)
+            var diagnostic: [String: Any] = ["category": repair.category.rawValue,
+                "fields": repair.fields.map { ["path": $0.path, "rule": $0.rule.rawValue] },
+                "action": "Return a fresh complete parameter object within the native catalog. Change parameters or template only; do not modify code or report success yourself."]
+            if let reason = repair.runtimeReason { diagnostic["runtimeReason"] = reason.rawValue }
+            message["repair"] = diagnostic
+        }
         if let base {
             let definition = try CreatorTemplateCatalog.definition(base.templateID)
             try definition.validate(base.parameters)

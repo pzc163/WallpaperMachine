@@ -18,8 +18,10 @@ enum CreatorGenerationFailure: Error, Equatable, Sendable, CustomStringConvertib
     }
     var debugDescription: String { description }
     static func sanitized(_ error: Error) -> Self {
+        if let issue = error as? CreatorRepairIssue { return issue.category == .policyViolation ? .policyViolation : .malformedOutput }
         if let failure = error as? Self { return failure }
         if error is CancellationError { return .cancelled }
+        if error is CreatorSettingsStore.Failure { return .staleInput }
         if let failure = error as? LLMFailure {
             switch failure {
             case .cancelled: return .cancelled

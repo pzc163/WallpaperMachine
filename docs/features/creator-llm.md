@@ -203,3 +203,10 @@ cover/publication and a default-skipped live smoke entry, with one request and
 one-shot in-memory credentials. UI and actual provider verification remain pending.
 S0/S1.0 generators and golden digests are unchanged. The known S0 unrestricted-code
 probes and S4 isolation work remain unresolved; S1.2 does not relax those gates.
+
+S2.1 callers disable internal transport retries and manage them in the persistent
+[conversation budget](creator-iteration.md). Each child Job has one request;
+JSON-mode fallback, 429 and 5xx share the outer limit rather than resetting it.
+Standalone callers retain the S1.2 behavior. A credential Grant can redact its
+current secret without exposing it; generation context then applies bounded
+native text filtering. No new Keychain namespace or external logging is added.

@@ -22,6 +22,7 @@ struct GenerationJob: Codable, Equatable, Sendable {
     var candidateDigest: String?
     var reservedOutputTokens: Int? = nil
     var baseRevisionDigest: String? = nil
+    var iterationID: UUID? = nil
 
     var ticket: Ticket { Ticket(id: id, projectID: projectID, cancellationToken: cancellationToken) }
     var isTerminal: Bool { [.completed, .cancelled, .interrupted].contains(state) }

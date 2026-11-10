@@ -20,6 +20,10 @@ actor ProviderCredentialStore {
         var debugDescription: String { description }
         var customMirror: Mirror { Mirror(self, children: [:]) }
 
+        func redacting(_ text: String) -> String {
+            key.isEmpty ? text : text.replacingOccurrences(of: key, with: "[redacted]")
+        }
+
         func request(_ descriptor: LLMRequestDescriptor) throws -> URLRequest {
             guard var components = URLComponents(url: descriptor.url, resolvingAgainstBaseURL: false),
                   components.fragment == nil, components.user == nil, components.password == nil

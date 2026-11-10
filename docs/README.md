@@ -77,6 +77,7 @@ file; pass `rg -u` to search them deliberately.
 
 | Document | Purpose |
 |---|---|
+| [features/creator-iteration.md](features/creator-iteration.md) | S2.1 bounded parameter repair, conversation budgets, restart cleanup and explicit revision selection |
 | [features/creator-publication.md](features/creator-publication.md) | S1.4 native runtime capture, sealed revision evidence, recoverable publication and opt-in live smoke |
 | [features/creator-generation.md](features/creator-generation.md) | S1.3 catalog-derived prompts, strict parameter contracts, native compilation and atomic revision evidence |
 | [features/creator-llm.md](features/creator-llm.md) | S1.2 shared SSE transport, three protocol codecs, profile-bound credentials and offline verification |

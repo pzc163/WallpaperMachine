@@ -79,8 +79,9 @@ Missing fields, wrong types/ranges, default conflicts, malformed/truncated or
 oversized output yield `malformedOutput`. Unknown fields/templates/versions and
 capability/code expansion yield `policyViolation`. Public failure descriptions
 contain only fixed codes; no raw prompt, model text, URL or credential is attached.
-There is no automatic parameter-repair request in S1.3; S2.1 must use the same
-request budget if it later adds bounded repairs.
+Standalone S1.3 generation does not repair parameters. [S2.1](creator-iteration.md)
+adds an explicit iteration ticket and bounded orchestration over the same global
+request/output budget; each child Job has one request.
 
 ## Native reconstruction and transaction
 
@@ -171,8 +172,8 @@ checks are reported separately, never as passes.
 
 The subsequent [S1.4 service workflow](creator-publication.md) implements native
 poster capture, runtime/final evidence and publication. Visible UI and authorized
-real-model validation remain pending; S1.3 itself still produces only a render draft. Parameters are not
-automatically repaired; project backup/storage migration, startup recovery wiring
+real-model validation remain pending; S1.3 itself still produces only a render draft. Bounded parameter repair is now documented in [S2.1](creator-iteration.md);
+project backup/storage migration, startup recovery wiring
 and visible interaction remain unimplemented. S4's download/network/termination
 probes remain unresolved and unrestricted code stays disabled. This stage stops
 after implementation and verification.

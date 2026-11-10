@@ -10,6 +10,9 @@ extension CreatorRevisionStore {
         var invalidRevisions: [UUID] = []
         var restoredProjects: [UUID] = []
         var discardedAtomicWrites = 0
+        var interruptedIterations: [UUID] = []
+        var liveIterations: [UUID] = []
+        var invalidConversations: [UUID] = []
     }
 
     /// Call on opening the creator workspace. A held lease belongs to another live owner.
@@ -55,10 +58,13 @@ extension CreatorRevisionStore {
                     guard CreatorPersistence.isUUIDName(directory.lastPathComponent), let id = UUID(uuidString: directory.lastPathComponent) else { continue }
                     do {
                         result.discardedAtomicWrites += try discardAtomicWrites(in: directory)
+                        let hasConversation = CreatorPersistence.exists(conversationURL(id))
+                        if hasConversation { try recoverConversation(id, result: &result) }
                         var project = try readProject(id)
                         let original = project
                         var intact: [UUID] = []
                         var validated: [UUID] = []
+                        var usable: [UUID] = []
                         for revisionID in project.revisionIDs {
                             let revisionDirectory = revisionURL(projectID: id, revisionID: revisionID)
                             if CreatorPersistence.exists(revisionDirectory) {
@@ -66,11 +72,16 @@ extension CreatorRevisionStore {
                             }
                             if (try? readRevision(projectID: id, revisionID: revisionID)) != nil { intact.append(revisionID) }
                             else { result.invalidRevisions.append(revisionID) }
-                            if (try? validReport(projectID: id, revisionID: revisionID)) != nil { validated.append(revisionID) }
+                            if let report = try? validReport(projectID: id, revisionID: revisionID) {
+                                validated.append(revisionID)
+                                if !hasConversation || report.allowsPublication || (try? readRevision(projectID: id, revisionID: revisionID).revision.bundleVersion) == 1 {
+                                    usable.append(revisionID)
+                                }
+                            }
                         }
                         project.latestRevisionID = intact.last
-                        project.lastValidatedRevisionID = validated.last
-                        if project.selectedRevisionID.map({ validated.contains($0) }) != true { project.selectedRevisionID = validated.last }
+                        project.lastValidatedRevisionID = usable.last
+                        if project.selectedRevisionID.map({ validated.contains($0) }) != true { project.selectedRevisionID = usable.last }
                         if let active = project.activeJobID {
                             if let job = try? readJob(active), job.projectID == id {
                                 if job.isTerminal { project.activeJobID = nil }
@@ -82,6 +93,20 @@ extension CreatorRevisionStore {
             }
             return result
         }
+    }
+
+    func recoverConversation(_ projectID: UUID, result: inout Recovery) throws {
+        do {
+            guard let turn = try readConversation(projectID).turns.last, !turn.state.terminal else { return }
+            if iterationLeases[turn.id] != nil { result.liveIterations.append(turn.id); return }
+            let ticket = CreatorConversation.Ticket(id: turn.id, projectID: projectID, token: turn.token)
+            let lease: CreatorPersistence.Lease
+            do { lease = try CreatorPersistence.Lease(iterationLeaseURL(ticket)) }
+            catch CreatorPersistence.Failure.busy { result.liveIterations.append(turn.id); return }
+            defer { withExtendedLifetime(lease) {} }
+            try closeIterationUnlocked(ticket, state: .interrupted, issue: .init(category: .interrupted))
+            result.interruptedIterations.append(turn.id)
+        } catch { result.invalidConversations.append(projectID); throw error }
     }
 
     /// A crashed atomic write can leave only a non-authoritative temporary sibling.
