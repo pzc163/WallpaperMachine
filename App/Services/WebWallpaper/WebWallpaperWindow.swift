@@ -278,6 +278,10 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// so the scripts the page's owner adds beside it (the preview denies
     /// capture) are kept here and installed again after it.
     private var extraUserScripts: [WKUserScript] = []
+    private let creatorResources: CreatorWebResources?
+    private let creatorPermissions: CreatorWebPermissions?
+    private var creatorLoadTask: Task<Void, Never>?
+    var expectedCreatorDigest: String?
     /// Raised when the page's audio subscription actually changes, so the host
     /// can open and close the capture tap on real demand.
     var onAudioDemandChanged: (@MainActor (Bool) -> Void)?
@@ -361,16 +365,23 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         self.timing = timing
         self.now = now ?? { ContinuousClock.now }
         self.wait = wait ?? { try await Task.sleep(for: $0) }
+        let isCreator = projectURL.lastPathComponent.hasPrefix(CreatorTemplate.idPrefix)
+        let creatorResources = isCreator ? CreatorWebResources() : nil
+        self.creatorResources = creatorResources
+        self.creatorPermissions = isCreator ? CreatorWebPermissions() : nil
         let configuration = WKWebViewConfiguration()
         // Persistent: web wallpapers keep their own state (tasks, favourites) in
         // localStorage exactly as they do under Wallpaper Engine.
-        configuration.websiteDataStore = persistentData ? .default() : .nonPersistent()
-        configuration.mediaTypesRequiringUserActionForPlayback = []
+        configuration.websiteDataStore = persistentData && !isCreator ? .default() : .nonPersistent()
+        configuration.mediaTypesRequiringUserActionForPlayback = isCreator ? .all : []
+        if let creatorResources {
+            configuration.setURLSchemeHandler(creatorResources, forURLScheme: CreatorWebResources.scheme)
+        }
         // Wallpaper Engine loads projects from file:// with sibling-file access;
         // ES modules and fetch() against project assets need the same origin
         // relaxation WebKit only exposes through these preference keys.
-        configuration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
-        configuration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
+        configuration.preferences.setValue(!isCreator, forKey: "allowFileAccessFromFileURLs")
+        configuration.setValue(!isCreator, forKey: "allowUniversalAccessFromFileURLs")
         // Lets WebKit throttle this page's own work once it leaves the window
         // tree. Media playback and capture are documented exceptions, which is
         // why suspension also suspends media explicitly.
@@ -391,6 +402,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         // per document, in `load()`.
         webView.configuration.userContentController.add(messageProxy, name: WebWallpaperProtocol.messageHandlerName)
         webView.navigationDelegate = self
+        if let creatorPermissions { webView.uiDelegate = creatorPermissions }
         webView.underPageBackgroundColor = .black
         webView.allowsBackForwardNavigationGestures = false
         webView.allowsMagnification = false
@@ -421,6 +433,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     }
 
     func load() {
+        creatorLoadTask?.cancel()
         // First, so the document about to start already carries the committed
         // frame-rate limit: its very first `requestAnimationFrame` call is paced.
         installUserScripts()
@@ -436,10 +449,38 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         reconcileHostSuspension()
         onLoading?()
         deliverAudioOutput()
-        webView.loadFileURL(entryURL, allowingReadAccessTo: projectURL)
+        if let creatorResources {
+            creatorResources.snapshot = nil
+            let generation = documentGeneration
+            let directory = projectURL
+            let digest = expectedCreatorDigest
+            creatorLoadTask = Task { @MainActor [weak self] in
+                do {
+                    let snapshot = try await Task.detached(priority: .userInitiated) {
+                        try CreatorDraftStore.read(directory, expectedDigest: digest)
+                    }.value
+                    let rules = try await CreatorWebResources.offlineRules()
+                    try Task.checkCancellation()
+                    guard let self, self.documentGeneration == generation else { return }
+                    self.webView.configuration.userContentController.removeAllContentRuleLists()
+                    self.webView.configuration.userContentController.add(rules)
+                    creatorResources.snapshot = snapshot
+                    self.webView.load(URLRequest(url: CreatorWebResources.entryURL))
+                } catch {
+                    guard !Task.isCancelled, let self, self.documentGeneration == generation else { return }
+                    AppLog.warn("Creator bundle rejected: \(error)")
+                    self.onFailure?(String(localized: "The wallpaper files changed or are missing. Refresh the library before previewing."))
+                }
+            }
+        } else {
+            webView.loadFileURL(entryURL, allowingReadAccessTo: projectURL)
+        }
     }
 
     func stop() {
+        creatorLoadTask?.cancel()
+        creatorLoadTask = nil
+        creatorResources?.snapshot = nil
         restartTask?.cancel()
         restartTask = nil
         resetFirstFrameWindow()
@@ -623,16 +664,18 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// page when the page asked for it *and* the user allowed it, so a page that
     /// registers a listener on a wallpaper with the setting off opens no tap.
     func setAudioResponseEnabled(_ enabled: Bool) {
-        guard enabled != audioResponseEnabled else { return }
-        audioResponseEnabled = enabled
+        let effective = enabled && creatorResources == nil
+        guard effective != audioResponseEnabled else { return }
+        audioResponseEnabled = effective
         refreshDemand()
     }
 
     /// The user's per-wallpaper media-integration setting. Unlike audio this
     /// does not gate the status listener: a page is told the feature is off.
     func setMediaIntegrationEnabled(_ enabled: Bool) {
-        guard enabled != mediaIntegrationEnabled else { return }
-        mediaIntegrationEnabled = enabled
+        let effective = enabled && creatorResources == nil
+        guard effective != mediaIntegrationEnabled else { return }
+        mediaIntegrationEnabled = effective
         refreshDemand()
     }
 
@@ -1054,6 +1097,9 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// What the page posts, once `WebWallpaperProtocol.PageMessage` has checked it. Anything that
     /// is not a recognised tagged object with well-formed fields is dropped there.
     fileprivate func receiveScriptMessage(_ body: Any) {
+        // Fixed S0 templates have no native capabilities. Diagnostics remain bounded below.
+        if creatorResources != nil,
+           (body as? [String: Any])?["type"] as? String != "pageDiagnostic" { return }
         let message: WebWallpaperProtocol.PageMessage
         switch WebWallpaperProtocol.PageMessage.parse(body) {
         case .success(let parsed): message = parsed
@@ -1169,6 +1215,11 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if creatorResources != nil {
+            decisionHandler(!action.shouldPerformDownload && action.targetFrame?.isMainFrame == true && action.request.url == CreatorWebResources.entryURL
+                            ? .allow : .cancel)
+            return
+        }
         // The page may fetch and embed anything it likes, but the top frame stays
         // on the project's own entry page: no wallpaper navigates the desktop away.
         guard action.targetFrame?.isMainFrame == true else {
@@ -1176,6 +1227,13 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
             return
         }
         decisionHandler(action.request.url?.standardizedFileURL == entryURL.standardizedFileURL ? .allow : .cancel)
+    }
+
+    func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse,
+                 decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        guard creatorResources != nil else { decisionHandler(.allow); return }
+        decisionHandler(response.isForMainFrame && response.response.url == CreatorWebResources.entryURL
+                        && response.response.mimeType == "text/html" && response.canShowMIMEType ? .allow : .cancel)
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {

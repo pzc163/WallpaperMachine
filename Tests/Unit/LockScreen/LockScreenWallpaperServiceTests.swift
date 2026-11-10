@@ -179,6 +179,31 @@ final class LockScreenWallpaperServiceTests: XCTestCase {
   }
 
   @MainActor
+  func testCreatorPrototypeCannotDowngradeIntoNativeFileHost() async throws {
+    let drafts = CreatorDraftStore(root: root.appendingPathComponent("creator-drafts"))
+    let spec = CreatorTemplate.Specification(projectID: UUID(), kind: .stars)
+    let directory = try await drafts.create(spec)
+    var record = scene()
+    record.displayId = 1
+    record.wallpaperId = spec.wallpaperID
+    record.projectPath = directory.appendingPathComponent("project.json").path
+    let service = LockScreenWallpaperService(prepareExtension: {}, notifyConfigurationChanged: {}, scenes: { [record] },
+      selection: LockScreenWallpaperSelection(storeURL: store, journalURL: journal, reload: {}),
+      exchange: exchange, defaults: defaults, scheduleMonitor: scheduleMonitor, displayUUID: { _ in "one" })
+    service.setEnabled(true)
+    await waitFor("creator lock-screen refusal") { !service.isBusy }
+    XCTAssertNotNil(service.errorMessage)
+    XCTAssertFalse(service.isEnabled)
+    XCTAssertFalse(service.ownsDesktopProvider)
+    service.setScreenSaverEnabled(true)
+    await waitFor("creator screen-saver refusal") { !service.isBusy }
+    XCTAssertNotNil(service.errorMessage)
+    XCTAssertFalse(service.screenSaverEnabled)
+    XCTAssertEqual(try selectedProvider("Desktop"), "display-one-desktop")
+    XCTAssertEqual(try selectedProvider("Idle"), "display-one-idle")
+  }
+
+  @MainActor
   func testActivationFailureAlwaysHandsDesktopBackToPosterProvider() async throws {
     try XCTSkipIf(CGDisplayIsOnline(CGMainDisplayID()) == 0, "No online main display")
     let service = LockScreenWallpaperService(prepareExtension: {}, notifyConfigurationChanged: {}, scenes: { [self.scene()] },

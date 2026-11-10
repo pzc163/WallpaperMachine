@@ -57,6 +57,7 @@ __pycache__/
 !.agents/skills/hotfix-release/
 .conductor/
 .commandcode/
+.serena/
 CLAUDE.local.md
 
 # Local working plans shared by the developer and agent sessions on this machine;

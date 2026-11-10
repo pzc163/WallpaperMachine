@@ -33,6 +33,8 @@ live under `testing/`.
 
 | Document | Purpose |
 |---|---|
+| [plans/2026-11-10-creator-s0.md](plans/2026-11-10-creator-s0.md) | Creator S0 implementation scope, steps and verification gates |
+| [plans/2026-11-10-creator-s1-s4.md](plans/2026-11-10-creator-s1-s4.md) | Creator template parameters, native covers, staged model contracts and gates for unrestricted source |
 | [conventions.md](conventions.md) | Code, test, documentation, commit and pull-request rules |
 | [release.md](release.md) | Versioning, release specs, notes generation, CI pipeline, in-app updater contract |
 | [../CHANGELOG.md](../CHANGELOG.md) | Published versions, newest first; written by `scripts/release_notes.py` |
@@ -73,6 +75,8 @@ file; pass `rg -u` to search them deliberately.
 
 | Document | Purpose |
 |---|---|
+| [features/creator-templates.md](features/creator-templates.md) | S1.0 native parameter catalog, richer Canvas2D templates, bounded rendering and legacy compatibility |
+| [features/creator-s0.md](features/creator-s0.md) | Local creator prototype: trusted templates, draft preview, restricted resources, library import and recovery |
 | [features/control-panel.md](features/control-panel.md) | The native window: language, tabs, toolbar, grid and inspector, pages and Settings, selection versus apply, Now Playing, target display, filtering and local collections, recently used, deleting, downloads and import |
 | [features/first-run.md](features/first-run.md) | The first-run guide over the window, the one-time support prompt after the first downloaded wallpaper, the later star prompt, the performance data question, the battery question, the subscriptions offer and the Discord invitation |
 | [features/wallpaper-properties.md](features/wallpaper-properties.md) | Inspector properties, live preview, property presets, image placement, the compatibility check and the black-bar check |

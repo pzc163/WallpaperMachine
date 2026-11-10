@@ -80,6 +80,10 @@ enum WallpaperPlaybackPreflight {
             // backup, a chosen folder that went away), so the renderer is pointed at it again.
             ClientPaths.exportAssetsRoot(assets)
         case "web":
+            if wallpaperID.hasPrefix(CreatorTemplate.idPrefix) {
+                _ = try await Task.detached(priority: .userInitiated) { try CreatorDraftStore.read(folder) }.value
+                try Task.checkCancellation()
+            }
             guard !manifest.entry.isEmpty,
                   FileManager.default.fileExists(atPath: folder.appendingPathComponent(manifest.entry).path) else {
                 throw Failure.missingWebEntry

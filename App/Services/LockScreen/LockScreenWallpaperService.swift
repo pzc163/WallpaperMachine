@@ -983,6 +983,13 @@ private enum LockScreenAssetPublisher {
           message: String(localized: "The committed wallpaper does not reference project.json."))
       }
       let source = project.deletingLastPathComponent()
+      // The extension has no creator snapshot host; do not downgrade a prototype to its file host.
+      guard !input.wallpaperID.hasPrefix(CreatorTemplate.idPrefix),
+        !source.lastPathComponent.hasPrefix(CreatorTemplate.idPrefix)
+      else {
+        throw LockScreenWallpaperFailure(
+          message: String(localized: "This wallpaper type cannot be presented by the native wallpaper provider."))
+      }
       let data = try Data(contentsOf: project)
       guard let metadata = try JSONSerialization.jsonObject(with: data) as? [String: Any],
         let type = metadata["type"] as? String
