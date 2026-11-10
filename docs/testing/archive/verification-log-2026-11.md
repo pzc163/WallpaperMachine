@@ -9,6 +9,19 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-08 — Issue 177: rejected candidates and visible-frame regression
+
+Issue #177 remains unresolved. The user rejected the delivered candidate after repeating the Stage Manager desktop transition; passing callback timing and unit checks did not establish smooth visible playback.
+
+- The `isVisible` override and its offscreen-only regression were removed; they did not fix the reported desktop behavior.
+- A Release candidate adding `canJoinAllApplications` also still froze with original Belle. That source change was reverted.
+- That candidate's checks passed: `python3 scripts/test.py --only WebWallpaperSuspensionTests` (24 passed), `python3 scripts/test.py` (32 Python suites; 4,658 native passed, 66 skipped, 0 failed; 3 runtime warnings), and `python3 scripts/build.py --swift-only --configuration Release`. These results are not a fix verification.
+- During a user-confirmed 90-second freeze reproduction, animation callbacks continued with no visibility changes; after startup, the largest recorded callback gap was 29 ms. Callback timing does not measure screen presentation.
+- The asset-free WebGL, Canvas 2D and CSS [continuity fixture](../../../Tests/UI/Fixtures/WebFrameContinuity/project.json) also froze, including with the control panel closed. A one-tile library did not prevent the freeze. The [manual regression](../manual-smoke.md#native-desktop-posters-and-mission-control) requires repeated visible transitions because the failure is intermittent.
+- Raising the web window one level, with coverage probes moved above it, failed a controlled repeat: the same window retained its raised level while the user observed freezes. An earlier smooth run was inconclusive because wallpapers changed during it. Original levels were restored.
+- Wallpaper Engine comparison was **not done**: the available VM's captures did not show Belle, so they cannot serve as reference frames. The VM was suspended again.
+- `python3 scripts/tests/test_doc_links.py` passed 11 tests. No fix was committed.
+
 ## 2026-11-08 — Belle Release build and Stage Manager retest
 
 Requested Release build and repeat desktop test for [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The candidate visibility change remains uncommitted; the reported Stage Manager stutter is **not verified as resolved**.

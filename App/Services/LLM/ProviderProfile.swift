@@ -6,6 +6,9 @@ struct ProviderProfile: Codable, Equatable, Sendable {
         case openaiCompatible, anthropicMessages, geminiGenerateContent
     }
     struct Capabilities: Codable, Equatable, Sendable {
+        enum JSONMode: String, Codable, Sendable { case automatic, required, disabled }
+        // Optional so S1.1 canonical records re-encode byte-for-byte when the field is absent.
+        var jsonMode: JSONMode? = nil
         var requestsUsage = true
         var filtersLeadingThinkBlock = false
     }
@@ -13,7 +16,7 @@ struct ProviderProfile: Codable, Equatable, Sendable {
         var requestBudget = 3
         var tokenBudget = 16_384
     }
-    struct Origin: Equatable, Sendable {
+    struct Origin: Codable, Equatable, Sendable {
         let scheme: String
         let host: String
         let port: Int
@@ -30,6 +33,10 @@ struct ProviderProfile: Codable, Equatable, Sendable {
     var localMode = false
     var capabilities = Capabilities()
     var limits = Limits()
+
+    var allowsEmptyKey: Bool {
+        localMode && protocolKind == .openaiCompatible && (try? origin()) != nil
+    }
 
     func validate() throws {
         guard schemaVersion == 1 else { throw CreatorPersistence.Failure.unsupportedVersion }

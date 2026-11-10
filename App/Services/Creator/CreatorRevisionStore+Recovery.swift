@@ -101,6 +101,7 @@ extension CreatorRevisionStore {
         var job = try readJob(ticket.id)
         guard job.ticket == ticket else { throw CreatorPersistence.Failure.staleJob }
         if job.isTerminal { return }
+        LLMRequestCoordinator.shared.jobCancelled(at: jobURL(job.id), ticket: ticket)
         var project = try readProject(job.projectID)
         if let candidate = job.candidateRevisionID, project.revisionIDs.contains(candidate) {
             // The project commit already won the race; never remove a committed revision.

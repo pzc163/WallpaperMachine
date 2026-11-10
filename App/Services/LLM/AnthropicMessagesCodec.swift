@@ -1,0 +1,84 @@
+import Foundation
+
+struct AnthropicMessagesCodec: LLMProtocolCodec {
+    private enum Block: Sendable { case text, thinking }
+    private var blocks: [Int: Block] = [:]
+    private var seen = Set<Int>()
+    private var started = false
+    private var stopped = false
+    private var done = false
+    private var answer = LLMAnswerBuffer(allowsLeadingThought: false)
+    private var usage = LLMResponse.Usage()
+
+    static func request(profile: ProviderProfile, input: LLMRequest) throws -> LLMRequestDescriptor {
+        let body: [String: Any] = ["model": profile.model, "stream": true, "max_tokens": input.maxOutputTokens,
+            "system": input.systemInstruction, "messages": input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
+        return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1", suffix: "messages"),
+                     headers: ["anthropic-version": "2023-06-01"], body: try LLMRequestDescriptor.encoded(body), authentication: .anthropic)
+    }
+    mutating func consume(_ event: SSEParser.Event) throws {
+        guard !done else { throw LLMFailure.protocolViolation }
+        let object = try LLMJSON.object(event.data)
+        guard let type = object["type"] as? String, type == event.name else { throw LLMFailure.protocolViolation }
+        if type == "error" { throw LLMFailure.refused }
+        if type == "ping" { return }
+        if type == "message_start" {
+            guard !started, let message = object["message"] as? [String: Any], message["role"] as? String == "assistant",
+                  let content = message["content"] as? [Any], content.isEmpty else { throw LLMFailure.protocolViolation }
+            started = true; try mergeUsage(message["usage"]); return
+        }
+        guard started else { throw LLMFailure.protocolViolation }
+        switch type {
+        case "content_block_start":
+            let index = try blockIndex(object)
+            guard !stopped, seen.count < 64, !seen.contains(index), let block = object["content_block"] as? [String: Any]
+            else { throw LLMFailure.protocolViolation }
+            switch block["type"] as? String {
+            case "text":
+                guard let text = block["text"] as? String else { throw LLMFailure.protocolViolation }
+                blocks[index] = .text; try answer.append(text)
+            case "thinking", "redacted_thinking": blocks[index] = .thinking
+            default: throw LLMFailure.refused
+            }
+            seen.insert(index)
+        case "content_block_delta":
+            let index = try blockIndex(object)
+            guard !stopped, let block = blocks[index], let delta = object["delta"] as? [String: Any] else { throw LLMFailure.protocolViolation }
+            switch (block, delta["type"] as? String) {
+            case (.text, "text_delta"):
+                guard let text = delta["text"] as? String else { throw LLMFailure.protocolViolation }
+                try answer.append(text)
+            case (.thinking, "thinking_delta"), (.thinking, "signature_delta"): break
+            default: throw LLMFailure.protocolViolation
+            }
+        case "content_block_stop":
+            guard blocks.removeValue(forKey: try blockIndex(object)) != nil else { throw LLMFailure.protocolViolation }
+        case "message_delta":
+            guard blocks.isEmpty, let delta = object["delta"] as? [String: Any] else { throw LLMFailure.protocolViolation }
+            if let reason = try LLMJSON.string(delta["stop_reason"]) {
+                guard !stopped else { throw LLMFailure.protocolViolation }
+                guard ["end_turn", "stop_sequence"].contains(reason) else { throw reason == "max_tokens" ? LLMFailure.truncated : LLMFailure.refused }
+                stopped = true
+            }
+            try mergeUsage(object["usage"])
+        case "message_stop":
+            guard stopped, blocks.isEmpty else { throw LLMFailure.truncated }
+            done = true
+        default: throw LLMFailure.protocolViolation
+        }
+    }
+    private func blockIndex(_ object: [String: Any]) throws -> Int {
+        guard let index = try LLMJSON.integer(object["index"]), index < 64 else { throw LLMFailure.protocolViolation }
+        return index
+    }
+    private mutating func mergeUsage(_ value: Any?) throws {
+        if let stats = try LLMJSON.dictionary(value) {
+            try usage.merge(stats, keys: ["input_tokens": \.inputTokens, "output_tokens": \.outputTokens,
+                "cache_read_input_tokens": \.cacheReadTokens, "cache_creation_input_tokens": \.cacheWriteTokens])
+        }
+    }
+    func finish() throws -> LLMResponse {
+        guard done else { throw LLMFailure.truncated }
+        return try answer.finish(usage: usage)
+    }
+}

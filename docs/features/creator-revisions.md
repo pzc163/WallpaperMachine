@@ -3,7 +3,8 @@
 S1.1 adds native storage services to the [template workflow](creator-templates.md).
 It implements the storage portions of PRD AC-02 (derive and return to a revision),
 AC-07 (cancel/reopen) and AC-10 (invalidate changed evidence). It adds no creator
-UI, model transport, screenshot capture or desktop activation. See the
+UI, screenshot capture or desktop activation. Model transport was subsequently
+added by [S1.2](creator-llm.md), with no UI or startup wiring. See the
 [PRD](../plans/02-creator-prd.md), [technical plan](../plans/03-creator-technical-plan.md)
 and [stage plan](../plans/2026-11-10-creator-s1-s4.md).
 
@@ -74,9 +75,11 @@ old or new complete file. It has the same process-interruption, not power-loss,
 durability boundary as the revision store.
 
 Each `ProviderProfile` contains schema version, stable ID, name, protocol enum,
-base URL, model, explicit local mode, two capability flags and bounded request/token
+base URL, model, explicit local mode, capability overrides and bounded request/token
 budgets (1–3 / 1–100,000). `requestsUsage` and `filtersLeadingThinkBlock` are
-OpenAI-compatible overrides; the other protocols require their standard values.
+OpenAI-compatible overrides; S1.2 adds optional `jsonMode` (automatic, required,
+disabled). Missing values preserve S1.1 canonical record bytes and mean automatic.
+The other protocols require their standard values.
 A saved profile starts at configuration revision 1. A changed profile increments
 that revision and receives a new random configuration ID. Old handles are rejected;
 selection alone and a no-op save do not rotate a profile. Reusing a deleted profile
@@ -84,7 +87,7 @@ ID still receives a new configuration ID, preventing stale-handle revival. Editi
 one profile does not affect another profile even at the same host.
 
 URLs are ASCII base URLs, at most 2,048 bytes, with no userinfo, query or fragment.
-This intentionally rejects all base-URL queries; S1.2 codecs will add protocol
+This intentionally rejects all base-URL queries; S1.2 codecs add protocol
 queries such as Gemini `alt=sse`. The default is HTTPS. HTTP is valid only for
 explicit local OpenAI-compatible profiles with exact normalized hosts `127.0.0.1`,
 `localhost` or `::1`; neither DNS resolution nor other loopback representations
@@ -93,11 +96,14 @@ models additionally use a single ASCII path segment. The origin value compares
 scheme, normalized host and effective port; it is not credential authorization.
 
 There is no key field, arbitrary authentication-header field or approval flag.
-No Keychain read/write, network transport, codec, request cancellation, connection
-test or UI is implemented here. S1.2 must independently bind Keychain credentials
-to the profile ID and confirmed origin, fence requests with the configuration ID,
-and cancel old jobs on changes. The settings JSON cannot certify a new host as
-approved. Existing native revision jobs still have no provider/model association.
+The [S1.2 credential service](creator-llm.md) binds Keychain credentials to profile
+ID, origin and configuration identity. `withCurrentProfile` rechecks a full saved
+snapshot under the settings file lock before a suspended task resumes. Atomic
+profile replacement notifies active native requests before rename; a failed rename
+can conservatively cancel an old request but never authorize a new host. The
+settings JSON cannot certify a new host as approved. Jobs do not persist provider
+secrets; the active request owns its profile snapshot and no request auto-resumes
+after application restart.
 The settings service, like the revision services, has no app-startup integration
 or settings-backup support yet.
 
@@ -150,8 +156,13 @@ generating -> staged -> committing -> completed
 Only one job is active per project. Its `jobID + projectID + cancellationToken`
 and persisted active pointer fence late callbacks. Starting a newer job cancels
 the old one. Attempts cannot exceed the configured 1–3 request budget; token
-budget metadata is bounded to 1–100,000. S1.1 does not consume tokens or implement
-provider billing. Partial input is capped at 16 KiB. Projects hold at most 1,000
+budget metadata is bounded to 1–100,000. S1.2 atomically reserves request attempts
+and maximum output tokens before sending; failed attempts are not refunded. The
+optional `reservedOutputTokens` field preserves old canonical bytes when absent,
+and old jobs with attempts but no reservation history cannot start another request.
+This is an output reservation, not a provider billing limit. Cancelling/superseding
+a job synchronously cancels matching in-process flights. Partial input is capped at
+16 KiB; S1.2 never writes raw streaming input into it. Projects hold at most 1,000
 indexed revisions; retention/garbage collection is not implemented.
 
 Each live owner holds an OS file lease. `recover()` skips jobs with a live lease,

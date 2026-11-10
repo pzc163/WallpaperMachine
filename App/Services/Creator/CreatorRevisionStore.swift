@@ -117,6 +117,32 @@ actor CreatorRevisionStore {
         }
     }
 
+    func generatingJob(_ ticket: GenerationJob.Ticket) throws -> GenerationJob {
+        try locked {
+            try Task.checkCancellation()
+            let job = try activeJob(ticket)
+            guard job.state == .generating else { throw CreatorPersistence.Failure.staleJob }
+            return job
+        }
+    }
+
+    /// Reserve a request's maximum output before sending; failed requests keep their reservation.
+    func reserveLLMAttempt(_ ticket: GenerationJob.Ticket, profile: ProviderProfile, outputTokens: Int) throws -> GenerationJob {
+        try locked {
+            try Task.checkCancellation()
+            var job = try activeJob(ticket)
+            let total = min(job.tokenBudget, profile.limits.tokenBudget)
+            guard job.state == .generating, job.attemptCount < min(job.requestBudget, profile.limits.requestBudget),
+                  job.reservedOutputTokens != nil || job.attemptCount == 0,
+                  outputTokens > 0, outputTokens <= total - (job.reservedOutputTokens ?? 0)
+            else { throw LLMFailure.budgetExhausted }
+            job.attemptCount += 1
+            job.reservedOutputTokens = (job.reservedOutputTokens ?? 0) + outputTokens
+            try save(job)
+            return job
+        }
+    }
+
     /// Opaque partial data is bounded, never placed in a bundle and never interpreted as code.
     func savePartial(_ data: Data, for ticket: GenerationJob.Ticket) throws {
         try locked {

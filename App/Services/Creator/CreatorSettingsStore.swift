@@ -16,6 +16,22 @@ actor CreatorSettingsStore {
         return try read()
     }
 
+    /// Check and start/register a request while holding the same file lock as profile edits.
+    func withCurrentProfile<T: Sendable>(_ expected: ProviderProfile, perform: @Sendable (ProviderProfile) throws -> T) throws -> T {
+        do {
+            try Task.checkCancellation()
+            try CreatorPersistence.directory(url.deletingLastPathComponent())
+            let lock = try CreatorPersistence.Lease(url.appendingPathExtension("lock"))
+            defer { withExtendedLifetime(lock) {} }
+            let settings = try read()
+            guard settings.profiles.first(where: { $0.id == expected.id }) == expected else { throw LLMFailure.staleProfile }
+            return try perform(expected)
+        } catch let failure as LLMFailure { throw failure }
+        catch is CancellationError { throw LLMFailure.cancelled }
+        catch CreatorPersistence.Failure.busy { throw LLMFailure.busy }
+        catch { throw LLMFailure.staleProfile }
+    }
+
     /// Fences stale configuration handles; S1.2 must independently check Keychain origin binding.
     func profile(id: UUID, configurationID: UUID) throws -> ProviderProfile {
         let settings = try settings()
@@ -86,6 +102,7 @@ actor CreatorSettingsStore {
         try CreatorPersistence.atomicWrite(data, to: url) {
             try beforeCommit()
             try Task.checkCancellation()
+            LLMRequestCoordinator.shared.profilesWillChange(at: url, to: next)
         }
         return next
     }

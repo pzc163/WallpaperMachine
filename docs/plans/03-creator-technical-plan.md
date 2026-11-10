@@ -7,7 +7,7 @@
 
 配套文档：[S0 实测边界](../features/creator-s0.md) · [产品需求与验收编号](02-creator-prd.md)
 
-第 1～13 节描述目标架构，包含后续阶段；S0 实际实现和测试结果以第 16 节及 [S0 验证报告](../features/creator-s0.md) 为准。本次计划修订已将 S1 固定为参数生成，并把自由代码合同、下载防护和不可合作脚本的终止能力列入 S4 解锁关口；S1.0 与 S1.1 的实现见阶段计划及第 17 节；模型、封面和 S4 仍未实现。执行拆分见 [S1 与 S4 开发计划](2026-11-10-creator-s1-s4.md)。
+第 1～13 节描述目标架构，包含后续阶段；S0 实际实现和测试结果以第 16 节及 [S0 验证报告](../features/creator-s0.md) 为准。本次计划修订已将 S1 固定为参数生成，并把自由代码合同、下载防护和不可合作脚本的终止能力列入 S4 解锁关口；S1.0 与 S1.1 的实现见阶段计划及第 17 节；S1.2 连接层见 [实施与验证](../features/creator-llm.md)。真实模型联调、S1.3 参数合同、封面和 S4 仍未完成。执行拆分见 [S1 与 S4 开发计划](2026-11-10-creator-s1-s4.md)。
 
 ## 1. 总体结构
 
@@ -93,10 +93,10 @@ libraryURL/
 | 对象 | 最小字段 |
 |---|---|
 | `CreatorSettings`（S1.1 已实现） | `schemaVersion, revision, profiles[], selectedProfileID`；有界、无 Key，原子写入和并发版本检查 |
-| `ProviderProfile`（S1.1 元数据已实现） | `schemaVersion, id, configurationRevision, configurationID, name, protocolKind, baseURL, model, localMode, capabilities, limits`；Key 与确认目标绑定留给 S1.2 的独立 Keychain 服务 |
+| `ProviderProfile`（S1.1 元数据已实现） | `schemaVersion, id, configurationRevision, configurationID, name, protocolKind, baseURL, model, localMode, capabilities, limits`；Key 与确认目标绑定由 S1.2 的独立 Keychain 服务管理 |
 | `CreatorProject` | `schemaVersion, id, title, createdAt, latestRevisionID, lastValidatedRevisionID, publishedWallpaperID` |
 | `CreatorRevision` | `id, parentID, promptSummary, providerID, modelID, outputSchemaVersion, bundleVersion, sdkVersion, templateID, templateRevision, normalizedParameters, posterDigest, bundleDigest, createdAt` |
-| `GenerationJob` | `id, projectID, baseRevisionID, state, attemptCount, requestBudget, tokenBudget, cancellationToken` |
+| `GenerationJob` | `id, projectID, baseRevisionID, state, attemptCount, requestBudget, tokenBudget, reservedOutputTokens?, cancellationToken` |
 | `ValidationReport` | `revisionID, renderDigest, posterDigest, bundleDigest, policyVersion, templateRevision, sdkVersion, hostVersion, testProfile, results[], measuredMetrics, validatedAt` |
 | `CreatorRuntimeRegistry`（S1.1 已实现） | 版本化 `entries`，绑定已安装旧 v1 壁纸与工程/修订/摘要/策略/验证环境；v2 发布登记待 S1.4 |
 | `PublishedRecord` | `wallpaperID, revisionID, digest, policyVersion, previousRevisionID, publicationState` |
@@ -108,18 +108,18 @@ libraryURL/
 
 ## 4. 模型输出合同
 
-P0 / S1.2 改为共享底层 `URLSession` SSE 流式传输与取消/脱敏控制，加三个纯逻辑协议 Codec：`openaiCompatible`、`anthropicMessages`、`geminiGenerateContent`。供应商与模型差异由 Provider Profile 显式描述；每个 Codec 均需合同测试，不能假设“兼容”意味着所有字段一致。第 4.1～4.3 节保留输出与包合同，第 4.4～4.7 节定义传输、协议及凭据边界，相关网络与 Keychain 行为仍为 S1.2 待编码要求；Profile 元数据已在 S1.1 实现，见第 17 节。
+P0 / S1.2 改为共享底层 `URLSession` SSE 流式传输与取消/脱敏控制，加三个纯逻辑协议 Codec：`openaiCompatible`、`anthropicMessages`、`geminiGenerateContent`。供应商与模型差异由 Provider Profile 显式描述；每个 Codec 均需合同测试，不能假设“兼容”意味着所有字段一致。第 4.1～4.3 节保留输出与包合同，第 4.4～4.7 节定义传输、协议及凭据边界，相关传输、凭据和 Codec 已在 S1.2 实现并以隔离测试验证，真实端点与系统 Keychain 权限未联调；Profile 元数据已在 S1.1 实现，见第 17 节。
 
-建议原生接口：
+S1.2 实际原生接口（省略 Swift 类型注解）：
 
 ```text
-LLMProvider.generate(request, profileID, configurationRevision) -> AsyncSequence<GenerationEvent>
-LLMProvider.cancel(jobID)
+LLMProvider.generate(request, profileID, configurationID, ticket, store) async throws -> Completion
+LLMProvider.cancel(ticket)
 
-GenerationEvent = progress | textDelta | usage | completed | failed | cancelled
+Completion = response(text, optional usage) + profile + ticket + attempts + reservedOutputTokens + elapsed
 ```
 
-`completed` 仅表示传输与协议完整结束；答案还须经过 S1.3 参数校验，不能直接视为已验证或可发布修订。
+本阶段传输内部按片消费，但调用方只接收完整结果；诊断回调仅发出有界的 started/retry/completed/failed 事件，不暴露部分正文或思维内容。未来 UI 的进度展示另行接线。返回 `Completion` 仅表示传输与协议完整结束；答案还须经过 S1.3 参数校验，不能直接视为已验证或可发布修订。
 
 ### 4.1 S1 实施合同：TemplateParameterOutput v1
 
@@ -236,19 +236,19 @@ S0 的画布像素检测不等于离屏 `takeSnapshot` 已验证。S1.4 必须�
 
 ### 4.4 共享传输层与纯逻辑 Codec
 
-P0 / S1.2 同时实现 `openaiCompatible`、`anthropicMessages`、`geminiGenerateContent` 三个协议 Codec，复用一套底层 `URLSession` SSE 流式传输、取消、限额、错误分类和脱敏控制。这里的三个协议不是三个独立网络客户端，也不代表已经完成三家线上供应商联调。具体服务地址、模型及能力差异保存在 Provider Profile 中；协议正确性先用固定响应和注入传输验证。
+P0 / S1.2 已实现 `openaiCompatible`、`anthropicMessages`、`geminiGenerateContent` 三个协议 Codec，复用一套底层 `URLSession` SSE 流式传输、取消、限额、错误分类和脱敏控制。这里的三个协议不是三个独立网络客户端，也不代表已经完成三家线上供应商联调。具体服务地址、模型及能力差异保存在 Provider Profile 中；协议正确性先用固定响应和注入传输验证。
 
 | 层 | 职责与边界 |
 |---|---|
 | `ProviderProfile` | 稳定 `profileID`、协议枚举、base URL、模型、本地模式、协议能力开关和限额；不含 API Key |
 | `LLMProvider` | 按任务和 Profile 选择 Codec，汇总事件；不产生另一套供应商专属网络实现 |
-| 共享 `LLMStreamTransport` / `SSEParser` | `URLSession` 请求生命周期、URL/凭据目标校验、鉴权头注入、SSE 分帧、取消、超时、限额、脱敏及统一错误；支持注入 session/字节源 |
+| 共享 `LLMStreamTransport` / `SSEParser` | `URLSession` 请求生命周期、SSE 字节分帧、取消、超时、限额、拒绝重定向及统一错误；注入 session configuration / Mock URLProtocol |
 | 三个纯逻辑 `LLMProtocolCodec` | 从原生请求生成不含秘密的请求描述（相对端点、普通头、JSON body、鉴权头类型），并把 SSE 事件归一化为正文、用量和结束/错误事件；不访问网络、Keychain、磁盘或 UI |
-| Profile 凭据服务 | 在目标校验后按 Profile 读取 Keychain；凭据值不经过 Codec，不交给模型输入或页面 |
+| `ProviderCredentialStore` | 在目标和配置校验后按 Profile 读取 Keychain，并将凭据注入原生请求头；凭据值不经过 Codec，不交给模型输入或页面 |
 
-每个请求维护独立的 Codec 状态，状态作为显式输入/输出，不跨请求共享缓冲、思维块状态或 token 累积。
+每个请求维护独立的 Codec 状态，状态作为显式输入/输出，不跨请求共享缓冲、思维块状态或 token 累积。当前使用每请求独立的 ephemeral URLSession，禁用系统凭据库、Cookie 和缓存；TLS 保持系统验证，不接受其他自动鉴权挑战。正文只在合法结束和完整 JSON object 校验后交回原生调用方；重复键、未知字段及模板参数 Schema 仍留给 S1.3。
 
-共享传输按实际 UTF-8 字节增量处理分片、多行 `data:`、空行分隔、LF/CRLF、注释/心跳及末尾残帧。SSE 分帧与协议 JSON 解码分开；不能把一个网络分片直接当成完整 JSON。正文最终仍受 16 KiB 合同上限约束；原始流、单事件及过滤前缓冲另有统一硬限额，被跳过的思维数据也计入传输限额，不能造成无限累积。
+共享传输按实际 UTF-8 字节增量处理分片、多行 `data:`、空行分隔、LF/CRLF、注释/心跳及末尾残帧。SSE 分帧与协议 JSON 解码分开；不能把一个网络分片直接当成完整 JSON。正文最终仍受 16 KiB 合同上限约束；原始流上限 1 MiB，单行/单事件上限 64 KiB，默认请求总超时 60 秒（可注入但不超过 300 秒）。被跳过的思维数据、注释和未知 SSE 字段也计入传输限额。取消/结束释放会话，迟到事件不能替换终态。
 
 取消必须终止对应 `URLSessionTask` 和消费流，释放缓冲；复用 S1.1 的 `jobID + cancellationToken` 并绑定 Profile 配置代次，丢弃迟到事件。401、429、超时、HTTP 错误及流内错误走同一分类/预算规则，不在 Codec 内自动重试；未结束、截断、取消、拒绝或 token 上限停止都不能变成成功结果。协议结束标志由 Codec 判定，不能只凭连接 EOF 或已经收到一些正文宣布完成。
 
@@ -262,6 +262,7 @@ P0 / S1.2 同时实现 `openaiCompatible`、`anthropicMessages`、`geminiGenerat
 - 默认强制 HTTPS 和非空 Key。**仅显式本地模式且规范化 host 严格等于 `127.0.0.1`、`localhost` 或 `::1` 时，允许 HTTP 与空 Key**；IPv6 URL 使用 `[::1]`，比较时去除方括号。空 Key 时省略鉴权头，不发送空 Bearer。HTTPS 本地地址也只有满足该显式模式和白名单才可空 Key。
 - 不将 `127.0.0.0/8`、内网地址、`0.0.0.0`、相似域名、DNS 恰好解析到回环的远程域名或其他 IP 表示法自动视为本地。URL 禁止 userinfo/凭据 query，TLS 验证不得关闭；HTTP 例外不扩散到另外两个 Codec。
 - 请求设置 `stream: true`，支持 `stream_options.include_usage: true`。Profile 可显式声明本地端点不支持该请求字段；此时省略选项，不自动发第二次请求试探。即便请求了用量，也接受本地正常结束但不返回 usage 的流，显示“未知”。不能因为缺少用量放宽结束/完整性检查。
+- `response_format: {"type":"json_object"}` 默认启用；Profile 的可选 `jsonMode` 为 `automatic` / `required` / `disabled`，缺省等于 automatic 并保留旧记录字节。仅服务端 400 明确报告 `response_format` 的 unsupported/unknown 参数码时，automatic 可在预算内降级一次；不根据自由错误文案猜测、不对 401 或无关 400 试探。当前发送 `max_tokens`，不自动猜测其他模型专属请求字段。
 - 只收集选定 choice 的答案正文；接受最后 `choices: []` 的 usage 专用块，忽略中间 `usage: null`，保留请求级用量而不逐块累加。收到 `finish_reason` 后仍需处理末尾用量及 `[DONE]`，不能提前关闭流。详见 [Chat Completions 请求及用量](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) 与 [流式事件](https://developers.openai.com/api/reference/resources/chat/subresources/completions/streaming-events)。
 - 过滤兼容端点的 `reasoning_content` 和显式思维块；这些是兼容扩展，不是所有 OpenAI 服务都返回的字段。对于 Profile 声明的前置 `<think>…</think>` 等包裹，使用跨分片状态处理，在输出首个 JSON 字符前剔除；不对 JSON 字符串中的普通文字做全局正则删除。思维块不闭合、未知包裹或结构歧义按无效/截断响应拒绝，不猜测正文边界。
 
@@ -285,11 +286,15 @@ Keychain 在模型服务专用命名空间中按 **Provider Profile 的稳定 `p
 
 凭据绑定经用户确认的目标 origin（至少包含规范化 host，另包含 scheme/有效端口），绑定信息与凭据由原生凭据服务维护，不能由编辑后的 Profile 自行证明新目标已获授权。**修改目标主机（host 变更）时，禁止自动携带旧凭据发送请求**：使当前凭据关联失效、取消旧配置任务、递增配置代次，并在用户针对新目标显式重新绑定/填写凭据前阻止连接测试和生成请求。保留旧 Keychain 项不等于允许把它发给新主机；失败重试和恢复任务同样不能携带旧关联。改变 scheme/端口也重新核对绑定，禁止 HTTPS 自动降级。
 
-共享传输在读取凭据和实际发送前核对 Profile 代次与目标；自动重定向不得跨 host/origin 转发鉴权头。跨目标重定向直接拒绝，不自动读取另一 Profile 的 Key，也不改用 URL query；同目标重定向仍须满足原协议、端点及 HTTPS/本地模式限制。URL 的 host 比较使用解析后的规范化值，禁止字符串前缀判断，以免把 `localhost.example.com` 等当作本机。
+共享传输在读取凭据和实际发送前核对 Profile 代次与目标；自动重定向不得跨 host/origin 转发鉴权头。跨目标重定向直接拒绝，不自动读取另一 Profile 的 Key，也不改用 URL query；S1.2 进一步拒绝同 origin 重定向：固定 POST 端点不自动改变方法或路径，`URLSessionTaskDelegate` 在转发之前返回 nil 并取消任务。URL 的 host 比较使用解析后的规范化值，禁止字符串前缀判断，以免把 `localhost.example.com` 等当作本机。
+
+S1.2 凭据服务使用 `WallpaperMachine.Creator.ProviderCredentials.v1` 命名空间、Profile UUID 作为 account；Keychain 内绑定 profileID、origin、configurationID/configurationRevision 及完整 Profile 摘要。base path、模型、能力或限额变化也要求显式重新绑定，删除后复用 ID 不能复活旧 Key。实际发送在 `CreatorSettingsStore` 同一文件锁下复核最新完整 Profile 后才 resume；同进程设置/凭据/任务变更同步取消飞行请求，其他进程或外部文件替换在有任务时每 100 ms 复核。已经发送的数据无法撤回；测试未验证跨进程系统 Keychain 通知或真实服务计费。
+
+请求预算复用 `GenerationJob`：每次发送前原子增加 attemptCount 和可选 reservedOutputTokens，旧字段缺失时保留规范 JSON 字节；已消耗次数却没有预留明细的旧任务不能获得免费重试。1～3 次请求预算包含重试与一次 JSON 模式降级，累计最大输出预留受 Profile/job 中较小预算约束。401/403 不重试；429 解析秒数或 HTTP-date 的 Retry-After，超过 30 秒直接报告且不擅自缩短；5xx 按有界退避重试。缺失用量为未知，当前只交付最后成功请求的统计，不称为整个任务账单；S1.3 修复仍须沿用这份任务预算。
 
 ### 4.7 S1.2 协议与凭据验收矩阵
 
-下表是 S1.2 待编码的合同测试要求，尚未实现或执行这些网络/凭据测试。S1.1 的 Profile 地址、配置代次和存储检查不替代下表验收。
+下表已由 S1.2 的 `SSEParserTests`、`LLMCodecTests`、`ProviderCredentialStoreTests`、`LLMProviderTests` 和 `LLMStreamTransportTests` 覆盖，使用内存 Keychain 与截获所有地址的 Mock URLProtocol。验证结果及未覆盖的真实系统边界见 [连接层实施与验证](../features/creator-llm.md)。S1.1 的元数据检查不替代这些网络/凭据合同测试。
 
 | 层/协议 | 必须覆盖 |
 |---|---|
@@ -487,7 +492,7 @@ S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设�
 
 ## 12. 下一轮阶段边界
 
-本轮完成 S1.1 设置与 Profile 元数据存储补充、存储回归和完整门禁后暂停，不自动开始 S1.2。后续按阶段计划实施共享传输和三个 Codec；先读 AGENTS.md、PRD、技术方案与 `docs/features/creator-revisions.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
+本轮完成 S1.2 原生连接层、离线合同测试、存储回归和完整门禁后暂停，不自动进入 S1.3，不提交本轮实现或推送。后续先读 AGENTS.md、PRD、本技术方案以及 `docs/features/creator-revisions.md`、`docs/features/creator-llm.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
 
 ## 13. 首版之后的发布准备
 
@@ -550,7 +555,7 @@ S0 当前存储为 `storageURL/Creator/Drafts/<creator-s0-uuid>/`，每个草稿
 
 本轮未接入模型 API、创作界面或启动自动恢复编排；未验证真实桌面切换后的显示器级回退、真实音频、长期能耗、任意脚本强制终止和 CPU/GPU 配额。恢复证据覆盖库文件及重新创建服务，不等于真实进程被强杀或断电后的端到端桌面恢复。锁屏/屏保扩展尚未接入这个宿主，因此明确拒绝 S0 项目。
 
-后续计划正式采用两阶段合同：S1 使用 `TemplateParameterOutput v1`，S1.0 已完成每模板 10/12/10 参数与六套预设，后续在 S1.4 增加首帧快照、`preview.jpg`、四文件包版本和最终摘要；不接收模型源码。S1.0 的新增证据单独记录在实施报告中，其他后续任务仍未实施，不追加到 S0 已通过能力中。
+后续计划正式采用两阶段合同：S1 使用 `TemplateParameterOutput v1`，S1.0 已完成每模板 10/12/10 参数与六套预设，后续在 S1.4 增加首帧快照、`preview.jpg`、四文件包版本和最终摘要；不接收模型源码。S1.0 的新增证据单独记录在实施报告中；S1.1 与 S1.2 的后续实现亦分别记录，不追加到 S0 已通过能力中。
 
 从模板模式升级到 `generatedOfflineV1` 的硬性条件是：**独立配置与经验证的执行进程隔离、宿主外部主动心跳/超时监督、超时后有界销毁重建且不影响其他壁纸，以及完整网络/文件/权限矩阵通过**。不依赖页面自报，不把单独 WebView/进程池或 `stopLoading()` 当作证据。下载方向补齐两个转换回调和 `WKDownloadDelegate` 取消兜底、有效 sandbox；即刻取消不能替代监听器“无额外连接”的证据。仅在 S4 全部条件满足后才启用 `CodeBundleOutput v2`。
 
@@ -566,4 +571,4 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 
 `CreatorSettingsStore` 在 `supportURL/CreatorSettings.json` 保存 `CreatorSettings` 与最多 32 个 Profile，复用 256 KiB 规范 JSON、原子替换和文件锁。每次修改要求匹配设置 `revision`，防止跨 actor/实例的旧快照覆盖；忙锁或旧版本明确报错，由调用方重读。Profile 保存稳定 ID，修改配置递增 `configurationRevision` 并换发 `configurationID`；仅切换选中项不改变 Profile 代次。删除后重建即便复用 ID，也不能复用旧配置标识。文件缺失可返回空设置，损坏、未知版本/字段和非法指针不能静默重置。
 
-元数据包括三协议枚举、名称、基地址、模型、显式本地模式、用量请求/前置思维块能力及请求/token 预算（1～3 / 1～100,000）。基地址首版限定 ASCII URL，禁止 userinfo、所有 query 和 fragment；协议 query（如 Gemini `alt=sse`）由后续 Codec 构造。默认 HTTPS；HTTP 仅限显式本地 openaiCompatible 的三个精确 host。Gemini 模型名限定单一路径段。这里没有 Key 字段、自由鉴权头或“目标已授权”标志，也不触碰 Keychain；计算 origin 仅供未来比对，不能代替原生凭据绑定。实际请求取消、host 变更后的凭据失效及重定向检查仍待 S1.2。设置与已有创作历史一样尚未接入备份/UI，未改动旧包生成器和黄金摘要。
+元数据包括三协议枚举、名称、基地址、模型、显式本地模式、用量请求/前置思维块能力及请求/token 预算（1～3 / 1～100,000）。基地址首版限定 ASCII URL，禁止 userinfo、所有 query 和 fragment；协议 query（如 Gemini `alt=sse`）由 S1.2 Codec 构造。默认 HTTPS；HTTP 仅限显式本地 openaiCompatible 的三个精确 host。Gemini 模型名限定单一路径段。这里没有 Key 字段、自由鉴权头或“目标已授权”标志，也不触碰 Keychain；计算 origin 仅供目标比对，不能代替原生凭据绑定。这些是 S1.1 的元数据边界；S1.2 已在独立凭据与传输服务实现请求取消、host 变更后拒绝旧凭据及重定向阻断，未向设置 JSON 加入 Key 或授权标记。设置与已有创作历史一样尚未接入备份/UI，未改动旧包生成器和黄金摘要。

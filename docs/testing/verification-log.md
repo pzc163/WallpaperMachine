@@ -25,6 +25,19 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-10 — Creator S1.2 profile-bound model transport and three codecs
+
+S1.2 adds profile-bound native model connections after local rollback commit `37f2c603`; see [connection implementation](../features/creator-llm.md). This stage has no creator UI or live model/Keychain test.
+
+- Targeted `python3 scripts/test.py --only SSEParserTests --only LLMCodecTests --only ProviderCredentialStoreTests --only LLMProviderTests --only LLMStreamTransportTests --only ProviderProfileTests --only CreatorSettingsStoreTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests` — exit 0; 87 passed, 0 failed, 0 skipped. All 49 new tests pass.
+- Earlier targeted integration run: 74 passed, 1 failed because URLSession moved the request body into httpBodyStream; corrected the offline fixture capture. Final runs also cover CRLF raw-byte limits at every split.
+- One full `python3 scripts/test.py` — exit 0; 687 Python tests across 32 modules; 4,860 native passed, 0 failed, 69 skipped of 4,929 in 150 seconds. No full-gate retry.
+- Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference render. S4 remains closed.
+- Two existing main-thread runtime warnings in AppUpdate signature verification and VideoFormatSupport cache tests; those tests pass and their production code is unchanged. No new LLM/Creator compiler warning.
+- `python3 scripts/tests/test_doc_links.py` and `git diff --check` — exit 0. Plans and implementation docs updated; frozen generators and golden digest assertions unchanged.
+- Model traffic is intercepted for every URL by Mock URLProtocol; credentials use injected MemoryKeychain. No paid/real provider calls, personal Keychain access, desktop/UI operations, installation or Release build.
+- Real endpoint/TLS/proxy/Keychain-permission interoperability is unverified. Output reservations are not billing limits; S1.3 strict schema and S1.4 UI/cover/publication remain pending. S1.2 changes remain uncommitted; no push.
+
 ## 2026-11-10 — Creator settings and provider profiles
 
 S1.1 settings/profile metadata supplement; details and limits are in [creator revisions](../features/creator-revisions.md). Provider transport, Keychain and UI remain deferred.
@@ -133,16 +146,3 @@ Installed gains a right-click menu on tiles (the inspector's More actions list, 
 - Uncleared output preserves prior pixels before partial writes; overflow coverage asserts draw admission without an Inf/NaN pixel-equivalence claim, while finite inputs retain exact frame comparisons.
 - Asset-dependent renderer cases were skipped; desktop/media/network opt-ins, real Space animations, WindowServer stacking and Wallpaper Engine reference comparisons were not checked. No Release app was built or installed.
 - Gitleaks scans of 1,278 existing commits, candidate staged differences and full staged files found no leaks; agent paths, private assets and build output are excluded.
-
-## 2026-11-08 — Issue 177: rejected candidates and visible-frame regression
-
-Issue #177 remains unresolved. The user rejected the delivered candidate after repeating the Stage Manager desktop transition; passing callback timing and unit checks did not establish smooth visible playback.
-
-- The `isVisible` override and its offscreen-only regression were removed; they did not fix the reported desktop behavior.
-- A Release candidate adding `canJoinAllApplications` also still froze with original Belle. That source change was reverted.
-- That candidate's checks passed: `python3 scripts/test.py --only WebWallpaperSuspensionTests` (24 passed), `python3 scripts/test.py` (32 Python suites; 4,658 native passed, 66 skipped, 0 failed; 3 runtime warnings), and `python3 scripts/build.py --swift-only --configuration Release`. These results are not a fix verification.
-- During a user-confirmed 90-second freeze reproduction, animation callbacks continued with no visibility changes; after startup, the largest recorded callback gap was 29 ms. Callback timing does not measure screen presentation.
-- The asset-free WebGL, Canvas 2D and CSS [continuity fixture](../../Tests/UI/Fixtures/WebFrameContinuity/project.json) also froze, including with the control panel closed. A one-tile library did not prevent the freeze. The [manual regression](manual-smoke.md#native-desktop-posters-and-mission-control) requires repeated visible transitions because the failure is intermittent.
-- Raising the web window one level, with coverage probes moved above it, failed a controlled repeat: the same window retained its raised level while the user observed freezes. An earlier smooth run was inconclusive because wallpapers changed during it. Original levels were restored.
-- Wallpaper Engine comparison was **not done**: the available VM's captures did not show Belle, so they cannot serve as reference frames. The VM was suspended again.
-- `python3 scripts/tests/test_doc_links.py` passed 11 tests. No fix was committed.
