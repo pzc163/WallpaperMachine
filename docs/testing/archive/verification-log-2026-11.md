@@ -9,6 +9,17 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-08 — Belle Release build and Stage Manager retest
+
+Requested Release build and repeat desktop test for [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The candidate visibility change remains uncommitted; the reported Stage Manager stutter is **not verified as resolved**.
+
+- `python3 scripts/build.py --swift-only --configuration Release` — exit 0; built and ran `build/Build/Products/Release/WallpaperMachine.app`, binary UUID `C60DA559-5CD2-3C21-BE10-2ED77F3A5D02`. The installed app was not overwritten.
+- Five automated panel-focus / Show Desktop cycles in installed 1.9.3 and five in the updated build on macOS 27.0.1, external 3840×2160 @2x / 120 Hz, wallpaper 60 fps / scale 1.0. A disposable copy measured animation callbacks and calls into the wallpaper's drawing function; production code contains no wallpaper detection.
+- Longest measured draw gap during the automated cycle intervals: baseline 95 ms, updated 113 ms. Neither reproduced the reported approximately 600 ms hold. No page visibility changes or forwarded desktop clicks were recorded in those intervals; these cycles are not the exact mouse-click reproduction.
+- The user reported visible stuttering in reply to the baseline question after the updated app had started. That observation lacks a timestamp identifying the binary/transition, and no separate updated-build manual verdict was received. Page callback timing cannot exclude a compositor-held frame. Current main also includes earlier changes absent from installed 1.9.3, so this is not an isolated patch A/B.
+- The unchanged candidate code previously passed the full routine gate: 32 Python suites, XcodeGen, 4,659 native passed, zero failed, 66 skipped. The gate was not repeated for this build/test-only follow-up. Wallpaper Engine comparison remains **not done**: the available VM's captures did not contain Belle; no pixel metrics are claimed.
+- Restored Lost Tower on the primary display and Stage Manager off, retained the internal display wallpaper, moved the temporary import to Trash and cleared the search. The updated Release build remains running. No commit, push or issue closure.
+
 ## 2026-11-08 — Desktop web scheduling during window visibility changes
 
 Investigation of [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The change repairs an independently reproduced window-visibility scheduling gap; its connection to the reporter's exact Stage Manager transition remains unconfirmed.

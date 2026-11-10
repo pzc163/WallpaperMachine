@@ -23,14 +23,16 @@ final class CreatorTemplateRenderingTests: XCTestCase {
     }
 
     private func make(_ definition: CreatorTemplateCatalog.Definition,
-                      values: [String: CreatorTemplateCatalog.Value]? = nil, deterministic: Bool = true) async throws -> WebWallpaperPreviewSurface {
+                      values: [String: CreatorTemplateCatalog.Value]? = nil, deterministic: Bool = true,
+                      initialPauseDelay: Int = 0) async throws -> WebWallpaperPreviewSurface {
         let store = CreatorDraftStore(root: root.appendingPathComponent(UUID().uuidString))
         let directory = try await store.create(definition.specification(parameters: values))
         let result = try await CreatorPreview.make(directory: directory, store: store)
         let surface = result.surface
         surface.view.setFrameSize(NSSize(width: 320, height: 180))
         surface.view.layoutSubtreeIfNeeded()
-        surface.page.addUserScript(WKUserScript(source: deterministic ? Self.clockAndCounters : "window.__probe={errors:[]};", injectionTime: .atDocumentStart, forMainFrameOnly: true))
+        let probe = deterministic ? Self.clockAndCounters + "\n__probe.initialPauseDelay=\(initialPauseDelay);" : "window.__probe={errors:[]};"
+        surface.page.addUserScript(WKUserScript(source: probe, injectionTime: .atDocumentStart, forMainFrameOnly: true))
         do {
             try await surface.start()
             let deadline = Date().addingTimeInterval(10)
@@ -38,14 +40,21 @@ final class CreatorTemplateRenderingTests: XCTestCase {
             guard surface.page.isLoaded else { throw CreatorTemplate.Failure.invalidBundle }
             XCTAssertNil(surface.page.webView.window)
             XCTAssertEqual(surface.page.webView.url, CreatorWebResources.entryURL)
-            if deterministic { _ = try await js(surface, "for(let i=0;i<11;i++) __probe.step(40); return true;") }
+            if deterministic {
+                // Navigation completion precedes the asynchronous native state replay.
+                // Stepping before its pause callback resets the animation clock nondeterministically.
+                _ = try await js(surface, """
+                  await __probe.waitFor(()=>__probe.paused===false && __probe.general.fps!==undefined && Object.keys(__probe.properties).length>0);
+                  for(let i=0;i<11;i++) __probe.step(40); return true;
+                  """)
+            }
             return surface
         } catch { surface.stop(); throw error }
     }
 
     private func pause(_ surface: WebWallpaperPreviewSurface) async throws {
         try surface.setPaused(true)
-        _ = try await js(surface, "await new Promise(r=>setTimeout(r,30)); __probe.step(40); return true;")
+        _ = try await js(surface, "await __probe.waitFor(()=>__probe.paused===true); __probe.step(40); return true;")
     }
 
     private func apply(_ values: [String: CreatorTemplateCatalog.Value], to surface: WebWallpaperPreviewSurface) async throws {
@@ -101,9 +110,24 @@ final class CreatorTemplateRenderingTests: XCTestCase {
                 samples.append(try XCTUnwrap(result["samples"] as? [Double]))
                 hashes.append(try XCTUnwrap(result["hash"] as? String))
             }
-            XCTAssertEqual(hashes[0], hashes[2], "Same seed, clock, viewport and parameters must reproduce pixels")
+            XCTAssertEqual(hashes[0], hashes[2], "\(definition.id): same seed, clock, viewport and parameters must reproduce pixels")
             let difference = zip(samples[0], samples[1]).reduce(0.0) { $0 + abs($1.0-$1.1) } / Double(samples[0].count)
             XCTAssertGreaterThan(difference, 5, "\(definition.id): preset color/layout difference is too small")
+        }
+    }
+
+    func testDeterministicClockWaitsForDelayedNativeReplay() async throws {
+        for definition in CreatorTemplateCatalog.all {
+            let immediate = try await make(definition)
+            defer { immediate.stop() }
+            try await pause(immediate)
+            let first = try await pixels(immediate)
+            let delayed = try await make(definition, initialPauseDelay: 200)
+            defer { delayed.stop() }
+            try await pause(delayed)
+            let second = try await pixels(delayed)
+            XCTAssertEqual(first["hash"] as? String, second["hash"] as? String,
+                           "\(definition.id): native replay latency must not change the simulated render time")
         }
     }
 
@@ -321,7 +345,37 @@ final class CreatorTemplateRenderingTests: XCTestCase {
         Object.defineProperty(performance,'now',{value:()=>now});
         const probe={counts:{frames:0,arcs:0,strokes:0},errors:[],reset(){this.counts={frames:0,arcs:0,strokes:0};},
           step(delta){now+=delta;const batch=[...pending.values()];pending.clear();for(const callback of batch)callback(now);}};
+        probe.paused=null; probe.general={}; probe.properties={}; probe.initialPauseDelay=0;
+        probe.waitFor=async predicate=>{
+          const deadline=NativeDate.now()+5000;
+          while(!predicate()) {
+            if(NativeDate.now()>deadline) throw new Error('Native state delivery did not settle');
+            await new Promise(resolve=>setTimeout(resolve,10));
+          }
+        };
         window.__probe=probe;
+        const descriptor=Object.getOwnPropertyDescriptor(window,'wallpaperPropertyListener');
+        Object.defineProperty(window,'wallpaperPropertyListener',{
+          ...descriptor,
+          set(listener) {
+            for(const name of ['setPaused','applyGeneralProperties','applyUserProperties']) {
+              const original=listener[name];
+              listener[name]=function(...args) {
+                const deliver=()=>{
+                  const result=original.apply(this,args);
+                  if(name==='setPaused') probe.paused=!!args[0];
+                  else Object.assign(name==='applyGeneralProperties'?probe.general:probe.properties,args[0]);
+                  return result;
+                };
+                if(name==='setPaused' && probe.paused===null && probe.initialPauseDelay>0) {
+                  setTimeout(deliver,probe.initialPauseDelay); return;
+                }
+                return deliver();
+              };
+            }
+            descriptor.set.call(this,listener);
+          }
+        });
         window.requestAnimationFrame=callback=>{pending.set(++next,callback);return next;};
         window.cancelAnimationFrame=id=>pending.delete(id);
         for(const [method,key] of [['createLinearGradient','frames'],['arc','arcs'],['stroke','strokes']]) {

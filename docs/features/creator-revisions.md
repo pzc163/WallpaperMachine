@@ -15,6 +15,7 @@ the selected storage root changes. It does not fill a replacement library when
 an external disk is missing.
 
 ```text
+supportURL/CreatorSettings.json          # nonsecret profiles; stays on this Mac
 supportURL/CreatorRuntimeRegistry.json
 storageURL/Creator/
   Drafts/creator-s0-<uuid>/             # existing S0/S1.0 source, unchanged
@@ -45,6 +46,7 @@ bytes and malformed records fail closed. Records are at most 256 KiB.
 | `CreatorRevision` | Immutable parent/provenance, template identity/revision, normalized parameters, bundle/SDK/policy versions and digests |
 | `GenerationJob` | Project/base revision, token, durable state, attempts/budgets, candidate identity and digest |
 | `ValidationReport` | Exact revision metadata, project identity, content digests, template revision, host/SDK/policy/profile/viewport and measured results |
+| `CreatorSettings` | Nonsecret Provider Profile metadata, selection and optimistic settings revision; configured through `CreatorSettingsStore` |
 | `CreatorRuntimeRegistry` | Installed legacy ID to revision/digest/policy/context binding; new v2 publication remains blocked |
 
 JSON replacement writes a unique sibling, synchronizes the file, then renames
@@ -53,6 +55,51 @@ cooperating writers across store instances. Reads reject symlinks in owned paths
 nonregular files and hard links. This is process-interruption recovery, not a
 claim of power-loss durability, authenticated signatures, OS filesystem isolation
 or protection from a local actor that can rewrite all files and recompute hashes.
+
+## Settings and provider metadata
+
+`CreatorSettingsStore` owns `supportURL/CreatorSettings.json`, separate from
+movable wallpaper storage. It uses the same checksummed Codable envelope,
+256 KiB read/write cap, atomic sibling replacement and filesystem lease as the
+revision services. It does not cache a stale document between calls. A missing
+file returns empty settings; a corrupt, linked, oversized, unknown-version or
+unknown-field record throws and is preserved, never replaced with defaults.
+
+The payload has its own schema version, a settings revision, up to 32 unique
+profiles and an optional selected ID that must exist. Every mutation requires the
+expected settings revision under the file lock; concurrent/stale writers receive
+`busy` or `staleSettings` and must reload before retrying. Cancellation immediately
+before rename and failed writes preserve the previous record. Reads observe the
+old or new complete file. It has the same process-interruption, not power-loss,
+durability boundary as the revision store.
+
+Each `ProviderProfile` contains schema version, stable ID, name, protocol enum,
+base URL, model, explicit local mode, two capability flags and bounded request/token
+budgets (1–3 / 1–100,000). `requestsUsage` and `filtersLeadingThinkBlock` are
+OpenAI-compatible overrides; the other protocols require their standard values.
+A saved profile starts at configuration revision 1. A changed profile increments
+that revision and receives a new random configuration ID. Old handles are rejected;
+selection alone and a no-op save do not rotate a profile. Reusing a deleted profile
+ID still receives a new configuration ID, preventing stale-handle revival. Editing
+one profile does not affect another profile even at the same host.
+
+URLs are ASCII base URLs, at most 2,048 bytes, with no userinfo, query or fragment.
+This intentionally rejects all base-URL queries; S1.2 codecs will add protocol
+queries such as Gemini `alt=sse`. The default is HTTPS. HTTP is valid only for
+explicit local OpenAI-compatible profiles with exact normalized hosts `127.0.0.1`,
+`localhost` or `::1`; neither DNS resolution nor other loopback representations
+expand that list. Name/model limits are 60 characters/128 UTF-8 bytes; Gemini
+models additionally use a single ASCII path segment. The origin value compares
+scheme, normalized host and effective port; it is not credential authorization.
+
+There is no key field, arbitrary authentication-header field or approval flag.
+No Keychain read/write, network transport, codec, request cancellation, connection
+test or UI is implemented here. S1.2 must independently bind Keychain credentials
+to the profile ID and confirmed origin, fence requests with the configuration ID,
+and cancel old jobs on changes. The settings JSON cannot certify a new host as
+approved. Existing native revision jobs still have no provider/model association.
+The settings service, like the revision services, has no app-startup integration
+or settings-backup support yet.
 
 ## Content and evidence binding
 
@@ -160,7 +207,26 @@ the recorded digest/context; an absent entry preserves the original S0 byte
 validation behavior. Full registry/publisher transactions for v2 belong to S1.4.
 No S4 networking/download/independent-process claim follows from these routes.
 
+## Deterministic render-test synchronization
+
+The first full gate of the settings supplement exposed an existing pixel-test
+race. Navigation completion preceded asynchronous native state delivery; a late
+`setPaused(false)` reset the template animation clock after the test had already
+advanced its simulated frames. A controlled 200 ms delivery delay reproduced the
+pixel mismatch before the fix. The test harness now observes actual property,
+FPS and pause delivery before stepping, and waits for the pause acknowledgement
+before reading pixels. A bounded wait throws on missing delivery; it does not
+replace assertions with sleeps or retries. The new regression compares immediate
+and delayed replay for all three templates. Production kernels, template versions
+and golden byte-digest assertions remain unchanged.
+
 ## Verification and remaining boundaries
+
+`CreatorSettingsStoreTests` and `ProviderProfileTests` additionally cover all three
+metadata variants, exact local-address policy, origin comparison, resource bounds,
+independent same-host profiles, generation fencing, restart, concurrent writers,
+failed/cancelled atomic writes and invalid/unknown/secret-field records. These
+16 tests do not perform network requests or access the personal Keychain.
 
 `CreatorRevisionStoreTests`, `CreatorStorageFormatTests` and
 `CreatorRuntimeRegistryTests` cover immutable derivation, rollback, source-byte
@@ -172,7 +238,17 @@ Affected import, preflight and lock-screen tests run with the existing S0/S1.0
 regressions. The lock-screen tests use injected stores/provider actions; they do
 not enable a real desktop provider.
 
-The 2026-11-10 final targeted run passed 214, failed 0 and skipped the three S0
+The settings supplement's final targeted run passed 231, failed 0 and skipped 3.
+The first full gate passed 4,809 native tests, failed the existing preset pixel
+reproducibility test and skipped 69. After the controlled-delay reproduction and
+test-only synchronization fix above, the permitted full-gate retry passed 687
+Python tests and 4,811 native tests, failed 0 and skipped 69 (4,880 native total).
+All 16 metadata tests and the added delayed-replay regression passed. This run
+recorded three main-thread runtime warnings: the two cases listed below and
+`WebMOpeningTests.testAVp9FileOpensWithItsFormatSizeAndLength()`. Those tests passed;
+their production code was not changed. No further full-gate run was performed.
+
+The initial 2026-11-10 revision-storage targeted run passed 214, failed 0 and skipped the three S0
 probes. One full routine gate passed 687 Python tests and 4,794 native tests, with
 0 native failures and 69 skips (4,863 total). All 27 S1.1 additions passed. Skips
 were 3 S0 probes, 62 opt-in media/device tests, 3 live Steam tests and 1 reference

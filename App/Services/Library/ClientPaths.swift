@@ -50,6 +50,7 @@ enum ClientPaths {
     static var creatorProjectsURL: URL { creatorURL.appendingPathComponent("Projects", isDirectory: true) }
     static var creatorJobsURL: URL { creatorURL.appendingPathComponent("Jobs", isDirectory: true) }
     static var creatorRuntimeRegistryURL: URL { supportURL.appendingPathComponent("CreatorRuntimeRegistry.json") }
+    static var creatorSettingsURL: URL { supportURL.appendingPathComponent("CreatorSettings.json") }
     static var managedAssetsURL: URL { supportURL.appendingPathComponent("SceneAssets", isDirectory: true) }
     /// Where user-picked `file`/`directory` property assets are kept for good.
     ///

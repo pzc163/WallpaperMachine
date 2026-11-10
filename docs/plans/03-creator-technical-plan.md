@@ -92,11 +92,13 @@ libraryURL/
 
 | 对象 | 最小字段 |
 |---|---|
-| `ProviderProfile`（S1.2 待实现） | `schemaVersion, id, protocolKind, baseURL, model, localMode, capabilities, limits`；Key 与确认目标绑定由 Keychain 凭据服务独立管理 |
+| `CreatorSettings`（S1.1 已实现） | `schemaVersion, revision, profiles[], selectedProfileID`；有界、无 Key，原子写入和并发版本检查 |
+| `ProviderProfile`（S1.1 元数据已实现） | `schemaVersion, id, configurationRevision, configurationID, name, protocolKind, baseURL, model, localMode, capabilities, limits`；Key 与确认目标绑定留给 S1.2 的独立 Keychain 服务 |
 | `CreatorProject` | `schemaVersion, id, title, createdAt, latestRevisionID, lastValidatedRevisionID, publishedWallpaperID` |
 | `CreatorRevision` | `id, parentID, promptSummary, providerID, modelID, outputSchemaVersion, bundleVersion, sdkVersion, templateID, templateRevision, normalizedParameters, posterDigest, bundleDigest, createdAt` |
 | `GenerationJob` | `id, projectID, baseRevisionID, state, attemptCount, requestBudget, tokenBudget, cancellationToken` |
 | `ValidationReport` | `revisionID, renderDigest, posterDigest, bundleDigest, policyVersion, templateRevision, sdkVersion, hostVersion, testProfile, results[], measuredMetrics, validatedAt` |
+| `CreatorRuntimeRegistry`（S1.1 已实现） | 版本化 `entries`，绑定已安装旧 v1 壁纸与工程/修订/摘要/策略/验证环境；v2 发布登记待 S1.4 |
 | `PublishedRecord` | `wallpaperID, revisionID, digest, policyVersion, previousRevisionID, publicationState` |
 | `ApplyAttempt` | `targetDisplayIDs, previousAssignments, candidateRevisionID, state, failureReason` |
 
@@ -106,7 +108,7 @@ libraryURL/
 
 ## 4. 模型输出合同
 
-P0 / S1.2 改为共享底层 `URLSession` SSE 流式传输与取消/脱敏控制，加三个纯逻辑协议 Codec：`openaiCompatible`、`anthropicMessages`、`geminiGenerateContent`。供应商与模型差异由 Provider Profile 显式描述；每个 Codec 均需合同测试，不能假设“兼容”意味着所有字段一致。第 4.1～4.3 节保留输出与包合同，第 4.4～4.7 节定义本次新增的传输、协议及凭据边界，均为待编码要求。
+P0 / S1.2 改为共享底层 `URLSession` SSE 流式传输与取消/脱敏控制，加三个纯逻辑协议 Codec：`openaiCompatible`、`anthropicMessages`、`geminiGenerateContent`。供应商与模型差异由 Provider Profile 显式描述；每个 Codec 均需合同测试，不能假设“兼容”意味着所有字段一致。第 4.1～4.3 节保留输出与包合同，第 4.4～4.7 节定义传输、协议及凭据边界，相关网络与 Keychain 行为仍为 S1.2 待编码要求；Profile 元数据已在 S1.1 实现，见第 17 节。
 
 建议原生接口：
 
@@ -287,7 +289,7 @@ Keychain 在模型服务专用命名空间中按 **Provider Profile 的稳定 `p
 
 ### 4.7 S1.2 协议与凭据验收矩阵
 
-下表是待编码的合同测试要求，当前文档修订没有实现或执行这些网络/凭据测试。
+下表是 S1.2 待编码的合同测试要求，尚未实现或执行这些网络/凭据测试。S1.1 的 Profile 地址、配置代次和存储检查不替代下表验收。
 
 | 层/协议 | 必须覆盖 |
 |---|---|
@@ -446,7 +448,7 @@ S1 的模型修复针对 JSON、模板选择和参数合同，不能要求模型
 | S0.3 严格策略验证 | `generatedOfflineV1` 原型及网络/文件/权限/死循环攻击样例 | S0.2 | 关键限制和可停止性有真实 WKWebView 证据；不满足则收缩代码生成范围 |
 | S0.4 发布与恢复验证 | 固定示例保存入库、策略保留、版本恢复验证 | S0.3 | 中途失败可恢复；正式运行不会切回宽松策略 |
 | S1.0 模板表现力（已完成） | 三个高表现力模板、各 8～12 个参数、每个至少两组预设、固定内核与原生总资源预算 | S0 模板路线 | 单参作用可区分；边界及组合最坏输入受限；无模型代码；先于真实 API 接入 |
-| S1.1 工程和修订（存储层已实现） | 模板目录、版本化合同、不可变修订、bundle v2 四文件格式、v1 兼容、策略路由及取消恢复 | S1.0 | AC-02、07、10；版本未知或路由不一致拒绝；封面未完成不可发布，不依赖真实模型 |
+| S1.1 工程和修订（存储层已实现） | 模板目录、版本化合同、不可变修订、CreatorSettings/Profile 元数据、bundle v2 四文件格式、v1 兼容、策略路由及取消恢复 | S1.0 | AC-02、07、10；版本未知或路由不一致拒绝；封面未完成不可发布，不依赖真实模型 |
 | S1.2 模型连接 | 共享 URLSession SSE/取消/脱敏 + 三个纯逻辑 Codec + 按 Provider Profile 隔离的 Keychain | S1.1 | AC-07/12/17/18；三协议请求/用量/思维过滤、401/429/超时/截断、host 变更与重定向测试通过；实际端点联调单独进行 |
 | S1.3 参数结构化生成 | `TemplateParameterOutput v1` JSON Schema、严格解析、参数/控件默认值一致性、原生模板重建 | S1.2 | 拒绝代码/文件字段、未知参数、越界、重复键、截断和 v2；不执行流式片段；本地校验独立于供应商能力 |
 | S1.4 第一条端到端流程与封面 | 最小创作入口：新建 → 提示词 → 参数检查 → 预览 → 原生 `preview.jpg` → 最终摘要 → 保存 | S1.3 + S0.4 | 首帧就绪后快照，失败/取消不发布；库卡片读取封面通过；完成一次基于真实模型参数的闭环，AC-15、16 纳入验收 |
@@ -459,7 +461,7 @@ S1 的模型修复针对 JSON、模板选择和参数合同，不能要求模型
 | S4.3 自由代码合同解锁 | `CodeBundleOutput v2` 元数据与原始文件分帧、SDK 能力校验、版本化策略 | S4.1、S4.2 及全部隔离矩阵通过 | 分隔歧义/截断/编码/路径攻击拒绝；自由代码预览、发布、重启和恢复同策略；不满足就保持关闭 |
 | S4.4 其他扩展与发布准备 | 参考图、文生图、WebGL、音频、分发逐项排期 | 本机试用反馈 | 每项独立立项；固定 WebGL 模板也须单独验收，不因使用参数合同自动获得 GPU 安全保证 |
 
-S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设、资源预算和兼容回归也已完成。全量门禁为 687 项 Python 通过、4,767 项原生通过、0 失败、69 跳过；详见 [S1.0 实施报告](../features/creator-templates.md)。S1.1 存储层已经实现，定向回归 214 通过、0 失败、3 项既有探针跳过；最终门禁结果见阶段计划。代码进度仍停止在 S1.1；本次只修订 S1.2 文档。自由代码仍未通过；S4 的通用隔离工程不阻塞模板产品闭环。工期根据模板表现力与封面试验再估算，不把接口存在视为实现已经完成。
+S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设、资源预算和兼容回归也已完成。全量门禁为 687 项 Python 通过、4,767 项原生通过、0 失败、69 跳过；详见 [S1.0 实施报告](../features/creator-templates.md)。此前 S1.1 修订存储层已经实现，定向回归 214 通过、0 失败、3 项既有探针跳过；最终门禁结果见阶段计划。本轮补齐 CreatorSettings/Profile 元数据；补充验证结果见阶段计划，代码进度仍停止在 S1.1。自由代码仍未通过；S4 的通用隔离工程不阻塞模板产品闭环。工期根据模板表现力与封面试验再估算，不把接口存在视为实现已经完成。
 
 ## 11. 测试策略与仓库工作规则
 
@@ -481,11 +483,11 @@ S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设�
 
 使用 `WALLPAPER_MACHINE_HOME` 和 `TemporaryDefaults` 隔离测试；测试临时数据不要写入个人 Documents/真实应用目录。不能手改生成的 Xcode 工程或桥接代码。新增界面文案按仓库现有语言目录一起维护。
 
-02 PRD、03 技术方案和 05 阶段计划以仓库 `docs/plans/` 为权威版本，并同步本聊天 outputs 副本。S0/S1.0/S1.1 的源码实现和测试记录属于已完成阶段；本次三协议调整只修改规划文档。文档阶段运行 `python3 scripts/tests/test_doc_links.py`、文档内容/副本一致性检查及 `git diff --check`，不修改源码、不生成 Xcode 工程、不运行完整应用门禁，不改写历史测试结果。
+02 PRD、03 技术方案和 05 阶段计划以仓库 `docs/plans/` 为权威版本，并同步本聊天 outputs 副本。S0/S1.0 与此前 S1.1 验证记录保留为历史；本轮设置存储补充另记定向与一次完整门禁结果，并运行 `python3 scripts/tests/test_doc_links.py`、文档内容/副本一致性检查及 `git diff --check`。三协议传输与凭据计划保持待实施，不将元数据测试记作网络联调。
 
 ## 12. 下一轮阶段边界
 
-本次仅同步三协议与凭据规划，完成文档检查后等待用户下一步编码指令，不自动开始 S1.2。后续按阶段计划实施共享传输和三个 Codec；先读 AGENTS.md、PRD、技术方案与 `docs/features/creator-revisions.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
+本轮完成 S1.1 设置与 Profile 元数据存储补充、存储回归和完整门禁后暂停，不自动开始 S1.2。后续按阶段计划实施共享传输和三个 Codec；先读 AGENTS.md、PRD、技术方案与 `docs/features/creator-revisions.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
 
 ## 13. 首版之后的发布准备
 
@@ -556,8 +558,12 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 
 ## 17. S1.1 存储层实施合同
 
-实现细节以 [工程与不可变修订](../features/creator-revisions.md) 为准：五类 Codable 记录采用独立版本、规范编码、摘要检查及原子替换；工程索引替换为修订提交点。任务暂存独立于历史，使用文件锁、存活租约和取消令牌防止并发覆盖；恢复保留损坏历史及最后有效选择。
+实现细节以 [工程与不可变修订](../features/creator-revisions.md) 为准：六类 Codable 记录（工程、修订、任务、报告、设置、运行注册表）采用独立版本、规范编码、摘要检查及原子替换；工程索引替换为修订提交点。任务暂存独立于历史，使用文件锁、存活租约和取消令牌防止并发覆盖；恢复保留损坏历史及最后有效选择。
 
 旧 v1 三文件逐字节重建和黄金摘要断言保持不变。v2 分为原生三文件渲染草稿及含 `preview.jpg` 的四文件封闭格式；封面解码/尺寸/字节限额已有合同与合成图片测试，但尚无截图生成或 v2 发布服务。结构报告绑定 revision 元数据字节、工程身份、真实资源摘要和验证环境；runtime/posterCapture 明确为 notChecked。新增修订或选择回退不会无故使旧报告失效；标题/来源/资源或验证环境变化会失效。
 
 普通导入、创作发布、正式播放和扩展入口不能把新草稿当兼容壁纸加载。注册表可登记已经安装且验证过的旧 v1 包；v2 发布事务和最终报告留在 S1.4。重启恢复目前由原生服务显式调用，待后续入口接线。既有备份/存储搬迁尚不包含创作历史；开放 UI 前需接入或显式阻断相应操作。没有执行桌面操作、LLM 请求或 S4 修复。
+
+`CreatorSettingsStore` 在 `supportURL/CreatorSettings.json` 保存 `CreatorSettings` 与最多 32 个 Profile，复用 256 KiB 规范 JSON、原子替换和文件锁。每次修改要求匹配设置 `revision`，防止跨 actor/实例的旧快照覆盖；忙锁或旧版本明确报错，由调用方重读。Profile 保存稳定 ID，修改配置递增 `configurationRevision` 并换发 `configurationID`；仅切换选中项不改变 Profile 代次。删除后重建即便复用 ID，也不能复用旧配置标识。文件缺失可返回空设置，损坏、未知版本/字段和非法指针不能静默重置。
+
+元数据包括三协议枚举、名称、基地址、模型、显式本地模式、用量请求/前置思维块能力及请求/token 预算（1～3 / 1～100,000）。基地址首版限定 ASCII URL，禁止 userinfo、所有 query 和 fragment；协议 query（如 Gemini `alt=sse`）由后续 Codec 构造。默认 HTTPS；HTTP 仅限显式本地 openaiCompatible 的三个精确 host。Gemini 模型名限定单一路径段。这里没有 Key 字段、自由鉴权头或“目标已授权”标志，也不触碰 Keychain；计算 origin 仅供未来比对，不能代替原生凭据绑定。实际请求取消、host 变更后的凭据失效及重定向检查仍待 S1.2。设置与已有创作历史一样尚未接入备份/UI，未改动旧包生成器和黄金摘要。

@@ -25,6 +25,19 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-10 — Creator settings and provider profiles
+
+S1.1 settings/profile metadata supplement; details and limits are in [creator revisions](../features/creator-revisions.md). Provider transport, Keychain and UI remain deferred.
+
+- Saved the previously verified tree as local baseline `f7d6168f` on `feat/ai-creator`; no push. The supplement remains uncommitted.
+- Added versioned nonsecret `CreatorSettings`/`ProviderProfile` records, actor/file-lock atomic updates, revision conflict checks and configuration fencing.
+- `python3 scripts/test.py --only CreatorSettingsStoreTests --only ProviderProfileTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests`: final 231 passed, 0 failed, 3 skipped; initial run 230 passed, 3 skipped.
+- First `python3 scripts/test.py`: Python 687 passed; native 4,809 passed, 1 failed, 69 skipped. Preset pixel reproducibility raced native state replay; a controlled 200 ms delay reproduced it before the test-only acknowledgement fix. No kernel or golden digest changes.
+- Full-gate retry after the fix: Python 687 passed (32 modules); native 4,811 passed, 0 failed, 69 skipped (4,880 total). All 16 metadata additions and the delayed-replay regression passed. No further full-gate run.
+- Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference rendering job. Runtime main-thread warnings: AppUpdate unsigned-copy check, VideoFormatSupport changed-file cache check, WebMOpening VP9 opening check; all passed, production code untouched.
+- `python3 scripts/tests/test_doc_links.py`: 11 passed. Documentation/mirror/frozen-source checks: 36 passed. `git diff --check`: passed. 02/03/05 and their output copies are synchronized.
+- No external model/Keychain access, desktop/UI run, Release build or install. S1.1 recovery is a service API; Creator settings/history backup/move integration, v2 poster generation/publication and S4 isolation remain future work.
+
 ## 2026-11-10 — Creator S1.1 immutable revision storage
 
 S1.1 adds immutable creator revision storage, content-bound structural reports, job cancellation/recovery and strict package routing. No UI, model API, cover capture or desktop changes.
@@ -133,14 +146,3 @@ Issue #177 remains unresolved. The user rejected the delivered candidate after r
 - Raising the web window one level, with coverage probes moved above it, failed a controlled repeat: the same window retained its raised level while the user observed freezes. An earlier smooth run was inconclusive because wallpapers changed during it. Original levels were restored.
 - Wallpaper Engine comparison was **not done**: the available VM's captures did not show Belle, so they cannot serve as reference frames. The VM was suspended again.
 - `python3 scripts/tests/test_doc_links.py` passed 11 tests. No fix was committed.
-
-## 2026-11-08 — Belle Release build and Stage Manager retest
-
-Requested Release build and repeat desktop test for [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The candidate visibility change remains uncommitted; the reported Stage Manager stutter is **not verified as resolved**.
-
-- `python3 scripts/build.py --swift-only --configuration Release` — exit 0; built and ran `build/Build/Products/Release/WallpaperMachine.app`, binary UUID `C60DA559-5CD2-3C21-BE10-2ED77F3A5D02`. The installed app was not overwritten.
-- Five automated panel-focus / Show Desktop cycles in installed 1.9.3 and five in the updated build on macOS 27.0.1, external 3840×2160 @2x / 120 Hz, wallpaper 60 fps / scale 1.0. A disposable copy measured animation callbacks and calls into the wallpaper's drawing function; production code contains no wallpaper detection.
-- Longest measured draw gap during the automated cycle intervals: baseline 95 ms, updated 113 ms. Neither reproduced the reported approximately 600 ms hold. No page visibility changes or forwarded desktop clicks were recorded in those intervals; these cycles are not the exact mouse-click reproduction.
-- The user reported visible stuttering in reply to the baseline question after the updated app had started. That observation lacks a timestamp identifying the binary/transition, and no separate updated-build manual verdict was received. Page callback timing cannot exclude a compositor-held frame. Current main also includes earlier changes absent from installed 1.9.3, so this is not an isolated patch A/B.
-- The unchanged candidate code previously passed the full routine gate: 32 Python suites, XcodeGen, 4,659 native passed, zero failed, 66 skipped. The gate was not repeated for this build/test-only follow-up. Wallpaper Engine comparison remains **not done**: the available VM's captures did not contain Belle; no pixel metrics are claimed.
-- Restored Lost Tower on the primary display and Stage Manager off, retained the internal display wallpaper, moved the temporary import to Trash and cleared the search. The updated Release build remains running. No commit, push or issue closure.
