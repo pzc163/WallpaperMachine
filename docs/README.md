@@ -77,6 +77,7 @@ file; pass `rg -u` to search them deliberately.
 
 | Document | Purpose |
 |---|---|
+| [features/creator-generation.md](features/creator-generation.md) | S1.3 catalog-derived prompts, strict parameter contracts, native compilation and atomic revision evidence |
 | [features/creator-llm.md](features/creator-llm.md) | S1.2 shared SSE transport, three protocol codecs, profile-bound credentials and offline verification |
 | [features/creator-revisions.md](features/creator-revisions.md) | S1.1 immutable revision storage, content-bound evidence, cancellation, recovery and policy routing |
 | [features/creator-templates.md](features/creator-templates.md) | S1.0 native parameter catalog, richer Canvas2D templates, bounded rendering and legacy compatibility |

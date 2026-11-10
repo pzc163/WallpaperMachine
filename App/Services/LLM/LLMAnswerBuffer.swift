@@ -12,8 +12,12 @@ struct LLMAnswerBuffer: Sendable {
         for character in fragment {
             switch phase {
             case .prefix:
-                if marker.isEmpty && character.isWhitespace { continue }
-                if marker.isEmpty && character == "{" { phase = .answer; text.append(character); continue }
+                if marker.isEmpty && character.isWhitespace {
+                    text.append(character)
+                    guard text.utf8.count <= LLMJSONEnvelope.maximumBytes else { throw LLMFailure.outputLimit }
+                    continue
+                }
+                if marker.isEmpty && (character == "{" || character == "\u{0060}") { phase = .answer; text.append(character); continue }
                 marker.append(character)
                 guard allowsLeadingThought, "<think>".hasPrefix(marker) else { throw LLMFailure.protocolViolation }
                 if marker == "<think>" { marker = ""; phase = .thought }
@@ -29,7 +33,7 @@ struct LLMAnswerBuffer: Sendable {
     }
     func finish(usage: LLMResponse.Usage) throws -> LLMResponse {
         guard phase == .answer else { throw LLMFailure.truncated }
-        _ = try LLMJSON.object(text)
-        return LLMResponse(text: text, usage: usage)
+        _ = try LLMJSON.object(LLMJSONEnvelope.unwrap(text))
+        return LLMResponse(text: text.trimmingCharacters(in: CharacterSet(charactersIn: " \r\n\t")), usage: usage)
     }
 }

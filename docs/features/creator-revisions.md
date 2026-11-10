@@ -4,7 +4,8 @@ S1.1 adds native storage services to the [template workflow](creator-templates.m
 It implements the storage portions of PRD AC-02 (derive and return to a revision),
 AC-07 (cancel/reopen) and AC-10 (invalidate changed evidence). It adds no creator
 UI, screenshot capture or desktop activation. Model transport was subsequently
-added by [S1.2](creator-llm.md), with no UI or startup wiring. See the
+added by [S1.2](creator-llm.md), followed by [S1.3 parameter generation](creator-generation.md),
+with no UI or startup wiring. See the
 [PRD](../plans/02-creator-prd.md), [technical plan](../plans/03-creator-technical-plan.md)
 and [stage plan](../plans/2026-11-10-creator-s1-s4.md).
 
@@ -31,6 +32,7 @@ storageURL/Creator/
     .lease
     partial.bin                        # bounded opaque input, never executable
     candidate/revision.json
+    candidate/validation.json           # S1.3 structure evidence, committed with revision
     candidate/bundle/
   Publication/                         # existing S0 journal; not renamed
 ```
@@ -127,7 +129,8 @@ used as content evidence. v1 golden digest assertions remain unchanged.
 `validate` currently issues only `template-structure-v1` evidence: reconstruction,
 structure and trusted-template policy pass; runtime and poster capture are
 explicitly `notChecked`. `lastValidatedRevisionID` refers to that named profile,
-not final publication approval. Changed content, provenance, title, host version,
+not final publication approval. S1.3 generated provenance (including optional usage)
+and bundle presentation metadata are included in these digests. Changed content, provenance, title, host version,
 SDK/policy/profile or viewport requires validation again. Recovery does not
 fabricate replacement reports. The preview receives the same frozen bytes that
 were checked against the report, and repeats the check on every page reload.
@@ -145,7 +148,11 @@ and changes only the project selection, never an applied wallpaper.
 The project index replacement is the commit point. Before it, a candidate folder
 alone is not history. Afterwards, a finishing job-journal write may be replayed
 without creating a duplicate revision. A saved but unvalidated new revision does
-not replace the last validated selection.
+not replace the last validated selection. S1.3 calls `commit(validatingStructure: true)`:
+structure-only evidence is written into the candidate first and moved with the
+revision; the same project-index commit selects that complete, statically checked
+revision. A post-commit error preserves it for journal recovery. No runtime or
+publication approval is implied.
 
 ```text
 generating -> staged -> committing -> completed
@@ -164,6 +171,18 @@ This is an output reservation, not a provider billing limit. Cancelling/supersed
 a job synchronously cancels matching in-process flights. Partial input is capped at
 16 KiB; S1.2 never writes raw streaming input into it. Projects hold at most 1,000
 indexed revisions; retention/garbage collection is not implemented.
+
+S1.3 adds optional `GenerationJob.baseRevisionDigest` and
+`CreatorRevision.generation` records. Missing values preserve old canonical bytes.
+A generation captures the explicit base metadata digest and rechecks it before
+staging and commit. Generated revisions fill provider/model/output-schema fields
+and record job/configuration identity, protocol, request attempts, maximum-output
+reservations, elapsed time and optional last-successful-request usage. These are
+provenance, never credential authorization; unknown usage stays nil. Raw answers,
+thoughts and system prompts are not persisted. The model receives only the
+explicit base's parameters/title/summary and its revision ID. A native v1 catalog
+revision can be a base for a new v2 bundle; an original two-parameter S0 template
+requires an explicit upgrade and is never silently overwritten.
 
 Each live owner holds an OS file lease. `recover()` skips jobs with a live lease,
 interrupts unfinished abandoned jobs, discards their partial/candidate files and

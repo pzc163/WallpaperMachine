@@ -13,7 +13,7 @@ actor CreatorDraftStore {
         var renderDigest: String {
             get throws {
                 if manifest == nil { return digest }
-                return CreatorTemplate.digest(try CreatorBundleManifest.files(for: specification))
+                return CreatorTemplate.digest(try CreatorBundleManifest.files(for: specification, presentation: manifest?.presentation))
             }
         }
     }

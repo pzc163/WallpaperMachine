@@ -83,14 +83,19 @@ actor CreatorRevisionStore {
     }
 
     /// Starts a new generation and durably fences callbacks from an older request.
-    func beginJob(projectID: UUID, baseRevisionID: UUID? = nil, requestBudget: Int = 1, tokenBudget: Int = 4096) throws -> GenerationJob.Ticket {
+    func beginJob(projectID: UUID, baseRevisionID: UUID? = nil, requestBudget: Int = 1, tokenBudget: Int = 4096,
+                  expectedBaseDigest: String? = nil) throws -> GenerationJob.Ticket {
         try locked {
             try Task.checkCancellation()
             var project = try readProject(projectID)
-            if let baseRevisionID { _ = try readRevision(projectID: projectID, revisionID: baseRevisionID) }
+            if let baseRevisionID {
+                let base = try readRevision(projectID: projectID, revisionID: baseRevisionID)
+                if let expectedBaseDigest, base.metadataDigest != expectedBaseDigest { throw CreatorPersistence.Failure.staleJob }
+            } else if expectedBaseDigest != nil { throw CreatorPersistence.Failure.invalidRecord }
             let job = GenerationJob(schemaVersion: 1, id: UUID(), projectID: projectID, baseRevisionID: baseRevisionID,
                                     state: .generating, attemptCount: 0, requestBudget: requestBudget, tokenBudget: tokenBudget,
-                                    cancellationToken: UUID(), createdAt: CreatorPersistence.timestamp(), candidateRevisionID: nil, candidateDigest: nil)
+                                    cancellationToken: UUID(), createdAt: CreatorPersistence.timestamp(), candidateRevisionID: nil, candidateDigest: nil,
+                                    baseRevisionDigest: expectedBaseDigest)
             try job.validate()
             if let previous = project.activeJobID {
                 let old = try readJob(previous)
@@ -154,27 +159,40 @@ actor CreatorRevisionStore {
     }
 
     func stage(_ specification: CreatorTemplate.Specification, for ticket: GenerationJob.Ticket,
-               summary: String = "", legacy: Bool = false) throws -> CreatorRevision {
+               summary: String = "", legacy: Bool = false, presentation: CreatorBundlePresentation? = nil,
+               generation: CreatorGenerationMetadata? = nil, providerID: String? = nil, modelID: String? = nil) throws -> CreatorRevision {
         try locked {
             try Task.checkCancellation()
             var job = try activeJob(ticket)
             guard job.state == .generating, specification.projectID == job.projectID,
                   summary.unicodeScalars.count <= 240 else { throw CreatorPersistence.Failure.invalidRecord }
-            let files = try legacy ? CreatorTemplate.files(for: specification) : CreatorBundleManifest.files(for: specification)
+            if let generation {
+                try generation.validate()
+                guard !legacy, generation.jobID == job.id, generation.attemptCount == job.attemptCount,
+                      generation.reservedOutputTokens == job.reservedOutputTokens,
+                      generation.baseRevisionDigest == job.baseRevisionDigest else { throw CreatorPersistence.Failure.invalidRecord }
+                try checkBase(job)
+            } else if providerID != nil || modelID != nil || (legacy && presentation != nil) {
+                throw CreatorPersistence.Failure.invalidRecord
+            }
+            let files = try legacy ? CreatorTemplate.files(for: specification) : CreatorBundleManifest.files(for: specification, presentation: presentation)
             let candidate = jobURL(job.id).appendingPathComponent("candidate", isDirectory: true)
             guard !CreatorPersistence.exists(candidate) else { throw CreatorPersistence.Failure.busy }
             let bundle = candidate.appendingPathComponent("bundle", isDirectory: true)
             try CreatorPersistence.directory(bundle, create: true)
-            for (name, data) in files { try CreatorPersistence.atomicWrite(data, to: bundle.appendingPathComponent(name)) }
+            for (name, data) in files {
+                try Task.checkCancellation()
+                try CreatorPersistence.atomicWrite(data, to: bundle.appendingPathComponent(name))
+            }
             let snapshot = try CreatorBundleManifest.read(bundle, scopedRevision: true)
             let identity = CreatorBundleManifest.templateIdentity(specification)
             let revision = CreatorRevision(schemaVersion: 1, id: UUID(), projectID: job.projectID, parentID: job.baseRevisionID,
-                                           promptSummary: summary, providerID: nil, modelID: nil, outputSchemaVersion: nil,
+                                           promptSummary: summary, providerID: providerID, modelID: modelID, outputSchemaVersion: generation == nil ? nil : 1,
                                            bundleVersion: snapshot.bundleVersion, sdkVersion: 1, policyVersion: 1,
                                            templateID: identity.0, templateRevision: identity.1,
                                            normalizedParameters: CreatorBundleManifest.parameters(specification),
                                            renderDigest: try snapshot.renderDigest, posterDigest: nil, bundleDigest: snapshot.digest,
-                                           createdAt: CreatorPersistence.timestamp())
+                                           createdAt: CreatorPersistence.timestamp(), generation: generation)
             try revision.validate(against: snapshot)
             try CreatorPersistence.write(revision, to: candidate.appendingPathComponent("revision.json"))
             job.candidateRevisionID = revision.id
@@ -188,7 +206,7 @@ actor CreatorRevisionStore {
     }
 
     /// The atomic project index replacement is the commit point. A revision folder alone is not visible history.
-    func commit(_ ticket: GenerationJob.Ticket) throws -> CreatorRevision {
+    func commit(_ ticket: GenerationJob.Ticket, validatingStructure: Bool = false) throws -> CreatorRevision {
         try locked {
             try Task.checkCancellation()
             var job = try activeJob(ticket)
@@ -199,9 +217,16 @@ actor CreatorRevisionStore {
             guard pair.revision.id == id, pair.revision.projectID == project.id,
                   pair.revision.parentID == job.baseRevisionID, pair.snapshot.digest == job.candidateDigest else { throw CreatorPersistence.Failure.invalidRecord }
             if let parent = job.baseRevisionID { _ = try readRevision(projectID: project.id, revisionID: parent) }
+            try checkBase(job)
             guard project.revisionIDs.count < 1000 else { throw CreatorPersistence.Failure.tooLarge }
             let destination = revisionURL(projectID: project.id, revisionID: id)
             guard !CreatorPersistence.exists(destination) else { throw CreatorPersistence.Failure.busy }
+            // A generated revision and its structure-only evidence cross the same commit point.
+            // Cancellation before this point discards both; runtime/publication remain unverified.
+            if validatingStructure {
+                let report = makeReport(project: project, revision: pair.revision, snapshot: pair.snapshot, metadataDigest: pair.metadataDigest)
+                try CreatorPersistence.write(report, to: candidate.appendingPathComponent("validation.json"))
+            }
             job.state = .committing
             try save(job)
             try FileManager.default.moveItem(at: candidate, to: destination)
@@ -210,6 +235,10 @@ actor CreatorRevisionStore {
             project.revisionIDs.append(id)
             project.latestRevisionID = id
             project.activeJobID = nil
+            if validatingStructure {
+                project.lastValidatedRevisionID = id
+                project.selectedRevisionID = id
+            }
             // Keep the last validated selection until this candidate has its own evidence.
             try save(project)
             try checkpoint(.afterProjectCommit)
@@ -228,14 +257,7 @@ actor CreatorRevisionStore {
             try Task.checkCancellation()
             var project = try readProject(projectID)
             let pair = try readRevision(projectID: projectID, revisionID: revisionID)
-            let report = ValidationReport(schemaVersion: 1, id: UUID(), projectID: projectID, revisionID: revisionID,
-                                          projectIdentityDigest: project.identityDigest, revisionDigest: pair.metadataDigest,
-                                          renderDigest: pair.revision.renderDigest, posterDigest: pair.revision.posterDigest,
-                                          bundleDigest: pair.snapshot.digest, templateRevision: pair.revision.templateRevision, context: context,
-                                          results: ["structure": .passed, "sourceReconstruction": .passed, "policy": .passed,
-                                                    "runtime": .notChecked, "posterCapture": .notChecked],
-                                          measuredMetrics: ["bundleBytes": Double(pair.snapshot.files.values.reduce(0) { $0 + $1.count })],
-                                          validatedAt: CreatorPersistence.timestamp())
+            let report = makeReport(project: project, revision: pair.revision, snapshot: pair.snapshot, metadataDigest: pair.metadataDigest)
             try CreatorPersistence.write(report, to: reportURL(projectID, revisionID))
             project.lastValidatedRevisionID = revisionID
             project.selectedRevisionID = revisionID

@@ -8,8 +8,9 @@ publish a revision. See the [PRD](../plans/02-creator-prd.md),
 and [stage plan](../plans/2026-11-10-creator-s1-s4.md).
 
 The local rollback anchor is `37f2c603` on `feat/ai-creator`, containing the
-previously verified S1.1 settings supplement and planning documents. S1.2 work
-remains uncommitted; no push, installation or desktop operation is part of this stage.
+previously verified S1.1 settings supplement and planning documents. Before S1.3,
+the verified S1.2 work was committed locally as `e3a61f55`; it was not pushed.
+No installation or desktop operation is part of either stage.
 
 ## Ownership and call boundary
 
@@ -27,13 +28,17 @@ remains uncommitted; no push, installation or desktop operation is part of this 
 The caller supplies a saved Profile ID/configuration ID and a live S1.1 job
 ticket. The provider returns complete answer text, optional usage, the Profile
 snapshot, ticket, attempt count, reserved output tokens and elapsed time. A
-successful response leaves the native job in `generating`; S1.3 must validate the
-parameter schema before staging a revision. No raw stream or partial answer is
+successful response leaves the native job in `generating`; the
+[S1.3 generator](creator-generation.md) validates the parameter schema before
+staging a revision. No raw stream or partial answer is
 written to `partial.bin`. Failure/cancellation cleans the owned job using S1.1
 transactions and preserves earlier revisions. `busy` does not cancel another
 owner's job. Restart recovery interrupts abandoned jobs, never resends them.
 
-Only a complete JSON object is accepted here. S1.3 still owns duplicate-key,
+Only a complete JSON object is accepted here. S1.3 adds `LLMJSONEnvelope` to
+accept a single whole Markdown JSON fence; surrounding prose, multiple blocks,
+unclosed fences and oversized text fail. The 16 KiB cap includes leading
+whitespace and fence bytes. The independent S1.3 validator owns duplicate-key,
 unknown-field, template/parameter/default-value and code-field rejection. A
 valid JSON object from this service is not permission to run or publish it.
 
@@ -124,7 +129,8 @@ canonical records byte-identical when absent. An old job with consumed attempts
 but no reservation history cannot obtain another request. Input/provider-specific
 token charges are not covered by this output reservation. Usage is optional and
 describes only the last successful request, not all failed attempts or a task's
-total bill. S1.3 must reuse the same budget for corrective attempts.
+total bill. S1.3 persists these counters without adding parameter-repair calls;
+future corrective attempts must reuse the same budget.
 
 ## Protocol-specific behavior
 
@@ -190,7 +196,8 @@ points to the new/modified LLM or Creator source/tests in the targeted build log
 Other existing compiler warnings remain outside this change.
 
 No real provider request, TLS/proxy interoperability, personal Keychain permission,
-UI, screenshot/cover, desktop activation or Release build is validated. S1.3's
-strict parameter contract and S1.4's creator UI/cover/publication remain pending.
+UI, screenshot/cover, desktop activation or Release build is validated.
+The subsequent [S1.3 strict parameter contract](creator-generation.md) is
+implemented and tested separately; S1.4 creator UI/cover/publication remain pending.
 S0/S1.0 generators and golden digests are unchanged. The known S0 unrestricted-code
 probes and S4 isolation work remain unresolved; S1.2 does not relax those gates.

@@ -12,6 +12,7 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
     let sdkVersion: Int
     let packaging: Packaging
     let posterDigest: String?
+    var presentation: CreatorBundlePresentation? = nil
 
     static func templateIdentity(_ specification: CreatorTemplate.Specification) -> (id: String, revision: Int) {
         (specification.templateID ?? specification.kind.rawValue + "-v1", specification.templateID == nil ? 1 : 2)
@@ -21,8 +22,17 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
         specification.parameters ?? ["hue": .number(specification.hue), "speed": .number(specification.speed)]
     }
 
-    static func files(for specification: CreatorTemplate.Specification, poster: Data? = nil) throws -> [String: Data] {
+    static func files(for specification: CreatorTemplate.Specification, poster: Data? = nil,
+                      presentation: CreatorBundlePresentation? = nil) throws -> [String: Data] {
         var files = try CreatorTemplate.files(for: specification)
+        if let presentation {
+            try presentation.validate()
+            guard specification.templateID != nil else { throw CreatorPersistence.Failure.invalidRecord }
+            var project = try JSONSerialization.jsonObject(with: files["project.json"]!) as! [String: Any]
+            project["title"] = presentation.title
+            project["description"] = presentation.summary
+            files["project.json"] = try JSONSerialization.data(withJSONObject: project, options: [.sortedKeys, .withoutEscapingSlashes])
+        }
         if let poster {
             try validatePoster(poster)
             var project = try JSONSerialization.jsonObject(with: files["project.json"]!) as! [String: Any]
@@ -33,7 +43,7 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
         let manifest = Self(schemaVersion: 1, bundleVersion: 2, specification: specification,
                             runtimePolicy: "trustedTemplateV1", policyVersion: 1, sdkVersion: 1,
                             packaging: poster == nil ? .renderDraft : .sealed,
-                            posterDigest: poster.map(CreatorPersistence.hash))
+                            posterDigest: poster.map(CreatorPersistence.hash), presentation: presentation)
         files[CreatorTemplate.metadataFile] = try CreatorPersistence.encode(manifest)
         return files
     }
@@ -73,7 +83,7 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
             guard (decoded.packaging == .sealed) == (files["preview.jpg"] != nil) else { throw CreatorPersistence.Failure.incompleteBundle }
             specification = decoded.specification
             manifest = decoded
-            rebuilt = try Self.files(for: specification, poster: files["preview.jpg"])
+            rebuilt = try Self.files(for: specification, poster: files["preview.jpg"], presentation: decoded.presentation)
         } else {
             specification = try JSONDecoder().decode(CreatorTemplate.Specification.self, from: metadata)
             manifest = nil

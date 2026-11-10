@@ -26,6 +26,28 @@ final class CreatorDraftTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: root.appendingPathComponent("Library").path))
     }
 
+    func testGeneratedPresentationIsReconstructedAndDoesNotChangeLegacyBytes() throws {
+        let definition = try CreatorTemplateCatalog.definition("stars-v2")
+        let specification = try definition.specification()
+        let legacy = try CreatorTemplate.files(for: specification)
+        let withoutPresentation = try CreatorBundleManifest.files(for: specification)
+        let output = try CreatorOutputValidator.parse(CreatorGenerationFixtures.output())
+        let files = try CreatorBundleManifest.files(for: specification, presentation: output.presentation)
+        let directory = root.appendingPathComponent("scoped")
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        for (name, data) in files { try data.write(to: directory.appendingPathComponent(name)) }
+        let snapshot = try CreatorBundleManifest.read(directory, scopedRevision: true)
+        XCTAssertEqual(snapshot.files, files)
+        XCTAssertEqual(try snapshot.renderDigest, snapshot.digest)
+        XCTAssertEqual(legacy["index.html"], files["index.html"])
+        XCTAssertEqual(try CreatorTemplate.files(for: specification), legacy)
+        XCTAssertEqual(try CreatorBundleManifest.files(for: specification), withoutPresentation)
+        var changed = try XCTUnwrap(JSONSerialization.jsonObject(with: files["project.json"]!) as? [String: Any])
+        changed["title"] = "Changed independently"
+        try JSONSerialization.data(withJSONObject: changed, options: [.sortedKeys, .withoutEscapingSlashes]).write(to: directory.appendingPathComponent("project.json"))
+        XCTAssertThrowsError(try CreatorBundleManifest.read(directory, scopedRevision: true))
+    }
+
     func testChangedBytesAndForgedEntryAreRejected() async throws {
         let store = CreatorDraftStore(root: root)
         let directory = try await store.create(.init(projectID: UUID(), kind: .stars))

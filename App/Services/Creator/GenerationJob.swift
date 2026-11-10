@@ -21,6 +21,7 @@ struct GenerationJob: Codable, Equatable, Sendable {
     var candidateRevisionID: UUID?
     var candidateDigest: String?
     var reservedOutputTokens: Int? = nil
+    var baseRevisionDigest: String? = nil
 
     var ticket: Ticket { Ticket(id: id, projectID: projectID, cancellationToken: cancellationToken) }
     var isTerminal: Bool { [.completed, .cancelled, .interrupted].contains(state) }
@@ -29,6 +30,7 @@ struct GenerationJob: Codable, Equatable, Sendable {
         guard schemaVersion == 1, (1...3).contains(requestBudget), (1...100_000).contains(tokenBudget),
               (0...requestBudget).contains(attemptCount), createdAt >= 0,
               reservedOutputTokens.map({ (0...tokenBudget).contains($0) }) ?? true,
+              baseRevisionDigest.map({ baseRevisionID != nil && CreatorPersistence.validDigest($0) }) ?? true,
               (candidateRevisionID == nil) == (candidateDigest == nil),
               candidateDigest.map(CreatorPersistence.validDigest) ?? true,
               ![.staged, .committing, .completed].contains(state) || candidateRevisionID != nil

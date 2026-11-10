@@ -4,7 +4,7 @@ import Foundation
 struct LLMResponse: Equatable, Sendable {
     var text: String
     var usage = Usage()
-    struct Usage: Equatable, Sendable {
+    struct Usage: Codable, Equatable, Sendable {
         var inputTokens: Int?
         var outputTokens: Int?
         var totalTokens: Int?
