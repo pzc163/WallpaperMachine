@@ -225,7 +225,7 @@ actor CreatorRevisionStore {
 
     /// The atomic project index replacement is the commit point. A revision folder alone is not visible history.
     func commit(_ ticket: GenerationJob.Ticket, validatingStructure: Bool = false,
-                runtimeEvidence: CreatorRuntimeCapture? = nil) throws -> CreatorRevision {
+                runtimeEvidence: CreatorRuntimeCapture? = nil, selecting: Bool = true) throws -> CreatorRevision {
         try locked {
             try Task.checkCancellation()
             var job = try activeJob(ticket)
@@ -260,7 +260,7 @@ actor CreatorRevisionStore {
             project.revisionIDs.append(id)
             project.latestRevisionID = id
             project.activeJobID = nil
-            if runtimeEvidence != nil || (validatingStructure && job.iterationID == nil) {
+            if runtimeEvidence != nil || (validatingStructure && selecting && job.iterationID == nil) {
                 project.lastValidatedRevisionID = id
                 project.selectedRevisionID = id
             }

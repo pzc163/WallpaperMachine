@@ -24,7 +24,7 @@ struct FilterSidebar: View {
       // than the window has (AppKit would loop on "needing another Update Constraints pass").
       .layoutPriority(1)
       .accessibilityElement(children: .contain)
-      .accessibilityLabel(Text("Filters"))
+      .accessibilityLabel(Text(verbatim: selection == .creator ? L("Recent projects") : L("Filters")))
       .accessibilityIdentifier("filters-sidebar")
   }
 
@@ -32,6 +32,7 @@ struct FilterSidebar: View {
   private var filters: some View {
     switch selection {
     case .wallpaper: InstalledFilters()
+    case .creator: CreatorProjectsList()
     case .workshop: WorkshopFilters()
     case .pixiv: PixivFilters()
     case .settings: EmptyView()

@@ -55,6 +55,15 @@ extension CreatorRevisionStore {
             }
             if CreatorPersistence.exists(projectsURL) {
                 for directory in try CreatorPersistence.directories(projectsURL) {
+                    if directory.lastPathComponent.hasPrefix(".deleted-"),
+                       let id = UUID(uuidString: String(directory.lastPathComponent.dropFirst(9))) {
+                        try CreatorPersistence.directory(directory)
+                        let retired = try CreatorPersistence.read(CreatorProject.self, at: directory.appendingPathComponent("project-meta.json"))
+                        try retired.validate()
+                        guard retired.id == id else { throw CreatorPersistence.Failure.invalidRecord }
+                        try FileManager.default.removeItem(at: directory)
+                        continue
+                    }
                     guard CreatorPersistence.isUUIDName(directory.lastPathComponent), let id = UUID(uuidString: directory.lastPathComponent) else { continue }
                     do {
                         result.discardedAtomicWrites += try discardAtomicWrites(in: directory)

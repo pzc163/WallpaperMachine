@@ -59,6 +59,9 @@ struct WallpaperBackupService: Sendable {
     }
 
     func export(to package: URL, includeLibrary: Bool, preferences: WallpaperBackupPreferences) throws {
+        let creatorLease = try CreatorStorageBoundary.lease(support: supportRoot)
+        defer { withExtendedLifetime(creatorLease) {} }
+        try CreatorStorageBoundary.requirePortable(support: supportRoot, storage: storageRoot)
         try Task.checkCancellation()
         let destination = package.deletingLastPathComponent().standardizedFileURL.resolvingSymlinksInPath()
             .appendingPathComponent(package.lastPathComponent)
@@ -115,6 +118,8 @@ struct WallpaperBackupService: Sendable {
     }
 
     func preview(package: URL, preferences: WallpaperBackupPreferences) throws -> WallpaperBackupPreview {
+        try CreatorStorageBoundary.requirePortable(support: supportRoot, storage: storageRoot)
+        try CreatorStorageBoundary.requirePortablePackage(package)
         let (manifest, digest) = try validatedPackage(package)
         try validateReferences(manifest: manifest, package: package)
         var conflicts = try resourceUnits(manifest.entries).filter {
@@ -140,6 +145,10 @@ struct WallpaperBackupService: Sendable {
     /// Revalidates every byte and builds the complete pending package before replacing
     /// a previous pending restore. Running settings and wallpapers are never touched.
     func stageRestore(package: URL, preview: WallpaperBackupPreview, policy: WallpaperBackupConflictPolicy) throws {
+        let creatorLease = try CreatorStorageBoundary.lease(support: supportRoot)
+        defer { withExtendedLifetime(creatorLease) {} }
+        try CreatorStorageBoundary.requirePortable(support: supportRoot, storage: storageRoot)
+        try CreatorStorageBoundary.requirePortablePackage(package)
         let (manifest, digest) = try validatedPackage(package)
         guard digest == preview.manifestDigest else { throw files.changed() }
         try validateReferences(manifest: manifest, package: package)
@@ -195,6 +204,10 @@ struct WallpaperBackupService: Sendable {
                              domainName: String = ClientPreferences.domainName,
                              beforePublish: ((String) throws -> Void)? = nil) throws -> WallpaperBackupRestoreReport? {
         let transaction = supportRoot.appendingPathComponent(Self.transactionDirectoryName)
+        let creatorLease = pendingRestore || manager.fileExists(atPath: transaction.path)
+            ? try CreatorStorageBoundary.lease(support: supportRoot) : nil
+        defer { withExtendedLifetime(creatorLease) {} }
+        if creatorLease != nil { try CreatorStorageBoundary.requirePortable(support: supportRoot, storage: storageRoot) }
         var recovered = false
         if manager.fileExists(atPath: transaction.path) {
             try recover(transaction: transaction, defaults: defaults)
@@ -210,6 +223,7 @@ struct WallpaperBackupService: Sendable {
         guard pendingRestore, lastStartupError == nil else {
             return recovered ? .init(restoredPaths: [], warnings: [], recoveredInterruptedRestore: true) : nil
         }
+        try CreatorStorageBoundary.requirePortablePackage(pending)
         let (manifest, digest) = try validatedPackage(pending, isPending: true)
         let pendingState = try readJSON(WallpaperBackupPending.self, at: pending, name: "pending.json")
         guard pendingState.version == 1, digest == pendingState.manifestDigest else { throw files.changed() }

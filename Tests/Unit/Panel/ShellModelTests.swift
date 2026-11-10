@@ -39,7 +39,7 @@ final class ShellModelTests: PanelTestCase {
   func testATabOpensItsPageAndTheLibrarysViewSurvivesAVisitToSettings() async throws {
     try await withPanel { panel in
       let shell = panel.controller.shell
-      XCTAssertEqual(PanelTabs.pages, [.wallpaper, .workshop, .pixiv, .settings])
+      XCTAssertEqual(PanelTabs.pages, [.wallpaper, .creator, .workshop, .pixiv, .settings])
       panel.controller.library.show(.favorites)
       await shell.open(.settings).value
       XCTAssertEqual(shell.selection, .settings)

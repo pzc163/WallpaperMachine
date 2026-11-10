@@ -5,13 +5,13 @@ import SwiftUI
 /// What the panel shows. The native menu commands, the status item and `wallpapermachine://open`
 /// links write it through `ControlPanelNavigation`, and the tabs write it back.
 enum SidebarSelection: String {
-  case wallpaper, workshop, pixiv, settings
+  case wallpaper, creator, workshop, pixiv, settings
 }
 
 /// The Settings sections, in the order of Settings' section list.
 enum SettingsSection: String, CaseIterable {
   case quick, general, appearance, desktop, playback, performance, displays, shortcuts, library,
-    storage, about
+    models, storage, about
 }
 
 /// What the panel remembers across a closed window: the section on show, the target display and

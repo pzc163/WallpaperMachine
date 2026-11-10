@@ -25,6 +25,21 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-10 — Native creator workspace and model settings (S2.2)
+
+Added the native AI Creator tab and model settings, with explicit generate/save/apply actions, trusted previews and controller-start recovery. [Feature and boundaries](../features/creator-workspace.md).
+
+- S2.1 baseline committed locally as `29cd3086` on `feat/ai-creator`; S2.2 remains uncommitted, no push or install.
+- Targeted Creator/shell/settings/image/backup run: 211 passed, zero failed, three S0 skips. Storage/move/backup: 71 passed; deletion/recovery: 38 passed; final controller suite: 11 passed.
+- Final `python3 scripts/test.py`: 695 Python tests and 4,962 native tests passed, zero failures, 70 skips. All 27 new tests passed; source/test/generated-project hashes were unchanged during the gate.
+- Gate attempts: first interrupted for a preview-session lifecycle correction (exit 73, not accepted as passed); second failed in an unchanged WebKit navigation replacement test; isolated recheck passed, then the final full recheck passed without source/assertion/threshold changes.
+- The WebKit failure reported `Cannot open file`; cause unresolved. Final build had seven existing linker/metadata warning lines and two main-thread runtime warnings recorded in passing existing tests.
+- Skips: three S0 unrestricted probes, 62 opt-in media/device checks, three Steam network checks, one reference job, one creator live smoke. No real provider requests, personal Keychain or desktop actions.
+- Legacy v1 golden bytes and v2 validation stay intact. Draft display names are separate workspace metadata; draft deletion preserves installed bytes and runtime policy.
+- Existing backup/restore/storage moves explicitly refuse Creator data, with a shared lease and durable first-write marker. Full Creator migration/backup is not implemented.
+- Six-language keys and offscreen narrow layouts checked; visible appearance, VoiceOver, actual preview-window interaction, real providers/Keychain and desktop activation remain unverified. S4 remains closed; no Release/long-run power test.
+- Final documentation/link/scope checks and cleanup retain structured test results; disposable test logs and result bundles are removed after collection.
+
 ## 2026-11-10 — Creator S2.1 bounded repair, conversation budget and rollback
 
 [S2.1 bounded repair and iteration](../features/creator-iteration.md) implements FR-07/08 and AC-02/03/07 service behavior; no UI or live desktop.
@@ -139,15 +154,3 @@ Installed gains a right-click menu on tiles (the inspector's More actions list, 
 - Not exercised: the tile's context menu, the drop outline and a real Finder drag, and the File menu items with their shortcuts in a real window. They need desktop control, which was not authorized; the menu's item rules are InspectorPolicy's existing tests, and the drop and menu actions are covered through the model
 - Not rebuilt: no Release build was made, so the delivered app does not contain these changes
 - Runtime warnings in the result bundle (2, main-thread call) come from AppUpdateTests and WebMOpeningTests, which this change does not touch
-
-## 2026-11-09 — Web wallpaper submitted background for Stage Manager
-
-- The desktop web container now submits one opaque black 1×1 Metal frame per backing layer and retains it through resize and page suspension, with no recurring GPU submission or rendering loop. The bounded allocation trade-off was approved; battery impact was not measured.
-- On the Dell display, the user reported that a submitted surface kept Belle smooth, removing it or replacing it with an empty Metal queue brought the freeze back, and using the submitted surface as the existing black background looked normal and stayed smooth.
-- The earlier tag-only Release candidate and native backing-flattening override failed the visible Stage Manager check. The override is removed; the existing transition tag remains alongside the submitted background.
-- `python3 scripts/test.py --only WebWallpaperWindowCompositionTests` — before the Metal implementation, 3 passed and 2 new regressions failed; final run: 7 passed, 0 failed, 0 skipped. Coverage includes a real submitted frame, resize, suspension/resume and the no-Metal fallback.
-- `python3 scripts/test.py` — passed: Python checks and XcodeGen succeeded; native suite: 4,698 passed, 0 failed, 66 skipped. Three unrelated runtime warnings concerned main-thread use in video and app-update tests.
-- `python3 scripts/build.py --renderer-only` rebuilt current upstream dependencies; `python3 scripts/build.py --swift-only --configuration Release` passed. No renderer source changes were made by this fix.
-- The clean Release app was restarted with the original covered-desktop preference restored. Runtime inspection confirmed attached web views and submitted 1×1 Metal backgrounds on both the Dell and built-in displays, with no diagnostic layer or runtime patch.
-- The additional clean-build Stage Manager and Mission Control visual check was requested but remains unconfirmed. The accepted smoothness result above is from the working prototype, not a claimed final-build visual observation.
-- Wallpaper Engine reference-frame comparison and measured power consumption were not performed; this change addresses host-window presentation rather than wallpaper content rendering.

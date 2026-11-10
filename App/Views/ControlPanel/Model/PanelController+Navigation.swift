@@ -19,6 +19,9 @@ extension PanelController {
         if !workshop.hasLoaded && !workshop.isLoading { workshop.search() }
       case .pixiv:
         if !pixiv.hasLoaded && !pixiv.isLoading { pixiv.apply(pixiv.query) }
+      case .creator:
+        try await recoverCreator()
+        try await loadCreator()
       case .wallpaper, .settings:
         break
       }

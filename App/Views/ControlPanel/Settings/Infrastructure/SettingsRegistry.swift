@@ -8,7 +8,7 @@ enum SettingsRegistry {
     + DesktopSettingsSection.items + PlaybackSettingsSection.items
     + PerformanceSettingsSection.items + DisplaysSettingsSection.items
     + ShortcutsSettingsSection.items + LibrarySettingsSection.items + StorageSettingsSection.items
-    + AboutSettingsSection.items
+    + CreatorSettingsSection.items + AboutSettingsSection.items
 
   static func items(in section: SettingsSection) -> [SettingsItem] {
     items.filter { $0.section == section }

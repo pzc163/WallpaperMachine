@@ -1,5 +1,7 @@
 # Creator projects and immutable revisions
 
+Subsequent integration: [S2.2 native creator workspace](creator-workspace.md) adds the panel UI, controller-start recovery and explicit backup/move refusal boundaries. Statements below about missing UI/startup wiring describe that earlier stage; its test evidence is historical. S2.1 was committed locally as `29cd3086` before S2.2, without push.
+
 S1.1 adds native storage services to the [template workflow](creator-templates.md).
 It implements the storage portions of PRD AC-02 (derive and return to a revision),
 AC-07 (cancel/reopen) and AC-10 (invalidate changed evidence). It adds no creator

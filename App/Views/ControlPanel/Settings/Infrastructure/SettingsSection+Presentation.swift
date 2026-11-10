@@ -13,6 +13,7 @@ extension SettingsSection {
     case .displays: "Displays"
     case .shortcuts: "Keyboard shortcuts"
     case .library: "Library & Steam"
+    case .models: "AI models"
     case .storage: "Storage"
     case .about: "About"
     }
@@ -37,6 +38,7 @@ extension SettingsSection {
     case .displays: "Each display’s wallpaper, playlist and automatic changes."
     case .shortcuts: "Shortcuts that work in any app, the Shortcuts app and links."
     case .library: "Where wallpapers live, and the Steam tools that download them."
+    case .models: "Connections, credentials and generation budgets."
     case .storage: "Disk space, backups and troubleshooting."
     case .about: "Version, updates and credits."
     }
@@ -54,6 +56,7 @@ extension SettingsSection {
     case .displays: "display"
     case .shortcuts: "keyboard"
     case .library: "books.vertical"
+    case .models: "sparkles"
     case .storage: "internaldrive"
     case .about: "info.circle"
     }
@@ -67,7 +70,7 @@ extension SettingsSection {
     case .desktop: .teal
     case .playback: .green
     case .performance: .orange
-    case .library: .indigo
+    case .library, .models: .indigo
     }
   }
 

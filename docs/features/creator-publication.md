@@ -1,5 +1,7 @@
 # Creator native runtime validation and publication
 
+Subsequent integration: [S2.2 native creator workspace](creator-workspace.md) adds the panel UI, controller-start recovery and explicit backup/move refusal boundaries. Statements below about missing UI/startup wiring describe that earlier stage; its test evidence is historical. S2.1 was committed locally as `29cd3086` before S2.2, without push.
+
 S1.4 connects [parameter generation](creator-generation.md) to real offscreen
 WebKit capture, an immutable four-file revision and a recoverable library save.
 It implements the service portions of PRD AC-02/07/10/15/16. Per the requested

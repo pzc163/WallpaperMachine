@@ -82,6 +82,7 @@ struct SettingsPages: View {
     case .displays: DisplaysSettingsSection()
     case .shortcuts: ShortcutsSettingsSection()
     case .library: LibrarySettingsSection()
+    case .models: CreatorSettingsSection()
     case .storage: StorageSettingsSection()
     case .about: AboutSettingsSection()
     }

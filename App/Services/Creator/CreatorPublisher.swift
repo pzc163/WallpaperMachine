@@ -216,7 +216,8 @@ actor CreatorPublisher {
         try await recover()
         for binding in try await registry.bindings().values where binding.bundleVersion == 2 {
             _ = try CreatorRuntimeRegistry.readForPlayback(library.appendingPathComponent(binding.wallpaperID), registryURL: registry.url)
-            try await store.recordPublished(binding)
+            // A deliberately deleted draft leaves a self-contained installed policy binding.
+            if try await store.containsProject(binding.projectID) { try await store.recordPublished(binding) }
         }
     }
 

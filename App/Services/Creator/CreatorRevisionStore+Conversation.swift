@@ -142,7 +142,7 @@ extension CreatorRevisionStore {
         if document.turns[index].state.terminal { iterationLeases[ticket.id] = nil; return }
         defer { iterationLeases[ticket.id] = nil }
         if state == .completed {
-            guard document.turns[index].state == .publishing, let result,
+            guard [.sealing, .publishing].contains(document.turns[index].state), let result,
                   try validReport(projectID: ticket.projectID, revisionID: result).allowsPublication else { throw CreatorPersistence.Failure.staleValidation }
             let revision = try readRevision(projectID: ticket.projectID, revisionID: result).revision
             guard revision.generation?.iterationID == ticket.id,

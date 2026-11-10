@@ -11,6 +11,7 @@ actor CreatorOrchestrator {
         let prompt: String
         var maxOutputTokens = 2048
         var maxRepairs = 0
+        var progress: @Sendable (Stage, Int, Int) async -> Void = { _, _, _ in }
     }
     struct Outcome: Sendable {
         let projectID: UUID
@@ -18,6 +19,13 @@ actor CreatorOrchestrator {
         let sealed: CreatorRevision
         let installedDirectory: URL
         let iterationID: UUID
+    }
+    struct Prepared: Sendable {
+        let projectID: UUID
+        let draft: CreatorRevision
+        let sealed: CreatorRevision
+        let iterationID: UUID
+        var installedDirectory: URL? = nil
     }
     enum Stage: String, Sendable { case generating, repairPending, runtime, sealing, publishing, completed }
     struct Failure: Error, Sendable, CustomStringConvertible {
@@ -36,7 +44,7 @@ actor CreatorOrchestrator {
     private let capture: Capture
     private let checkpoint: @Sendable (Stage) async throws -> Void
     private let wait: @Sendable (TimeInterval) async throws -> Void
-    private var active: [UUID: (id: UUID, task: Task<Outcome, Error>)] = [:]
+    private var active: [UUID: (id: UUID, task: Task<Prepared, Error>)] = [:]
 
     init(store: CreatorRevisionStore, generator: CreatorGenerator, publisher: CreatorPublisher,
          capture: @escaping Capture = { project, revision, store in
@@ -48,6 +56,18 @@ actor CreatorOrchestrator {
     }
 
     func createAndSave(_ request: Request) async throws -> Outcome {
+        let result = try await perform(request, publish: true)
+        guard let directory = result.installedDirectory else { throw CreatorPersistence.Failure.incompleteBundle }
+        return Outcome(projectID: result.projectID, draft: result.draft, sealed: result.sealed,
+                       installedDirectory: directory, iterationID: result.iterationID)
+    }
+
+    /// The panel stops here; publication and desktop application require separate user actions.
+    func createForPreview(_ request: Request) async throws -> Prepared {
+        try await perform(request, publish: false)
+    }
+
+    private func perform(_ request: Request, publish: Bool) async throws -> Prepared {
         try Task.checkCancellation()
         guard (0...2).contains(request.maxRepairs) else { throw CreatorGenerationFailure.invalidRequest }
         guard request.projectID != nil || request.baseRevisionID == nil else { throw CreatorGenerationFailure.invalidRequest }
@@ -72,15 +92,24 @@ actor CreatorOrchestrator {
                         stage = .generating
                         if input.repair != nil { try await checkpoint(stage) }
                         try Task.checkCancellation()
+                        let turn = try await store.iteration(iteration)
+                        await request.progress(stage, turn.requestCount + 1, turn.requestBudget)
                         let draft = try await generator.generate(input)
                         stage = .runtime
+                        await request.progress(stage, turn.requestCount + 1, turn.requestBudget)
                         try await store.moveIteration(iteration, to: .runtime)
                         try await checkpoint(stage); try Task.checkCancellation()
                         let evidence = try await capture(projectID, draft.id, store)
                         stage = .sealing
+                        await request.progress(stage, turn.requestCount + 1, turn.requestBudget)
                         try await store.moveIteration(iteration, to: .sealing)
                         try await checkpoint(stage); try Task.checkCancellation()
                         let sealed = try await store.seal(evidence, iteration: iteration)
+                        if !publish {
+                            try await store.closeIteration(iteration, state: .completed, result: sealed.id)
+                            await request.progress(.completed, turn.requestCount + 1, turn.requestBudget)
+                            return Prepared(projectID: projectID, draft: draft, sealed: sealed, iterationID: iteration.id)
+                        }
                         stage = .publishing
                         try await store.moveIteration(iteration, to: .publishing)
                         try await checkpoint(stage); try Task.checkCancellation()
@@ -92,7 +121,7 @@ actor CreatorOrchestrator {
                         let publication = try await store.publication(projectID: projectID, revisionID: sealed.id)
                         try await store.recordPublished(publication.binding)
                         try await store.closeIteration(iteration, state: .completed, result: sealed.id)
-                        return Outcome(projectID: projectID, draft: draft, sealed: sealed, installedDirectory: installed, iterationID: iteration.id)
+                        return Prepared(projectID: projectID, draft: draft, sealed: sealed, iterationID: iteration.id, installedDirectory: installed)
                     } catch {
                         try Task.checkCancellation()
                         let issue = CreatorRepairIssue.from(error)
@@ -100,6 +129,8 @@ actor CreatorOrchestrator {
                               try await store.pendingRepair(iteration, issue: issue, outputTokens: request.maxOutputTokens)
                         else { throw error }
                         stage = .repairPending
+                        let pending = try await store.iteration(iteration)
+                        await request.progress(stage, pending.requestCount, pending.requestBudget)
                         try await checkpoint(stage); try Task.checkCancellation()
                         if issue.category == .rateLimited { try await wait(issue.retryAfter ?? 1) }
                         if issue.category == .server { try await wait(0.5) }

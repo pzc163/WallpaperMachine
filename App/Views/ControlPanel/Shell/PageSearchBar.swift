@@ -30,6 +30,9 @@ struct PageSearchBar: View {
 
   private var field: PageSearchFieldView.Field? {
     switch selection {
+    case .creator:
+      return .init(text: Binding(get: { controller.creator.search }, set: { controller.creator.search = $0 }),
+                   prompt: L("Search projects"), name: L("Search projects"), submit: {})
     case .wallpaper:
       let model = controller.library
       return .init(

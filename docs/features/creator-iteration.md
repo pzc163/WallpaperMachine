@@ -1,5 +1,7 @@
 # Creator bounded repair and revision iteration
 
+Subsequent integration: [S2.2 native creator workspace](creator-workspace.md) adds the panel UI, controller-start recovery and explicit backup/move refusal boundaries. Statements below about missing UI/startup wiring describe that earlier stage; its test evidence is historical. S2.1 was committed locally as `29cd3086` before S2.2, without push.
+
 S2.1 implements the service portions of FR-07/08 and AC-02/03/07. It extends the
 [S1.4 workflow](creator-publication.md) with a persistent whole-turn budget,
 bounded parameter repairs, local conversation history and explicit selection of

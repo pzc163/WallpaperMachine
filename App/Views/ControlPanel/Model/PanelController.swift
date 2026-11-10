@@ -58,6 +58,8 @@ final class PanelController {
   /// Energy readout on Settings › Performance; samples only while Settings is on screen.
   let energyUsage: EnergyUsageMonitor
   let defaults: UserDefaults
+  let creatorWorkspace: CreatorWorkspace
+  let creator = CreatorModel()
 
   // MARK: Core services
 
@@ -271,7 +273,8 @@ final class PanelController {
     displayLayouts: WallpaperDisplayLayoutStore? = nil,
     spaces: WallpaperSpaceMonitor? = nil,
     systemConditions: SystemConditionState? = nil,
-    searchTranslation: WorkshopSearchTranslator? = nil
+    searchTranslation: WorkshopSearchTranslator? = nil,
+    creatorWorkspace: CreatorWorkspace? = nil
   ) {
     let pixiv = pixiv ?? PixivStore()
     let imports = imports ?? LibraryImportStore()
@@ -290,6 +293,7 @@ final class PanelController {
     let systemConditions = systemConditions ?? .shared
     let errors = PanelErrorState(store: store, imports: imports, workshop: workshop, pixiv: pixiv)
 
+    self.creatorWorkspace = creatorWorkspace ?? CreatorWorkspace()
     self.store = store
     self.navigation = navigation
     self.workshop = workshop
@@ -380,6 +384,7 @@ final class PanelController {
   func start() {
     guard !isStarted else { return }
     isStarted = true
+    launch(PanelActionCoordinator.key("creator.recover")) { try await self.recoverCreator() }
     isStopped = false
     presentation.onBecameKey = { [weak self] in self?.windowDidBecomeKey() }
     presentation.onClose = { [weak self] in self?.stop() }
@@ -417,6 +422,7 @@ final class PanelController {
   /// Ends everything `start()` began. Work the app owns (imports, downloads, setup, queued
   /// commands) is not the panel's and keeps running.
   func stop() {
+    creator.close()
     guard isStarted else { return }
     isStarted = false
     isStopped = true
