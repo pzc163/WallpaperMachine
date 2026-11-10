@@ -7,7 +7,9 @@
 
 配套文档：[S0 实测边界](../features/creator-s0.md) · [产品需求与验收编号](02-creator-prd.md)
 
-第 1～13 节描述目标架构，包含后续阶段；S0 实际实现和测试结果以第 16 节及 [S0 验证报告](../features/creator-s0.md) 为准。本次计划修订已将 S1 固定为参数生成，并把自由代码合同、下载防护和不可合作脚本的终止能力列入 S4 解锁关口；S1.0 与 S1.1 的实现见阶段计划及第 17 节；S1.2 连接层见 [实施与验证](../features/creator-llm.md)。S1.3 参数合同与原生修订链见 [实施与验证](../features/creator-generation.md)；真实模型联调、封面和 S4 仍未完成。执行拆分见 [S1 与 S4 开发计划](2026-11-10-creator-s1-s4.md)。
+第 1～13 节描述目标架构，包含后续阶段；S0 实际实现和测试结果以第 16 节及 [S0 验证报告](../features/creator-s0.md) 为准。本次计划修订已将 S1 固定为参数生成，并把自由代码合同、下载防护和不可合作脚本的终止能力列入 S4 解锁关口；S1.0 与 S1.1 的实现见阶段计划及第 17 节；S1.2 连接层见 [实施与验证](../features/creator-llm.md)。S1.3 参数合同与原生修订链见 [实施与验证](../features/creator-generation.md)；S1.4 原生编排、运行证据、封面和发布恢复见 [原生保存闭环](../features/creator-publication.md)；真实模型联调、可见 UI 与 S4 仍未完成。执行拆分见 [S1 与 S4 开发计划](2026-11-10-creator-s1-s4.md)。
+
+S1.4 后续真机补充：用户以 openaiCompatible / kimi-k3 显式运行 `CreatorLiveSmokeTests`，结果 1 passed、0 failed、0 skipped。进入 S2.1 前已核对本地结果摘要；仅代表该 Profile 的一次创建/封面/保存闭环，不扩展到其他供应商或多轮修复。此次核对不发新请求，临时日志与结果包按要求清理。
 
 ## 1. 总体结构
 
@@ -38,7 +40,7 @@ flowchart TD
 
 ## 2. 已有接入位置与建议新增模块
 
-以下是目标模块布局。原生模板、修订存储、模型连接及 S1.3 参数编译已实现；创作界面、封面和后续扩展仍为规划，不应重复新建已有实现。
+以下是目标模块布局。原生模板、修订存储、模型连接、参数编译及 S1.4 封面/发布编排已实现；创作界面和后续扩展仍为规划，不应重复新建已有实现。
 
 | 模块 | 建议位置 | 职责及集成注意 |
 |---|---|---|
@@ -49,7 +51,7 @@ flowchart TD
 | 模型服务（S1.2 已实现） | `App/Services/LLM/` | 共享 URLSession SSE 传输、取消/脱敏与三个纯逻辑 Codec：`openaiCompatible`、`anthropicMessages`、`geminiGenerateContent` |
 | 凭据（复用） | `App/Services/Keychain/KeychainGenericPassword.swift` | 模型服务专用命名空间，按 Provider Profile 独立存储并绑定目标；host 变更不自动携带旧凭据，不复用 Steam/pixiv 凭据 |
 | 运行策略（新增/修改） | `App/Services/WebWallpaper/` | `WebContentPolicy` / 工厂；策略须覆盖预览、桌面和恢复入口 |
-| 草稿预览（扩展 S0） | `App/Services/Creator/CreatorPreview.swift`；拟新增 `CreatorPosterService.swift` | 保留严格草稿入口，增加原生封面快照及过期回调检查 |
+| 草稿预览（扩展 S0） | `App/Services/Creator/CreatorPreview.swift`；`CreatorPosterService.swift` | 保留严格草稿入口，增加原生封面快照及过期回调检查 |
 | 现有页面宿主（修改） | `App/Services/WebWallpaper/WebWallpaperWindow.swift` | 此文件定义 `WebWallpaperPage`；拆出配置/策略而非复制一整套页面实现 |
 | 素材与模板 | `App/Services/Creator/CreatorTemplateCatalog.swift`、原生模板生成器；未来素材可用 `App/Resources/Creator/` | 当前目录、代码及资源上限由原生维护；素材包尚未开放 |
 | 自动测试（新增） | `Tests/Unit/Creator/`、`Tests/Unit/LLM/` | 对应领域行为；Web 主机回归仍归原有测试域 |
@@ -95,11 +97,11 @@ libraryURL/
 | `CreatorSettings`（S1.1 已实现） | `schemaVersion, revision, profiles[], selectedProfileID`；有界、无 Key，原子写入和并发版本检查 |
 | `ProviderProfile`（S1.1 元数据已实现） | `schemaVersion, id, configurationRevision, configurationID, name, protocolKind, baseURL, model, localMode, capabilities, limits`；Key 与确认目标绑定由 S1.2 的独立 Keychain 服务管理 |
 | `CreatorProject` | `schemaVersion, id, title, createdAt, latestRevisionID, lastValidatedRevisionID, publishedWallpaperID` |
-| `CreatorRevision` | `id, parentID, promptSummary, providerID, modelID, outputSchemaVersion, generation?, bundleVersion, sdkVersion, templateID, templateRevision, normalizedParameters, renderDigest, posterDigest, bundleDigest, createdAt` |
+| `CreatorRevision` | `id, parentID, promptSummary, providerID, modelID, outputSchemaVersion, generation?, seal?, bundleVersion, sdkVersion, templateID, templateRevision, normalizedParameters, renderDigest, posterDigest, bundleDigest, createdAt` |
 | `GenerationJob` | `id, projectID, baseRevisionID, baseRevisionDigest?, state, attemptCount, requestBudget, tokenBudget, reservedOutputTokens?, cancellationToken` |
 | `ValidationReport` | `revisionID, renderDigest, posterDigest, bundleDigest, policyVersion, templateRevision, sdkVersion, hostVersion, testProfile, results[], measuredMetrics, validatedAt` |
-| `CreatorRuntimeRegistry`（S1.1 已实现） | 版本化 `entries`，绑定已安装旧 v1 壁纸与工程/修订/摘要/策略/验证环境；v2 发布登记待 S1.4 |
-| `PublishedRecord` | `wallpaperID, revisionID, digest, policyVersion, previousRevisionID, publicationState` |
+| `CreatorRuntimeRegistry`（S1.1 已实现） | 版本化 `entries`，保留 v1 登记兼容；S1.4 的 v2 Binding 增加最终 ValidationReport，原子比较替换与回滚 |
+| 发布记录（S1.4） | `CreatorPublisher.Journal` 保存 candidate/previous 摘要、前后 Binding 和 prepared/installed/confirmed；`CreatorRuntimeRegistry.Binding` 保存当前发布修订 |
 | `ApplyAttempt` | `targetDisplayIDs, previousAssignments, candidateRevisionID, state, failureReason` |
 
 内容摘要应对按稳定顺序排列的**相对文件路径和真实字节内容**计算，而非只看大小和修改时间。现有 `WallpaperProjectRevision` 使用文件元数据生成指纹，适合变更缓存，不直接作为“测试的就是这份代码”的内容证据。
@@ -194,7 +196,7 @@ export function render(frame) {
 
 ### 4.3 S1 原生封装与 preview.jpg
 
-S1 由原生模板编译器封装，不由模型生成文件。S1.3 已生成 `bundleVersion: 2`、`packaging: renderDraft` 的三文件草稿；模型参数同步映射为 `project.json.general.properties[*].value`。可选 `presentation` 记录纯文本标题/摘要，参与确定性重建和摘要，不进入脚本；字段缺失时保留原 v2 字节。发布包的最小形态拟为：
+S1 由原生模板编译器封装，不由模型生成文件。S1.3 已生成 `bundleVersion: 2`、`packaging: renderDraft` 的三文件草稿；模型参数同步映射为 `project.json.general.properties[*].value`。可选 `presentation` 记录纯文本标题/摘要，参与确定性重建和摘要，不进入脚本；字段缺失时保留原 v2 字节。S1.4 已实现的封闭发布包为：
 
 ```text
 project.json
@@ -203,7 +205,7 @@ creator.json
 preview.jpg
 ```
 
-S0 的读取器严格接受三个固定文件；不能直接允许任意额外文件。S1.1 先引入独立的 `bundleVersion: 2` 和明确的四文件清单，保留 S0 v1 读取与显式迁移；S1.4 完成原生封面服务后，才允许 v2 包成为可发布状态。代码及参数清单按模板版本逐字节重建；`preview.jpg` 是原生派生的非执行资源，另验 JPEG 解码、尺寸、字节数和记录摘要。包摘要存于修订/验证记录中，避免清单自包含自身摘要形成循环。
+S0 的读取器严格接受三个固定文件；不能直接允许任意额外文件。S1.1 先引入独立的 `bundleVersion: 2` 和明确的四文件清单，保留 S0 v1 读取与显式迁移；S1.4 已通过原生封面服务签发完整证据，只有四文件 sealed 包及匹配报告可进入发布。代码及参数清单按模板版本逐字节重建；`preview.jpg` 是原生派生的非执行资源，另验 JPEG 解码、尺寸、字节数和记录摘要。包摘要存于修订/验证记录中，避免清单自包含自身摘要形成循环。
 
 渲染草稿和可发布包使用不同的准入状态：原生校验过、尚缺封面的草稿可以进入专用预览入口，正式库入口只接受已封闭的完整包。原生编排器将运行检查绑定到 `renderDigest`，生成封面后确认可执行内容未变，再签发绑定 `posterDigest` 和最终 `bundleDigest` 的报告；不能复用旧的三文件报告直接放行四文件包，也不能由模型填写“已封闭”状态。
 
@@ -234,9 +236,9 @@ AI 修订信息放在独立元数据中，不发明 `type: ai`，不冒用 Works
 
 封面流程：运行检查通过 → 固定当前修订、参数、视口和页面代次 → 等待首帧就绪 → 原生 `WKWebView.takeSnapshot` → JPEG 编码与校验 → 原子写入 `preview.jpg` → 写入清单 `preview` 字段 → 冻结最终包 → 计算最终摘要与发布报告。不能先发放通过摘要再追加封面。
 
-“首帧稳定”指页面加载、布局/字体及绘制已就绪，不要求动画的连续帧像素相同。以原生快照成功且可解码作为必要证据，不能只相信页面自报 ready。候选限制为总等待 5 秒、至多一次本地重试、编码后长边不超过 1280 像素、JPEG 不超过 512 KiB；视口保持用户选择的比例。`snapshotWidth` 的单位是点，必须验证编码图片的实际像素尺寸。整体快照应包含时钟等 DOM 图层，不能只导出 Canvas 冒充完整封面。[Apple 快照接口](https://developer.apple.com/documentation/webkit/wkwebview/takesnapshot%28with%3Acompletionhandler%3A%29)、[快照配置](https://developer.apple.com/documentation/webkit/wksnapshotconfiguration)。
+“首帧稳定”指页面加载、布局/字体及绘制已就绪，不要求动画的连续帧像素相同。以原生快照成功且可解码作为必要证据，不能只相信页面自报 ready。已实施限制为页面加载/首帧/快照等待至多 5 秒，不自动重拍；JPEG 超限时仅尝试一次更低质量编码，不再请求模型。编码后长边不超过 1280 像素、JPEG 不超过 512 KiB；视口保持用户选择的比例。`snapshotWidth` 的单位是点，必须验证编码图片的实际像素尺寸。整体快照应包含时钟等 DOM 图层，不能只导出 Canvas 冒充完整封面。[Apple 快照接口](https://developer.apple.com/documentation/webkit/wkwebview/takesnapshot%28with%3Acompletionhandler%3A%29)、[快照配置](https://developer.apple.com/documentation/webkit/wksnapshotconfiguration)。
 
-S0 的画布像素检测不等于离屏 `takeSnapshot` 已验证。S1.4 必须实测其离屏行为及所选模板图层；若失败、空白、编码超限、超时或取消，则保留草稿并阻止发布，丢弃旧代次回调，不偷偷打开窗口或截取真实桌面。改参会使封面与发布报告过期；发布后还要从库卡片实际使用的预览加载链验证封面存在且可显示。
+S1.4 已实测没有 NSWindow 的整页快照，覆盖三套 v2 模板与旧 S0 DOM 时钟，并从 `LibraryPreviewFetcher` 读回正式包封面。原生 32×32 网格检测至少 922/1024 不透明样本及两种量化颜色，避免仅依赖 JS 自报。初始化确认完整属性、fps、暂停与字体就绪，再冻结当前帧并重绘；这里的确定性指参数/布局/绘制顺序，不保证动画或时钟在不同时刻的 JPEG 字节相同。失败、空白、编码超限、超时或取消保留草稿并停止页面；旧回调不能复活会话。无桌面截图或开窗。
 
 ### 4.4 共享传输层与纯逻辑 Codec
 
@@ -394,7 +396,7 @@ P0 禁止生成项目进入锁屏、屏保等尚未适配严格策略的表面�
 
 任务持有 `jobID + baseRevisionID`。同一工程默认最多一个生成任务；用户启动新任务时撤销旧任务，晚到回调按 jobID 丢弃。传输层、解析、文件生成与验证各阶段均检查取消。
 
-S1.3 的 `CreatorGenerator` 串联提示词、`LLMProvider`、严格解析、原生编译和修订存储，每实例最多四个活跃工程。已有任务状态 `generating → staged → committing → completed` 不变；生成失败清理自有候选，保留旧版本。提交前生成结构报告，与修订目录一起移动，在同一次工程索引原子替换时生效；仅 `structure/sourceReconstruction/policy` 为 passed，`runtime/posterCapture` 为 notChecked。提交点前取消不留下可见修订；提交点之后的收尾失败保留完整修订，恢复完成日志，不回滚已提交历史。下面包含 S1.4/S2 的完整产品状态机，不表示全部实现。
+S1.3 的 `CreatorGenerator` 串联提示词、`LLMProvider`、严格解析、原生编译和修订存储，每实例最多四个活跃工程。已有任务状态 `generating → staged → committing → completed` 不变；生成失败清理自有候选，保留旧版本。提交前生成结构报告，与修订目录一起移动，在同一次工程索引原子替换时生效；仅 `structure/sourceReconstruction/policy` 为 passed，`runtime/posterCapture` 为 notChecked。提交点前取消不留下可见修订；提交点之后的收尾失败保留完整修订，恢复完成日志，不回滚已提交历史。S1.4 另外创建封闭子修订及 runtime 报告；原始静态报告不升级、不覆写。下面包含 S2 的修复和 UI 状态，不表示全部实现。
 
 ```text
 Idle → Requesting → Receiving → Decoding → StaticValidation
@@ -415,7 +417,7 @@ S1 的模型修复针对 JSON、模板选择和参数合同，不能要求模型
 
 ## 8. 发布与回滚
 
-发布和桌面应用分开；创作失败不触碰正在运行的版本。
+发布和桌面应用分开；创作失败不触碰正在运行的版本。S1.4 实现了前五步的原生服务，未接线 UI 刷新或后三步桌面应用。发布事务持有跨异步操作的文件租约，旧版字节和登记同时留在日志；confirmed 前恢复旧版，之后保留新版。外部修改导致摘要/登记不匹配时保留日志并报错。`recover(store:)` 还能补齐发布后工程指针；应用启动仍需未来入口调用。
 
 1. 完成运行检查、原生封面和清单校验，冻结最终候选包，取得绑定最终摘要及当前策略的通过报告。
 2. 重新计算资源包摘要，核对报告和完整资源清单。
@@ -462,7 +464,7 @@ S1 的模型修复针对 JSON、模板选择和参数合同，不能要求模型
 | S1.1 工程和修订（存储层已实现） | 模板目录、版本化合同、不可变修订、CreatorSettings/Profile 元数据、bundle v2 四文件格式、v1 兼容、策略路由及取消恢复 | S1.0 | AC-02、07、10；版本未知或路由不一致拒绝；封面未完成不可发布，不依赖真实模型 |
 | S1.2 模型连接（服务层已实现） | 共享 URLSession SSE/取消/脱敏 + 三个纯逻辑 Codec + 按 Provider Profile 隔离的 Keychain | S1.1 | AC-07/12/17/18；三协议请求/用量/思维过滤、401/429/超时/截断、host 变更与重定向测试通过；实际端点联调单独进行 |
 | S1.3 参数结构化生成（服务层已实现） | 动态目录提示词、`TemplateParameterOutput v1` Schema/严格解析、参数/控件默认值一致性、原生重建及原子结构报告 | S1.2 | 拒绝代码/文件字段、未知参数、越界、重复键、截断和 v2；不执行流式片段；本地校验独立于供应商能力 |
-| S1.4 第一条端到端流程与封面 | 最小创作入口：新建 → 提示词 → 参数检查 → 预览 → 原生 `preview.jpg` → 最终摘要 → 保存 | S1.3 + S0.4 | 首帧就绪后快照，失败/取消不发布；库卡片读取封面通过；完成一次基于真实模型参数的闭环，AC-15、16 纳入验收 |
+| S1.4 第一条端到端流程与封面（原生服务已实现） | CreatorOrchestrator：新建/指定旧修订 → 参数生成 → 静态检查 → 离屏运行 → 原生 `preview.jpg` → sealed 修订/最终报告 → 保存及登记 | S1.3 + S0.4 | Mock 三协议 × 三模板闭环、取消/恢复、库预览服务已验证；真实模型入口默认跳过，UI/真实端点未验收，AC-15、16 不宣称全部完成 |
 | S2.1 迭代与有限修复 | 参数新修订、结构化错误摘要、最多两次修复、回退 | S1.4 | 按模板模式解释 AC-02、03、07；不把内部模板缺陷转换成模型写代码 |
 | S2.2 完整创作页 | 工程列表、状态、预览入口、属性、报告和库操作 | S1.4，可在服务稳定后推进 | 无障碍、窄窗、国际化，UI 不执行领域 IO |
 | S2.3 稳定性验收 | 10 提示词基准、30 分钟模板运行、封面/参数/恢复回归 | S2.1、S2.2 | PRD AC-01～18 按阶段验收；自由代码 AC-05/06 不冒充完成，设备未测项单列 |
@@ -472,7 +474,7 @@ S1 的模型修复针对 JSON、模板选择和参数合同，不能要求模型
 | S4.3 自由代码合同解锁 | `CodeBundleOutput v2` 元数据与原始文件分帧、SDK 能力校验、版本化策略 | S4.1、S4.2 及全部隔离矩阵通过 | 分隔歧义/截断/编码/路径攻击拒绝；自由代码预览、发布、重启和恢复同策略；不满足就保持关闭 |
 | S4.4 其他扩展与发布准备 | 参考图、文生图、WebGL、音频、分发逐项排期 | 本机试用反馈 | 每项独立立项；固定 WebGL 模板也须单独验收，不因使用参数合同自动获得 GPU 安全保证 |
 
-S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设、资源预算和兼容回归也已完成。全量门禁为 687 项 Python 通过、4,767 项原生通过、0 失败、69 跳过；详见 [S1.0 实施报告](../features/creator-templates.md)。上述为 S1.0 历史结果。S1.1 的修订/设置存储、S1.2 的三协议连接和 S1.3 的参数生成已分别实现；各次定向、完整门禁和剩余限制见阶段计划及对应功能文档，不能混算为早期阶段证据。自由代码仍未通过；S4 的通用隔离工程不阻塞模板产品闭环。工期根据模板表现力与封面试验再估算，不把接口存在视为实现已经完成。
+S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设、资源预算和兼容回归也已完成。全量门禁为 687 项 Python 通过、4,767 项原生通过、0 失败、69 跳过；详见 [S1.0 实施报告](../features/creator-templates.md)。上述为 S1.0 历史结果。S1.1 的修订/设置存储、S1.2 的三协议连接、S1.3 的参数生成和 S1.4 的原生保存闭环已分别实现；各次定向、完整门禁和剩余限制见阶段计划及对应功能文档，不能混算为早期阶段证据。自由代码仍未通过；S4 的通用隔离工程不阻塞模板产品闭环。工期根据模板表现力与封面试验再估算，不把接口存在视为实现已经完成。
 
 ## 11. 测试策略与仓库工作规则
 
@@ -498,7 +500,7 @@ S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设�
 
 ## 12. 下一轮阶段边界
 
-本轮已将通过门禁的 S1.2 固化为本地提交 `e3a61f55`。完成 S1.3 参数生成与不可变修订封装、离线合同测试、存储回归及完整门禁后暂停，不自动进入 S1.4，不提交本轮实现或推送。后续先读 AGENTS.md、PRD、本技术方案以及 `docs/features/creator-revisions.md`、`docs/features/creator-llm.md`、`docs/features/creator-generation.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
+本轮已将通过 4,888 项原生门禁的 S1.3 固化为本地提交 `ac28cf34`。完成 S1.4 原生运行/封面/发布编排、默认跳过的单请求联调入口、定向回归及一次完整门禁后暂停，不自动进入 S2/S4，不提交本轮实现或推送。用户明确本轮不构建 UI、不切换桌面，常规门禁只用 Mock；真实 API 入口仅供后续显式运行。后续先读 AGENTS.md、PRD、本技术方案以及 `docs/features/creator-revisions.md`、`docs/features/creator-llm.md`、`docs/features/creator-generation.md`。三协议范围已确定，实际供应商端点、模型、Profile 能力和限额在外部联调前确定。S1.1 的验证报告只允许结构已验证的受限预览，不能替代 S1.4 的运行、封面及最终发布验证。
 
 ## 13. 首版之后的发布准备
 
@@ -571,9 +573,9 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 
 实现细节以 [工程与不可变修订](../features/creator-revisions.md) 为准：六类 Codable 记录（工程、修订、任务、报告、设置、运行注册表）采用独立版本、规范编码、摘要检查及原子替换；工程索引替换为修订提交点。任务暂存独立于历史，使用文件锁、存活租约和取消令牌防止并发覆盖；恢复保留损坏历史及最后有效选择。
 
-旧 v1 三文件逐字节重建和黄金摘要断言保持不变。v2 分为原生三文件渲染草稿及含 `preview.jpg` 的四文件封闭格式；封面解码/尺寸/字节限额已有合同与合成图片测试，但尚无截图生成或 v2 发布服务。结构报告绑定 revision 元数据字节、工程身份、真实资源摘要和验证环境；runtime/posterCapture 明确为 notChecked。新增修订或选择回退不会无故使旧报告失效；标题/来源/资源或验证环境变化会失效。
+旧 v1 三文件逐字节重建和黄金摘要断言保持不变。v2 分为原生三文件渲染草稿及含 `preview.jpg` 的四文件封闭格式；S1.1 当时仅验证封面格式，后续 S1.4 的截图与 v2 发布服务见第 19 节。结构报告绑定 revision 元数据字节、工程身份、真实资源摘要和验证环境；runtime/posterCapture 明确为 notChecked。新增修订或选择回退不会无故使旧报告失效；标题/来源/资源或验证环境变化会失效。
 
-普通导入、创作发布、正式播放和扩展入口不能把新草稿当兼容壁纸加载。注册表可登记已经安装且验证过的旧 v1 包；v2 发布事务和最终报告留在 S1.4。重启恢复目前由原生服务显式调用，待后续入口接线。既有备份/存储搬迁尚不包含创作历史；开放 UI 前需接入或显式阻断相应操作。没有执行桌面操作、LLM 请求或 S4 修复。
+普通导入、创作发布、正式播放和扩展入口不能把新草稿当兼容壁纸加载。注册表保留旧 v1 登记兼容；S1.4 新增 v2 完整报告和发布事务，普通导入没有原生许可仍拒绝 v2。重启恢复目前由原生服务显式调用，待后续入口接线。既有备份/存储搬迁尚不包含创作历史；开放 UI 前需接入或显式阻断相应操作。没有执行桌面操作、LLM 请求或 S4 修复。
 
 `CreatorSettingsStore` 在 `supportURL/CreatorSettings.json` 保存 `CreatorSettings` 与最多 32 个 Profile，复用 256 KiB 规范 JSON、原子替换和文件锁。每次修改要求匹配设置 `revision`，防止跨 actor/实例的旧快照覆盖；忙锁或旧版本明确报错，由调用方重读。Profile 保存稳定 ID，修改配置递增 `configurationRevision` 并换发 `configurationID`；仅切换选中项不改变 Profile 代次。删除后重建即便复用 ID，也不能复用旧配置标识。文件缺失可返回空设置，损坏、未知版本/字段和非法指针不能静默重置。
 
@@ -586,3 +588,15 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 `CreatorRevision.generation` 保存版本化来源：jobID、配置 ID/代次、协议、请求次数、输出 token 预留、耗时、最后成功请求的可选用量及基线摘要；已有 providerID/modelID/outputSchemaVersion 和 promptSummary 同步填入。`GenerationJob.baseRevisionDigest` 绑定发送上下文的版本，暂存和提交均重核；旧记录缺少这些可选字段时规范字节不变。来源与用量改变使旧报告失效，未报告用量保留未知，预留不是账单上限。
 
 封装前与提交前分别重读 Profile；该检查和修订文件锁不是跨存储原子事务，不宣称阻止检查之后另一进程改设置的零时间窗。封装阶段不再发请求，飞行请求的凭据边界仍以 S1.2 为准。标题/摘要仅写原生清单及 project.json；脚本、资源白名单、CSP、模板版本和旧 v1 黄金摘要不变。渲染草稿不含 preview.jpg，不可进入正式发布。
+
+## 19. S1.4 原生运行、封闭与发布实施合同
+
+实现细节及联调命令见 [原生保存闭环](../features/creator-publication.md)。`CreatorPosterService` 只加载结构报告对应的不可变渲染快照，通过真实离屏 WebKit 检查初始属性、布局/字体、暂停重绘和错误，取得整页原生快照及有限像素指标。5 秒等待截止或取消不依赖页面主动汇报结束；停止宿主后丢弃回调。这仍是可信模板验证，不证明非合作任意脚本的进程终止能力。
+
+`CreatorRevisionStore.seal` 复核草稿当前报告、工程身份、latest 指针、base 摘要和无新任务，再创建新的四文件修订。`seal` 来源记录包含原修订 ID/元数据摘要、renderDigest、测试环境和原生像素指标；原修订及结构报告不变。最终报告使用 `template-runtime-v1`，五项 structure/sourceReconstruction/policy/runtime/posterCapture 全 passed，绑定 revision/project 身份、posterDigest、最终 bundleDigest、模板/策略/SDK/宿主及测试尺寸。生成与封闭是两个本地 Job；只有前者消耗模型请求，封闭继承生成来源而不重复计费。摘要是内容一致性检查，不是防止本地攻击者重算所有记录的密码学签名。
+
+`CreatorPublisher` 将完整报告作为原生导入许可复用 `WallpaperImportService`，写入注册表后再次通过正式读取入口及源修订检查，再原子写 confirmed 日志。v2 缺登记、过期报告、图片或资源被改均拒绝加载；不会降级到兼容 WKWebView。事务不等于瞬时跨文件系统原子操作：短暂不一致时拒绝播放，恢复借助持久日志完成。存活租约避免其他实例恢复当前事务；外来修改、损坏登记或宿主升级导致旧证据失效时保留日志、停止操作，不强行修复或放宽策略。
+
+`CreatorOrchestrator` 串联新建/指定旧版本修改、生成、运行、封闭、发布和工程指针；取消会停止流或页面，提交点以前不产生可见半包，已经完整提交的草稿/封闭修订保留。`recover()` 显式恢复发布日志和存储 Jobs，不发起模型请求。每实例最多四个活跃工程；发布根目录一次只允许一项事务，冲突明确报 busy，不自动重发模型。尚无应用启动/UI/备份搬迁接线。
+
+按需真实测试必须同时选择 `--only CreatorLiveSmokeTests` 与 `TEST_RUNNER_CREATOR_LIVE_LLM=1`，显式指定三协议之一/端点/模型/内存临时 Key。完整门禁拒绝 live 模式；缺开关原生测试立即 skip。运行器在启动 XcodeGen 或任何子进程前删除 Key 环境变量，通过 127.0.0.1 一次性令牌通道交给测试的内存 Keychain；Key 不进入 Xcode 保存的测试环境。requestBudget=1、输出 token 预留 2,048，不降级重试；临时库在结束时删除。结果附件保留经合同校验的真实参数、用量、报告、快照或分阶段固定失败码，不保存原始 SSE/思维/错误体。该 opt-in 路径本轮未实际调用；日常测试只有 Mock 与本机合成凭据桥，不等于真实供应商联调已通过。

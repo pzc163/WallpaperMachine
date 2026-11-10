@@ -21,6 +21,7 @@ struct CreatorRevision: Codable, Equatable, Sendable {
     let bundleDigest: String
     let createdAt: Int64
     var generation: CreatorGenerationMetadata? = nil
+    var seal: CreatorSeal? = nil
 
     func validate(against snapshot: CreatorDraftStore.Snapshot) throws {
         let identity = CreatorBundleManifest.templateIdentity(snapshot.specification)
@@ -40,10 +41,14 @@ struct CreatorRevision: Codable, Equatable, Sendable {
                   !modelID.unicodeScalars.contains(where: CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains),
                   CreatorBundlePresentation.validText(promptSummary, limit: CreatorBundlePresentation.summaryLimit),
                   snapshot.manifest?.presentation != nil,
-                  (parentID == nil) == (generation.baseRevisionDigest == nil)
+                  seal != nil || (parentID == nil) == (generation.baseRevisionDigest == nil)
             else { throw CreatorPersistence.Failure.invalidRecord }
         } else {
             guard providerID == nil, modelID == nil, outputSchemaVersion == nil else { throw CreatorPersistence.Failure.invalidRecord }
+        }
+        if let seal {
+            guard parentID == seal.sourceRevisionID else { throw CreatorPersistence.Failure.invalidRecord }
+            try seal.validate(snapshot: snapshot)
         }
     }
 }

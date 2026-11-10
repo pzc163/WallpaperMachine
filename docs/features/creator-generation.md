@@ -9,8 +9,8 @@ tests, poster capture, publication or desktop activation. See the
 and [stage plan](../plans/2026-11-10-creator-s1-s4.md).
 
 Before implementation, the verified S1.2 code and documents were committed locally
-as `e3a61f55` on `feat/ai-creator`, then the tree was checked clean. This S1.3 work
-remains uncommitted. No push, installation or desktop operation was performed.
+as `e3a61f55` on `feat/ai-creator`, then the tree was checked clean. The verified S1.3 implementation was subsequently committed locally as
+`ac28cf34` before S1.4. No push, installation or desktop operation was performed.
 
 ## Ownership and call boundary
 
@@ -169,8 +169,9 @@ live paid API, creator UI, runtime capture, desktop operation or Release build
 is exercised by the new generation tests. Existing full-suite opt-in/skipped
 checks are reported separately, never as passes.
 
-S1.4 still owns the creator entry point, authorized real-model validation, native
-poster capture, runtime/final evidence and publication. Parameters are not
+The subsequent [S1.4 service workflow](creator-publication.md) implements native
+poster capture, runtime/final evidence and publication. Visible UI and authorized
+real-model validation remain pending; S1.3 itself still produces only a render draft. Parameters are not
 automatically repaired; project backup/storage migration, startup recovery wiring
 and visible interaction remain unimplemented. S4's download/network/termination
 probes remain unresolved and unrestricted code stays disabled. This stage stops

@@ -18,6 +18,10 @@ Opt-in layers are off by default and are requested through the environment:
 `WALLPAPER_MACHINE_NETWORK_TESTS=1` (live Steam pages and temporary native SteamCMD install).
 `WALLPAPER_MACHINE_WEB_REFERENCE=<job file>` is not a layer of checks but the web page
 renderer of `scripts/we_reference.py render`, which sets it.
+Creator live model smoke additionally requires `TEST_RUNNER_CREATOR_LIVE_LLM=1`
+and `--only CreatorLiveSmokeTests`; see docs/features/creator-publication.md.
+The runner removes API keys before launching children and uses a one-shot memory
+handoff. A full gate cannot opt into the creator live request.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -28,6 +32,7 @@ import subprocess
 import sys
 
 from lib.glyphs import markers
+from lib.creator_live_smoke import ConfigurationError, LiveSmoke
 from lib.paths import BUILD, ROOT, TEST_ARTIFACTS, XCODEPROJ
 from lib.xcode import run_quiet, test_summary
 
@@ -156,6 +161,10 @@ def main():
         help="Echo the whole xcodebuild stream instead of only failures; the log gets it either way.",
     )
     args = parser.parse_args()
+    try:
+        live = LiveSmoke(os.environ, only=args.only, ui=args.ui, python_only=args.python_only)
+    except ConfigurationError as error:
+        parser.error(str(error))
     if args.python_only:
         if args.ui or args.only:
             parser.error("--python-only runs no native tests; drop --ui and --only")
@@ -177,9 +186,10 @@ def main():
     prefix = "UI-" if args.ui else "Tests-"
     result = TEST_ARTIFACTS / (prefix + datetime.now().strftime("%Y%m%d-%H%M%S-%f") + ".xcresult")
     # UI tests drive one desktop and cannot share it with a second worker.
-    command = xcodebuild_command(scheme, target, result, args.only, parallel=not (args.serial or args.ui))
-    env = test_host_environment(os.environ)
-    completed, log = run_quiet(command, result.with_suffix(".log"), cwd=ROOT, env=env, verbose=args.verbose)
+    command = xcodebuild_command(scheme, target, result, args.only, parallel=not (args.serial or args.ui or live.enabled))
+    with live as environment:
+        env = test_host_environment(environment)
+        completed, log = run_quiet(command, result.with_suffix(".log"), cwd=ROOT, env=env, verbose=args.verbose)
     failed = None
     if (result / "Info.plist").exists():
         lines, failed = test_summary(result, cwd=ROOT)

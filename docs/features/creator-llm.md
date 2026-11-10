@@ -198,6 +198,8 @@ Other existing compiler warnings remain outside this change.
 No real provider request, TLS/proxy interoperability, personal Keychain permission,
 UI, screenshot/cover, desktop activation or Release build is validated.
 The subsequent [S1.3 strict parameter contract](creator-generation.md) is
-implemented and tested separately; S1.4 creator UI/cover/publication remain pending.
+implemented and tested separately. [S1.4](creator-publication.md) adds native
+cover/publication and a default-skipped live smoke entry, with one request and
+one-shot in-memory credentials. UI and actual provider verification remain pending.
 S0/S1.0 generators and golden digests are unchanged. The known S0 unrestricted-code
 probes and S4 isolation work remain unresolved; S1.2 does not relax those gates.

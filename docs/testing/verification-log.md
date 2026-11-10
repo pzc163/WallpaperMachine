@@ -25,6 +25,17 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-10 — Creator S1.4 native runtime, sealed publication and opt-in smoke
+
+[S1.4 native publication](../features/creator-publication.md) connects template generation, real unattached WebKit snapshots, immutable four-file evidence and recoverable library import. S1.3 was committed locally as `ac28cf34`; S1.4 remains uncommitted, with no push or desktop change.
+
+- `python3 scripts/test.py --only CreatorPublicationTests --only CreatorPosterTests --only CreatorOrchestratorTests --only CreatorLiveSmokeTests --only CreatorGeneratorTests --only CreatorDraftTests --only CreatorRuntimeRegistryTests --only CreatorPublisherTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only CreatorPreviewTests --only ImportTests --only WallpaperImportStagingTests --only WebWallpaperPreviewSurfaceTests --only LibraryPreviewFetcherTests` — exit 0; 189 passed, 0 failed, 4 skipped.
+- `python3 scripts/tests/test_creator_live_smoke.py` and `python3 scripts/tests/test_test.py` — exit 0; 8 and 18 passed, synthetic loopback credentials only.
+- `python3 scripts/test.py` — exit 0, once; 695 Python tests in 33 modules; 4,907 native passed, 0 failed, 70 skipped of 4,977. All 19 new routine native tests passed; live smoke skipped.
+- Skips: 3 S0 unrestricted probes, 62 opt-in media/device checks, 3 live Steam checks, 1 reference job and 1 creator live test. No real model request, personal Keychain, UI/desktop, Release delivery or S4 validation.
+- Four main-thread runtime warnings in passing unchanged AppUpdate, VideoFormatSupport, WebMPlayer and WebMOpening tests; no source locations. The two WebM warnings were additionally observed this run. Full compilation has 28 warning lines outside the changed sources/tests.
+- `python3 scripts/tests/test_doc_links.py` — exit 0; 11 passed. Planning mirrors, frozen v1 generators/golden assertions, tested-source hashes, branch/scope and `git diff --check` verified; XcodeGen generated the project.
+
 ## 2026-11-10 — Creator S1.3 structured parameter generation
 
 S1.3 catalog-derived prompts, strict parameter validation and immutable native drafts; see [implementation and boundaries](../features/creator-generation.md). S1.2 rollback commit `e3a61f55` was made before implementation; S1.3 remains uncommitted.
@@ -136,13 +147,3 @@ Installed gains a right-click menu on tiles (the inspector's More actions list, 
 - The built-in window contained its live web view. The Dell window contained an NSImageView suspension poster; session logs recorded repeated presentation suspend/resume decisions for display 3.
 - The foreground-app rule was Keep running, covered-desktop behavior was the default Pause, and the power source was External. The relationship between this pause and the reported stutter remains unconfirmed; a controlled manual retest with the coverage rule disabled is pending authorization.
 - No new fix, desktop automation, app restart or settings mutation was performed. The candidate remains local and must not be treated as resolving #177.
-
-## 2026-11-09 — Web transition composition final review (#177)
-
-- Reviewed the web-window transition policy and live-resize restoration against current main; retained the general fix without wallpaper-specific behavior or per-frame work.
-- python3 scripts/test.py --only WebWallpaperWindowCompositionTests: 3 passed, 0 failed, 0 skipped; reads WindowServer policy on unordered windows and exercises an AppKit live-resize cycle.
-- python3 scripts/test.py: all 32 Python suites passed; 4,667 native passed, 0 failed, 66 skipped. The skipped asset, media, network and desktop-dependent checks are not passing coverage.
-- One runtime warning in AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy: a method called on the main thread may cause unresponsiveness; unrelated to web transition composition.
-- python3 scripts/build.py --swift-only --configuration Release: passed; built build/Build/Products/Release/WallpaperMachine.app. Existing linker deployment-target warnings remain.
-- Prior same-window Belle manual trials recorded smooth playback with tag 55 set, stutter after clearing it, and smooth playback after setting it again; the prior rebuilt app readback also showed the flag set automatically.
-- Final rebuilt-app visual acceptance remains unconfirmed. No desktop automation, wallpaper changes or app restart were performed during this final review. No valid Wallpaper Engine frame comparison is available.

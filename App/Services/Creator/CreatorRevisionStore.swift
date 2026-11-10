@@ -84,10 +84,13 @@ actor CreatorRevisionStore {
 
     /// Starts a new generation and durably fences callbacks from an older request.
     func beginJob(projectID: UUID, baseRevisionID: UUID? = nil, requestBudget: Int = 1, tokenBudget: Int = 4096,
-                  expectedBaseDigest: String? = nil) throws -> GenerationJob.Ticket {
+                  expectedBaseDigest: String? = nil, sealingLatest: Bool = false) throws -> GenerationJob.Ticket {
         try locked {
             try Task.checkCancellation()
             var project = try readProject(projectID)
+            if sealingLatest {
+                guard project.activeJobID == nil, project.latestRevisionID == baseRevisionID else { throw CreatorPersistence.Failure.staleJob }
+            }
             if let baseRevisionID {
                 let base = try readRevision(projectID: projectID, revisionID: baseRevisionID)
                 if let expectedBaseDigest, base.metadataDigest != expectedBaseDigest { throw CreatorPersistence.Failure.staleJob }
@@ -206,7 +209,8 @@ actor CreatorRevisionStore {
     }
 
     /// The atomic project index replacement is the commit point. A revision folder alone is not visible history.
-    func commit(_ ticket: GenerationJob.Ticket, validatingStructure: Bool = false) throws -> CreatorRevision {
+    func commit(_ ticket: GenerationJob.Ticket, validatingStructure: Bool = false,
+                runtimeEvidence: CreatorRuntimeCapture? = nil) throws -> CreatorRevision {
         try locked {
             try Task.checkCancellation()
             var job = try activeJob(ticket)
@@ -221,10 +225,16 @@ actor CreatorRevisionStore {
             guard project.revisionIDs.count < 1000 else { throw CreatorPersistence.Failure.tooLarge }
             let destination = revisionURL(projectID: project.id, revisionID: id)
             guard !CreatorPersistence.exists(destination) else { throw CreatorPersistence.Failure.busy }
-            // A generated revision and its structure-only evidence cross the same commit point.
-            // Cancellation before this point discards both; runtime/publication remain unverified.
-            if validatingStructure {
-                let report = makeReport(project: project, revision: pair.revision, snapshot: pair.snapshot, metadataDigest: pair.metadataDigest)
+            // A revision and its matching structure/runtime evidence cross the same commit point.
+            // Runtime evidence is supplied only by the native sealing flow.
+            if validatingStructure || runtimeEvidence != nil {
+                let report: ValidationReport
+                if let runtimeEvidence {
+                    report = try runtimeReport(project: project, revision: pair.revision, snapshot: pair.snapshot,
+                                               metadataDigest: pair.metadataDigest, evidence: runtimeEvidence)
+                } else {
+                    report = makeReport(project: project, revision: pair.revision, snapshot: pair.snapshot, metadataDigest: pair.metadataDigest)
+                }
                 try CreatorPersistence.write(report, to: candidate.appendingPathComponent("validation.json"))
             }
             job.state = .committing
@@ -235,7 +245,7 @@ actor CreatorRevisionStore {
             project.revisionIDs.append(id)
             project.latestRevisionID = id
             project.activeJobID = nil
-            if validatingStructure {
+            if validatingStructure || runtimeEvidence != nil {
                 project.lastValidatedRevisionID = id
                 project.selectedRevisionID = id
             }
@@ -344,8 +354,9 @@ actor CreatorRevisionStore {
               report.projectIdentityDigest == project.identityDigest, report.revisionDigest == pair.metadataDigest,
               report.renderDigest == pair.revision.renderDigest, report.posterDigest == pair.revision.posterDigest,
               report.bundleDigest == pair.snapshot.digest, report.templateRevision == pair.revision.templateRevision,
-              report.context == context, report.allowsPreview, report.validatedAt >= pair.revision.createdAt,
-              report.measuredMetrics == ["bundleBytes": Double(pair.snapshot.files.values.reduce(0) { $0 + $1.count })]
+              report.context == (report.allowsPublication ? context.runtime : context),
+              report.allowsPreview, report.validatedAt >= pair.revision.createdAt,
+              report.measuredMetrics == (try expectedMetrics(report: report, revision: pair.revision, snapshot: pair.snapshot))
         else { throw CreatorPersistence.Failure.staleValidation }
         return (report, pair.snapshot)
     }

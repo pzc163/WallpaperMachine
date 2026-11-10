@@ -5,7 +5,8 @@ It implements the storage portions of PRD AC-02 (derive and return to a revision
 AC-07 (cancel/reopen) and AC-10 (invalidate changed evidence). It adds no creator
 UI, screenshot capture or desktop activation. Model transport was subsequently
 added by [S1.2](creator-llm.md), followed by [S1.3 parameter generation](creator-generation.md),
-with no UI or startup wiring. See the
+with no UI or startup wiring. [S1.4](creator-publication.md) subsequently added
+native capture, sealed revisions and publication; S1.1 counts below remain historical. See the
 [PRD](../plans/02-creator-prd.md), [technical plan](../plans/03-creator-technical-plan.md)
 and [stage plan](../plans/2026-11-10-creator-s1-s4.md).
 
@@ -50,7 +51,7 @@ bytes and malformed records fail closed. Records are at most 256 KiB.
 | `GenerationJob` | Project/base revision, token, durable state, attempts/budgets, candidate identity and digest |
 | `ValidationReport` | Exact revision metadata, project identity, content digests, template revision, host/SDK/policy/profile/viewport and measured results |
 | `CreatorSettings` | Nonsecret Provider Profile metadata, selection and optimistic settings revision; configured through `CreatorSettingsStore` |
-| `CreatorRuntimeRegistry` | Installed legacy ID to revision/digest/policy/context binding; new v2 publication remains blocked |
+| `CreatorRuntimeRegistry` | Installed legacy ID to revision/digest/policy/context binding; S1.4 adds final v2 reports and publication transactions |
 
 JSON replacement writes a unique sibling, synchronizes the file, then renames
 it atomically. Actor serialization and a nonblocking filesystem lock protect
@@ -212,19 +213,22 @@ fields are nil for these native S1.1 revisions.
 | --- | --- | --- |
 | v1 | `creator.json`, `project.json`, `index.html` | Existing S0 preview/import/publish/recovery |
 | v2 render draft | Same three names, versioned manifest | Validated revision preview only |
-| v2 sealed format | Those three plus `preview.jpg` | Format validation only in S1.1; publication waits for S1.4 |
+| v2 sealed format | Those three plus `preview.jpg` | Format validation in S1.1; S1.4 requires final native report and registry binding |
 
 The v2 manifest separately declares schema/bundle/policy/SDK versions, template
 specification, `trustedTemplateV1`, native packaging state and poster digest.
 Its publisher ID is reserved as `ai-<project-uuid>`. The native format builder can
 validate an already supplied JPEG (512 KiB, 1–1280 pixels per edge, one complete
 decodable JPEG image) and reconstruct `project.json.preview`. Tests use a synthetic
-JPEG fixture; this is not template snapshot generation. S1.4 must derive a new
-sealed revision and final report; it must not mutate an existing render draft.
+JPEG fixture; this is not template snapshot generation. S1.4 derives a new
+sealed revision and final report without mutating an existing render draft. Its
+optional `seal` provenance binds the source revision/digest, render bytes, viewport,
+validation context and native pixel metrics; absent fields preserve older records.
 
-Both `CreatorPublisher` and ordinary folder import reject v2 packages until that
-final flow exists. Formal preflight rejects them as well, including forged type
-changes. A `creator.json` marker or reserved creator/AI ID selects the restricted
+Ordinary folder import still rejects v2 packages without a native publication
+permit. S1.4 CreatorPublisher accepts sealed bytes only with a matching full
+report; formal playback requires the registered binding. Drafts, absent or stale
+evidence and forged type changes remain rejected. A `creator.json` marker or reserved creator/AI ID selects the restricted
 WebKit host before loading; renaming a bundle cannot select the compatibility
 file host. New v2 previews use the revision store loader and immutable scheme
 resources. Unknown policy/versions, registry corruption or mismatched restored
@@ -234,7 +238,9 @@ creator routes, including renamed marker-bearing folders.
 `registerLegacy` registers an already installed, validated v1 copy. It performs no
 import or desktop action. A matching registry entry tightens legacy playback to
 the recorded digest/context; an absent entry preserves the original S0 byte
-validation behavior. Full registry/publisher transactions for v2 belong to S1.4.
+validation behavior. Full registry/publisher transactions for v2 are documented in
+[S1.4 publication](creator-publication.md); missing v2 bindings never fall back. This
+does not change old v1 no-registry compatibility.
 No S4 networking/download/independent-process claim follows from these routes.
 
 ## Deterministic render-test synchronization

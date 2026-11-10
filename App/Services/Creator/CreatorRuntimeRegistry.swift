@@ -11,12 +11,13 @@ actor CreatorRuntimeRegistry {
         let bundleDigest: String
         let runtimePolicy: String
         let context: ValidationReport.Context
+        var report: ValidationReport? = nil
     }
     struct Document: Codable, Equatable, Sendable {
         var schemaVersion = 1
         var entries: [String: Binding] = [:]
     }
-    let url: URL
+    nonisolated let url: URL
     init(url: URL = ClientPaths.creatorRuntimeRegistryURL) { self.url = url }
 
     /// S1.1 can register an already installed legacy package. V2 publication needs S1.4's final evidence.
@@ -40,6 +41,18 @@ actor CreatorRuntimeRegistry {
 
     func bindings() throws -> [String: Binding] { try Self.read(at: url).entries }
 
+    /// Compare-and-swap lets publication restore exactly the prior binding without overwriting another writer.
+    func replace(_ id: String, expected: Binding?, with replacement: Binding?) throws {
+        try CreatorPersistence.directory(url.deletingLastPathComponent(), create: true)
+        let lock = try CreatorPersistence.Lease(url.appendingPathExtension("lock"))
+        defer { withExtendedLifetime(lock) {} }
+        var document = try Self.read(at: url)
+        guard document.entries[id] == expected else { throw CreatorPersistence.Failure.staleValidation }
+        document.entries[id] = replacement
+        try Self.validate(document)
+        try CreatorPersistence.write(document, to: url)
+    }
+
     nonisolated static func isCreatorID(_ id: String) -> Bool {
         // Even malformed reserved identifiers must never fall through to the compatibility host.
         id.hasPrefix(CreatorTemplate.idPrefix) || id.hasPrefix("ai-")
@@ -57,10 +70,39 @@ actor CreatorRuntimeRegistry {
         guard document.schemaVersion == 1, document.entries.count <= 1000 else { throw CreatorPersistence.Failure.unsupportedVersion }
         for (key, binding) in document.entries {
             try binding.context.validate()
-            guard key == binding.wallpaperID, binding.schemaVersion == 1, binding.bundleVersion == 1,
-                  key == CreatorTemplate.idPrefix + CreatorPersistence.uuidName(binding.projectID),
+            guard key == binding.wallpaperID, binding.schemaVersion == 1, [1, 2].contains(binding.bundleVersion),
+                  key == (binding.bundleVersion == 1 ? CreatorTemplate.idPrefix : "ai-") + CreatorPersistence.uuidName(binding.projectID),
                   binding.runtimePolicy == "trustedTemplateV1", CreatorPersistence.validDigest(binding.bundleDigest)
             else { throw CreatorPersistence.Failure.unsupportedVersion }
+            if binding.bundleVersion == 1 {
+                guard binding.report == nil else { throw CreatorPersistence.Failure.invalidRecord }
+            } else {
+                guard let report = binding.report, report.schemaVersion == 1, report.allowsPublication,
+                      report.projectID == binding.projectID, report.revisionID == binding.revisionID,
+                      report.bundleDigest == binding.bundleDigest, report.context == binding.context,
+                      CreatorPersistence.validDigest(report.projectIdentityDigest), CreatorPersistence.validDigest(report.revisionDigest),
+                      CreatorPersistence.validDigest(report.renderDigest), report.validatedAt >= 0
+                else { throw CreatorPersistence.Failure.staleValidation }
+            }
+        }
+    }
+
+    nonisolated static func validateBinding(_ binding: Binding, snapshot: CreatorDraftStore.Snapshot,
+                                            context: ValidationReport.Context = .current) throws {
+        try validate(Document(entries: [binding.wallpaperID: binding]))
+        guard binding.wallpaperID == snapshot.wallpaperID, binding.bundleDigest == snapshot.digest,
+              binding.projectID == snapshot.specification.projectID, binding.bundleVersion == snapshot.bundleVersion,
+              binding.context.sameHost(as: context) else { throw CreatorPersistence.Failure.staleValidation }
+        if snapshot.bundleVersion == 2 {
+            guard snapshot.manifest?.packaging == .sealed, let report = binding.report,
+                  report.renderDigest == (try snapshot.renderDigest), report.posterDigest == snapshot.manifest?.posterDigest,
+                  report.templateRevision == CreatorBundleManifest.templateIdentity(snapshot.specification).revision,
+                  report.measuredMetrics["bundleBytes"] == Double(snapshot.files.values.reduce(0) { $0 + $1.count }),
+                  let jpeg = snapshot.files["preview.jpg"] else { throw CreatorPersistence.Failure.staleValidation }
+            var metrics = report.measuredMetrics; metrics.removeValue(forKey: "bundleBytes")
+            try CreatorPosterMetadata.validate(jpeg: jpeg, metrics: metrics, context: binding.context)
+        } else {
+            guard binding.context == context else { throw CreatorPersistence.Failure.staleValidation }
         }
     }
     nonisolated static func readForPlayback(_ directory: URL, expectedDigest: String? = nil,
@@ -68,11 +110,11 @@ actor CreatorRuntimeRegistry {
                                            context: ValidationReport.Context = .current) throws -> CreatorDraftStore.Snapshot {
         let document = try read(at: registryURL)
         let snapshot = try CreatorBundleManifest.read(directory, expectedDigest: expectedDigest)
-        // A syntactically sealed v2 package still lacks S1.4's final publication validation.
-        guard snapshot.bundleVersion == 1 else { throw CreatorPersistence.Failure.incompleteBundle }
+        if snapshot.bundleVersion == 2, document.entries[directory.lastPathComponent] == nil {
+            throw CreatorPersistence.Failure.incompleteBundle
+        }
         if let binding = document.entries[directory.lastPathComponent] {
-            guard binding.bundleDigest == snapshot.digest, binding.projectID == snapshot.specification.projectID,
-                  binding.context == context else { throw CreatorPersistence.Failure.staleValidation }
+            try validateBinding(binding, snapshot: snapshot, context: context)
         }
         return snapshot
     }
