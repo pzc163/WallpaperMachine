@@ -656,6 +656,6 @@
     "name": "@lobehub/icons-static-svg",
     "license": "MIT",
     "licenseSource": "https://github.com/lobehub/lobe-icons/blob/ea434b96e75813517b377825e01c0df61dee8836/LICENSE",
-    "notes": "Selected upstream SVGs bundled in Assets.xcassets; currentColor normalized to black for asset compilation, monochrome assets use native template tint. Per-icon hashes: ThirdParty/lobehub-icons/icons.json. This pinned package has no MiniCPM/ModelBest icon; the app uses a native initial, not an attributed brand logo."
+    "notes": "Selected upstream SVGs bundled in Assets.xcassets; currentColor normalized to black for asset compilation, monochrome assets use native template tint. Per-icon hashes: ThirdParty/lobehub-icons/icons.json. This pinned package has no MiniCPM/ModelBest icon. The separate ModelBest brand asset comes from its official platform, not this MIT package; source and checksum are documented in docs/features/creator-llm.md."
   }
 }

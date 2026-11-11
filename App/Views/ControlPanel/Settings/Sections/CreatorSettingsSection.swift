@@ -98,7 +98,7 @@ struct CreatorSettingsSection: View {
         } label: {
             HStack(spacing: 8) {
                 if entry.custom { Image(systemName: "plus").frame(width: 20) }
-                else { CreatorProviderIcon(name: entry.id == "minicpm" ? "minicpm" : entry.icon) }
+                else { CreatorProviderIcon(name: entry.icon) }
                 Text(verbatim: entry.custom ? PanelLocale.shared.catalogString(entry.name) : entry.name)
                 Spacer(minLength: 0)
             }.padding(.vertical, 5).contentShape(Rectangle())

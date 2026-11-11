@@ -24,11 +24,16 @@ final class CreatorProviderCenterTests: XCTestCase {
             if let icon = entry.icon { XCTAssertNotNil(NSImage(named: "Provider-" + icon), icon) }
         }
         var profile = CreatorProviderCatalog.entry("lmstudio")!.profile(); profile.model = "local"
-        for model in ["claude-test", "gemini-test", "grok-test", "qwen-test", "deepseek-test", "kimi-test", "glm-test"] {
+        for model in ["claude-test", "gemini-test", "grok-test", "qwen-test", "deepseek-test", "kimi-test", "glm-test", "MiniCPM-test", "openbmb/MiniCPM-test"] {
             let icon = try XCTUnwrap(CreatorProviderCatalog.icon(profile: profile, model: model))
             XCTAssertNotNil(NSImage(named: "Provider-" + icon))
+            if model.lowercased().contains("minicpm") { XCTAssertEqual(icon, "minicpm") }
         }
-        XCTAssertNil(CreatorProviderCatalog.entry("minicpm")?.icon, "The pinned library has no MiniCPM brand asset")
+        let miniCPM = try XCTUnwrap(CreatorProviderCatalog.entry("minicpm"))
+        XCTAssertEqual(miniCPM.icon, "minicpm")
+        XCTAssertEqual(CreatorProviderCatalog.icon(profile: miniCPM.profile()), miniCPM.icon)
+        let image = try XCTUnwrap(NSImage(named: "Provider-minicpm"))
+        XCTAssertFalse(image.isTemplate, "Preserve the ModelBest brand color in both appearances")
     }
     func testSelectingModelsSharesOneCredentialAndDoesNotChangeConfiguration() async throws {
         let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)

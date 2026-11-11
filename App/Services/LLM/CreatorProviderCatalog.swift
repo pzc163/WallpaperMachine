@@ -26,7 +26,7 @@ enum CreatorProviderCatalog {
         .init(id: "minimax", name: "MiniMax", protocolKind: .openaiCompatible, endpoints: ["https://api.minimaxi.com/v1", "https://api.minimax.io/v1"], icon: "minimax"),
         .init(id: "hunyuan", name: "Hunyuan", protocolKind: .openaiCompatible, endpoints: ["https://api.hunyuan.cloud.tencent.com/v1"], icon: "hunyuan"),
         .init(id: "deepseek", name: "DeepSeek", protocolKind: .openaiCompatible, endpoints: ["https://api.deepseek.com/v1"], icon: "deepseek"),
-        .init(id: "minicpm", name: "MiniCPM", protocolKind: .openaiCompatible, endpoints: ["https://api.modelbest.cn/v1"], icon: nil),
+        .init(id: "minicpm", name: "MiniCPM", protocolKind: .openaiCompatible, endpoints: ["https://api.modelbest.cn/v1"], icon: "minicpm"),
         .init(id: "custom-cloud", name: "Custom cloud service", protocolKind: .openaiCompatible, endpoints: [], icon: nil, custom: true),
         .init(id: "lmstudio", name: "LM Studio", protocolKind: .openaiCompatible, endpoints: ["http://127.0.0.1:1234/v1"], icon: "lmstudio", local: true),
         .init(id: "ollama", name: "Ollama", protocolKind: .openaiCompatible, endpoints: ["http://127.0.0.1:11434/v1"], icon: "ollama", local: true),
@@ -35,9 +35,8 @@ enum CreatorProviderCatalog {
     static func entry(_ id: String) -> Entry? { entries.first { $0.id == id } }
     static func icon(profile: ProviderProfile, model: String? = nil) -> String? {
         if let model = model?.lowercased() {
-            for (prefix, icon) in [("claude", "claude"), ("gemini", "gemini"), ("grok", "grok"), ("qwen", "qwen"), ("deepseek", "deepseek"), ("kimi", "kimi"), ("glm", "zhipu")] where model.hasPrefix(prefix) { return icon }
+            for (prefix, icon) in [("claude", "claude"), ("gemini", "gemini"), ("grok", "grok"), ("qwen", "qwen"), ("deepseek", "deepseek"), ("kimi", "kimi"), ("glm", "zhipu"), ("minicpm", "minicpm"), ("openbmb/minicpm", "minicpm")] where model.hasPrefix(prefix) { return icon }
         }
-        if profile.providerID == "minicpm" { return "minicpm" }
         return profile.providerID.flatMap(entry)?.icon
     }
 }

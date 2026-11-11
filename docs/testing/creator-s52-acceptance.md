@@ -5,7 +5,7 @@
 ## 已交付
 
 - 供应商双栏中心：11 家云端预设、LM Studio/Ollama、自定义云端/本地服务，Profile 共用凭据及多个模型、可选视觉模型能力、自动/手动上下文预算、折叠高级 JSON 设置。
-- LobeHub 1.102.0 离线 SVG 图标、锁定来源/摘要及 MIT 通知。MiniCPM 无对应官方静态品牌资产，使用原生字母标识，不冒充其他品牌图标。
+- LobeHub 1.102.0 离线 SVG 图标、锁定来源/摘要及 MIT 通知。初始 S5.2 包中 MiniCPM 使用字母标识；后续按用户提供的参考图，改用 ModelBest 官方平台的原始蓝色 SVG，独立记录[来源与摘要](../features/creator-llm.md#s52-provider-center)，不归入 LobeHub MIT 资产。
 - 单舞台、对话抽屉、源码编辑/运行、参数热更新与自动派生保存、固定保存/应用栏；应用仍为用户显式动作。
 - 新版半浮点反馈（RGBA16F + LINEAR，实际附件验证后回退 RGBA8），旧运行库字节继续可用。
 - 图片/视频导入、拖入/粘贴/库选择、原生五色调色板/亮度遮罩、单次视觉缩略图授权、v3 封闭素材包与 `.wmpkg` 分享。
@@ -28,6 +28,16 @@
 完整门禁的 69 项跳过沿用外部资产/设备/显式 opt-in 条件，不能算作通过；未启用真实 LLM、Benchmark、Soak、可见 UI 或真实桌面测试。结果包记录 3 条主线程响应性运行时警告，非测试失败，不声称消除所有历史诊断。
 
 ## 本轮实证修复
+
+### MiniCPM 图标补齐（2026-11-12）
+
+按用户参考图替换字母占位，原样内置 ModelBest 官方 SVG；供应商目录与模型切换器共用资源，也识别本地 MiniCPM / openbmb/MiniCPM 模型。保留品牌蓝色、透明底及矢量缩放，来源与摘要独立于 LobeHub MIT 清单。
+
+- `python3 scripts/test.py --only CreatorProviderCenterTests`：6 通过、0 失败、0 跳过。
+- `python3 scripts/test.py`：724 Python 检查通过；5,109 原生通过、0 失败、69 条件跳过，原生 135 秒；2 条主线程响应性警告。
+- 未运行可见 UI / 桌面验收；后续发布沿用 macOS 15+、arm64、Ad-hoc 路线，实际交付以对应 Pre-release 的源码提交、DMG 和 SHA-256 为准。
+
+### S5.2 主体
 
 1. WebKit 自定义内容规则不接受通用正则中的所有写法；媒体扩展改为独立锚定规则，资源 handler 继续执行精确清单匹配。
 2. opaque srcdoc 同时受父容器和自身 CSP 约束；两层只增加 wm-media 图像/视频白名单，connect-src 仍为 none。

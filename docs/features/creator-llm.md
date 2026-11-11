@@ -25,7 +25,14 @@ model; it does not itself authorize sending an image.
 LobeHub icons are pinned to `@lobehub/icons-static-svg` 1.102.0, verified against the
 npm integrity hash, compiled into Assets and included in the MIT notice inventory.
 Per-icon source/output hashes live in `ThirdParty/lobehub-icons/icons.json`.
-MiniCPM has no icon in this pinned upstream package and uses a native initial.
+MiniCPM uses the blue ModelBest emblem matching the maintainer-provided reference.
+Its unchanged [official SVG](https://platform.modelbest.cn/console/favicon.svg) is
+bundled separately as `Provider-minicpm` (747 bytes, SHA-256
+`f409523ea554e17faa54cf658b7350865e135ec9c0938cad27e7448341d5c338`).
+The SVG retains its transparent background, proportions and original brand color;
+the supplier directory and model picker share it, including local `MiniCPM` and
+`openbmb/MiniCPM` model IDs. This brand asset is not part of LobeHub's MIT icon set;
+the ModelBest name and mark remain their owner's trademarks.
 No brand or model icon is fetched at runtime.
 
 `CreatorProviderCenterTests` covers presets, compiled assets, shared credentials,
