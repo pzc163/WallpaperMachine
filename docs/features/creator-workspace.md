@@ -1,5 +1,11 @@
 # Native Creator workspace (S2.2 and S3 controls)
 
+S4 adds a native template/free-code mode picker, a separate single-HTML authoring
+contract and bounded desktop cursor delivery. Settings now share automatic output
+negotiation, a dismissible success banner and explicit LAN mode. See
+[the current free-code boundary](creator-free-code.md); the earlier stage evidence
+below is historical. Save and Apply remain separate actions.
+
 S2.1 was verified against its recorded file hashes and committed locally on
 `feat/ai-creator` as `29cd3086ef81b3046a98a1498029ac200c007483` before this work.
 The tree was clean. S2.2 was subsequently committed locally as `35594fb9`.

@@ -6,9 +6,11 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
     private var answer = LLMAnswerBuffer(allowsLeadingThought: false)
     private var usage = LLMResponse.Usage()
 
+    init(requiresJSON: Bool = true) { answer.requiresJSON = requiresJSON }
+
     static func request(profile: ProviderProfile, input: LLMRequest) throws -> LLMRequestDescriptor {
         let body: [String: Any] = ["systemInstruction": ["parts": [["text": input.systemInstruction]]],
-            "generationConfig": ["responseMimeType": "application/json", "maxOutputTokens": input.maxOutputTokens],
+            "generationConfig": ["responseMimeType": input.requiresJSON ? "application/json" : "text/plain", "maxOutputTokens": input.maxOutputTokens],
             "contents": input.messages.map { ["role": $0.role == .assistant ? "model" : "user", "parts": [["text": $0.content]]] }]
         return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1beta", suffix: "models/\(profile.model):streamGenerateContent", query: [.init(name: "alt", value: "sse")]),
                      headers: [:], body: try LLMRequestDescriptor.encoded(body), authentication: .google)

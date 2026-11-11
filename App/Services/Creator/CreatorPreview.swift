@@ -26,7 +26,9 @@ enum CreatorPreview {
         let specification = snapshot.specification
         let properties: [String: Any]
         let title: String
-        if let templateID = specification.templateID, let parameters = specification.parameters {
+        if specification.kind == .code {
+            properties = [:]; title = snapshot.manifest?.presentation?.title ?? "Generated wallpaper"
+        } else if let templateID = specification.templateID, let parameters = specification.parameters {
             let definition = try CreatorTemplateCatalog.definition(templateID)
             properties = try definition.properties(for: parameters)
             title = definition.label

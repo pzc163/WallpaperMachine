@@ -15,9 +15,13 @@ struct ValidationReport: Codable, Equatable, Sendable {
                     testProfile: "template-structure-v1", width: 960, height: 540)
         }
 
+        func forMode(_ mode: CreatorCreationMode) -> Context {
+            Context(policyVersion: policyVersion, sdkVersion: sdkVersion, hostVersion: hostVersion,
+                    testProfile: mode == .code ? "code-structure-v1" : "template-structure-v1", width: width, height: height)
+        }
         var runtime: Context {
             Context(policyVersion: policyVersion, sdkVersion: sdkVersion, hostVersion: hostVersion,
-                    testProfile: "template-runtime-v1", width: width, height: height)
+                    testProfile: testProfile.hasPrefix("code-") ? "code-runtime-v1" : "template-runtime-v1", width: width, height: height)
         }
 
         func sameHost(as other: Context) -> Bool {
@@ -26,9 +30,9 @@ struct ValidationReport: Codable, Equatable, Sendable {
 
         func validate() throws {
             guard policyVersion == 1, sdkVersion == 1, !hostVersion.isEmpty, hostVersion.utf8.count <= 128,
-                  ["template-structure-v1", "template-runtime-v1"].contains(testProfile),
+                  ["template-structure-v1", "template-runtime-v1", "code-structure-v1", "code-runtime-v1"].contains(testProfile),
                   (1...4096).contains(width), (1...4096).contains(height),
-                  testProfile != "template-runtime-v1" || ((64...1280).contains(width) && (64...1280).contains(height))
+                  !testProfile.hasSuffix("runtime-v1") || ((64...1280).contains(width) && (64...1280).contains(height))
             else { throw CreatorPersistence.Failure.unsupportedVersion }
         }
     }
@@ -49,13 +53,13 @@ struct ValidationReport: Codable, Equatable, Sendable {
     let validatedAt: Int64
 
     var allowsPreview: Bool {
-        (context.testProfile == "template-structure-v1" &&
+        (["template-structure-v1", "code-structure-v1"].contains(context.testProfile) &&
          results == ["structure": .passed, "sourceReconstruction": .passed, "policy": .passed,
                      "runtime": .notChecked, "posterCapture": .notChecked]) || allowsPublication
     }
 
     var allowsPublication: Bool {
-        context.testProfile == "template-runtime-v1" && posterDigest.map(CreatorPersistence.validDigest) == true &&
+        ["template-runtime-v1", "code-runtime-v1"].contains(context.testProfile) && posterDigest.map(CreatorPersistence.validDigest) == true &&
         results == ["structure": .passed, "sourceReconstruction": .passed, "policy": .passed,
                     "runtime": .passed, "posterCapture": .passed]
     }

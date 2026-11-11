@@ -17,11 +17,11 @@ struct LLMRequestDescriptor: Sendable {
         case .geminiGenerateContent: return try GeminiGenerateContentCodec.request(profile: profile, input: input)
         }
     }
-    static func decoder(for profile: ProviderProfile) -> any LLMProtocolCodec {
+    static func decoder(for profile: ProviderProfile, requiresJSON: Bool = true) -> any LLMProtocolCodec {
         switch profile.protocolKind {
-        case .openaiCompatible: return OpenAICompatibleCodec(allowsLeadingThought: true)
-        case .anthropicMessages: return AnthropicMessagesCodec()
-        case .geminiGenerateContent: return GeminiGenerateContentCodec()
+        case .openaiCompatible: return OpenAICompatibleCodec(allowsLeadingThought: true, requiresJSON: requiresJSON)
+        case .anthropicMessages: return AnthropicMessagesCodec(requiresJSON: requiresJSON)
+        case .geminiGenerateContent: return GeminiGenerateContentCodec(requiresJSON: requiresJSON)
         }
     }
     static func endpoint(_ profile: ProviderProfile, version: String?, suffix: String, query: [URLQueryItem] = []) throws -> URL {

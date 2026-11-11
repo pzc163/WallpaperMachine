@@ -11,6 +11,7 @@ actor CreatorOrchestrator {
         let prompt: String
         var maxOutputTokens = 2048
         var maxRepairs = 0
+        var mode: CreatorCreationMode = .template
         var progress: @Sendable (Stage, Int, Int) async -> Void = { _, _, _ in }
     }
     struct Outcome: Sendable {
@@ -84,7 +85,7 @@ actor CreatorOrchestrator {
                 try await checkpoint(stage); try Task.checkCancellation()
                 var input = CreatorGenerator.Request(projectID: projectID, baseRevisionID: request.baseRevisionID,
                     profileID: request.profileID, configurationID: request.configurationID, prompt: request.prompt,
-                    maxOutputTokens: request.maxOutputTokens)
+                    maxOutputTokens: request.maxOutputTokens, mode: request.mode)
                 let iteration = try await generator.beginIteration(input, maxRepairs: request.maxRepairs)
                 ticket = iteration; input.iteration = iteration
                 while true {

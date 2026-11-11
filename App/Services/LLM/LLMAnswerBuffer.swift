@@ -7,6 +7,8 @@ struct LLMAnswerBuffer: Sendable {
     private var marker = ""
     private var text = ""
     let allowsLeadingThought: Bool
+    var requiresJSON = true
+    private var maximumBytes: Int { requiresJSON ? LLMJSONEnvelope.maximumBytes : 34 * 1024 }
 
     mutating func append(_ fragment: String) throws {
         for character in fragment {
@@ -14,7 +16,7 @@ struct LLMAnswerBuffer: Sendable {
             case .prefix:
                 if marker.isEmpty && character.isWhitespace {
                     text.append(character)
-                    guard text.utf8.count <= LLMJSONEnvelope.maximumBytes else { throw LLMFailure.outputLimit }
+                    guard text.utf8.count <= maximumBytes else { throw LLMFailure.outputLimit }
                     continue
                 }
                 if marker.isEmpty && (character == "{" || character == "\u{0060}") { phase = .answer; text.append(character); continue }
@@ -28,12 +30,12 @@ struct LLMAnswerBuffer: Sendable {
             case .answer:
                 text.append(character)
             }
-            guard text.utf8.count <= 16 * 1024 else { throw LLMFailure.outputLimit }
+            guard text.utf8.count <= maximumBytes else { throw LLMFailure.outputLimit }
         }
     }
     func finish(usage: LLMResponse.Usage) throws -> LLMResponse {
         guard phase == .answer else { throw LLMFailure.truncated }
-        _ = try LLMJSON.object(LLMJSONEnvelope.unwrap(text))
+        if requiresJSON { _ = try LLMJSON.object(LLMJSONEnvelope.unwrap(text)) }
         return LLMResponse(text: text.trimmingCharacters(in: CharacterSet(charactersIn: " \r\n\t")), usage: usage)
     }
 }

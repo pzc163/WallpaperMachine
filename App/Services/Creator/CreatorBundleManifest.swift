@@ -15,19 +15,21 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
     var presentation: CreatorBundlePresentation? = nil
 
     static func templateIdentity(_ specification: CreatorTemplate.Specification) -> (id: String, revision: Int) {
-        (specification.templateID ?? specification.kind.rawValue + "-v1", specification.templateID == nil ? 1 : (specification.rendererRevision ?? 2))
+        if specification.kind == .code { return (CreatorCodeOutput.templateID, 1) }
+        return (specification.templateID ?? specification.kind.rawValue + "-v1", specification.templateID == nil ? 1 : (specification.rendererRevision ?? 2))
     }
 
     static func parameters(_ specification: CreatorTemplate.Specification) -> [String: CreatorTemplateCatalog.Value] {
-        specification.parameters ?? ["hue": .number(specification.hue), "speed": .number(specification.speed)]
+        if specification.kind == .code { return [:] }
+        return specification.parameters ?? ["hue": .number(specification.hue), "speed": .number(specification.speed)]
     }
 
     static func files(for specification: CreatorTemplate.Specification, poster: Data? = nil,
-                      presentation: CreatorBundlePresentation? = nil) throws -> [String: Data] {
-        var files = try CreatorTemplate.files(for: specification)
+                      presentation: CreatorBundlePresentation? = nil, source: Data? = nil) throws -> [String: Data] {
+        var files = try specification.kind == .code ? CreatorCodeOutput.files(specification: specification, html: source) : CreatorTemplate.files(for: specification)
         if let presentation {
             try presentation.validate()
-            guard specification.templateID != nil else { throw CreatorPersistence.Failure.invalidRecord }
+            guard specification.templateID != nil || specification.kind == .code else { throw CreatorPersistence.Failure.invalidRecord }
             var project = try JSONSerialization.jsonObject(with: files["project.json"]!) as! [String: Any]
             project["title"] = presentation.title
             project["description"] = presentation.summary
@@ -41,7 +43,7 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
             files["preview.jpg"] = poster
         }
         let manifest = Self(schemaVersion: 1, bundleVersion: 2, specification: specification,
-                            runtimePolicy: "trustedTemplateV1", policyVersion: 1, sdkVersion: 1,
+                            runtimePolicy: specification.runtimePolicy, policyVersion: 1, sdkVersion: 1,
                             packaging: poster == nil ? .renderDraft : .sealed,
                             posterDigest: poster.map(CreatorPersistence.hash), presentation: presentation)
         files[CreatorTemplate.metadataFile] = try CreatorPersistence.encode(manifest)
@@ -79,11 +81,11 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
         if object?["bundleVersion"] != nil {
             let decoded = try JSONDecoder().decode(Self.self, from: metadata)
             guard decoded.schemaVersion == 1, decoded.bundleVersion == 2, decoded.policyVersion == 1,
-                  decoded.sdkVersion == 1, decoded.runtimePolicy == "trustedTemplateV1" else { throw CreatorPersistence.Failure.unsupportedVersion }
+                  decoded.sdkVersion == 1, decoded.runtimePolicy == decoded.specification.runtimePolicy else { throw CreatorPersistence.Failure.unsupportedVersion }
             guard (decoded.packaging == .sealed) == (files["preview.jpg"] != nil) else { throw CreatorPersistence.Failure.incompleteBundle }
             specification = decoded.specification
             manifest = decoded
-            rebuilt = try Self.files(for: specification, poster: files["preview.jpg"], presentation: decoded.presentation)
+            rebuilt = try Self.files(for: specification, poster: files["preview.jpg"], presentation: decoded.presentation, source: decoded.specification.kind == .code ? files["index.html"] : nil)
         } else {
             specification = try JSONDecoder().decode(CreatorTemplate.Specification.self, from: metadata)
             manifest = nil

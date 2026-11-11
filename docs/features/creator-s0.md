@@ -115,6 +115,11 @@ before offering new publication operations.
 
 ### Isolation decision and known failing probes
 
+**Historical S0 evidence.** The findings below are preserved; S4 now uses a different
+opaque iframe host. The same three methods run in the routine gate and pass with
+positive-control loopback listeners. See [S4 implementation](creator-free-code.md)
+for the new boundary, termination evidence and remaining cross-system/GPU limits.
+
 On macOS 27.2 (26B123), injecting arbitrary JavaScript into the loaded page
 exposed an outgoing loopback connection from an anchor with `download`, despite
 the CSP, native content rules and navigation policy. A response-header
@@ -131,7 +136,7 @@ rejected by `CreatorDraftStore` before a preview is constructed. Native test
 injection intentionally bypasses this byte-validation boundary to explore a
 possible future host; it is not an available authoring API.
 
-The three known failing exploratory methods are opt-in, explicitly skipped
+At the S0 checkpoint, the three failing exploratory methods were opt-in, explicitly skipped
 in the ordinary gate, and must not be counted as passing restriction checks:
 
 ```sh
@@ -141,7 +146,7 @@ TEST_RUNNER_CREATOR_UNRESTRICTED_PROBES=1 python3 scripts/test.py \
   --only CreatorPreviewTests/testMediaIsBlockedBeforeConnecting
 ```
 
-Free-form generation remains blocked until these probes and a process-isolated
+At the S0 checkpoint, free-form generation was blocked until these probes and a process-isolated
 stop/watchdog design pass. A first model integration may emit template
 parameters; an independent restricted host is a separate decision.
 

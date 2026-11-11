@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="라이선스: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="Apple 실리콘 탑재 macOS 15 이상">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 스타"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="AI 제작 미리보기 다운로드"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="AI 제작 미리보기 다운로드"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="원본 프로젝트 웹 데모"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5">릴리스 노트 및 체크섬</a></sub>
+  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111">릴리스 노트 및 체크섬</a></sub>
 </p>
 
 <p align="center">
@@ -59,25 +59,19 @@
 
 ## 빠른 시작
 
-**macOS 15+ 호환 패키지**를 권장합니다. 두 패키지는 동일한 앱 소스 `93eb2aa5`(앱 버전 1.9.4)와 AI 제작 기능을 포함하며, 내장 라이브러리의 최소 운영체제 요구 사항만 다릅니다.
+**[S4 개발자 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)**를 받으세요. macOS 15.0+, Apple Silicon / arm64, Ad-hoc 서명이며 **Apple 공증은 없습니다**. Intel은 지원하지 않습니다. [S3 macOS 15 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)와 [기존 S3 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)는 회귀 확인용으로 남아 있으며, 기존 패키지는 macOS 27.2+가 필요합니다.
 
-| 패키지 | 시스템 및 칩 | 용도 |
-| --- | --- | --- |
-| [macOS 15+ 호환 패키지 — 권장](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) | macOS 15.0+ · Apple Silicon / arm64 | 새 설치 및 S3 기기 검증 |
-| [기존 S3 검증 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) | macOS 27.2+ · Apple Silicon / arm64 | 보관된 초기 패키지; macOS 15/26에서 실행 불가 |
+1. DMG의 SHA-256을 확인하세요. 별도 macOS 테스트 계정을 권장합니다. 정식 앱을 덮어쓰거나 같은 계정에서 두 버전을 동시에 실행하지 마세요.
+2. 출처와 체크섬을 확인한 뒤 [설치 체크리스트](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md)에 따라 테스트 복사본에만 `xattr -cr`을 적용하거나 개인정보 보호 및 보안 → 그래도 열기를 사용하세요. 시스템 보안은 끄지 마세요.
+3. 테스트 중 자동 업데이트를 끄세요. 업데이트 설정은 여전히 원본 프로젝트를 사용합니다. 이 패키지는 main/latest에 들어가지 않으며 이 포크의 Releases에서 수동으로 갱신합니다.
 
-1. 해당 Release 페이지에서 `.dmg`를 받고 안내된 명령으로 **SHA-256**을 확인하세요. 두 패키지 모두 Intel Mac을 지원하지 않습니다.
-2. 별도의 macOS 테스트 계정을 권장합니다. 이미지를 열고 앱을 복사하세요. 기존 정식 앱을 덮어쓰거나 같은 계정에서 두 버전을 동시에 실행하지 마세요. 앱 식별자가 동일합니다.
-3. 두 패키지 모두 **Ad-hoc 서명이며 Apple 공증을 받지 않았습니다**. 첫 실행이 차단되면 출처를 확인한 후 [Apple 안내](https://support.apple.com/102445)에 따라 **시스템 설정 → 개인정보 보호 및 보안 → 그래도 열기**를 사용하세요. 시스템 보안 기능을 끌 필요는 없습니다.
-4. 검증 중에는 자동 업데이트를 끄세요. 내장 업데이트 설정은 아직 원본 프로젝트를 가리킵니다. 후속 테스트 패키지는 [이 포크의 Releases](https://github.com/pzc163/WallpaperMachine/releases)에서 직접 받으세요.
-
-원본 웹사이트와 `brew install --cask wallpapermachine`은 이 포크의 AI 제작 기능이 없는 원본 앱을 제공합니다. 기존 장면·동영상·웹·정지 이미지 재생과 창작마당 탐색은 유지됩니다. 창작마당 다운로드 및 장면 공유 리소스에 필요한 Wallpaper Engine 구매 조건도 같습니다.
+원본 웹사이트와 Homebrew에는 이 포크의 AI 제작 기능이 없습니다. 기존 장면, 동영상, 웹, 이미지 및 창작마당 기능과 Wallpaper Engine 구매 요건은 유지됩니다.
 
 <a id="ai-creator"></a>
 
-## AI 제작: 현재 제공하는 기능
+## AI 제작: 제공 기능
 
-S0–S2.3 로컬 제작 흐름과 S3용 JSON 모드 및 프리셋 컨트롤이 구현되었습니다. 원하는 배경화면을 설명하고 대화로 수정한 뒤 네이티브 속성을 조정할 수 있습니다. 모델은 신뢰할 수 있는 템플릿과 제한된 매개변수만 반환하며, 네이티브 코드가 이를 검증하고 리소스를 재구성합니다.
+**템플릿 조정**과 **자유 코드(HTML5 / Canvas / WebGL)** 모드는 네이티브 작업 공간, 대화, 불변 이력, 독립 미리보기, JPEG 표지와 저장 흐름을 공유합니다. 기본은 템플릿 모드입니다. 자유 코드에서는 검은 배경 위 포인터를 따라 번지는 보라색 유체 잉크를 요청하고 대화로 수정할 수 있습니다.
 
 | 템플릿 | 매개변수 | 기본 프리셋 |
 | --- | --- | --- |
@@ -85,22 +79,20 @@ S0–S2.3 로컬 제작 흐름과 S3용 JSON 모드 및 프리셋 컨트롤이 �
 | 다층 별빛 `stars-v2` | 12개: 밀도, 크기 분포, 잔상, 레이어, 반짝임, 유성, 두 색조, 속도, 시계 표시/위치/크기 | `quiet` / `voyage` |
 | 분위기 시계 `clock-v2` | 10개: 두 색조, 배경 움직임, 9개 위치, 크기, 12/24시간 형식, 초, 날짜, 글꼴, 빛 효과 | `dawn` / `terminal` |
 
-- **네이티브 작업 공간:** 최근 프로젝트, 생성/이름 변경/복제/초안 삭제, 대화 기록과 인스펙터. 초안 삭제 시 보관함에 저장된 배경화면은 기본적으로 유지됩니다.
-- **여러 모델 연결:** OpenAI-compatible, Anthropic Messages, Gemini GenerateContent용 Provider Profile, 주소/모델 및 요청/token 예산, 취소 가능한 연결 테스트. OpenAI-compatible은 `automatic`(기본값), `schema`, `required`, `disabled` JSON 모드를 제공합니다.
-- **프리셋과 실시간 미리보기:** 전체 프리셋을 적용하거나 슬라이더·색상·스위치를 조정하면 열린 미리보기에 반영됩니다. 독립 창은 일시 정지/재개, 기본 음소거, 16:9·16:10·9:16 비율을 지원합니다.
-- **검증과 제한된 자동 수정:** 정적 매개변수 검사, 실제 오프스크린 WebKit 실행 검사 및 JPEG 표지 생성. 자동 수정은 최대 2회, 작업당 모델 호출은 최대 3회이며 언제든 중지할 수 있습니다. 소요 시간, token 사용량(미제공 시 알 수 없음), 민감 정보가 제거된 보고서를 표시합니다.
-- **변경 불가능한 기록:** 검증된 과거 리비전에서 수정을 이어 가거나 명시적으로 되돌릴 수 있습니다. 이전 버전을 보존하고 취소·실패·재시작 시 마지막 유효 리비전을 복구합니다.
-- **저장과 적용 분리:** 매개변수 수정 후 변경 사항을 검증해 새 리비전을 만들고 보관함에 저장하세요. 디스플레이에 적용을 명시적으로 눌러야 데스크탑이 바뀝니다. 게시된 신뢰 템플릿 배경화면은 모델 서비스 없이 오프라인으로 재생됩니다.
+- **WebGL 템플릿:** 흐름과 디더링을 사용하는 그라데이션, 어두운 성운·다층 별·유성, 선명한 시계와 측정된 여백. 최대 30 FPS와 2,073,600픽셀을 유지하고 이전 이력은 원래 렌더러를 보존합니다.
+- **모델 연결:** OpenAI-compatible, Anthropic Messages, Gemini GenerateContent. Automatic은 실제 예산 안에서 schema → object → prompt를 협상합니다. 상단 성공 알림에 모델·실제 모드·시간을 표시합니다. 기본 출력 예약은 호출당 최대 8,192, 총 24,576토큰이며 실제 과금은 공급자 기준입니다.
+- **로컬/LAN 모델:** 명시적 로컬 모드에서 루프백, 사설 IPv4, IPv6 ULA/link-local 및 .local HTTP와 빈 키를 허용합니다. 공용 HTTP는 거부합니다. 자격 증명은 Profile·origin·설정 세대에 묶이며 호스트 변경 시 이전 키를 보내지 않습니다.
+- **코드 상호작용:** 외부 의존성 없는 단일 HTML이 미리보기와 데스크톱에서 포인터 좌표를 받습니다. 화면별 최대 30 Hz로 제한하고 일시 정지·가림·절전 시 감시를 중단합니다. 오프라인 iframe, 네이티브 감독 및 패키지 무결성이 계속 적용됩니다.
+- **제한된 수정/이력:** 문법, 매개변수, 첫 프레임과 실행 오류는 다시 검증해야 합니다. 최초 생성과 최대 두 번 수정, 총 세 번 호출 이내입니다. 실패·취소·복구 시 마지막 유효 버전을 보존하며 원본 오류와 키는 수정 로그에 넣지 않습니다.
+- **저장과 적용 분리:** 프리셋/슬라이더 변경을 검증하거나 대화로 코드 이력을 만든 뒤 미리보기에서 정지·음소거·화면비를 확인합니다. 라이브러리 저장 후 사용자가 명시적으로 화면에 적용합니다.
 
-**로컬 LM Studio로 시작하기:** 모델을 별도로 내려받아 로드하고 로컬 서버를 시작하세요. 설정에서 OpenAI-compatible Profile을 추가하고 주소를 `http://127.0.0.1:1234/v1`, 모델을 서버의 실제 ID로 입력한 뒤 명시적 로컬 모드와 `schema`를 선택하세요. 인증 없는 루프백 서비스에만 빈 Key를 허용하며 원격 연결에는 기본적으로 HTTPS와 자격 증명이 필요합니다. 앱에 모델은 포함되어 있지 않습니다.
+**LM Studio:** 모델과 서버를 실행한 뒤 `http://127.0.0.1:1234/v1`, 실제 모델 ID, 로컬 모드 및 automatic을 설정하세요. 다른 Mac에서는 SSH 터널 또는 `http://model-host.local:1234/v1` 같은 신뢰할 수 있는 LAN을 사용하고 확인 창의 대상을 점검하세요. 모델은 포함되지 않습니다.
 
-AI 제작 열기 → 프로젝트 생성 → 프롬프트 입력(예: “차가운 색의 성긴 별빛, 오른쪽 아래에 시계”) → 결과 확인 및 미리보기 → 대화로 수정하거나 프리셋 선택 → 변경 검증 → 보관함 저장 → 필요할 때 명시적으로 적용하세요. 원격 서비스는 비용이 발생할 수 있습니다. Key는 Profile별 Keychain에 바인딩되며 대상 주소나 설정 세대가 바뀌면 이전 자격 증명을 자동 재사용하지 않고 다시 바인딩해야 합니다.
+**공개 테스트 제한:** 자유 코드는 ≤32 KiB HTML 하나, 절차적 그래픽과 시스템 글꼴만 지원합니다. 외부 자원/글꼴, 네트워크, 오디오, 모듈 및 다중 파일은 지원하지 않습니다. WebKit 감독은 확인된 SPI를 사용하고 지원하지 않는 환경은 거부합니다. 운영체제의 강제 GPU 할당량이나 임의 악성 코드의 보안 감사가 아닙니다. 기존 Creator 백업/복원/저장소 이동은 계속 차단합니다. 배경화면 오프라인 재생은 창작마당/업데이트 네트워크까지 끄지는 않습니다.
 
-**현재 제한:** 위 세 가지 매개변수 템플릿만 지원합니다. S4 자유 코드 실행은 꺼져 있으며 임의 HTML/JS, 텍스트 기반 이미지·동영상 생성은 제공하지 않습니다. Creator 데이터가 생성되면 기존 형식의 백업 내보내기/복원 및 저장 위치 이동을 차단합니다. 초안을 삭제해도 자동 해제되지 않으며 완전한 마이그레이션은 아직 지원하지 않습니다. 배경화면의 오프라인 재생이 앱 전체의 네트워크 차단을 뜻하지는 않습니다. 창작마당과 업데이트 확인 등은 별도로 동작합니다.
+**검증:** Mock 모델과 실제 오프스크린 WebKit으로 기존 S0 세 항목, 프로세스 장애, 세 프로토콜, 모의 두 화면, 수정 및 이력을 확인합니다. 과거 30/30 벤치마크와 1,800초 장기 실행은 이전 템플릿 결과이며 새 셰이더/자유 코드에 적용되지 않습니다. macOS 15 실기기, DPI/절전, 시각 품질 및 전체/GPU 에너지는 추가 검증이 필요합니다.
 
-**검증 현황:** `qwen3.8-flash-next + schema`의 고정 로컬 벤치마크에서 프롬프트 10개 × 3회, 30/30이 첫 시도에 통과했습니다. 실제 오프스크린 WebKit 1,800초 연속 실행도 통과했습니다. 다른 모델이나 임의 프롬프트의 성공률을 보장하지 않습니다. macOS 15 패키지는 8개 Mach-O의 최소 버전·내장 의존성, 서명, 다운로드 검증을 통과했습니다. macOS 15 실기기, 다중/고주사율 디스플레이, 잠자기/깨우기 및 전체 에너지 검증은 S3에 남아 있습니다.
-
-상세 문서: [제작 작업 공간](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-workspace.md) · [검증 항목과 벤치마크](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md) · [macOS 15 패키징 근거](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-macos15-results.json).
+[S4 구현과 제한](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-free-code.md) · [공개 테스트 체크리스트](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) · [인수 매트릭스](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md)를 참고하세요.
 
 ## 앱 소개
 
@@ -135,7 +127,7 @@ AI 제작 열기 → 프로젝트 생성 → 프롬프트 입력(예: “차가�
 
 ## 보안과 투명성
 
-아래 원본 프로젝트의 빌드 증명과 업데이트 흐름은 이 포크의 S3 패키지에 적용되지 않습니다. 로컬에서 패키징한 Ad-hoc 빌드이며 Apple 공증과 GitHub Actions 빌드 증명이 없습니다. [Release 페이지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)의 SHA-256을 확인하세요. AI 제작은 생성·수정·연결 테스트를 요청할 때 선택한 모델 서비스에 요청을 보냅니다.
+아래 원본 프로젝트의 빌드 증명과 업데이트 흐름은 이 포크의 S3 패키지에 적용되지 않습니다. 로컬에서 패키징한 Ad-hoc 빌드이며 Apple 공증과 GitHub Actions 빌드 증명이 없습니다. [Release 페이지](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)의 SHA-256을 확인하세요. AI 제작은 생성·수정·연결 테스트를 요청할 때 선택한 모델 서비스에 요청을 보냅니다.
 
 - **오픈 소스.** 앱, 렌더러, 장면 엔진 모두 이 저장소에 GPL-3.0-only로
   공개되어 있습니다. 비공개 코어도, 유료 기능도 없습니다. 앱은 누구에게나 똑같습니다.
@@ -242,7 +234,7 @@ Mac 사용자 이름, Steam 계정 이름은 자동으로 가려집니다.
 <details>
 <summary><b>어떻게 설치하나요?</b></summary>
 
-이 포크의 AI 제작 기능은 [macOS 15+ 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)에서 받고 [빠른 시작](#빠른-시작)을 따라 설치하세요. Apple 공증이 없는 Ad-hoc 검증 패키지입니다. 원본 프로젝트의 [정식 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), 웹사이트와 Homebrew는 별도로 유지되며 이 포크의 AI 제작 기능을 포함하지 않습니다.
+이 포크의 AI 제작 기능은 [macOS 15+ 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)에서 받고 [빠른 시작](#빠른-시작)을 따라 설치하세요. Apple 공증이 없는 Ad-hoc 검증 패키지입니다. 원본 프로젝트의 [정식 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), 웹사이트와 Homebrew는 별도로 유지되며 이 포크의 AI 제작 기능을 포함하지 않습니다.
 
 </details>
 

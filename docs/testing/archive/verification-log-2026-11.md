@@ -9,6 +9,17 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-10 — Creator S1.4 native runtime, sealed publication and opt-in smoke
+
+[S1.4 native publication](../../features/creator-publication.md) connects template generation, real unattached WebKit snapshots, immutable four-file evidence and recoverable library import. S1.3 was committed locally as `ac28cf34`; S1.4 remains uncommitted, with no push or desktop change.
+
+- `python3 scripts/test.py --only CreatorPublicationTests --only CreatorPosterTests --only CreatorOrchestratorTests --only CreatorLiveSmokeTests --only CreatorGeneratorTests --only CreatorDraftTests --only CreatorRuntimeRegistryTests --only CreatorPublisherTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only CreatorPreviewTests --only ImportTests --only WallpaperImportStagingTests --only WebWallpaperPreviewSurfaceTests --only LibraryPreviewFetcherTests` — exit 0; 189 passed, 0 failed, 4 skipped.
+- `python3 scripts/tests/test_creator_live_smoke.py` and `python3 scripts/tests/test_test.py` — exit 0; 8 and 18 passed, synthetic loopback credentials only.
+- `python3 scripts/test.py` — exit 0, once; 695 Python tests in 33 modules; 4,907 native passed, 0 failed, 70 skipped of 4,977. All 19 new routine native tests passed; live smoke skipped.
+- Skips: 3 S0 unrestricted probes, 62 opt-in media/device checks, 3 live Steam checks, 1 reference job and 1 creator live test. No real model request, personal Keychain, UI/desktop, Release delivery or S4 validation.
+- Four main-thread runtime warnings in passing unchanged AppUpdate, VideoFormatSupport, WebMPlayer and WebMOpening tests; no source locations. The two WebM warnings were additionally observed this run. Full compilation has 28 warning lines outside the changed sources/tests.
+- `python3 scripts/tests/test_doc_links.py` — exit 0; 11 passed. Planning mirrors, frozen v1 generators/golden assertions, tested-source hashes, branch/scope and `git diff --check` verified; XcodeGen generated the project.
+
 ## 2026-11-10 — Creator S1.3 structured parameter generation
 
 S1.3 catalog-derived prompts, strict parameter validation and immutable native drafts; see [implementation and boundaries](../../features/creator-generation.md). S1.2 rollback commit `e3a61f55` was made before implementation; S1.3 remains uncommitted.

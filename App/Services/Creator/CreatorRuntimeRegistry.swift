@@ -72,7 +72,8 @@ actor CreatorRuntimeRegistry {
             try binding.context.validate()
             guard key == binding.wallpaperID, binding.schemaVersion == 1, [1, 2].contains(binding.bundleVersion),
                   key == (binding.bundleVersion == 1 ? CreatorTemplate.idPrefix : "ai-") + CreatorPersistence.uuidName(binding.projectID),
-                  binding.runtimePolicy == "trustedTemplateV1", CreatorPersistence.validDigest(binding.bundleDigest)
+                  ["trustedTemplateV1", "generatedOfflineV1"].contains(binding.runtimePolicy),
+                  binding.bundleVersion != 1 || binding.runtimePolicy == "trustedTemplateV1", CreatorPersistence.validDigest(binding.bundleDigest)
             else { throw CreatorPersistence.Failure.unsupportedVersion }
             if binding.bundleVersion == 1 {
                 guard binding.report == nil else { throw CreatorPersistence.Failure.invalidRecord }
@@ -80,6 +81,7 @@ actor CreatorRuntimeRegistry {
                 guard let report = binding.report, report.schemaVersion == 1, report.allowsPublication,
                       report.projectID == binding.projectID, report.revisionID == binding.revisionID,
                       report.bundleDigest == binding.bundleDigest, report.context == binding.context,
+                      report.context.testProfile == (binding.runtimePolicy == "generatedOfflineV1" ? "code-runtime-v1" : "template-runtime-v1"),
                       CreatorPersistence.validDigest(report.projectIdentityDigest), CreatorPersistence.validDigest(report.revisionDigest),
                       CreatorPersistence.validDigest(report.renderDigest), report.validatedAt >= 0
                 else { throw CreatorPersistence.Failure.staleValidation }
@@ -92,7 +94,7 @@ actor CreatorRuntimeRegistry {
         try validate(Document(entries: [binding.wallpaperID: binding]))
         guard binding.wallpaperID == snapshot.wallpaperID, binding.bundleDigest == snapshot.digest,
               binding.projectID == snapshot.specification.projectID, binding.bundleVersion == snapshot.bundleVersion,
-              binding.context.sameHost(as: context) else { throw CreatorPersistence.Failure.staleValidation }
+              binding.context.sameHost(as: context), binding.runtimePolicy == snapshot.specification.runtimePolicy else { throw CreatorPersistence.Failure.staleValidation }
         if snapshot.bundleVersion == 2 {
             guard snapshot.manifest?.packaging == .sealed, let report = binding.report,
                   report.renderDigest == (try snapshot.renderDigest), report.posterDigest == snapshot.manifest?.posterDigest,

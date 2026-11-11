@@ -57,7 +57,10 @@ final class CreatorPosterService {
         func start(_ answer: CheckedContinuation<CreatorRuntimeCapture, Error>) {
             guard !stopped else { answer.resume(throwing: CreatorRuntimeFailure.cancelled); return }
             continuation = answer
-            surface.onFailure = { [weak self] _ in self?.finish(.failure(CreatorRuntimeFailure.pageFailed)) }
+            surface.onFailure = { [weak self] _ in
+                guard let self else { return }
+                self.finish(.failure(self.surface.page.creatorCodeFailure ?? .init(category: .runtime, runtimeReason: .pageFailed)))
+            }
             deadline = Task { [weak self, timeout] in
                 do { try await Task.sleep(for: timeout) } catch { return }
                 self?.finish(.failure(CreatorRuntimeFailure.timeout))
@@ -72,6 +75,7 @@ final class CreatorPosterService {
             guard surface.page.isLoaded else { again(); return }
             guard surface.page.webView.window == nil, surface.page.webView.url == CreatorWebResources.entryURL
             else { finish(.failure(CreatorRuntimeFailure.pageFailed)); return }
+            if let code = surface.page.creatorCode { pollCode(code); return }
             surface.page.webView.callAsyncJavaScript(Self.status, arguments: ["expected": parameters.mapValues(\.json), "freeze": !initialized],
                 in: nil, in: .page) { [weak self] result in
                 guard let self, !stopped else { return }
@@ -80,6 +84,17 @@ final class CreatorPosterService {
                 }
                 if state == 1 { initialized = true; again() }
                 else if state == 2 { snapshot() }
+                else { again() }
+            }
+        }
+        func pollCode(_ code: CreatorCodeSandbox) {
+            guard code.ready, !code.stopped, code.failure == nil, let frame = code.frame else { again(); return }
+            guard code.samples >= 2 else { again(); return }
+            code.pause(true)
+            surface.page.webView.callAsyncJavaScript("await document.fonts.ready; return document.readyState==='complete';",
+                arguments: [:], in: frame, in: .page) { [weak self] result in
+                guard let self, !stopped else { return }
+                if case .success(let value) = result, value as? Bool == true { snapshot() }
                 else { again() }
             }
         }
@@ -98,6 +113,10 @@ final class CreatorPosterService {
                 guard let self, !stopped else { return }
                 guard surface.page.isLoaded, surface.page.webView.window == nil else {
                     finish(.failure(CreatorRuntimeFailure.pageFailed)); return
+                }
+                if let code = surface.page.creatorCode {
+                    guard code.ready, !code.stopped, code.failure == nil else { finish(.failure(CreatorRuntimeFailure.pageFailed)); return }
+                    completeImage(result); return
                 }
                 surface.page.webView.callAsyncJavaScript(Self.status, arguments: ["expected": parameters.mapValues(\.json), "freeze": false],
                     in: nil, in: .page) { [weak self] status in

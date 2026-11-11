@@ -176,7 +176,7 @@ actor CreatorRevisionStore {
 
     func stage(_ specification: CreatorTemplate.Specification, for ticket: GenerationJob.Ticket,
                summary: String = "", legacy: Bool = false, presentation: CreatorBundlePresentation? = nil,
-               generation: CreatorGenerationMetadata? = nil, providerID: String? = nil, modelID: String? = nil) throws -> CreatorRevision {
+               generation: CreatorGenerationMetadata? = nil, source: Data? = nil, providerID: String? = nil, modelID: String? = nil) throws -> CreatorRevision {
         try locked {
             try Task.checkCancellation()
             var job = try activeJob(ticket)
@@ -193,7 +193,7 @@ actor CreatorRevisionStore {
             } else if providerID != nil || modelID != nil || (legacy && presentation != nil) {
                 throw CreatorPersistence.Failure.invalidRecord
             }
-            let files = try legacy ? CreatorTemplate.files(for: specification) : CreatorBundleManifest.files(for: specification, presentation: presentation)
+            let files = try legacy ? CreatorTemplate.files(for: specification) : CreatorBundleManifest.files(for: specification, presentation: presentation, source: source)
             let candidate = jobURL(job.id).appendingPathComponent("candidate", isDirectory: true)
             guard !CreatorPersistence.exists(candidate) else { throw CreatorPersistence.Failure.busy }
             let bundle = candidate.appendingPathComponent("bundle", isDirectory: true)
@@ -205,7 +205,7 @@ actor CreatorRevisionStore {
             let snapshot = try CreatorBundleManifest.read(bundle, scopedRevision: true)
             let identity = CreatorBundleManifest.templateIdentity(specification)
             let revision = CreatorRevision(schemaVersion: 1, id: UUID(), projectID: job.projectID, parentID: job.baseRevisionID,
-                                           promptSummary: summary, providerID: providerID, modelID: modelID, outputSchemaVersion: generation == nil ? nil : 1,
+                                           promptSummary: summary, providerID: providerID, modelID: modelID, outputSchemaVersion: generation == nil ? nil : (specification.kind == .code ? 2 : 1),
                                            bundleVersion: snapshot.bundleVersion, sdkVersion: 1, policyVersion: 1,
                                            templateID: identity.0, templateRevision: identity.1,
                                            normalizedParameters: CreatorBundleManifest.parameters(specification),
@@ -372,7 +372,7 @@ actor CreatorRevisionStore {
               report.projectIdentityDigest == project.identityDigest, report.revisionDigest == pair.metadataDigest,
               report.renderDigest == pair.revision.renderDigest, report.posterDigest == pair.revision.posterDigest,
               report.bundleDigest == pair.snapshot.digest, report.templateRevision == pair.revision.templateRevision,
-              report.context == (report.allowsPublication ? context.runtime : context),
+              report.context == (report.allowsPublication ? context.forMode(pair.snapshot.specification.creationMode).runtime : context.forMode(pair.snapshot.specification.creationMode)),
               report.allowsPreview, report.validatedAt >= pair.revision.createdAt,
               report.measuredMetrics == (try expectedMetrics(report: report, revision: pair.revision, snapshot: pair.snapshot))
         else { throw CreatorPersistence.Failure.staleValidation }

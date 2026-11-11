@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="Licença: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 ou posterior em Apple silicon">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="Estrelas no GitHub"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Demonstração do projeto original"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5">Notas da versão e checksums</a></sub>
+  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111">Notas da versão e checksums</a></sub>
 </p>
 
 <p align="center">
@@ -59,25 +59,19 @@
 
 ## Início rápido
 
-Prefira o **pacote compatível com macOS 15+**. Os dois pacotes usam o código do app `93eb2aa5` (versão 1.9.4) e têm os mesmos recursos de IA; a diferença está nos requisitos mínimos das bibliotecas incluídas.
+Baixe a **[prévia S4 para desenvolvedores](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, assinatura Ad-hoc, **sem notarização Apple**. Intel não é suportado. Os pacotes [S3 macOS 15](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) e [S3 original](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) continuam disponíveis para regressão; o original exige macOS 27.2+.
 
-| Pacote | Sistema e chip | Uso |
-| --- | --- | --- |
-| [Compatível com macOS 15+ — recomendado](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) | macOS 15.0+ · Apple Silicon / arm64 | Novas instalações e aceitação S3 |
-| [Pacote S3 original](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) | macOS 27.2+ · Apple Silicon / arm64 | Pacote anterior mantido; não funciona no macOS 15/26 |
+1. Confira o SHA-256 do DMG. Prefira uma conta macOS de teste; não sobrescreva a cópia de produção nem execute ambas na mesma conta.
+2. Após verificar a origem e o checksum, siga a [lista de instalação](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) para aplicar `xattr -cr` apenas à cópia de teste, ou use Privacidade e Segurança → Abrir Mesmo Assim. Não desative a segurança do sistema.
+3. Desative atualizações automáticas durante a avaliação: o atualizador ainda aponta para o projeto original. Esta prévia não entra em main/latest; obtenha atualizações manualmente nos Releases deste fork.
 
-1. Baixe o `.dmg` na página do Release e confira o **SHA-256** com o comando indicado. Nenhum pacote suporta Macs Intel.
-2. Prefira uma conta de teste separada no macOS, abra a imagem e copie o app. Não substitua uma instalação de uso diário nem execute as duas versões na mesma conta: elas usam o mesmo identificador de aplicativo.
-3. Ambos têm **assinatura Ad-hoc, sem notarização da Apple**. Se a primeira abertura for bloqueada, confira a origem e siga as [instruções da Apple](https://support.apple.com/102445): **Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim**. Não desative a segurança do sistema.
-4. Desative as atualizações automáticas durante os testes: o atualizador ainda usa a configuração do projeto original. Baixe os próximos pacotes manualmente nos [Releases deste fork](https://github.com/pzc163/WallpaperMachine/releases).
-
-O site original e `brew install --cask wallpapermachine` distribuem o app original, sem o Criador com IA deste fork. A reprodução de cenas, vídeos, páginas web e imagens e a navegação pelo Workshop continuam disponíveis; os requisitos de compra do Wallpaper Engine para downloads e recursos compartilhados de cenas permanecem iguais.
+O site original e o Homebrew não distribuem o Criador com IA deste fork. Cenas, vídeos, páginas web, imagens e Workshop continuam disponíveis; os requisitos de aquisição do Wallpaper Engine não mudaram.
 
 <a id="ai-creator"></a>
 
 ## Criador com IA: recursos disponíveis
 
-O fluxo local S0–S2.3 e os controles de modo JSON e predefinições para S3 estão implementados. Descreva um papel de parede, refine pela conversa e ajuste as propriedades nativas. O modelo escolhe um modelo visual confiável e devolve parâmetros limitados; o código nativo valida os valores e reconstrói os recursos.
+**Ajuste de modelos visuais** e **Código livre (HTML5 / Canvas / WebGL)** compartilham espaço nativo, conversa, histórico imutável, prévia independente, capa JPEG e publicação. Os modelos continuam sendo o padrão. No modo código, descreva tinta violeta fluida seguindo o ponteiro sobre fundo preto e refine pela conversa.
 
 | Modelo visual | Parâmetros | Predefinições |
 | --- | --- | --- |
@@ -85,22 +79,20 @@ O fluxo local S0–S2.3 e os controles de modo JSON e predefinições para S3 es
 | Campo de estrelas `stars-v2` | 12: densidade, variação de tamanho, rastros, camadas, cintilação, meteoros, dois matizes, velocidade, visibilidade/posição/escala do relógio | `quiet` / `voyage` |
 | Relógio ambiente `clock-v2` | 10: dois matizes, movimento de fundo, nove posições, escala, formato 12/24 h, segundos, data, fonte, brilho | `dawn` / `terminal` |
 
-- **Área nativa:** projetos recentes, criação/renomeação/duplicação/exclusão de rascunhos, conversa e inspetor. Excluir um rascunho preserva por padrão os papéis de parede já publicados na biblioteca.
-- **Várias conexões:** Provider Profiles para OpenAI-compatible, Anthropic Messages e Gemini GenerateContent, endereço/modelo, limites de solicitações/tokens e teste de conexão cancelável. OpenAI-compatible oferece os modos JSON `automatic` (padrão), `schema`, `required` e `disabled`.
-- **Predefinições e prévia ao vivo:** aplique todos os valores de uma predefinição ou ajuste controles deslizantes, cores e chaves na prévia aberta. A janela separada permite pausar/retomar, começa sem som e simula 16:9, 16:10 e 9:16.
-- **Validação e reparos limitados:** verificação estática, execução real em WebKit fora da tela e capa JPEG. Até dois reparos, no máximo três chamadas ao modelo por tarefa; cancelamento, tempo, tokens (Desconhecido quando ausentes) e relatórios sem dados sensíveis.
-- **Histórico imutável:** continue a partir de qualquer revisão validada ou volte explicitamente a ela. Versões anteriores são preservadas; cancelamento, falhas e reinicialização mantêm a última revisão válida.
-- **Salvar e aplicar separados:** após editar parâmetros, valide as alterações para criar uma revisão, depois salve na biblioteca. Só Aplicar ao monitor muda a mesa. Os papéis de parede publicados desses modelos visuais funcionam offline, sem o serviço de IA.
+- **Modelos WebGL:** gradiente com fluxo e dithering, nebulosa escura com estrelas em camadas e meteoros, relógio nítido com margens medidas. Limites de 30 FPS e 2.073.600 pixels; revisões antigas preservam o renderizador original.
+- **Conexões:** OpenAI-compatible, Anthropic Messages e Gemini GenerateContent. Automatic negocia schema → object → prompt dentro do orçamento; o aviso superior mostra modelo, modo efetivo e tempo. Padrão: até 8.192 tokens de saída por chamada, 24.576 reservados no total; cobrança real depende do provedor.
+- **Modelos locais e LAN:** modo local explícito aceita loopback, IPv4 privado, IPv6 ULA/link-local e .local com HTTP e chave opcional. HTTP público é recusado. Credenciais vinculadas ao Profile, origin e geração da configuração; mudar o host exige novo vínculo.
+- **Código interativo:** um HTML sem dependências recebe coordenadas do ponteiro na prévia e na área de trabalho. Entrega por monitor limitada a 30 Hz, interrompida em pausa, oclusão ou repouso; iframe offline, supervisão nativa e integridade do pacote permanecem ativos.
+- **Reparo e histórico:** erros de sintaxe, parâmetros, primeiro quadro e execução passam novamente pela validação. Geração inicial mais até dois reparos, no máximo três chamadas. Falhas, cancelamento e recuperação preservam a última revisão válida; chaves e erros brutos não entram no log de reparo.
+- **Salvar e aplicar separados:** valide predefinições/controles ou gere nova revisão por conversa, visualize com pausa, mudo e proporções, salve na biblioteca e só então aplique explicitamente ao monitor.
 
-**Comece com LM Studio local:** baixe e carregue um modelo à parte e inicie o servidor local. Nos Ajustes, adicione um Profile OpenAI-compatible com endereço `http://127.0.0.1:1234/v1`, o ID real do modelo, modo local explícito e `schema`. A Key só pode ficar vazia em um serviço de loopback sem autenticação; conexões remotas exigem HTTPS e credenciais por padrão. O app não inclui modelos.
+**LM Studio:** carregue um modelo, inicie o servidor e configure `http://127.0.0.1:1234/v1`, o ID real, modo local e automatic. Em outro Mac, prefira túnel SSH ou LAN confiável como `http://model-host.local:1234/v1`; confira o destino na confirmação. Modelos não são incluídos.
 
-Abra o Criador com IA → crie um projeto → descreva o papel de parede (por exemplo, “poucas estrelas em tons frios, relógio no canto inferior direito”) → confira e visualize → continue a conversa ou escolha uma predefinição → valide → salve na biblioteca → aplique explicitamente se desejar. Serviços remotos podem cobrar. As chaves ficam no Keychain, vinculadas a cada Profile; mudanças de destino ou geração da configuração exigem novo vínculo, sem reutilizar silenciosamente a credencial antiga.
+**Limites:** código livre usa um HTML ≤32 KiB, gráficos procedurais e fontes do sistema. Sem recursos/fontes externas, rede, áudio, módulos ou múltiplos arquivos. A supervisão WebKit usa SPI verificada e recusa ambientes incompatíveis; não é cota rígida de GPU do sistema nem auditoria de código hostil arbitrário. Backup/restauração/mudança de armazenamento antigos do Creator continuam bloqueados. Reprodução offline não desativa a rede do Workshop/atualizador.
 
-**Limites atuais:** apenas esses três modelos visuais parametrizados. A execução de código livre S4 está desativada; não há geração de HTML/JS arbitrário, imagens ou vídeos por texto. Após criar dados do Criador, a exportação/restauração de backup no formato antigo e a mudança de armazenamento são bloqueadas; excluir rascunhos não remove esse bloqueio. A migração completa ainda não está disponível. Reprodução offline não significa que o app inteiro deixa de acessar a rede: Workshop e atualizações têm comportamento separado.
+**Verificação:** modelos Mock e WebKit real fora da tela cobrem os três testes S0, falhas de processo, protocolos, monitores simulados, reparo e histórico. O resultado histórico 30/30 e 1.800 segundos refere-se aos modelos anteriores, não aos novos shaders/código livre. macOS 15 físico, DPI/repouso, qualidade visual e energia total/GPU ainda precisam de avaliação.
 
-**Verificação:** no teste local fixo com `qwen3.8-flash-next + schema`, dez prompts em três rodadas passaram 30/30 na primeira tentativa. O teste prolongado real de WebKit fora da tela passou 1.800 segundos. Isso não garante o resultado com outros modelos ou prompts. O pacote macOS 15 passou na verificação dos oito Mach-O, suas versões mínimas e dependências, assinatura e download; macOS 15 em hardware real, vários monitores/altas taxas de atualização, repouso/retomada e energia ainda aguardam S3.
-
-Detalhes: [área de criação](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-workspace.md) · [matriz e testes](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md) · [evidências do pacote macOS 15](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-macos15-results.json).
+Veja [implementação e limites S4](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-free-code.md) · [lista de avaliação](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) · [matriz de aceitação](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md).
 
 ## O app
 
@@ -138,7 +130,7 @@ sem abrir a janela.
 
 ## Por que você pode confiar
 
-Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes S3 deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
+Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes S3 deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
 
 - **Código aberto, por inteiro.** O app, o renderizador e o motor de cenas estão todos
   neste repositório sob GPL-3.0-only. Não há núcleo fechado nem recursos pagos: o app
@@ -246,7 +238,7 @@ os nomes das contas Steam são substituídos antes.
 <details>
 <summary><b>Como eu consigo o app?</b></summary>
 
-Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
+Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
 
 </details>
 

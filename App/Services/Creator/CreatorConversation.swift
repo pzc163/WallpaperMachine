@@ -34,6 +34,7 @@ struct CreatorConversation: Codable, Equatable, Sendable {
         var failure: CreatorRepairIssue? = nil
         var budgetExhausted = false
         // Absent in historical conversations; those retain their original one-call-per-repair rule.
+        var creationMode: CreatorCreationMode? = nil
         var negotiatesJSON: Bool? = nil
         var negotiationCount: Int? = nil
         var effectiveJSONMode: ProviderProfile.Capabilities.JSONMode? {

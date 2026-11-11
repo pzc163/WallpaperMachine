@@ -11,7 +11,7 @@ struct CreatorSeal: Codable, Equatable, Sendable {
 
     func validate(snapshot: CreatorDraftStore.Snapshot) throws {
         try context.validate()
-        guard schemaVersion == 1, context.testProfile == "template-runtime-v1",
+        guard schemaVersion == 1, context.testProfile == (snapshot.specification.kind == .code ? "code-runtime-v1" : "template-runtime-v1"),
               CreatorPersistence.validDigest(sourceRevisionDigest), renderDigest == (try snapshot.renderDigest),
               snapshot.bundleVersion == 2, snapshot.manifest?.packaging == .sealed,
               let jpeg = snapshot.files["preview.jpg"] else { throw CreatorPersistence.Failure.invalidRecord }

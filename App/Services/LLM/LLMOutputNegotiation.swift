@@ -6,6 +6,7 @@ enum LLMOutputNegotiation {
         profile.protocolKind == .openaiCompatible && (profile.capabilities.jsonMode ?? .automatic) == .automatic
     }
     static func initial(_ profile: ProviderProfile, input: LLMRequest, override: Mode? = nil) -> Mode {
+        guard input.requiresJSON else { return .disabled }
         let mode = override ?? profile.capabilities.jsonMode ?? .automatic
         return mode == .automatic ? (input.structuredOutput == nil ? .required : .schema) : mode
     }

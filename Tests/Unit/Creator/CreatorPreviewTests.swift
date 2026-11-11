@@ -30,7 +30,7 @@ final class CreatorPreviewTests: XCTestCase {
     }
 
     func testThreeDraftTemplatesPaintAndDeliverPropertiesWithoutInstallingOrOpeningWindows() async throws {
-        for kind in CreatorTemplate.Kind.allCases {
+        for kind in CreatorTemplate.Kind.templates {
             let (_, _, surface) = try await make(kind)
             defer { surface.stop() }
             try await surface.start()
@@ -98,13 +98,7 @@ final class CreatorPreviewTests: XCTestCase {
     }
 
     func testEventSourceIsBlockedBeforeConnecting() async throws {
-        try unrestrictedProbe()
-        try await withNetworkProbe { page, url in
-            let blocked = try await js(page, """
-              return await new Promise(r=>{const s=new EventSource(url+'/events');s.onopen=()=>{s.close();r(false)};s.onerror=()=>{s.close();r(true)};setTimeout(()=>{s.close();r(false)},1500)});
-              """, arguments: ["url": url]) as? Bool
-            XCTAssertEqual(blocked, true)
-        }
+        try await codeNetworkProbe("const e=new EventSource(url+'/events');setTimeout(()=>e.close(),500);")
     }
 
     func testFontIsBlockedBeforeConnecting() async throws {
@@ -115,13 +109,7 @@ final class CreatorPreviewTests: XCTestCase {
     }
 
     func testMediaIsBlockedBeforeConnecting() async throws {
-        try unrestrictedProbe()
-        try await withNetworkProbe { page, url in
-            let blocked = try await js(page, """
-              return await new Promise(r=>{const v=document.createElement('video');v.onloadeddata=()=>r(false);v.onerror=()=>r(true);v.preload='auto';document.body.append(v);v.src=url+'/video';v.load();setTimeout(()=>r(false),1500)});
-              """, arguments: ["url": url]) as? Bool
-            XCTAssertEqual(blocked, true)
-        }
+        try await codeNetworkProbe("const v=document.createElement('video');document.body.append(v);v.src=url+'/video';v.load();")
     }
 
     func testFormsAreBlockedBeforeNavigating() async throws {
@@ -138,17 +126,29 @@ final class CreatorPreviewTests: XCTestCase {
     }
 
     func testDownloadLinksAreBlockedBeforeConnecting() async throws {
-        try unrestrictedProbe()
-        try await withNetworkProbe { page, url in
-            _ = try await js(page, "const a=document.createElement('a');a.href=url+'/download';a.download='probe';document.body.append(a);a.click();return true;", arguments: ["url": url])
-        }
+        try await codeNetworkProbe("const a=document.createElement('a');a.href=url+'/download';a.download='probe';document.body.append(a);a.click();")
     }
 
-    /// Exploratory arbitrary-code probes remain reproducible, but do not gate a
-    /// format which refuses those source bytes before WebKit sees them.
-    private func unrestrictedProbe() throws {
-        try XCTSkipUnless(ProcessInfo.processInfo.environment["CREATOR_UNRESTRICTED_PROBES"] == "1",
-                          "Unrestricted code is blocked for S0; known failing probe, see docs/features/creator-s0.md")
+    /// The original S0 cases now exercise generatedOfflineV1's actual installed-page executor.
+    /// Policy teardown is an explicit native refusal; no page-owned error/timeout is trusted.
+    private func codeNetworkProbe(_ script: String) async throws {
+        let server = try CreatorLoopbackProbe(); defer { server.stop() }
+        let port = try await server.readyPort()
+        let control = NWConnection(host: "127.0.0.1", port: NWEndpoint.Port(rawValue: port)!, using: .tcp)
+        control.start(queue: DispatchQueue(label: "s4-positive-control"))
+        let deadline = ContinuousClock.now + .seconds(3)
+        while server.connections == 0 && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(10)) }
+        XCTAssertEqual(server.connections, 1); control.cancel()
+        let surface = try await CreatorCodeTestFixture.preview(root: root)
+        defer { surface.stop() }
+        do { _ = try await CreatorCodeTestFixture.js(surface, script + "return true;", arguments: ["url": "http://127.0.0.1:\(port)"]) }
+        catch {
+            let deadline = ContinuousClock.now + .seconds(3)
+            while surface.page.creatorCodeFailure == nil && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(10)) }
+            XCTAssertNotNil(surface.page.creatorCodeFailure)
+        }
+        try await Task.sleep(for: .milliseconds(600))
+        XCTAssertEqual(server.connections, 1, "No connection beyond the positive control")
     }
 
     func testRedirectEndpointsAreNeverContacted() async throws {
@@ -276,7 +276,7 @@ final class CreatorPreviewTests: XCTestCase {
     }
 }
 
-private final class CreatorLoopbackProbe: @unchecked Sendable {
+final class CreatorLoopbackProbe: @unchecked Sendable {
     private let listener: NWListener
     private let lock = NSLock()
     private var accepted: [NWConnection] = []

@@ -15,20 +15,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="许可证：GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 或更高版本，Apple 芯片">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 星标"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="下载 AI 创作预览版"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="下载 AI 创作预览版"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/zh/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="上游在线演示"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5">发布说明与校验和</a></sub>
+  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111">发布说明与校验和</a></sub>
 </p>
 
 <p align="center">
@@ -57,25 +57,19 @@
 
 ## 快速开始
 
-推荐下载 **macOS 15+ 兼容包**。两个包的应用源码均为 `93eb2aa5`（应用版本 1.9.4），AI 创作功能相同，区别是内置动态库的最低系统要求。
+推荐下载 **[S4 开发者公测包](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)**：macOS 15.0+，Apple Silicon / arm64，Ad-hoc 签名，未经过 Apple 公证，不支持 Intel。旧的 [S3 macOS 15 包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)和 [S3 原始包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)保留用于回归；原始包要求 macOS 27.2+。
 
-| 安装包 | 系统与芯片 | 用途 |
-| --- | --- | --- |
-| [macOS 15+ 兼容包（推荐）](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) | macOS 15.0+ · Apple Silicon / arm64 | 新安装与 S3 实机验收 |
-| [原始 S3 验收包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) | macOS 27.2+ · Apple Silicon / arm64 | 保留的早期验收包；不适用于 macOS 15/26 |
+1. 下载 DMG 并核对 Release 页的 SHA-256。推荐使用独立 macOS 测试账户，不覆盖正式副本，不在同一账户同时运行两个版本。
+2. 仅在核验来源和校验值后，按[公测安装说明](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md)对测试副本执行 `xattr -cr`，或使用系统“隐私与安全性 → 仍要打开”。不关闭系统安全设置。
+3. 验收期间关闭自动更新；内置更新器仍沿用上游配置。此包不进入 main/latest，后续公测包从本 fork Releases 手动获取。
 
-1. 从对应 Release 页下载 `.dmg`，按页内命令核对 **SHA-256**。两个包均不支持 Intel Mac。
-2. 推荐使用独立的 macOS 测试账户，打开磁盘映像并复制应用。已有正式版时不要覆盖它，也不要在同一账户同时运行两个版本；它们仍使用相同应用标识。
-3. 两个包均为 **Ad-hoc 签名，未经过 Apple 公证**。首次启动若被拦截，核验来源后按 [Apple 的说明](https://support.apple.com/102445)，在“系统设置 → 隐私与安全性”中选择“仍要打开”。无需关闭系统安全功能。
-4. 验收期间关闭自动更新；内置更新器仍沿用上游配置。后续测试包从本仓库 [Releases](https://github.com/pzc163/WallpaperMachine/releases) 手动获取。
-
-上游网站与 `brew install --cask wallpapermachine` 提供的是上游正式版，不包含本 fork 的 AI 创作功能。已有的场景、视频、网页、静态图片播放与创意工坊浏览仍保留；创意工坊下载及场景共享资源的 Wallpaper Engine 购买要求不变。
+上游网站和 Homebrew 提供上游正式版，不包含本 fork 的 AI 创作功能；已有场景、视频、网页、静态壁纸和创意工坊能力保留，Wallpaper Engine 购买要求不变。
 
 <a id="ai-creator"></a>
 
 ## AI 创作：当前已实现的功能
 
-S0～S2.3 的本地创作流程和 S3 所需的 JSON 模式、预设控件已实现。你可以用自然语言创建壁纸、继续对话调整，再手动微调原生属性。模型只选择可信模板并返回受限参数，原生代码负责校验和重建资源包。
+**精调模板模式**与**自由代码模式（HTML5 / Canvas / WebGL）**共用原生创作页、对话、不可变历史、独立预览、JPEG 封面与发布流程。模板模式为默认；自由代码可描述“纯黑背景，随鼠标移动晕染的紫色流体水墨”，并通过追问继续调整。
 
 | 模板 | 可调参数 | 内置预设 |
 | --- | --- | --- |
@@ -83,22 +77,20 @@ S0～S2.3 的本地创作流程和 S3 所需的 JSON 模式、预设控件已实
 | 分层星空 `stars-v2` | 12 项：密度、大小分布、拖尾、层数、闪烁、流星、双色相、速度、时钟开关与位置/缩放 | `quiet` / `voyage` |
 | 氛围时钟 `clock-v2` | 10 项：双色相、背景运动、九宫格位置、缩放、12/24 小时制、秒数、日期、字体、辉光 | `dawn` / `terminal` |
 
-- **原生创作页：** 最近工程、新建/重命名/复制/删除草稿、对话记录与右侧检查器；删除草稿默认保留已入库壁纸。
-- **多模型连接：** 多个 Provider Profile，支持 OpenAI-compatible、Anthropic Messages、Gemini GenerateContent；配置端点、模型与请求/token 预算，测试连接可以取消。OpenAI-compatible 提供 `automatic`（默认）、`schema`、`required`、`disabled` 四种 JSON 输出模式。
-- **预设与实时预览：** 一键套用完整预设参数，滑块、颜色和开关联动已打开的预览；独立窗口支持暂停/继续，默认静音，可模拟 16:9、16:10、9:16。
-- **验证与有限修复：** 静态参数检查、真实离屏 WebKit 运行检查与 JPEG 封面生成；自动修复最多 2 次，单任务最多 3 次模型调用，支持随时停止，并显示耗时、token 用量（缺失时为“未知”）和脱敏报告。
-- **不可变版本：** 基于任意历史已验证修订继续修改或显式回退；保留旧版本，取消、失败或重启后恢复最后有效版本。
-- **保存与应用分开：** 修改参数后先点“验证修改”生成新修订，再“保存到壁纸库”；只有显式“应用到显示器”才更换桌面。已发布的可信模板壁纸不需要模型服务即可离线播放。
+- **WebGL 模板升级：** 渐变使用流场与色带抖动，星空使用黑底星云、分层星点和流星，时钟使用高 DPI 排版与安全边距。新模板最高 30 FPS、画布最多 2,073,600 像素；旧模板修订按原版本重建。
+- **模型连接：** 支持 OpenAI-compatible、Anthropic Messages、Gemini GenerateContent。automatic 在预算内按 schema → object → prompt 协商；测试连接成功在顶部显示模型、实际模式与耗时。默认每请求最多预留 8192 输出 token，总预留 24576；费用以供应商实际账单为准。
+- **本机及局域网模型：** 显式本地模式允许回环、私有 IPv4、IPv6 ULA/link-local 和 .local HTTP/空 Key；公网 HTTP 拒绝。凭据按 Profile、目标 origin 和配置代次绑定，改主机不沿用旧 Key。
+- **自由代码互动：** 无外部依赖的单 HTML，可在预览和桌面接收鼠标坐标。桌面按屏节流到最高 30 Hz，暂停、遮挡、休眠时停止指针监听。离线 iframe、原生外部监督和包摘要持续生效。
+- **有限修复和回退：** 语法、参数、首帧和运行错误必须重新检查；首次加最多两次修复，总计最多三次模型调用。失败、取消和重启保留最后可用版本，Key 和原始错误正文不进入修复日志。
+- **保存和应用分开：** 模板预设/滑块修改先验证；自由代码通过对话创建新修订。独立预览支持暂停、静音和比例模拟。验证后保存入库，再由用户显式应用到显示器，不自动替换桌面。
 
-**用本机 LM Studio 开始：** 先自行下载并加载模型，启动本地服务。在设置中新增 OpenAI-compatible Profile，端点填 `http://127.0.0.1:1234/v1`，模型填写服务实际提供的 ID，启用显式本地模式，并选择 `schema`。仅当回环服务未启用鉴权时才可留空 Key；远端连接默认要求 HTTPS 和凭据。应用不附带模型。
+**用 LM Studio 开始：** 加载模型并启动服务，设置 OpenAI-compatible Profile，填写 `http://127.0.0.1:1234/v1`、实际模型 ID，启用本地模式，JSON 模式先用 automatic。跨机优先 SSH 隧道，也支持可信 LAN 的 `http://model-host.local:1234/v1`；连接前核对目标确认弹窗。应用不附带模型。
 
-打开“AI 创作” → 新建工程 → 输入提示词（如“冷色低密度星空，右下角显示时钟”）→ 查看生成结果并预览 → 继续对话或套用预设 → 验证修改 → 保存到壁纸库 → 按需显式应用。远端服务可能计费；Key 保存在按 Profile 隔离的 Keychain 中，目标地址或配置代次变化后需要重新绑定，不会自动携带旧凭据。
+**公测边界：** 自由代码目前只支持 ≤32 KiB 单文件、系统字体与程序绘制，不支持外部图片/字体、网络、音频、模块或多文件。WebKit 进程监督使用能力检查与 SPI，不可用时拒绝自由代码；不是操作系统硬 GPU 配额或对任意敌对代码的安全审计。Creator 数据的旧格式备份/恢复/搬迁仍明确拒绝。壁纸离线不表示 Workshop/更新器也不联网。
 
-**当前边界：** 仅支持上述三种参数化模板，S4 自由代码执行仍关闭，不提供任意 HTML/JS、文生图或文生视频生成。创建过 Creator 数据后，旧格式的备份导出/恢复和存储位置搬迁会被明确阻止，清空草稿不会自动解除；完整迁移支持尚未实现。壁纸离线播放也不等于整个应用完全不联网，创意工坊、更新检查等仍有独立网络行为。
+**验证进度：** 本轮使用 Mock 模型与真实离屏 WebKit，覆盖原 S0 三项探针、进程故障、三协议、双屏替身、修复和历史。旧 S2.3 的 30/30 基准与 1800 秒长稳是历史模板结果，不外推到新 WebGL/自由代码。macOS 15 实机、多屏 DPI/睡眠、可见视觉和整机/GPU 能耗仍待公测。
 
-**验证进度：** 已归档的固定本地模型基准为 `qwen3.8-flash-next + schema`、10 条提示词 × 3 轮，30/30 首次通过；真实离屏 WebKit 长稳运行 1800 秒通过。这不代表其他模型或任意提示词的成功率。macOS 15 包已通过全部 8 个 Mach-O 最低系统版本与依赖闭合、签名和下载校验；macOS 15 真机、多屏/高刷新率、睡眠唤醒和整机能耗仍待 S3 验收。
-
-实现与限制：[创作工作区](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-workspace.md) · [验收矩阵与基准](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md) · [macOS 15 打包证据](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-macos15-results.json)。
+详见 [S4 实现与限制](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-free-code.md) · [可执行公测清单](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) · [验收矩阵](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md)。
 
 ## 应用一览
 
@@ -129,7 +121,7 @@ S0～S2.3 的本地创作流程和 S3 所需的 JSON 模式、预设控件已实
 
 ## 为什么值得信任
 
-以下上游正式版的构建证明与更新机制不适用于本 fork 的 S3 包：本次包为本地打包、Ad-hoc 签名且未公证，没有 GitHub Actions 构建证明。请使用 [Release 页](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)提供的 SHA-256。AI 创作仅在你发起生成、修改或测试连接时向所选模型服务发送请求。
+以下上游正式版的构建证明与更新机制不适用于本 fork 的 S3 包：本次包为本地打包、Ad-hoc 签名且未公证，没有 GitHub Actions 构建证明。请使用 [Release 页](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)提供的 SHA-256。AI 创作仅在你发起生成、修改或测试连接时向所选模型服务发送请求。
 
 - **全部开源。** 应用、渲染器和场景引擎都在这个仓库中，以 GPL-3.0-only 许可证发布。没有闭源核心，也没有付费功能：每个人用到的应用都一样。
 - **上游公开构建。** 上游正式版本由 [GitHub Actions](docs/release.md#build-buildyml) 从打了标签的提交构建并测试，然后附带 SHA-256 校验和与构建来源证明（build provenance attestation）发布。以下命令仅用于验证上游正式下载来自上游工作流：
@@ -195,7 +187,7 @@ WallpaperMachine 支持场景、视频和网页渲染。兼容性因壁纸而异
 <details>
 <summary><b>如何获取？</b></summary>
 
-本 fork 的 AI 创作版本请从 [macOS 15+ 预发布页](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)下载，并按[快速开始](#快速开始)核验与安装；它是未公证的 Ad-hoc 验收包。上游的[正式版本](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)、官网与 Homebrew 安装渠道另行维护，不能用来获取本 fork 的 AI 创作功能。
+本 fork 的 AI 创作版本请从 [macOS 15+ 预发布页](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)下载，并按[快速开始](#快速开始)核验与安装；它是未公证的 Ad-hoc 验收包。上游的[正式版本](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)、官网与 Homebrew 安装渠道另行维护，不能用来获取本 fork 的 AI 创作功能。
 
 </details>
 

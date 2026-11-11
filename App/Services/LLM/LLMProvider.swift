@@ -62,6 +62,12 @@ actor LLMProvider {
         return texts.map { CreatorConversationText.sanitize(grant.redacting($0)) }
     }
 
+    func checkSourceContainsNoCredential(_ text: String, profile: ProviderProfile) async throws {
+        guard text.utf8.count <= 40 * 1024 else { throw LLMFailure.outputLimit }
+        let grant = try await credentials.resolve(for: profile, settings: settings)
+        guard grant.redacting(text) == text else { throw CreatorRepairIssue.field("$", .text, policy: true) }
+    }
+
     private static func diagnostic(_ error: Error) -> LLMFailure {
         if let issue = error as? CreatorRepairIssue {
             return issue.category == .jsonModeUnsupported ? .jsonModeUnsupported : .protocolViolation
@@ -117,7 +123,7 @@ actor LLMProvider {
             catch { throw LLMFailure.invalidJob }
             log(.started(attempt: job.attemptCount))
             do {
-                var response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile)) { task in
+                var response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile, requiresJSON: input.requiresJSON)) { task in
                     try cancellation.check()
                     do { _ = try await store.generatingJob(ticket) } catch { throw LLMFailure.invalidJob }
                     try await settings.withCurrentProfile(profile) { _ in
@@ -128,7 +134,7 @@ actor LLMProvider {
                 try cancellation.check()
                 try await settings.withCurrentProfile(profile) { _ in }
                 do { _ = try await store.generatingJob(ticket) } catch { throw LLMFailure.invalidJob }
-                response.text = try LLMJSONEnvelope.unwrap(response.text)
+                if input.requiresJSON { response.text = try LLMJSONEnvelope.unwrap(response.text) }
                 try await received(response)
                 try validate(response.text)
                 log(.completed(attempts: job.attemptCount))
@@ -140,7 +146,7 @@ actor LLMProvider {
                 try cancellation.check()
                 let failure = diagnostic(error)
                 log(.failed(failure))
-                let nextMode = LLMOutputNegotiation.automatic(profile) && LLMOutputNegotiation.formatFailure(error)
+                let nextMode = input.requiresJSON && LLMOutputNegotiation.automatic(profile) && LLMOutputNegotiation.formatFailure(error)
                     ? LLMOutputNegotiation.next(mode) : nil
                 // An iteration owns its ledger and starts a separate immutable attempt for negotiation.
                 guard retrying else {

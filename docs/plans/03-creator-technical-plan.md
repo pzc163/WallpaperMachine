@@ -1,5 +1,7 @@
 # AI 创作工坊：技术方案与 Codex 开发计划 v0.1
 
+**当前实施更新（2026-11-11）：** 三阶段升级已接入 automatic 有界协商、LAN 模型、版本化 WebGL 模板，以及精调模板/自由代码双模式。`generatedOfflineV1` 采用单 HTML、不透明 iframe 和原生外部监督；仅支持能力检查通过的 WebKit。实现及回归见 [S4 实现与边界](../features/creator-free-code.md)，公测步骤见[检查表](../testing/creator-s4-public-test.md)。下方 S0～S2.3 的关闭/跳过描述保留为当时历史，不能当作当前开关状态。真实 S3 设备/能耗及跨系统复验仍待人工执行。
+
 日期：2026-11-10  
 状态：已补充存储与 Web 桥接合同，S0 可信模板流程已验证；任意代码隔离未通过。  
 用户目标：先在本机跑通完整创作流程，再逐步发布。  
@@ -185,25 +187,22 @@ S1.3 接收协议正常结束后的完整回答。仅兼容剥离覆盖整个回
 
 `CreatorPromptBuilder` 从目录导出类型、范围、枚举、单位、默认值、六套预设及固定资源预算，构建 System Prompt。用户描述上限 2,048 UTF-8 字节，完整请求文本上限 16 KiB。指定基线时只带该修订的参数和标题/摘要，保存其元数据摘要用于暂存/提交前复核；不偷换为最新修订，不带 Key、主机地址或本地路径。原始 S0 的两参数模板需显式升级；S1.0 的 v1 包含 v2 模板目录时可直接派生 v2 包。
 
-### 4.2 后续自由代码合同：CodeBundleOutput v2
+### 4.2 S4 自由代码合同：CodeBundleOutput v2
 
-**待 S4 隔离关口全部通过后启用，S1～S3 不解析或执行此合同。** 采用“JSON 元数据头 + `<file path="…">` 原始代码分块”，源码不作为 JSON 字符串值。下面是应用协议草案，非 Wallpaper Engine 标准，也不是可直接当 XML 解析的文档。
+本轮冻结为单文件合同，替代原多文件 1 MiB 草案。头部恰有 schemaVersion、title、summary，源码使用原始分块，不把 JS 塞入 JSON 字符串。
 
 ```text
-{"schemaVersion":2,"templateID":"canvas2d-sdk-v1","title":"深蓝星空","summary":"固定 SDK 下的效果模块","files":[{"path":"main.js","mediaType":"text/javascript"}],"capabilities":["canvas2d"]}
-<file path="main.js">
-export function render(frame) {
-  frame.clear();
-}
+{"schemaVersion":2,"title":"紫色水墨","summary":"黑底指针互动"}
+<file path="index.html">
+<!doctype html><html><body><canvas></canvas><script>/* bounded visual code */</script></body></html>
 </file>
-<end-bundle/>
 ```
 
-元数据 Schema 仅描述版本、纯文本信息、允许的相对路径清单和能力请求；不包含 `content` 字段。能力请求不等于授权，宿主骨架、CSP、SDK、运行策略及原生桥接仍由应用生成。每个文件必须在头部清单出现且恰好一个块，缺块、重复路径、尾部文本、缺失终止标记均拒绝。
+仅一个固定 `index.html` 块、完整末尾分隔行，无尾部文本、额外路径或保留标签歧义；HTML ≤32 KiB UTF-8、响应 ≤34 KiB。只允许无属性内联 classic script，原生语法编译不执行源码。标题/摘要沿用原长度与控制字符检查。跨 SSE 分片和 UTF-8 由共享流层处理，完整流结束后解析。未知版本、截断、重复头/文件、外部依赖和凭据回显拒绝。
 
-分块解析必须有明确状态机和流量上限，不能用一个正则“找标签”。示例的闭合标签与终止行属于保留分隔符：源码含有可造成歧义的完整分隔行时拒绝，不静默截断或转义改写源码。S4 冻结协议前比较带原生随机边界的分帧或长度帧，覆盖字符串内标签、分隔符跨网络分片、UTF-8 多字节截断、重复块及取消；摘要与最终字节数由本地计算，不以模型自报作为完整性证明。
+三协议的代码请求显式关闭 JSON grammar（Gemini text/plain）；模板合同保持 JSON 和既有 Schema 不变。没有模型能力请求自动授权；CSP、SDK、资源限制及所有摘要由宿主控制。
 
-自由代码合同初始上限为最多 20 个文本文件、单文件 256 KiB、总计 1 MiB；这些限制不套用到 S1 的短参数 JSON。拒绝绝对路径、`..`、空路径段、链接、大小写/Unicode 规范化碰撞、NUL、非允许类型及可执行二进制。只有完整封闭、检查通过的包才能进入受限运行器。
+源码在资源包 v2 的 index.html 保存，原生计算 source/codeDigest、bundleDigest、revisionDigest，生成 preview.jpg 后取得 code-runtime-v1 证据。未运行/失败候选不能发布。详细准入和限制见 [S4 实现](../features/creator-free-code.md)。
 
 ### 4.3 S1 原生封装与 preview.jpg
 
@@ -365,7 +364,7 @@ SDK 是可靠性约束，不是恶意脚本的隔离边界。S4 的非合作代�
 
 - `workshopCompatible`：保留现有项目所需兼容行为。
 - `trustedTemplateV1`：S1 规划中的模板参数策略；由 S0 的逐字节重建与严格模板入口扩展，模型无源码入口。
-- `generatedOfflineV1`：未来自由代码策略，须先通过本节全部硬性准入条件；当前关闭。
+- `generatedOfflineV1`：本轮开发者公测的离线单 HTML 策略，使用实际 iframe sandbox、独立进程归属核验及原生外部监督；不支持的 WebKit 拒绝运行。
 
 现有代码启用文件和跨源访问以适配项目内容；不能将这套配置原样作为新策略。普通预览使用临时网站数据存储也不等于阻止网络访问。[现有实现](https://github.com/MMFoundation/WallpaperMachine/blob/7025ba39f4c92f6c1af221aa3060c62aefb0e2a2/App/Services/WebWallpaper/WebWallpaperWindow.swift#L364)
 
@@ -388,7 +387,7 @@ S0 探索项保留为 S4 的复验基线。下表是自由代码关口，不把�
 
 拦截顶层导航不会覆盖所有子资源；替换 JavaScript 的 fetch 不是安全边界；`WKURLSchemeHandler` 只处理所注册的 scheme，也不能单独截获所有 HTTP(S)。必须组合策略并基于真实 WKWebView 证据决定是否开放代码生成。
 
-**下载排查方案（待实施，不是修复结论）：** S0 观察到第二条连接，尚未取得足够回调时序证明所有底层原因；“导航转入下载管线”是有接口依据的排查方向。先检查 `navigationAction.shouldPerformDownload`，在 action/response 策略中取消不允许的导航及下载转换，生成宿主不返回 `.download`。再覆盖 `webView(_:navigationAction:didBecome:)` 与 `webView(_:navigationResponse:didBecome:)` 两个入口，立即给 `WKDownload` 绑定由原生强持有的拒绝型 delegate，并调用 `cancel`；目的地回调返回 `nil`，下载重定向返回 `.cancel`，不保存 resume data，不接受下载文件名提供的路径。[Apple 下载转换回调](https://developer.apple.com/documentation/webkit/wknavigationdelegate/webview%28_%3Anavigationresponse%3Adidbecome%3A%29)、[取消下载](https://developer.apple.com/documentation/webkit/wkdownload/cancel%28_%3A%29)、[下载目的地](https://developer.apple.com/documentation/webkit/wkdownloaddelegate/download%28_%3Adecidedestinationusing%3Asuggestedfilename%3Acompletionhandler%3A%29)。
+**S0 历史排查方案（本次实际实现另见第 23 节）：** S0 观察到第二条连接，尚未取得足够回调时序证明所有底层原因；“导航转入下载管线”是有接口依据的排查方向。先检查 `navigationAction.shouldPerformDownload`，在 action/response 策略中取消不允许的导航及下载转换，生成宿主不返回 `.download`。再覆盖 `webView(_:navigationAction:didBecome:)` 与 `webView(_:navigationResponse:didBecome:)` 两个入口，立即给 `WKDownload` 绑定由原生强持有的拒绝型 delegate，并调用 `cancel`；目的地回调返回 `nil`，下载重定向返回 `.cancel`，不保存 resume data，不接受下载文件名提供的路径。[Apple 下载转换回调](https://developer.apple.com/documentation/webkit/wknavigationdelegate/webview%28_%3Anavigationresponse%3Adidbecome%3A%29)、[取消下载](https://developer.apple.com/documentation/webkit/wkdownload/cancel%28_%3A%29)、[下载目的地](https://developer.apple.com/documentation/webkit/wkdownloaddelegate/download%28_%3Adecidedestinationusing%3Asuggestedfilename%3Acompletionhandler%3A%29)。
 
 下载转换回调发生时不能假定尚未建立连接；上述取消是阻止继续传输/落盘的兜底，**不等于零网络请求保证**。复验要同时记录 action、response、didBecome、cancel 和服务器端事件的时间顺序，给每个探针独立标识，维持正向对照；如果仍出现额外连接，自由代码离线关口仍不通过。响应附件测试必须区分“诊断用服务器已发送响应”与“严格模式下是否应在第一条请求前拒绝”。
 
@@ -402,7 +401,7 @@ S0 探索项保留为 S4 的复验基线。下表是自由代码关口，不把�
 4. **攻击与共存测试。** 实际执行不可合作的死循环、微任务饥饿、持续分配及无限日志样例，证明超时后资源被释放、旧实例不能复活、其他壁纸和主应用继续可用；记录截止时间和实测停止延迟。进程终止能力与 CPU/GPU/内存限额分别验收，不互相替代。
 5. **网络/文件/权限全矩阵通过。** 三个 S0 失败探针及本节全部入口必须在目标支持环境复验，无跳过冒充通过，且发布、重启和恢复入口保持相同策略。
 
-S1 继续使用可信模板及参数范围/组合负载检查，不为完成这些 S4 条件临时开发通用进程查杀器。条件未全部满足时保持 `generatedOfflineV1` 和 `CodeBundleOutput v2` 关闭。
+S1 模板继续按原生目录重建。S4 本机离屏网络/进程验证与跨系统硬件验收分开记录；若运行时无法确认进程/存储归属或终止能力，拒绝该实例，不能回退兼容宿主。CPU/GPU 的应用层限额及未覆盖口径必须在公测说明中保留，不能以终止测试替代 GPU/能耗验收。
 
 ### 6.3 策略在发布后的持续有效性
 
@@ -662,3 +661,14 @@ S3 控件补充：设置中的 JSON 模式选择器只对 OpenAI-compatible 写�
    其余门禁保持本地 Mock。命令、报告字段、AC-01～14 矩阵与待 S3/S4 的边界见 [验收文档](../features/creator-acceptance.md)。
 
 2026-11-11 已核对真实 smoke、30/30 首次通过的固定模型/schema 基准及 1800 秒三模板长稳；该配置可运行率目标已达成。常规门禁继续跳过真实入口，最终计数与脱敏聚合指标以验收文档为准；宿主内存不包含 WebContent/GPU，S3 设备与视觉验收、S4 自由代码关口不变。
+
+## 23. S3 修复与 S4 公测实施合同
+
+- automatic 使用 schema → object → prompt，有界协商与内容修复共享最多三次请求；连接探针/创作同一实现，默认 8192 输出 token/次、24576 总预留。显式本地 LAN 白名单保持主机/代次绑定，成功顶部通知显示模型/模式/耗时。
+- 新模板 rendererRevision 3 使用 WebGL + DOM 时钟；旧 rendererRevision nil/2 和 S0 源码冻结，原摘要回归保留。目录、参数数目和预设不变。
+- S4 新增 CreatorCodeOutput/Prompt/SDK/Sandbox/Process；父页面由 scheme 内存提供，模型仅在 sandbox allow-scripts iframe 执行。无 same-origin/downloads/外部资源权限，完整包摘要和 code-runtime-v1 注册贯穿发布/重启/播放列表/恢复。
+- 外部健康检查 250 ms、deadline 2 秒；原生 footprint 512 MiB、持续 CPU 占用阈值；故障仅终止所属 WebContent。停止后旧回调失效。SPI 不可用拒绝，GPU 共享及跨版本保证边界明确记录。
+- 光标复用按屏原生节流，≤30 Hz；暂停/遮挡/休眠无代码光标订阅。预览/封面/修复/回退/入库复用已有原生编排，模板参数控件不用于自由代码。
+- 原 S0 三项探针已成为常规测试；网络正向对照、实际死循环/微任务/分配/日志及两页共存有独立证据。旧 S2.3 live/1800 秒结果不外推到新实现。
+
+完整说明与测试映射：[S4 实现](../features/creator-free-code.md)。真实 macOS 15、双屏 DPI/睡眠、视觉与能耗仍须公测；本轮不自动启动应用或更换桌面。

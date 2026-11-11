@@ -49,6 +49,36 @@ import XCTest
         } catch { await panel.shutdown(); throw error }
         await panel.shutdown()
     }
+    func testCodeModeGeneratesIndependentlyAndSelectingHistoryRestoresModeWithoutDesktop() async throws {
+        let c = try await LLMTestContext(tokens: 24576); defer { c.cleanup() }
+        let workspace = CreatorWorkspaceTests.workspace(c), panel = try makeController(creatorWorkspace: CreatorWorkspaceTests.workspace(c))
+        do {
+            try await panel.start(); try await panel.controller.recoverCreator()
+            let settings = try await workspace.configuration()
+            _ = try await workspace.selectProfile(c.profile.id, expectedRevision: settings.revision)
+            let controller = panel.controller
+            try await controller.selectCreatorProject(c.ticket.projectID)
+            try await controller.setCreatorMode(.code)
+            XCTAssertNil(controller.creator.selectedProjectID)
+            controller.creator.prompt = "紫色水墨"
+            c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(CreatorCodeWorkflowTests.output())])])
+            try await controller.generateCreator()
+            let id = try XCTUnwrap(controller.creator.selectedProjectID)
+            XCTAssertEqual(controller.creator.detail?.specification?.kind, .code)
+            XCTAssertTrue(controller.creator.canSave); XCTAssertFalse(controller.creator.canApply)
+            XCTAssertTrue(controller.creator.parameters.isEmpty)
+            try await controller.setCreatorMode(.template)
+            XCTAssertNil(controller.creator.selectedProjectID)
+            let retained = try await c.store.project(id)
+            XCTAssertNotNil(retained.selectedRevisionID)
+            try await controller.selectCreatorProject(id)
+            XCTAssertEqual(controller.creator.mode, .code)
+            XCTAssertTrue(controller.creator.canSave)
+            XCTAssertTrue(panel.bridge.hostStartupCalls.isEmpty)
+            XCTAssertFalse(FileManager.default.fileExists(atPath: c.root.appendingPathComponent("Library").path))
+        } catch { await panel.shutdown(); throw error }
+        await panel.shutdown()
+    }
     func testControllerCancellationStopsRequestAndDoesNotPublish() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         let workspace = CreatorWorkspaceTests.workspace(c)

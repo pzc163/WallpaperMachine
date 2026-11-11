@@ -280,6 +280,8 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     private var extraUserScripts: [WKUserScript] = []
     private let creatorResources: CreatorWebResources?
     private let creatorPermissions: CreatorWebPermissions?
+    private(set) var creatorCode: CreatorCodeSandbox?
+    private(set) var creatorCodeFailure: CreatorRepairIssue?
     private var creatorLoadTask: Task<Void, Never>?
     var onContentProcessTermination: (@MainActor () -> Void)?
     var expectedCreatorDigest: String?
@@ -396,6 +398,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         let pageView = PageWebView(frame: .zero, configuration: configuration)
         webView = pageView
         super.init()
+        CreatorCodeProcess.observe(webView)
         messageProxy.page = self
         pageView.onBackingScale = { [weak self] scale in self?.applyBackingScale(scale) }
         // Registered on the web view's own controller: `WKWebView` copies the
@@ -435,6 +438,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     }
 
     func load() {
+        creatorCode?.stop(); creatorCode = nil; creatorCodeFailure = nil
         creatorLoadTask?.cancel()
         // First, so the document about to start already carries the committed
         // frame-rate limit: its very first `requestAnimationFrame` call is paced.
@@ -472,6 +476,16 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
                     guard let self, self.documentGeneration == generation else { return }
                     self.webView.configuration.userContentController.removeAllContentRuleLists()
                     self.webView.configuration.userContentController.add(rules)
+                    if snapshot.specification.kind == .code {
+                        guard CreatorCodeProcess.supported else { throw CreatorRuntimeFailure.pageFailed }
+                        let sandbox = CreatorCodeSandbox(view: self.webView)
+                        self.creatorCode = sandbox
+                        sandbox.onReady = { [weak self] in self?.completeLoad() }
+                        sandbox.onFailure = { [weak self] issue in
+                            self?.creatorCodeFailure = issue; self?.isLoaded = false
+                            self?.onFailure?(issue.description)
+                        }
+                    }
                     creatorResources.snapshot = snapshot
                     self.webView.load(URLRequest(url: CreatorWebResources.entryURL))
                 } catch {
@@ -487,6 +501,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     }
 
     func stop() {
+        creatorCode?.stop(); creatorCode = nil
         creatorLoadTask?.cancel()
         creatorLoadTask = nil
         creatorResources?.snapshot = nil
@@ -548,7 +563,10 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// that draws at it), and no more than the frame limit, since a page held to
     /// 30 frames cannot show 60 positions. Below 10 a second hover would stop
     /// following the pointer, so a very low limit does not slow it further.
+    var acceptsPointer: Bool { isLoaded && !hostSuspended && (creatorCode == nil || !committed.isPaused) }
+
     var pointerMoveInterval: TimeInterval {
+        if creatorCode != nil { return 1 / Double(min(30, max(1, committed.fps ?? 30))) }
         let limit = frameLimit
         return 1 / Double(limit == 0 ? renderRate : max(limit, Self.minimumPointerRate))
     }
@@ -776,9 +794,11 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     private func applyHostSuspension(_ suspended: Bool) {
         guard suspended != hostSuspended else { return }
         hostSuspended = suspended
+        creatorCode?.setHostSuspended(suspended)
         suspensionGeneration += 1
         let generation = suspensionGeneration
         if suspended {
+            creatorCode?.cursor(x: 0, y: 0, active: false)
             // Suspend, never pause: unsuspending restores what each element was
             // doing, so media the user had paused stays paused.
             webView.setAllMediaPlaybackSuspended(true)
@@ -942,6 +962,8 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
 
     private func deliverPaused() {
         guard isLoaded else { return }
+        creatorCode?.pause(committed.isPaused)
+        if committed.isPaused { creatorCode?.cursor(x: 0, y: 0, active: false) }
         run(WebWallpaperProtocol.hostCall(.setPaused, "paused"), arguments: ["paused": committed.isPaused])
     }
 
@@ -1106,6 +1128,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// What the page posts, once `WebWallpaperProtocol.PageMessage` has checked it. Anything that
     /// is not a recognised tagged object with well-formed fields is dropped there.
     fileprivate func receiveScriptMessage(_ body: Any) {
+        if creatorCode != nil { return }
         // Fixed S0 templates have no native capabilities. Diagnostics remain bounded below.
         if creatorResources != nil,
            (body as? [String: Any])?["type"] as? String != "pageDiagnostic" { return }
@@ -1162,6 +1185,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
             do {
                 _ = try await self.webView.callAsyncJavaScript(script, arguments: arguments, in: nil, contentWorld: .page)
             } catch {
+                if self.creatorCode != nil { return }
                 AppLog.warn("web wallpaper \(self.projectURL.lastPathComponent): host call failed: \(error.localizedDescription)", load: self.logLoad)
             }
         }
@@ -1172,6 +1196,15 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// tree would both restart work and hit-test against stale geometry.
     func deliverMouse(_ event: NSEvent) {
         guard !hostSuspended else { return }
+        if let creatorCode {
+            guard !committed.isPaused else { return }
+            if [.mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged].contains(event.type) {
+                let point = webView.convert(event.locationInWindow, from: nil)
+                creatorCode.cursor(x: point.x / max(1, webView.bounds.width),
+                    y: (webView.isFlipped ? point.y : webView.bounds.height-point.y) / max(1, webView.bounds.height), active: true)
+            }
+            return
+        }
         counters.record(.pointerDelivered, for: surface)
         switch event.type {
         case .mouseMoved:
@@ -1199,6 +1232,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
 
     /// Clears `:hover` and fires `mouseout` when the pointer leaves the desktop.
     func deliverMouseExit() {
+        if let creatorCode { creatorCode.cursor(x: 0, y: 0, active: false); return }
         guard WKWebView.instancesRespond(to: Self.simulateExit),
               let exit = NSEvent.enterExitEvent(
                 with: .mouseExited, location: NSPoint(x: -1, y: -1), modifierFlags: [],
@@ -1209,6 +1243,15 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        if let creatorCode, let source = creatorResources?.snapshot?.files["index.html"] {
+            do { try creatorCode.start(source: String(decoding: source, as: UTF8.self)) }
+            catch { creatorCodeFailure = .from(error); onFailure?("code_start_failed") }
+            return
+        }
+        completeLoad()
+    }
+    private func completeLoad() {
+        creatorCode?.setHostSuspended(hostSuspended)
         isLoaded = true
         lastLoadFinished = now()
         replayCommittedState()
@@ -1225,6 +1268,8 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor action: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         if creatorResources != nil {
+            if creatorCode != nil, !action.shouldPerformDownload, action.targetFrame?.isMainFrame == false,
+               action.request.url?.absoluteString == "about:srcdoc" { decisionHandler(.allow); return }
             decisionHandler(!action.shouldPerformDownload && action.targetFrame?.isMainFrame == true && action.request.url == CreatorWebResources.entryURL
                             ? .allow : .cancel)
             return
@@ -1245,7 +1290,20 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
                         && response.response.mimeType == "text/html" && response.canShowMIMEType ? .allow : .cancel)
     }
 
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        if let creatorCode { creatorCode.cancel(download) } else if creatorResources != nil { download.cancel { _ in } }
+    }
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        if let creatorCode { creatorCode.cancel(download) } else if creatorResources != nil { download.cancel { _ in } }
+    }
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        if let creatorCode {
+            isLoaded = false
+            if creatorCode.stopped && creatorCode.failure == nil { return }
+            if creatorCodeFailure == nil { creatorCodeFailure = creatorCode.failure ?? .init(category: .runtime, runtimeReason: .pageFailed) }
+            creatorCode.stop()
+            onFailure?("code_process_terminated"); return
+        }
         onContentProcessTermination?()
         isLoaded = false
         onLoading?()
@@ -1297,12 +1355,14 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         isLoaded = false
         forgetDocumentState()
-        onFailure?(error.localizedDescription)
+        if creatorCode != nil { creatorCodeFailure = .init(category: .runtime, runtimeReason: .pageFailed); onFailure?("code_navigation_failed") }
+        else { onFailure?(error.localizedDescription) }
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         isLoaded = false
         forgetDocumentState()
-        onFailure?(error.localizedDescription)
+        if creatorCode != nil { creatorCodeFailure = .init(category: .runtime, runtimeReason: .pageFailed); onFailure?("code_navigation_failed") }
+        else { onFailure?(error.localizedDescription) }
     }
 }

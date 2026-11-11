@@ -8,7 +8,7 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
     }
     enum Rule: String, Codable, Sendable { case syntax, missing, unexpected, type, range, choice, text, defaultMismatch, resourceBudget }
     struct Field: Codable, Equatable, Sendable { let path: String; let rule: Rule }
-    enum RuntimeReason: String, Codable, Sendable { case timeout, pageFailed, invalidCapture }
+    enum RuntimeReason: String, Codable, Sendable { case timeout, pageFailed, invalidCapture, syntax, script, unhandled, shader, resource, policy }
     let category: Category
     var fields: [Field] = []
     var retryAfter: Double? = nil

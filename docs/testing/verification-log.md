@@ -25,6 +25,19 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — S4 offline code creation and developer preview
+
+- Stage 1 commit 8fccf4b9: bounded schema/object/prompt negotiation, LAN endpoints and native success banner; 720 script and 5006 native passed, 72 skipped.
+- Stage 2 commit c9ada8b3: versioned WebGL templates, legacy byte reconstruction, native covers and context recovery; 720 script and 5012 native passed, 72 skipped.
+- S4: single raw HTML contract, immutable code revisions, three protocol codecs, native snapshot publication and bounded repair/history.
+- Opaque sandbox iframe and positive-control network matrix; the original download/EventSource/media probes execute and pass.
+- Native process ownership and external deadline: synchronous loop, microtask starvation, bounded memory/log overload, release and coexistence tests passed.
+- Cursor and dual-display host tested using inert surfaces/monitor; no visible window or desktop assignment.
+- Focused S4 18/18, broader regression 68/68, controller/S4 27/27 passed.
+- Full python3 scripts/test.py: 720 script tests and 5034 native passed, 0 failed, 69 skipped; two runtime warnings retained.
+- Documentation 11, catalog localization 8 and panel localization 9 checks passed. No live model, personal Keychain or physical S3 operation.
+- WebKit SPI availability checked at runtime; GPU hard quotas, macOS 15 hardware, visible quality, sleep and whole-system energy remain separate public acceptance items.
+
 ## 2026-11-11 — Versioned WebGL Creator templates
 
 - New template specifications use rendererRevision 3; existing S0 and revision 2 bytes are frozen and checked with golden digests.
@@ -128,14 +141,3 @@ Added the native AI Creator tab and model settings, with explicit generate/save/
 - Skips: 3 S0 unrestricted probes, 62 media/device opt-ins, 3 Steam network tests, 1 reference job and 1 Creator live smoke. No real-provider request, personal Keychain access, desktop operation or Release/install this stage.
 - Final compiler-warning lines: targeted 28, full 0, none in changed sources/tests. Runtime warnings in passing untouched tests: `WebMOpeningTests.testAVp9FileOpensWithItsFormatSizeAndLength()`, `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`, `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()`.
 - Updated 02/03/05, feature owners and index; final documentation/source/scope checks and links recorded in the S2.1 report. Task-only artifacts removed after preserving counts; S2.1 remains uncommitted and stops here.
-
-## 2026-11-10 — Creator S1.4 native runtime, sealed publication and opt-in smoke
-
-[S1.4 native publication](../features/creator-publication.md) connects template generation, real unattached WebKit snapshots, immutable four-file evidence and recoverable library import. S1.3 was committed locally as `ac28cf34`; S1.4 remains uncommitted, with no push or desktop change.
-
-- `python3 scripts/test.py --only CreatorPublicationTests --only CreatorPosterTests --only CreatorOrchestratorTests --only CreatorLiveSmokeTests --only CreatorGeneratorTests --only CreatorDraftTests --only CreatorRuntimeRegistryTests --only CreatorPublisherTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only CreatorPreviewTests --only ImportTests --only WallpaperImportStagingTests --only WebWallpaperPreviewSurfaceTests --only LibraryPreviewFetcherTests` — exit 0; 189 passed, 0 failed, 4 skipped.
-- `python3 scripts/tests/test_creator_live_smoke.py` and `python3 scripts/tests/test_test.py` — exit 0; 8 and 18 passed, synthetic loopback credentials only.
-- `python3 scripts/test.py` — exit 0, once; 695 Python tests in 33 modules; 4,907 native passed, 0 failed, 70 skipped of 4,977. All 19 new routine native tests passed; live smoke skipped.
-- Skips: 3 S0 unrestricted probes, 62 opt-in media/device checks, 3 live Steam checks, 1 reference job and 1 creator live test. No real model request, personal Keychain, UI/desktop, Release delivery or S4 validation.
-- Four main-thread runtime warnings in passing unchanged AppUpdate, VideoFormatSupport, WebMPlayer and WebMOpening tests; no source locations. The two WebM warnings were additionally observed this run. Full compilation has 28 warning lines outside the changed sources/tests.
-- `python3 scripts/tests/test_doc_links.py` — exit 0; 11 passed. Planning mirrors, frozen v1 generators/golden assertions, tested-source hashes, branch/scope and `git diff --check` verified; XcodeGen generated the project.

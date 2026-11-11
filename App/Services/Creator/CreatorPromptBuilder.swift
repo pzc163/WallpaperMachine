@@ -8,6 +8,7 @@ enum CreatorPromptBuilder {
         let parameters: [String: CreatorTemplateCatalog.Value]
         let title: String
         let summary: String
+        var source: String? = nil
     }
     static func build(prompt: String, base: Base?, maxOutputTokens: Int, repair: CreatorRepairIssue? = nil) throws -> LLMRequest {
         try Task.checkCancellation()

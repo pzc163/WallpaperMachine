@@ -26,7 +26,8 @@ extension CreatorRevisionStore {
                 guard checked.report == source, checked.snapshot.bundleVersion == 2,
                       checked.snapshot.manifest?.packaging == .renderDraft else { throw CreatorPersistence.Failure.staleValidation }
                 let files = try CreatorBundleManifest.files(for: checked.snapshot.specification, poster: capture.jpeg,
-                                                            presentation: checked.snapshot.manifest?.presentation)
+                                                            presentation: checked.snapshot.manifest?.presentation,
+                                                            source: checked.snapshot.specification.kind == .code ? checked.snapshot.files["index.html"] : nil)
                 let candidate = jobURL(job.id).appendingPathComponent("candidate", isDirectory: true)
                 let bundle = candidate.appendingPathComponent("bundle", isDirectory: true)
                 try CreatorPersistence.directory(bundle, create: true)
@@ -66,7 +67,7 @@ extension CreatorRevisionStore {
             guard pair.report.allowsPublication, pair.snapshot.manifest?.packaging == .sealed else { throw CreatorPersistence.Failure.incompleteBundle }
             let binding = CreatorRuntimeRegistry.Binding(schemaVersion: 1, wallpaperID: pair.snapshot.wallpaperID,
                 projectID: projectID, revisionID: revisionID, bundleVersion: 2, bundleDigest: pair.snapshot.digest,
-                runtimePolicy: "trustedTemplateV1", context: pair.report.context, report: pair.report)
+                runtimePolicy: pair.snapshot.specification.runtimePolicy, context: pair.report.context, report: pair.report)
             try CreatorRuntimeRegistry.validateBinding(binding, snapshot: pair.snapshot, context: context)
             return (pair.snapshot, binding)
         }
@@ -85,7 +86,7 @@ extension CreatorRevisionStore {
         return ValidationReport(schemaVersion: 1, id: UUID(), projectID: project.id, revisionID: revision.id,
             projectIdentityDigest: project.identityDigest, revisionDigest: metadataDigest,
             renderDigest: revision.renderDigest, posterDigest: revision.posterDigest, bundleDigest: snapshot.digest,
-            templateRevision: revision.templateRevision, context: context.runtime,
+            templateRevision: revision.templateRevision, context: context.forMode(snapshot.specification.creationMode).runtime,
             results: ["structure": .passed, "sourceReconstruction": .passed, "policy": .passed, "runtime": .passed, "posterCapture": .passed],
             measuredMetrics: metrics, validatedAt: CreatorPersistence.timestamp())
     }

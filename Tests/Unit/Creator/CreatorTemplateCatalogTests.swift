@@ -99,7 +99,7 @@ final class CreatorTemplateCatalogTests: XCTestCase {
             .stars: "343bfa8085915ff4e430da4bce22bfd419e44566c147f83f3ca68348a7a0c10e",
             .clock: "63ebb34cbfa8b717f1f70f23cb5c054397f6e31d8fa428576113742804af829a",
         ]
-        for kind in CreatorTemplate.Kind.allCases {
+        for kind in CreatorTemplate.Kind.templates {
             let files = try CreatorTemplate.files(for: .init(projectID: id, kind: kind))
             XCTAssertEqual(CreatorTemplate.digest(files), original[kind], "Persisted S0 bundles must still validate")
         }

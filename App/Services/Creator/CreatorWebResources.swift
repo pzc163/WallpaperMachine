@@ -32,9 +32,10 @@ final class CreatorWebResources: NSObject, WKURLSchemeHandler {
             task.didFailWithError(URLError(.noPermissionsToReadFile))
             return
         }
-        task.didReceive(URLResponse(url: url, mimeType: "text/html", expectedContentLength: data.count,
+        let payload = snapshot?.specification.kind == .code ? Data(CreatorCodeSandbox.container.utf8) : data
+        task.didReceive(URLResponse(url: url, mimeType: "text/html", expectedContentLength: payload.count,
                                    textEncodingName: "utf-8"))
-        task.didReceive(data)
+        task.didReceive(payload)
         task.didFinish()
     }
 
@@ -46,6 +47,10 @@ final class CreatorWebResources: NSObject, WKURLSchemeHandler {
 final class CreatorWebPermissions: NSObject, WKUIDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration,
                  for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? { nil }
+    @available(macOS 27.0, *)
+    func webView(_ webView: WKWebView, requestGeolocationPermissionFor origin: WKSecurityOrigin,
+                 initiatedBy frame: WKFrameInfo, decisionHandler: @escaping (WKPermissionDecision) -> Void) { decisionHandler(.deny) }
+
     func webView(_ webView: WKWebView, requestMediaCapturePermissionFor origin: WKSecurityOrigin,
                  initiatedByFrame frame: WKFrameInfo, type: WKMediaCaptureType,
                  decisionHandler: @escaping (WKPermissionDecision) -> Void) { decisionHandler(.deny) }

@@ -36,7 +36,7 @@ automatic credential copying is introduced.
 Stage 1 verification: the routine gate passed 5,006 native tests with zero failures and
 72 explicit skips; all 720 script tests passed. Focused negotiation, profile, generation,
 repair, conversation and settings coverage passed 56/56. No live provider or desktop
-operation was used. Stages 2 and 3 remain pending; this commit does not unlock S4.
+operation was used. At the stage 1 checkpoint, stages 2 and 3 remained pending; that commit did not unlock S4.
 
 ## 2. Versioned WebGL template renderer
 
@@ -78,3 +78,12 @@ models mocked and credentials isolated. The final package additionally verifies 
 signatures, bundled library deployment versions, mounting and published download bytes.
 Durable outcomes are recorded in the owning feature documentation and verification log;
 temporary output stays in one task artifact directory and is removed after verification.
+
+Final stage 3 gate: all 720 script and 5,034 native tests passed, zero failed and 69
+explicit skips. The original three S0 probes now execute in the ordinary gate.
+Focused S4 coverage passed 18/18, with a broader 68/68 regression run and a 27/27
+controller/S4 run. Documentation and localization checks passed. The single-HTML
+contract, opaque iframe, process ownership/SPI limitations and remaining hardware/GPU
+checks are described in [the implementation](../features/creator-free-code.md).
+Release construction and publication follow the verified commit; no main merge,
+latest promotion, personal credentials or visible desktop operation is authorized.

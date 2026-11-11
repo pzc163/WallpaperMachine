@@ -100,9 +100,10 @@ actor CreatorWorkspace {
         let next = try await store.createProject(title: title)
         do {
             if let revision = project.selectedRevisionID {
-                var spec = try await store.snapshot(projectID: id, revisionID: revision).specification
+                let original = try await store.snapshot(projectID: id, revisionID: revision)
+                var spec = original.specification
                 spec.projectID = next.id
-                _ = try await rebuild(spec, base: nil)
+                _ = try await rebuild(spec, base: nil, source: spec.kind == .code ? original.files["index.html"] : nil)
             }
             return next.id
         } catch {
@@ -112,10 +113,10 @@ actor CreatorWorkspace {
             throw error
         }
     }
-    private func rebuild(_ specification: CreatorTemplate.Specification, base: UUID?) async throws -> CreatorRevision {
+    private func rebuild(_ specification: CreatorTemplate.Specification, base: UUID?, source: Data? = nil) async throws -> CreatorRevision {
         let ticket = try await store.beginJob(projectID: specification.projectID, baseRevisionID: base)
         do {
-            _ = try await store.stage(specification, for: ticket)
+            _ = try await store.stage(specification, for: ticket, source: source)
             let draft = try await store.commit(ticket, validatingStructure: true, selecting: false)
             let evidence = try await capture(specification.projectID, draft.id, store)
             try Task.checkCancellation()

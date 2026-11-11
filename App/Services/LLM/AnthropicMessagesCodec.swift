@@ -10,6 +10,8 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
     private var answer = LLMAnswerBuffer(allowsLeadingThought: false)
     private var usage = LLMResponse.Usage()
 
+    init(requiresJSON: Bool = true) { answer.requiresJSON = requiresJSON }
+
     static func request(profile: ProviderProfile, input: LLMRequest) throws -> LLMRequestDescriptor {
         let body: [String: Any] = ["model": profile.model, "stream": true, "max_tokens": input.maxOutputTokens,
             "system": input.systemInstruction, "messages": input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]

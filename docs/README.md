@@ -81,6 +81,8 @@ file; pass `rg -u` to search them deliberately.
 
 | Document | Purpose |
 |---|---|
+| [features/creator-free-code.md](features/creator-free-code.md) | S4 raw HTML contract, opaque offline host, native watchdog and cursor bridge |
+| [testing/creator-s4-public-test.md](testing/creator-s4-public-test.md) | External developer install, LAN model and hardware acceptance checklist |
 | [features/creator-acceptance.md](features/creator-acceptance.md) | S2.3 headless recovery, AC evidence matrix, opt-in model benchmark and offscreen soak |
 | [features/creator-workspace.md](features/creator-workspace.md) | S2.2 native creator page, model settings, explicit preview/save/apply actions and startup/storage boundaries |
 | [features/creator-iteration.md](features/creator-iteration.md) | S2.1 bounded parameter repair, conversation budgets, restart cleanup and explicit revision selection |

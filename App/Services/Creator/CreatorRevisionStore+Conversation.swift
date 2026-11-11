@@ -21,7 +21,7 @@ extension CreatorRevisionStore {
     }
 
     func beginIteration(projectID: UUID, base: CreatorPromptBuilder.Base?, profile: ProviderProfile,
-                        message: String, maxRepairs: Int) throws -> CreatorConversation.Ticket {
+                        message: String, maxRepairs: Int, mode: CreatorCreationMode = .template) throws -> CreatorConversation.Ticket {
         try locked {
             try Task.checkCancellation()
             guard (0...2).contains(maxRepairs), CreatorConversationText.sanitize(message) == message else { throw CreatorGenerationFailure.invalidRequest }
@@ -34,12 +34,12 @@ extension CreatorRevisionStore {
             }
             try cancelActiveIteration(projectID)
             var document = try readConversation(projectID)
-            let automatic = LLMOutputNegotiation.automatic(profile)
+            let automatic = mode == .template && LLMOutputNegotiation.automatic(profile)
             let turn = CreatorConversation.Turn(id: UUID(), token: UUID(), createdAt: CreatorPersistence.timestamp(),
                 baseRevisionID: base?.revisionID, baseRevisionDigest: base?.revisionDigest,
                 profileID: profile.id, configurationID: profile.configurationID, userMessage: message,
                 maxRepairs: maxRepairs, requestBudget: min(automatic ? 3 : 1 + maxRepairs, profile.limits.requestBudget), tokenBudget: profile.limits.tokenBudget,
-                negotiatesJSON: automatic ? true : nil, negotiationCount: automatic ? 0 : nil)
+                creationMode: mode == .code ? .code : nil, negotiatesJSON: automatic ? true : nil, negotiationCount: automatic ? 0 : nil)
             document.turns.append(turn)
             try document.validate()
             let ticket = CreatorConversation.Ticket(id: turn.id, projectID: projectID, token: turn.token)

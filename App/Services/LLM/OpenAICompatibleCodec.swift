@@ -6,7 +6,7 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
     private var stopped = false
     private var done = false
 
-    init(allowsLeadingThought: Bool) { answer = LLMAnswerBuffer(allowsLeadingThought: allowsLeadingThought) }
+    init(allowsLeadingThought: Bool, requiresJSON: Bool = true) { answer = LLMAnswerBuffer(allowsLeadingThought: allowsLeadingThought, requiresJSON: requiresJSON) }
     static func request(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool) throws -> LLMRequestDescriptor {
         let basePath = URLComponents(string: profile.baseURL)?.path ?? ""
         let url = try LLMRequestDescriptor.endpoint(profile, version: basePath.isEmpty || basePath == "/" ? "v1" : nil, suffix: "chat/completions")

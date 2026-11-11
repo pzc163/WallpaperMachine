@@ -35,7 +35,7 @@ struct CreatorRevision: Codable, Equatable, Sendable {
               bundleDigest == snapshot.digest, createdAt >= 0 else { throw CreatorPersistence.Failure.invalidRecord }
         if let generation {
             try generation.validate()
-            guard bundleVersion == 2, outputSchemaVersion == 1,
+            guard bundleVersion == 2, outputSchemaVersion == (snapshot.specification.kind == .code ? 2 : 1),
                   let providerID, UUID(uuidString: providerID) != nil,
                   let modelID, !modelID.isEmpty, modelID.utf8.count <= 128,
                   !modelID.unicodeScalars.contains(where: CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains),

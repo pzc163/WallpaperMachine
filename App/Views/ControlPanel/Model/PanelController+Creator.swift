@@ -27,6 +27,7 @@ extension PanelController {
         creator.projects = projects; creator.configuration = configuration; creator.detail = detail
         creator.selectedProjectID = detail?.project.id
         creator.parameters = detail?.specification?.parameters ?? [:]
+        if let mode = detail?.specification?.creationMode ?? detail?.conversation.turns.last?.creationMode { creator.mode = mode }
         if !creator.isBusy {
             creator.issue = detail?.conversation.turns.last?.failure
             creator.phase = creator.issue == nil ? (creator.selectedRevision == nil ? .idle : .ready) : .failed
@@ -37,6 +38,13 @@ extension PanelController {
         creator.preview?.close(); creator.preview = nil
         creator.selectedProjectID = id
         try await run(.immediate) { try await loadCreator() }
+    }
+    func setCreatorMode(_ mode: CreatorCreationMode) async throws {
+        guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
+        if mode == .code && !CreatorCodeProcess.supported { throw CreatorPanelFailure(message: L("Free code is unavailable on this WebKit version.")) }
+        guard creator.mode != mode else { return }
+        try await selectCreatorProject(nil)
+        creator.mode = mode
     }
     func newCreatorProject() async throws {
         try await creatorOperation(.editing) {
@@ -68,7 +76,7 @@ extension PanelController {
             let token = self.creator.operationID
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
-                maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs)
+                maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs, mode: self.creator.mode)
             request.progress = { [self] stage, attempt, limit in
                 await MainActor.run {
                     guard self.creator.operationID == token else { return }

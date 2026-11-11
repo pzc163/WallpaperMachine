@@ -11,7 +11,7 @@ final class CreatorDraftTests: XCTestCase {
 
     func testAllTemplatesCreateImmutableCompleteBundlesOutsideLibrary() async throws {
         let store = CreatorDraftStore(root: root.appendingPathComponent("drafts"))
-        for kind in CreatorTemplate.Kind.allCases {
+        for kind in CreatorTemplate.Kind.templates {
             let spec = CreatorTemplate.Specification(projectID: UUID(), kind: kind)
             let directory = try await store.create(spec)
             let first = try await store.snapshot(directory)

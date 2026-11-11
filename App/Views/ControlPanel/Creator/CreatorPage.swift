@@ -106,6 +106,16 @@ private struct CreatorComposer: View {
     var body: some View {
         @Bindable var model = controller.creator
         VStack(alignment: .leading, spacing: 10) {
+            Picker("Creation mode", selection: Binding(get: { model.mode }, set: { mode in
+                controller.launch { try await controller.setCreatorMode(mode) }
+            })) {
+                Text("Template tuning").tag(CreatorCreationMode.template)
+                Text("Free code · HTML5 / Canvas / WebGL").tag(CreatorCreationMode.code)
+            }.disabled(model.isBusy).accessibilityIdentifier("creator-mode")
+            if model.mode == .code {
+                Text("Offline interactive code. Every revision must pass runtime validation before saving.")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
             TextField("Describe your wallpaper or the changes you want", text: $model.prompt, axis: .vertical)
                 .lineLimit(2...5).textFieldStyle(.roundedBorder).disabled(model.isBusy)
                 .accessibilityIdentifier("creator-prompt")
