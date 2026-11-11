@@ -10,6 +10,7 @@ final class CreatorModel {
     var detail: CreatorWorkspace.Detail?
     var search = ""
     var prompt = ""
+    var composerFocusID = UUID()
     var mode = CreatorCreationMode.template
     var autoRepair = false
     var maxRepairs = 1

@@ -25,6 +25,13 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator native composer and connection preview gate
+
+- Workspace/controller/settings targeted suite: 29 passed; expanded composer and native growth/scrolling suite: 5 passed. Six languages and compact layouts tested offscreen.
+- Full python3 scripts/test.py: 720 Python checks, 5048 native passed, 0 failed, 69 skipped; 2 runtime warnings. First run exposed two old deadline assertions; updated contract checks and full rerun passed.
+- No live API, personal model Keychain, visible window, production app or desktop access. Physical macOS 15/LAN privacy, visible IME/UX and hardware acceptance remain manual.
+- Feature branch only; Release and Ad-hoc macOS 15 packaging requested. Package-specific signatures, dependency minima and hash are attached to creator-ux-preview-20261111, outside the source verification record.
+
 ## 2026-11-11 — Creator streaming deadlines and progress
 
 - Three-protocol codec, transport, bounded repair and code workflow checks: 53 passed, 0 failed. Final response-header/idle boundary rerun: 12 passed, 0 failed.
@@ -111,17 +118,3 @@ S2.3 final closeout; durable evidence: [acceptance](../features/creator-acceptan
 - Compiler log: 339 warning lines, none attributed to touched files; zero XCTest runtime warnings.
 - Three pre-existing benchmark artifacts cleaned. No live model request, personal Keychain, visible UI, desktop change, full gate, commit or push; requested targeted scope only.
 - Real-model quality/grammar acceptance remains unmeasured after this patch; single live smoke still has requestBudget=1.
-
-## 2026-11-10 — Creator S2.3 headless acceptance and benchmark harnesses
-
-S2.3 — headless recovery, publication playback gate, credential-echo rejection and acceptance harnesses.
-
-- S2.2 baseline committed locally as `35594fb9` on `feat/ai-creator`; no push. S2.3 remains uncommitted.
-- Final targeted: 52 passed, 0 failed, 3 existing S0 probes skipped; broader targeted: 105 passed, 0 failed, 5 skipped.
-- `python3 scripts/test.py` — one full run, exit 0; 701 Python tests; native 4,978 passed, 0 failed, 72 skipped (5,050 total).
-- New tests: 16 native + 6 Python passed; 1,246 source/test/config hashes unchanged across the full gate; 9 frozen sources preserved.
-- Skip groups: 62 media/device, 3 Steam network, 1 reference renderer, 3 S0 unrestricted probes, 3 creator live/benchmark/soak opt-ins.
-- Two main-thread warnings in VideoFormatSupportTests and AppUpdateTests; both tests passed, warnings not claimed fixed.
-- Mock 10×3: first 60%, final 90%, 48 requests, 24 unknown usages; not a live quality result. Real WK short soak 0.825 s, not 30 minutes.
-- AC-01–14 matrix, exact commands and limits: [creator-acceptance.md](../features/creator-acceptance.md). S3 device/UI and S4 isolation remain open.
-- No live API, personal Keychain, visible UI, desktop change, Release build or installation; structured evidence retained before cleaning this task's logs/results.

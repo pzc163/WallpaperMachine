@@ -73,7 +73,9 @@ final class CreatorBenchmarkTests: XCTestCase {
             XCTAssertNoThrow(try LLMStreamTransport.Limits(timeout: timing.requestTimeout).validate())
         }
         XCTAssertThrowsError(try LLMStreamTransport.Limits(timeout: 601).validate())
-        XCTAssertEqual(LLMStreamTransport.Limits().timeout, 60, "Production default is unchanged")
+        XCTAssertEqual(LLMStreamTransport.Limits().timeout, 300)
+        XCTAssertEqual(LLMStreamTransport.Limits().firstResponseTimeout, 25)
+        XCTAssertEqual(LLMStreamTransport.Limits().idleTimeout, 90)
     }
     func testLiveTimingRejectsNonFiniteMalformedAndOutOfRangeValues() {
         for field in ["CREATOR_BENCHMARK_ALLOWANCE", "CREATOR_LIVE_TIMEOUT"] {
@@ -97,13 +99,13 @@ final class CreatorBenchmarkTests: XCTestCase {
             for secret in ["https://", "private output", "secret-key", "Bearer", "\n"] { XCTAssertFalse(line.contains(secret)) }
         }
     }
-    func testConfiguredRequestTimeoutReachesURLSessionForEveryProtocol() async throws {
+    func testURLSessionIdleTimeoutRemainsIndependentOfConfiguredTotalForEveryProtocol() async throws {
         for kind in ProviderProfile.ProtocolKind.allCases {
             for timeout in [90.0, 600.0] {
                 let c = try await LLMTestContext(kind: kind, timeout: timeout); defer { c.cleanup() }
                 _ = try await c.run()
                 XCTAssertEqual(c.route.requests.count, 1)
-                XCTAssertEqual(try XCTUnwrap(c.route.requests.first).timeoutInterval, timeout)
+                XCTAssertEqual(try XCTUnwrap(c.route.requests.first).timeoutInterval, 90, "URLSession request timeout is idle, not total; transport independently enforces total")
             }
         }
     }

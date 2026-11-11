@@ -3,7 +3,7 @@
      The Supporter list between the markers is written by scripts/update_sponsors.py, as in README.md. -->
 <p align="center"><sub><a href="README.md">English</a>&ensp;·&ensp;<a href="README.zh-CN.md">简体中文</a>&ensp;·&ensp;<b>한국어</b>&ensp;·&ensp;<a href="README.pt-BR.md">Português</a></sub></p>
 
-**AI 제작 미리보기 · S3 실제 기기 검증 단계.** 이 포크는 [원본 WallpaperMachine](https://github.com/MMFoundation/WallpaperMachine)을 기반으로 합니다. 새 코드는 [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator)에 있으며, `main`에는 README만 동기화되고 제작 기능 코드는 아직 병합되지 않았습니다. 아래 스크린샷과 웹 데모는 원본 프로젝트의 화면입니다. AI 제작 기능은 이 포크의 사전 릴리스에서 사용할 수 있습니다.
+**AI 제작 개발자 미리보기 · 연결 및 작업 공간 개선.** 이 포크는 [원본 WallpaperMachine](https://github.com/MMFoundation/WallpaperMachine)을 기반으로 합니다. 새 코드는 [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator)에 있으며, `main`에는 README만 동기화되고 제작 기능 코드는 아직 병합되지 않았습니다. 아래 스크린샷과 웹 데모는 원본 프로젝트의 화면입니다. AI 제작 기능은 이 포크의 사전 릴리스에서 사용할 수 있습니다.
 
 <a href="https://www.wallpapermachine.app">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="WallpaperMachine이 재생하는 여섯 가지 라이브 배경화면이 차례로 바뀌는 Mac 데스크탑: 물결 위의 치사키, 달 위의 루시, 눈 속의 레드불 F1 머신, 해 질 녘의 반디, 비 내리는 버스 정류장의 엘렌, Into The Abyss. 위에는 macOS 메뉴 막대, 아래에는 Dock이 있습니다.">
@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="라이선스: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="Apple 실리콘 탑재 macOS 15 이상">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 스타"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="AI 제작 미리보기 다운로드"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="AI 제작 미리보기 다운로드"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="원본 프로젝트 웹 데모"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111">릴리스 노트 및 체크섬</a></sub>
+  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111">릴리스 노트 및 체크섬</a></sub>
 </p>
 
 <p align="center">
@@ -59,7 +59,7 @@
 
 ## 빠른 시작
 
-**[S4 개발자 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)**를 받으세요. macOS 15.0+, Apple Silicon / arm64, Ad-hoc 서명이며 **Apple 공증은 없습니다**. Intel은 지원하지 않습니다. [S3 macOS 15 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)와 [기존 S3 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)는 회귀 확인용으로 남아 있으며, 기존 패키지는 macOS 27.2+가 필요합니다.
+**[S4 개발자 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)**를 받으세요. macOS 15.0+, Apple Silicon / arm64, Ad-hoc 서명이며 **Apple 공증은 없습니다**. Intel은 지원하지 않습니다. [S3 macOS 15 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)와 [기존 S3 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)는 회귀 확인용으로 남아 있으며, 기존 패키지는 macOS 27.2+가 필요합니다.
 
 1. DMG의 SHA-256을 확인하세요. 별도 macOS 테스트 계정을 권장합니다. 정식 앱을 덮어쓰거나 같은 계정에서 두 버전을 동시에 실행하지 마세요.
 2. 출처와 체크섬을 확인한 뒤 [설치 체크리스트](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md)에 따라 테스트 복사본에만 `xattr -cr`을 적용하거나 개인정보 보호 및 보안 → 그래도 열기를 사용하세요. 시스템 보안은 끄지 마세요.
@@ -79,6 +79,7 @@
 | 다층 별빛 `stars-v2` | 12개: 밀도, 크기 분포, 잔상, 레이어, 반짝임, 유성, 두 색조, 속도, 시계 표시/위치/크기 | `quiet` / `voyage` |
 | 분위기 시계 `clock-v2` | 10개: 두 색조, 배경 움직임, 9개 위치, 크기, 12/24시간 형식, 초, 날짜, 글꼴, 빛 효과 | `dawn` / `terminal` |
 
+- **연결 및 작업 공간 개선:** 명확한 입력 라벨, 확인 후 로컬 모델 조회, 제한된 LAN ATS 예외와 세션 자격 증명 캐시를 제공합니다. 스트리밍은 첫 응답 25초/유휴 90초/전체 300초 제한과 진행 상태를 표시하며 예산 내에서 비스트리밍으로 전환합니다. 여러 줄 입력창에서 모델/모드 선택, Enter/Shift-Enter, 자동 프로젝트 이름, 이름 편집 및 실패한 작업별 재시도/편집을 지원합니다.
 - **WebGL 템플릿:** 흐름과 디더링을 사용하는 그라데이션, 어두운 성운·다층 별·유성, 선명한 시계와 측정된 여백. 최대 30 FPS와 2,073,600픽셀을 유지하고 이전 이력은 원래 렌더러를 보존합니다.
 - **모델 연결:** OpenAI-compatible, Anthropic Messages, Gemini GenerateContent. Automatic은 실제 예산 안에서 schema → object → prompt를 협상합니다. 상단 성공 알림에 모델·실제 모드·시간을 표시합니다. 기본 출력 예약은 호출당 최대 8,192, 총 24,576토큰이며 실제 과금은 공급자 기준입니다.
 - **로컬/LAN 모델:** 명시적 로컬 모드에서 루프백, 사설 IPv4, IPv6 ULA/link-local 및 .local HTTP와 빈 키를 허용합니다. 공용 HTTP는 거부합니다. 자격 증명은 Profile·origin·설정 세대에 묶이며 호스트 변경 시 이전 키를 보내지 않습니다.
@@ -127,7 +128,7 @@
 
 ## 보안과 투명성
 
-아래 원본 프로젝트의 빌드 증명과 업데이트 흐름은 이 포크의 S3 패키지에 적용되지 않습니다. 로컬에서 패키징한 Ad-hoc 빌드이며 Apple 공증과 GitHub Actions 빌드 증명이 없습니다. [Release 페이지](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)의 SHA-256을 확인하세요. AI 제작은 생성·수정·연결 테스트를 요청할 때 선택한 모델 서비스에 요청을 보냅니다.
+아래 원본 프로젝트의 빌드 증명과 업데이트 흐름은 이 포크의 S3 패키지에 적용되지 않습니다. 로컬에서 패키징한 Ad-hoc 빌드이며 Apple 공증과 GitHub Actions 빌드 증명이 없습니다. [Release 페이지](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)의 SHA-256을 확인하세요. AI 제작은 생성·수정·연결 테스트를 요청할 때 선택한 모델 서비스에 요청을 보냅니다.
 
 - **오픈 소스.** 앱, 렌더러, 장면 엔진 모두 이 저장소에 GPL-3.0-only로
   공개되어 있습니다. 비공개 코어도, 유료 기능도 없습니다. 앱은 누구에게나 똑같습니다.
@@ -234,7 +235,7 @@ Mac 사용자 이름, Steam 계정 이름은 자동으로 가려집니다.
 <details>
 <summary><b>어떻게 설치하나요?</b></summary>
 
-이 포크의 AI 제작 기능은 [macOS 15+ 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)에서 받고 [빠른 시작](#빠른-시작)을 따라 설치하세요. Apple 공증이 없는 Ad-hoc 검증 패키지입니다. 원본 프로젝트의 [정식 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), 웹사이트와 Homebrew는 별도로 유지되며 이 포크의 AI 제작 기능을 포함하지 않습니다.
+이 포크의 AI 제작 기능은 [macOS 15+ 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)에서 받고 [빠른 시작](#빠른-시작)을 따라 설치하세요. Apple 공증이 없는 Ad-hoc 검증 패키지입니다. 원본 프로젝트의 [정식 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), 웹사이트와 Homebrew는 별도로 유지되며 이 포크의 AI 제작 기능을 포함하지 않습니다.
 
 </details>
 

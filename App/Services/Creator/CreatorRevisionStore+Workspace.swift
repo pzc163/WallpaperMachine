@@ -44,6 +44,17 @@ extension CreatorRevisionStore {
             try CreatorPersistence.write(DisplayName(value: title), to: projectURL(id).appendingPathComponent("display-name.json"))
         }
     }
+    func nameFirstPrompt(_ id: UUID, sanitizedPrompt: String) throws {
+        try locked {
+            let project = try readProject(id)
+            let nameURL = projectURL(id).appendingPathComponent("display-name.json")
+            guard CreatorProjectNaming.defaultNames.contains(project.title),
+                  !CreatorPersistence.exists(nameURL), try readConversation(id).turns.isEmpty,
+                  let title = CreatorProjectNaming.title(from: sanitizedPrompt) else { return }
+            try Task.checkCancellation()
+            try CreatorPersistence.write(DisplayName(value: title), to: nameURL)
+        }
+    }
     /// Only Creator's source directory is removed. Published bytes and registry bindings survive.
     func deleteDraft(_ id: UUID) throws {
         try locked {

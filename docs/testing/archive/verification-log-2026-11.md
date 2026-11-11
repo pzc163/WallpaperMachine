@@ -9,6 +9,20 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-10 — Creator S2.3 headless acceptance and benchmark harnesses
+
+S2.3 — headless recovery, publication playback gate, credential-echo rejection and acceptance harnesses.
+
+- S2.2 baseline committed locally as `35594fb9` on `feat/ai-creator`; no push. S2.3 remains uncommitted.
+- Final targeted: 52 passed, 0 failed, 3 existing S0 probes skipped; broader targeted: 105 passed, 0 failed, 5 skipped.
+- `python3 scripts/test.py` — one full run, exit 0; 701 Python tests; native 4,978 passed, 0 failed, 72 skipped (5,050 total).
+- New tests: 16 native + 6 Python passed; 1,246 source/test/config hashes unchanged across the full gate; 9 frozen sources preserved.
+- Skip groups: 62 media/device, 3 Steam network, 1 reference renderer, 3 S0 unrestricted probes, 3 creator live/benchmark/soak opt-ins.
+- Two main-thread warnings in VideoFormatSupportTests and AppUpdateTests; both tests passed, warnings not claimed fixed.
+- Mock 10×3: first 60%, final 90%, 48 requests, 24 unknown usages; not a live quality result. Real WK short soak 0.825 s, not 30 minutes.
+- AC-01–14 matrix, exact commands and limits: [creator-acceptance.md](../../features/creator-acceptance.md). S3 device/UI and S4 isolation remain open.
+- No live API, personal Keychain, visible UI, desktop change, Release build or installation; structured evidence retained before cleaning this task's logs/results.
+
 ## 2026-11-10 — Native creator workspace and model settings (S2.2)
 
 Added the native AI Creator tab and model settings, with explicit generate/save/apply actions, trusted previews and controller-start recovery. [Feature and boundaries](../../features/creator-workspace.md).

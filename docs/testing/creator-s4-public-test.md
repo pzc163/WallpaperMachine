@@ -56,3 +56,26 @@ ssh -N -L 1234:127.0.0.1:1234 user@model-host.local
 不要在自己的正式环境运行恶意探针。自动化的死循环/下载/文件探针仅在临时数据和隔离离屏宿主执行。
 S4 开放不等于所有硬件验收完成；本轮没有再次调用真实模型，也没有新版本 1800 秒/GPU 能耗实测。
 反馈时只提交系统版本、模板/模式、复现步骤、固定错误分类和脱敏指标，勿上传 Key、完整日志、私人路径或项目素材。
+
+## Connection and composer preview update
+
+Use the newest `creator-ux-preview-20261111` prerelease for the connection/workspace
+update. In Settings → AI models, enable Local server mode, enter the server Base URL,
+and choose Fetch models. Confirm the displayed target and select a returned model ID;
+then save. Empty local credentials never require Keychain access. A protected local
+server can use an explicitly entered key. Remote keys may need one macOS permission
+approval per new Ad-hoc build; subsequent requests reuse a process-only cache.
+
+Verify the following on the test account: local numeric-IP HTTP after granting macOS
+local-network permission, cancelling model discovery, 25-second unreachable-target
+feedback, continued thinking/content progress without a short total timeout, and
+accurate usage. A non-stream endpoint gets one budgeted fallback; all negotiation and
+repairs still share at most three requests. No real-model testing was performed for
+this UI update.
+
+Check project auto naming and pencil rename, sidebar search/context menus, failed-turn
+Retry/Edit and resend, and model/mode selection from the composer. Enter sends;
+Shift-Enter adds a line; confirming an IME candidate must not send. Paste a long prompt
+and verify three-to-eight-line growth and internal scrolling at narrow window sizes.
+Save and Apply remain separate. Physical visual/focus/LAN and macOS 15 device behavior
+remain manual checks; automated views are hosted offscreen.

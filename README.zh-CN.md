@@ -2,7 +2,7 @@
      (App/Resources/Localizable.xcstrings) and the website's /zh/ pages. The Supporter list between the markers is written by scripts/update_sponsors.py, as in README.md. -->
 <p align="center"><sub><a href="README.md">English</a>&ensp;·&ensp;<b>简体中文</b>&ensp;·&ensp;<a href="README.ko.md">한국어</a>&ensp;·&ensp;<a href="README.pt-BR.md">Português</a></sub></p>
 
-**AI 创作预览版 · S3 实机验收阶段。** 本仓库基于 [WallpaperMachine 上游项目](https://github.com/MMFoundation/WallpaperMachine) 开发。新增代码位于 [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator)；`main` 目前仅同步这份说明，尚未合入创作功能。下方截图与网站演示来自上游，AI 创作功能以本仓库的预发布包为准。
+**AI 创作开发者公测 · 连接与工作台升级。** 本仓库基于 [WallpaperMachine 上游项目](https://github.com/MMFoundation/WallpaperMachine) 开发。新增代码位于 [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator)；`main` 目前仅同步这份说明，尚未合入创作功能。下方截图与网站演示来自上游，AI 创作功能以本仓库的预发布包为准。
 
 <a href="https://www.wallpapermachine.app/zh/">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="一台 Mac 的桌面轮流播放 WallpaperMachine 的六张动态壁纸：水波中的千咲、月球上的 Lucy、雪地里的红牛 F1 赛车、黄昏中的流萤、雨中公交站的艾莲，以及 Into The Abyss，上方是 macOS 菜单栏，下方是程序坞。">
@@ -15,20 +15,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="许可证：GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 或更高版本，Apple 芯片">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 星标"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="下载 AI 创作预览版"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="下载 AI 创作预览版"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/zh/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="上游在线演示"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111">发布说明与校验和</a></sub>
+  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111">发布说明与校验和</a></sub>
 </p>
 
 <p align="center">
@@ -57,7 +57,7 @@
 
 ## 快速开始
 
-推荐下载 **[S4 开发者公测包](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)**：macOS 15.0+，Apple Silicon / arm64，Ad-hoc 签名，未经过 Apple 公证，不支持 Intel。旧的 [S3 macOS 15 包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)和 [S3 原始包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)保留用于回归；原始包要求 macOS 27.2+。
+推荐下载 **[S4 开发者公测包](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)**：macOS 15.0+，Apple Silicon / arm64，Ad-hoc 签名，未经过 Apple 公证，不支持 Intel。旧的 [S3 macOS 15 包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)和 [S3 原始包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)保留用于回归；原始包要求 macOS 27.2+。
 
 1. 下载 DMG 并核对 Release 页的 SHA-256。推荐使用独立 macOS 测试账户，不覆盖正式副本，不在同一账户同时运行两个版本。
 2. 仅在核验来源和校验值后，按[公测安装说明](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md)对测试副本执行 `xattr -cr`，或使用系统“隐私与安全性 → 仍要打开”。不关闭系统安全设置。
@@ -77,6 +77,7 @@
 | 分层星空 `stars-v2` | 12 项：密度、大小分布、拖尾、层数、闪烁、流星、双色相、速度、时钟开关与位置/缩放 | `quiet` / `voyage` |
 | 氛围时钟 `clock-v2` | 10 项：双色相、背景运动、九宫格位置、缩放、12/24 小时制、秒数、日期、字体、辉光 | `dawn` / `terminal` |
 
+- **连接与工作台升级：** 设置表单补齐标签、本地模型列表、局域网 ATS 例外与按需凭据缓存；流式请求采用首包 25 秒 / 空闲 90 秒 / 总时长 300 秒限制，显示思考与字符进度，并在原预算内回退非流式。多行创作框支持模型/模式切换、Enter 发送与 Shift+Enter 换行，工程自动命名、内联重命名和逐条失败任务重试/编辑重发。
 - **WebGL 模板升级：** 渐变使用流场与色带抖动，星空使用黑底星云、分层星点和流星，时钟使用高 DPI 排版与安全边距。新模板最高 30 FPS、画布最多 2,073,600 像素；旧模板修订按原版本重建。
 - **模型连接：** 支持 OpenAI-compatible、Anthropic Messages、Gemini GenerateContent。automatic 在预算内按 schema → object → prompt 协商；测试连接成功在顶部显示模型、实际模式与耗时。默认每请求最多预留 8192 输出 token，总预留 24576；费用以供应商实际账单为准。
 - **本机及局域网模型：** 显式本地模式允许回环、私有 IPv4、IPv6 ULA/link-local 和 .local HTTP/空 Key；公网 HTTP 拒绝。凭据按 Profile、目标 origin 和配置代次绑定，改主机不沿用旧 Key。
@@ -121,7 +122,7 @@
 
 ## 为什么值得信任
 
-以下上游正式版的构建证明与更新机制不适用于本 fork 的 S3 包：本次包为本地打包、Ad-hoc 签名且未公证，没有 GitHub Actions 构建证明。请使用 [Release 页](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)提供的 SHA-256。AI 创作仅在你发起生成、修改或测试连接时向所选模型服务发送请求。
+以下上游正式版的构建证明与更新机制不适用于本 fork 的 S3 包：本次包为本地打包、Ad-hoc 签名且未公证，没有 GitHub Actions 构建证明。请使用 [Release 页](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)提供的 SHA-256。AI 创作仅在你发起生成、修改或测试连接时向所选模型服务发送请求。
 
 - **全部开源。** 应用、渲染器和场景引擎都在这个仓库中，以 GPL-3.0-only 许可证发布。没有闭源核心，也没有付费功能：每个人用到的应用都一样。
 - **上游公开构建。** 上游正式版本由 [GitHub Actions](docs/release.md#build-buildyml) 从打了标签的提交构建并测试，然后附带 SHA-256 校验和与构建来源证明（build provenance attestation）发布。以下命令仅用于验证上游正式下载来自上游工作流：
@@ -187,7 +188,7 @@ WallpaperMachine 支持场景、视频和网页渲染。兼容性因壁纸而异
 <details>
 <summary><b>如何获取？</b></summary>
 
-本 fork 的 AI 创作版本请从 [macOS 15+ 预发布页](https://github.com/pzc163/WallpaperMachine/releases/tag/s4-preview-20261111)下载，并按[快速开始](#快速开始)核验与安装；它是未公证的 Ad-hoc 验收包。上游的[正式版本](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)、官网与 Homebrew 安装渠道另行维护，不能用来获取本 fork 的 AI 创作功能。
+本 fork 的 AI 创作版本请从 [macOS 15+ 预发布页](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)下载，并按[快速开始](#快速开始)核验与安装；它是未公证的 Ad-hoc 验收包。上游的[正式版本](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)、官网与 Homebrew 安装渠道另行维护，不能用来获取本 fork 的 AI 创作功能。
 
 </details>
 

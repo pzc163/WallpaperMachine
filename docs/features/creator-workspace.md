@@ -57,6 +57,28 @@ edits are refused before changing values. Neither revisions nor installed bytes 
 Validate changes still creates and fully checks a new revision before publication;
 selecting values identical to the current revision does not invent a dirty state.
 
+## Composer and project navigation
+
+Search and New live only at the top of the project sidebar. The workspace contains
+the current title with inline Return-to-save/pencil rename, conversation, and one
+native multiline composer. The sidebar keeps rename/copy/delete context actions;
+collapsed layouts use the existing sidebar toggle, without a duplicate project list.
+
+The plain NSTextView grows from three to eight lines and scrolls beyond that. Return
+sends; Shift-Return inserts a newline; marked text and modifier combinations stay
+with the input method. Model selection, template/code mode, repair count and send/stop
+share the composer footer. Edit-and-resend restores a failed/cancelled/interrupted
+turn's original sanitized prompt and focuses the composer; Retry uses that prompt
+with the currently selected Profile/mode and the current validated base. Neither
+action rewrites the old turn. Four localized inspiration cards fill the composer
+without making a request. A successful generation clears its submitted prompt.
+
+The first submitted prompt names an untouched default project using up to 18
+characters after common filler prefixes. This uses already-redacted text and writes
+`display-name.json`, outside immutable identity/digests. Existing names, explicit
+renames (even back to the default name), conversations and historical revisions
+are preserved. Views do no storage, credential, preview or network operations.
+
 ## Projects and history
 
 Display names use a versioned `display-name.json` alongside project metadata;

@@ -8,4 +8,13 @@ Scope: three atomic commits on `feat/ai-creator`; no production application or d
 
 Verification: isolated Mock URLProtocol and memory Keychain tests; offscreen native view tests in six languages; targeted checks per commit and one complete routine gate before packaging. No live model requests. ATS plist/CIDR contract and loopback transport are automated; physical LAN permission and macOS 15 hardware checks remain manual. Release packaging must audit all Mach-O minimum versions, dependencies and Ad-hoc signatures, preserve main/latest, and publish a new prerelease.
 
-Status: connection settings committed; streaming and workspace implementation in progress.
+Status: all three implementation stages complete and routine gate passed.
+
+## Verification results
+
+- Settings/credentials/model discovery: 21 targeted native checks passed.
+- Streaming/protocol/repair/code flow: 53 checks passed; final header/idle boundary rerun: 12 passed.
+- Workspace/controller/six-language layouts: 29 passed; expanded composer suite: 5 passed, including native three-to-eight-line growth and scrolling.
+- Full gate: 720 Python checks and 5,048 native checks passed, 0 failed, 69 intentionally skipped; 2 runtime warnings remain. The first full run found two obsolete benchmark assertions tied to the old 60-second deadline; those now test independent 25/90/300-second defaults and the complete rerun passed.
+- No live model/API calls, personal model Keychain access, visible app launch or desktop changes. Physical LAN privacy authorization, macOS 15 hardware and visible UI/IME behavior remain device acceptance items.
+- Release target: `creator-ux-preview-20261111`, Pre-release only, never main/latest. DMG SHA-256, Ad-hoc signatures, dependency/ABI and minimum-macOS evidence are supplied with the release assets. Four README languages and the public testing guide describe the update.

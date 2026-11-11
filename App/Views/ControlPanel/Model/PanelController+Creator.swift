@@ -99,7 +99,23 @@ extension PanelController {
                 }
             }
             _ = try await self.creatorWorkspace.generate(request)
+            if self.creator.prompt == prompt { self.creator.prompt = "" }
         }
+    }
+    func editCreatorTurn(_ id: UUID) throws {
+        guard !creator.isBusy, let turn = creator.detail?.conversation.turns.first(where: { $0.id == id }),
+              [.failed, .cancelled, .interrupted].contains(turn.state) else { throw CreatorGenerationFailure.invalidRequest }
+        creator.prompt = turn.userMessage
+        creator.composerFocusID = UUID()
+    }
+    func retryCreatorTurn(_ id: UUID) async throws {
+        try editCreatorTurn(id)
+        try await generateCreator()
+    }
+    func useCreatorInspiration(_ text: String, mode: CreatorCreationMode) async throws {
+        guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
+        try await setCreatorMode(mode)
+        creator.prompt = text; creator.composerFocusID = UUID()
     }
     func cancelCreator() { creator.cancel() }
     func rollbackCreator(_ revision: UUID) async throws {
@@ -176,6 +192,7 @@ extension PanelController {
         }
     }
     func selectCreatorProfile(_ id: UUID) async throws {
+        guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
         creator.connectionNotice = nil
         creator.configuration = try await creatorWorkspace.selectProfile(id, expectedRevision: creator.configuration.revision)
     }

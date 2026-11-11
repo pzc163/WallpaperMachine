@@ -67,7 +67,13 @@ actor CreatorWorkspace {
         try beforeWrite(); _ = try await orchestrator.selectRevision(projectID: project, revisionID: revision)
     }
     func generate(_ request: CreatorOrchestrator.Request) async throws -> CreatorOrchestrator.Prepared {
-        try beforeWrite(); return try await orchestrator.createForPreview(request)
+        try beforeWrite()
+        if let project = request.projectID {
+            let profile = try await settings.profile(id: request.profileID, configurationID: request.configurationID)
+            let safe = try await provider.sanitizedContext([request.prompt], profile: profile)[0]
+            try await store.nameFirstPrompt(project, sanitizedPrompt: safe)
+        }
+        return try await orchestrator.createForPreview(request)
     }
     func installedWallpaper(project: UUID, revision: UUID) async throws -> String {
         let publication = try await store.publication(projectID: project, revisionID: revision)
