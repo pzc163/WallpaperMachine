@@ -146,7 +146,11 @@ actor CreatorGenerator {
                 reservedOutputTokens: completed.reservedOutputTokens, usage: completed.response.usage,
                 elapsed: completed.elapsed, baseRevisionDigest: base?.revisionDigest, iterationID: request.iteration?.id, repairIndex: turn?.repairCount)
             let assets: [String: Data]?
-            if let base = contextBase { assets = try await store.snapshot(projectID: request.projectID, revisionID: base.revisionID).assets } else { assets = nil }
+            // Legacy parameter revisions need only their checked generation context, not
+            // a modern preview report. Load asset bytes only for a media-bearing core.
+            if let base = contextBase, engineReference?.metadata.media != nil {
+                assets = try await store.snapshot(projectID: request.projectID, revisionID: base.revisionID).assets
+            } else { assets = nil }
             _ = try await store.stage(specification, for: ticket, summary: CreatorPromptBuilder.promptSummary(prompt),
                 presentation: presentation, generation: metadata, source: source, assets: assets, providerID: profile.id.uuidString.lowercased(), modelID: try input.model(for: profile))
             try await checkpoint(.beforeCommit); try Task.checkCancellation()

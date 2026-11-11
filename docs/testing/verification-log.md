@@ -25,6 +25,14 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-12 — S5.2 provider center, single stage and offline media
+
+- Full gate: python3 scripts/test.py — 724 Python checks; 5,109 native passed, 0 failed, 69 skipped (155s). Initial three failures repaired and targeted rerun passed.
+- Media/engines: 15 native master captures; MOV and VP9 WebM decode, Range, pause/resume, asset digest, archive, opt-in thumbnail and parameter boundaries verified.
+- Regression: v1/v2 golden bytes, code sandbox attack probes, immutable history and publisher recovery retained. Last focused regressions: 39 + 26 passed.
+- Docs/localization: 28 checks passed; six UI languages and four READMEs updated. Offline Three pin check passed; Debug license closure 179, zero incompatible/unknown.
+- No real provider calls, personal model Keychain, visible production app, desktop application or install. macOS 15 hardware, multi-display/energy and external provider compatibility remain manual acceptance.
+
 ## 2026-11-11 — S5.2 single stage, source editor and hot parameter publication
 
 - Added a single aspect-controlled stage, editable source with Command-R, a conversation drawer and fixed inspector save/apply actions; localized all added controls in six languages.
@@ -93,16 +101,3 @@ Native Shader/Three shells, an offline pinned library, declarative parameters an
 - Targeted LLMConnectionUXTests, ProviderCredentialStoreTests, CreatorModelSettingsTests and LLMStreamTransportTests: 21 passed, 0 failed, 0 skipped.
 - Documentation links (11), panel localization (9) and localization catalog (8) checks passed. Full routine gate follows after all three atomic changes.
 - Memory Keychain and Mock URLProtocol only; offscreen six-language form checks. No production app, LAN host, personal Keychain or model API accessed. macOS 15 physical LAN authorization remains a device check.
-
-## 2026-11-11 — S4 offline code creation and developer preview
-
-- Stage 1 commit 8fccf4b9: bounded schema/object/prompt negotiation, LAN endpoints and native success banner; 720 script and 5006 native passed, 72 skipped.
-- Stage 2 commit c9ada8b3: versioned WebGL templates, legacy byte reconstruction, native covers and context recovery; 720 script and 5012 native passed, 72 skipped.
-- S4: single raw HTML contract, immutable code revisions, three protocol codecs, native snapshot publication and bounded repair/history.
-- Opaque sandbox iframe and positive-control network matrix; the original download/EventSource/media probes execute and pass.
-- Native process ownership and external deadline: synchronous loop, microtask starvation, bounded memory/log overload, release and coexistence tests passed.
-- Cursor and dual-display host tested using inert surfaces/monitor; no visible window or desktop assignment.
-- Focused S4 18/18, broader regression 68/68, controller/S4 27/27 passed.
-- Full python3 scripts/test.py: 720 script tests and 5034 native passed, 0 failed, 69 skipped; two runtime warnings retained.
-- Documentation 11, catalog localization 8 and panel localization 9 checks passed. No live model, personal Keychain or physical S3 operation.
-- WebKit SPI availability checked at runtime; GPU hard quotas, macOS 15 hardware, visible quality, sleep and whole-system energy remain separate public acceptance items.

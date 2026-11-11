@@ -3,7 +3,7 @@
      The Supporter list between the markers is written by scripts/update_sponsors.py, as in README.md. -->
 <p align="center"><sub><a href="README.md">English</a>&ensp;·&ensp;<a href="README.zh-CN.md">简体中文</a>&ensp;·&ensp;<b>한국어</b>&ensp;·&ensp;<a href="README.pt-BR.md">Português</a></sub></p>
 
-**AI 제작 S5.1 개발자 미리보기 · 다중 엔진 마스터 갤러리.** 이 포크는 [원본 WallpaperMachine](https://github.com/MMFoundation/WallpaperMachine)을 기반으로 합니다. 제작 기능 코드는 이제 [`main`](https://github.com/pzc163/WallpaperMachine/tree/main)에 병합되었습니다. 아래 스크린샷과 웹 데모는 원본 프로젝트의 화면입니다. AI 제작 기능은 이 포크의 사전 릴리스에서 사용할 수 있습니다.
+**AI 제작 S5.2 미리보기 · 공급자 센터와 오프라인 이미지/영상 제작.** [원본 WallpaperMachine](https://github.com/MMFoundation/WallpaperMachine)을 기반으로 합니다. S5.1은 main에, S5.2 변경은 [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator)에 있습니다. 아래 원본 스크린샷과 웹 데모는 모든 제작 기능을 보여주지는 않습니다.
 
 <a href="https://www.wallpapermachine.app">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="WallpaperMachine이 재생하는 여섯 가지 라이브 배경화면이 차례로 바뀌는 Mac 데스크탑: 물결 위의 치사키, 달 위의 루시, 눈 속의 레드불 F1 머신, 해 질 녘의 반디, 비 내리는 버스 정류장의 엘렌, Into The Abyss. 위에는 macOS 메뉴 막대, 아래에는 Dock이 있습니다.">
@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="라이선스: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="Apple 실리콘 탑재 macOS 15 이상">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 스타"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="AI 제작 미리보기 다운로드"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="AI 제작 미리보기 다운로드"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="원본 프로젝트 웹 데모"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111">릴리스 노트 및 체크섬</a></sub>
+  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112">릴리스 노트 및 체크섬</a></sub>
 </p>
 
 <p align="center">
@@ -59,15 +59,17 @@
 
 ## 빠른 시작
 
-**[S5.1 개발자 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)**를 받으세요. macOS 15.0+, Apple Silicon / arm64, Ad-hoc 서명이며 **Apple 공증은 없습니다**. Intel은 지원하지 않습니다. Releases에는 이 버전만 유지됩니다. 이전 릴리스와 설치 파일은 삭제되었으며 Git 태그와 소스 기록은 보존됩니다.
+**[S5.2 개발자 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112)**: macOS 15.0+, Apple Silicon / arm64, Ad-hoc 서명이며 **Apple 공증은 없습니다**. Intel은 지원하지 않습니다. 이전 S5.1 테스트 빌드도 유지됩니다.
 
 1. DMG의 SHA-256을 확인하세요. 별도 macOS 테스트 계정을 권장합니다. 정식 앱을 덮어쓰거나 같은 계정에서 두 버전을 동시에 실행하지 마세요.
 2. 출처와 체크섬을 확인한 뒤 [설치 체크리스트](https://github.com/pzc163/WallpaperMachine/blob/main/docs/testing/creator-s4-public-test.md)에 따라 테스트 복사본에만 `xattr -cr`을 적용하거나 개인정보 보호 및 보안 → 그래도 열기를 사용하세요. 시스템 보안은 끄지 마세요.
-3. 테스트 중 자동 업데이트를 끄세요. 업데이트 설정은 여전히 원본 프로젝트를 사용합니다. 소스는 main에 있지만 패키지는 정식 latest 채널에 들어가지 않는 사전 릴리스입니다. 이 포크의 Releases에서 수동으로 갱신하세요.
+3. 테스트 중 자동 업데이트를 끄세요. 업데이트 설정은 여전히 원본 프로젝트를 사용합니다. S5.2 소스는 feat/ai-creator에 있으며 패키지는 정식 latest 채널에 들어가지 않는 사전 릴리스입니다. 이 포크의 Releases에서 수동으로 갱신하세요.
 
 원본 웹사이트와 Homebrew에는 이 포크의 AI 제작 기능이 없습니다. 기존 장면, 동영상, 웹, 이미지 및 창작마당 기능과 Wallpaper Engine 구매 요건은 유지됩니다.
 
 <a id="ai-creator"></a>
+
+**S5.2 새 기능:** 클라우드 11곳, LM Studio/Ollama와 사용자 지정 LAN을 지원하는 두 열 공급자 센터, 오프라인 LobeHub 아이콘, 키 하나로 여러 모델 관리, 자동/수동 컨텍스트 및 출력 한도. 단일 무대의 코드 편집(⌘R), 접이식 대화와 고정 저장/적용 버튼을 제공합니다. 파일 업로드·드롭·붙여넣기·라이브러리 선택으로 이미지/영상을 가져와 새 하이브리드/2.5D 마스터 6개(총 15개)를 사용합니다. 네이티브 색상/휘도 분석과 오프라인 Range 로딩, 채우기·노출·속도 조정 및 `.wmpkg` 공유를 지원합니다. 시각 모델 썸네일은 작업마다 명시적으로 동의해야 전송됩니다. [계약과 제한](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-media.md).
 
 S5.1은 로컬 렌더링 마스터 9개를 제공합니다. 엔진 검증 기록을 참고하세요. [S5.1](https://github.com/pzc163/WallpaperMachine/blob/main/docs/testing/creator-s51-acceptance.md).
 
@@ -90,11 +92,11 @@ S5.1은 로컬 렌더링 마스터 9개를 제공합니다. 엔진 검증 기록
 - **로컬/LAN 모델:** 명시적 로컬 모드에서 루프백, 사설 IPv4, IPv6 ULA/link-local 및 .local HTTP와 빈 키를 허용합니다. 공용 HTTP는 거부합니다. 자격 증명은 Profile·origin·설정 세대에 묶이며 호스트 변경 시 이전 키를 보내지 않습니다.
 - **코드 상호작용:** 외부 의존성 없는 단일 HTML이 미리보기와 데스크톱에서 포인터 좌표를 받습니다. 화면별 최대 30 Hz로 제한하고 일시 정지·가림·절전 시 감시를 중단합니다. 오프라인 iframe, 네이티브 감독 및 패키지 무결성이 계속 적용됩니다.
 - **제한된 수정/이력:** 문법, 매개변수, 첫 프레임과 실행 오류는 다시 검증해야 합니다. 최초 생성과 최대 두 번 수정, 총 세 번 호출 이내입니다. 실패·취소·복구 시 마지막 유효 버전을 보존하며 원본 오류와 키는 수정 로그에 넣지 않습니다.
-- **저장과 적용 분리:** 프리셋/슬라이더 변경을 검증하거나 대화로 코드 이력을 만든 뒤 미리보기에서 정지·음소거·화면비를 확인합니다. 라이브러리 저장 후 사용자가 명시적으로 화면에 적용합니다.
+- **저장과 적용 분리:** 매개변수 변경은 직접 저장하고 코드 변경은 실행 검증한 뒤 미리보기에서 정지·음소거·화면비를 확인합니다. 라이브러리 저장 후 사용자가 명시적으로 화면에 적용합니다.
 
 **LM Studio:** 모델과 서버를 실행한 뒤 `http://127.0.0.1:1234/v1`, 실제 모델 ID, 로컬 모드 및 automatic을 설정하세요. 다른 Mac에서는 SSH 터널 또는 `http://model-host.local:1234/v1` 같은 신뢰할 수 있는 LAN을 사용하고 확인 창의 대상을 점검하세요. 모델은 포함되지 않습니다.
 
-**공개 테스트 제한:** 자유 코드는 ≤256 KiB HTML 하나, 절차적 그래픽과 시스템 글꼴만 지원합니다. 외부 자원/글꼴, 네트워크, 오디오, 모듈 및 다중 파일은 지원하지 않습니다. WebKit 감독은 확인된 SPI를 사용하고 지원하지 않는 환경은 거부합니다. 운영체제의 강제 GPU 할당량이나 임의 악성 코드의 보안 감사가 아닙니다. 기존 Creator 백업/복원/저장소 이동은 계속 차단합니다. 배경화면 오프라인 재생은 창작마당/업데이트 네트워크까지 끄지는 않습니다.
+**공개 테스트 제한:** S5.2 하이브리드/2.5D는 명시적으로 가져와 다이제스트에 묶인 오프라인 미디어도 지원합니다.  자유 코드는 ≤256 KiB HTML 하나, 절차적 그래픽과 시스템 글꼴만 지원합니다. 외부 자원/글꼴, 네트워크, 오디오, 모듈 및 다중 파일은 지원하지 않습니다. WebKit 감독은 확인된 SPI를 사용하고 지원하지 않는 환경은 거부합니다. 운영체제의 강제 GPU 할당량이나 임의 악성 코드의 보안 감사가 아닙니다. 기존 Creator 백업/복원/저장소 이동은 계속 차단합니다. 배경화면 오프라인 재생은 창작마당/업데이트 네트워크까지 끄지는 않습니다.
 
 **검증:** Mock 모델과 실제 오프스크린 WebKit으로 기존 S0 세 항목, 프로세스 장애, 세 프로토콜, 모의 두 화면, 수정 및 이력을 확인합니다. 과거 30/30 벤치마크와 1,800초 장기 실행은 이전 템플릿 결과이며 새 셰이더/자유 코드에 적용되지 않습니다. macOS 15 실기기, DPI/절전, 시각 품질 및 전체/GPU 에너지는 추가 검증이 필요합니다.
 
@@ -133,7 +135,7 @@ S5.1은 로컬 렌더링 마스터 9개를 제공합니다. 엔진 검증 기록
 
 ## 보안과 투명성
 
-아래 원본 프로젝트의 빌드 증명과 업데이트 흐름은 이 포크의 미리보기 패키지에 적용되지 않습니다. 로컬에서 패키징한 Ad-hoc 빌드이며 Apple 공증과 GitHub Actions 빌드 증명이 없습니다. [Release 페이지](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)의 SHA-256을 확인하세요. AI 제작은 생성·수정·연결 테스트를 요청할 때 선택한 모델 서비스에 요청을 보냅니다.
+아래 원본 프로젝트의 빌드 증명과 업데이트 흐름은 이 포크의 미리보기 패키지에 적용되지 않습니다. 로컬에서 패키징한 Ad-hoc 빌드이며 Apple 공증과 GitHub Actions 빌드 증명이 없습니다. [Release 페이지](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112)의 SHA-256을 확인하세요. AI 제작은 생성·수정·연결 테스트를 요청할 때 선택한 모델 서비스에 요청을 보냅니다.
 
 - **오픈 소스.** 앱, 렌더러, 장면 엔진 모두 이 저장소에 GPL-3.0-only로
   공개되어 있습니다. 비공개 코어도, 유료 기능도 없습니다. 앱은 누구에게나 똑같습니다.
@@ -240,7 +242,7 @@ Mac 사용자 이름, Steam 계정 이름은 자동으로 가려집니다.
 <details>
 <summary><b>어떻게 설치하나요?</b></summary>
 
-이 포크의 AI 제작 기능은 [macOS 15+ 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)에서 받고 [빠른 시작](#빠른-시작)을 따라 설치하세요. Apple 공증이 없는 Ad-hoc 검증 패키지입니다. 원본 프로젝트의 [정식 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), 웹사이트와 Homebrew는 별도로 유지되며 이 포크의 AI 제작 기능을 포함하지 않습니다.
+이 포크의 AI 제작 기능은 [macOS 15+ 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112)에서 받고 [빠른 시작](#빠른-시작)을 따라 설치하세요. Apple 공증이 없는 Ad-hoc 검증 패키지입니다. 원본 프로젝트의 [정식 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), 웹사이트와 Homebrew는 별도로 유지되며 이 포크의 AI 제작 기능을 포함하지 않습니다.
 
 </details>
 
@@ -281,10 +283,10 @@ MMFoundation의 [Discord](https://mmfoundation.dev/discord)에,
 
 ## 오픈 소스와 직접 빌드
 
-AI 제작 버전을 빌드하려면 이 포크의 `main` 브랜치를 받으세요. 이전 운영체제 지원 여부는 모든 내장 라이브러리의 최소 버전에도 달려 있습니다. [macOS 15 패키징 기록](https://github.com/pzc163/WallpaperMachine/blob/main/docs/plans/2026-11-11-creator-macos15.md)을 참고하세요.
+AI 제작 버전을 빌드하려면 이 포크의 `feat/ai-creator` 브랜치를 받으세요. 이전 운영체제 지원 여부는 모든 내장 라이브러리의 최소 버전에도 달려 있습니다. [macOS 15 패키징 기록](https://github.com/pzc163/WallpaperMachine/blob/main/docs/plans/2026-11-11-creator-macos15.md)을 참고하세요.
 
 ```sh
-git clone --branch main https://github.com/pzc163/WallpaperMachine.git
+git clone --branch feat/ai-creator https://github.com/pzc163/WallpaperMachine.git
 cd WallpaperMachine
 ```
 

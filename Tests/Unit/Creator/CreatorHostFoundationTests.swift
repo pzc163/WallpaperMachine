@@ -66,7 +66,8 @@ import XCTest
         XCTAssertEqual(derivedDraft.parentID, first.id); XCTAssertTrue(c.route.requests.isEmpty)
         let model = CreatorModel(); model.detail = try await workspace.detail(second.projectID)
         model.parameters = values; XCTAssertTrue(model.canSave)
-        model.parameters["speed"] = .number(2.5); XCTAssertFalse(model.canSave); XCTAssertFalse(model.canApply)
+        model.parameters["speed"] = .number(2.5); XCTAssertTrue(model.canSave); XCTAssertTrue(model.canApply)
+        model.parameters["speed"] = .number(10001); XCTAssertFalse(model.canSave); XCTAssertFalse(model.canApply)
     }
     func testLibraryOnlyServesExactPinnedAssetNames() throws {
         XCTAssertGreaterThan(try CreatorLibrary.bytes("wm-lib://three/bundle.js").count, 100_000)

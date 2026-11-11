@@ -58,7 +58,8 @@ import XCTest
             XCTAssertEqual(controller.creator.detail?.conversation.turns.map(\.userMessage), [turn.userMessage, turn.userMessage])
             XCTAssertEqual(controller.creator.detail?.conversation.turns.first?.state, .failed)
             XCTAssertTrue(panel.bridge.hostStartupCalls.isEmpty)
-            XCTAssertFalse(controller.creator.canApply)
+            XCTAssertTrue(controller.creator.canApply)
+            XCTAssertNil(controller.creator.detail?.project.publishedWallpaperID)
         } catch { await panel.shutdown(); throw error }
         await panel.shutdown()
     }

@@ -9,6 +9,19 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — S4 offline code creation and developer preview
+
+- Stage 1 commit 8fccf4b9: bounded schema/object/prompt negotiation, LAN endpoints and native success banner; 720 script and 5006 native passed, 72 skipped.
+- Stage 2 commit c9ada8b3: versioned WebGL templates, legacy byte reconstruction, native covers and context recovery; 720 script and 5012 native passed, 72 skipped.
+- S4: single raw HTML contract, immutable code revisions, three protocol codecs, native snapshot publication and bounded repair/history.
+- Opaque sandbox iframe and positive-control network matrix; the original download/EventSource/media probes execute and pass.
+- Native process ownership and external deadline: synchronous loop, microtask starvation, bounded memory/log overload, release and coexistence tests passed.
+- Cursor and dual-display host tested using inert surfaces/monitor; no visible window or desktop assignment.
+- Focused S4 18/18, broader regression 68/68, controller/S4 27/27 passed.
+- Full python3 scripts/test.py: 720 script tests and 5034 native passed, 0 failed, 69 skipped; two runtime warnings retained.
+- Documentation 11, catalog localization 8 and panel localization 9 checks passed. No live model, personal Keychain or physical S3 operation.
+- WebKit SPI availability checked at runtime; GPU hard quotas, macOS 15 hardware, visible quality, sleep and whole-system energy remain separate public acceptance items.
+
 ## 2026-11-11 — Versioned WebGL Creator templates
 
 - New template specifications use rendererRevision 3; existing S0 and revision 2 bytes are frozen and checked with golden digests.

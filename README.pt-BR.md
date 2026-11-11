@@ -3,7 +3,7 @@
      The Supporter list between the markers is written by scripts/update_sponsors.py, as in README.md. -->
 <p align="center"><sub><a href="README.md">English</a>&ensp;·&ensp;<a href="README.zh-CN.md">简体中文</a>&ensp;·&ensp;<a href="README.ko.md">한국어</a>&ensp;·&ensp;<b>Português</b></sub></p>
 
-**Prévia S5.1 do Criador com IA · galeria com vários motores.** Este fork parte do [WallpaperMachine original](https://github.com/MMFoundation/WallpaperMachine). A implementação do Criador agora está integrada à branch [`main`](https://github.com/pzc163/WallpaperMachine/tree/main). As capturas e a demonstração do site abaixo são do projeto original; use o pré-lançamento deste fork para experimentar a criação com IA.
+**Prévia S5.2 do Criador com IA · provedores e mídia offline.** Baseada no [WallpaperMachine original](https://github.com/MMFoundation/WallpaperMachine). S5.1 está na main; as novidades S5.2 estão em [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator). As capturas e a demonstração original abaixo não mostram todos os recursos do Criador.
 
 <a href="https://www.wallpapermachine.app">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="A mesa de um Mac alternando entre seis papéis de parede animados reproduzidos pelo WallpaperMachine: Chisaki sobre a água ondulante, Lucy na Lua, um carro de F1 da Red Bull na neve, Firefly ao entardecer, Ellen num ponto de ônibus na chuva e Into The Abyss, sob a barra de menus e o Dock do macOS.">
@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="Licença: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 ou posterior em Apple silicon">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="Estrelas no GitHub"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Demonstração do projeto original"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111">Notas da versão e checksums</a></sub>
+  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112">Notas da versão e checksums</a></sub>
 </p>
 
 <p align="center">
@@ -59,21 +59,21 @@
 
 ## Início rápido
 
-Baixe a **[prévia S5.1 para desenvolvedores](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, assinatura Ad-hoc, **sem notarização Apple**. Intel não é suportado. Este é o único Release mantido; os Releases e instaladores anteriores foram removidos, preservando as tags Git e o histórico do código.
+Baixe a **[prévia S5.2 para desenvolvedores](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112)**: macOS 15.0+, Apple Silicon / arm64, assinatura Ad-hoc, **sem notarização Apple**. Intel não é suportado. S5.1 continua disponível como versão de teste anterior.
 
 1. Confira o SHA-256 do DMG. Prefira uma conta macOS de teste; não sobrescreva a cópia de produção nem execute ambas na mesma conta.
 2. Após verificar a origem e o checksum, siga a [lista de instalação](https://github.com/pzc163/WallpaperMachine/blob/main/docs/testing/creator-s4-public-test.md) para aplicar `xattr -cr` apenas à cópia de teste, ou use Privacidade e Segurança → Abrir Mesmo Assim. Não desative a segurança do sistema.
-3. Desative atualizações automáticas durante a avaliação: o atualizador ainda aponta para o projeto original. O código está em main, mas o pacote continua como pré-lançamento fora do canal latest oficial. Obtenha atualizações manualmente nos Releases deste fork.
+3. Desative atualizações automáticas durante a avaliação: o atualizador ainda aponta para o projeto original. O código S5.2 está em feat/ai-creator, mas o pacote continua como pré-lançamento fora do canal latest oficial. Obtenha atualizações manualmente nos Releases deste fork.
 
 O site original e o Homebrew não distribuem o Criador com IA deste fork. Cenas, vídeos, páginas web, imagens e Workshop continuam disponíveis; os requisitos de aquisição do Wallpaper Engine não mudaram.
 
 <a id="ai-creator"></a>
 
-S5.1 inclui nove modelos renderizados localmente; consulte o registro de aceitação. [S5.1](https://github.com/pzc163/WallpaperMachine/blob/main/docs/testing/creator-s51-acceptance.md).
+**Novidades S5.2:** central de provedores em duas colunas com 11 serviços de nuvem, LM Studio/Ollama e LAN personalizada; ícones LobeHub offline, uma chave para vários modelos e limites automáticos ou manuais. Palco único com edição de código (⌘R), histórico recolhível e ações fixas. Importe imagens/vídeos por arquivo, arrastar, colar ou biblioteca e use seis novos modelos híbridos/2.5D (15 no total), paleta/luminância nativas e mídia offline com Range. Ajuste preenchimento, exposição e velocidade sem IA; compartilhe a revisão por `.wmpkg`. Miniaturas visuais exigem consentimento em cada tarefa. [Contratos e limites](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-media.md).
 
 ## Criador com IA: recursos disponíveis
 
-**Galeria S5.1 com vários motores:** novos projetos começam em Shader GLSL; também há Three.js 3D e HTML5/Canvas livre. Nove modelos locais incluem tinta fluida, nuvens volumétricas, lente gravitacional, vidro refrativo, montanhas com aurora, partículas orbitais, micélio, relógio astronômico e geometria Bauhaus. Abra sem chamar um modelo, ajuste controles nativos e valide uma nova revisão. Edições usam o núcleo anterior; criações vazias recebem uma referência do motor escolhido. Three.js é local, via lista fechada `wm-lib://`, sem CDN. [Contratos e limites](https://github.com/pzc163/WallpaperMachine/blob/main/docs/features/creator-engines.md).
+**Galeria S5.1 com vários motores:** novos projetos começam em Shader GLSL; também há Three.js 3D e HTML5/Canvas livre. Nove modelos locais incluem tinta fluida, nuvens volumétricas, lente gravitacional, vidro refrativo, montanhas com aurora, partículas orbitais, micélio, relógio astronômico e geometria Bauhaus. Abra sem chamar um modelo, ajuste controles nativos e salve uma nova revisão. Edições usam o núcleo anterior; criações vazias recebem uma referência do motor escolhido. Three.js é local, via lista fechada `wm-lib://`, sem CDN. [Contratos e limites](https://github.com/pzc163/WallpaperMachine/blob/main/docs/features/creator-engines.md).
 
 **Ajuste de modelos visuais** e **Código livre (HTML5 / Canvas / WebGL)** compartilham espaço nativo, conversa, histórico imutável, prévia independente, capa JPEG e publicação. Os modelos clássicos continuam disponíveis. No modo código, descreva tinta violeta fluida seguindo o ponteiro sobre fundo preto e refine pela conversa.
 
@@ -90,11 +90,11 @@ S5.1 inclui nove modelos renderizados localmente; consulte o registro de aceita�
 - **Modelos locais e LAN:** modo local explícito aceita loopback, IPv4 privado, IPv6 ULA/link-local e .local com HTTP e chave opcional. HTTP público é recusado. Credenciais vinculadas ao Profile, origin e geração da configuração; mudar o host exige novo vínculo.
 - **Código interativo:** um HTML sem dependências recebe coordenadas do ponteiro na prévia e na área de trabalho. Entrega por monitor limitada a 30 Hz, interrompida em pausa, oclusão ou repouso; iframe offline, supervisão nativa e integridade do pacote permanecem ativos.
 - **Reparo e histórico:** erros de sintaxe, parâmetros, primeiro quadro e execução passam novamente pela validação. Geração inicial mais até dois reparos, no máximo três chamadas. Falhas, cancelamento e recuperação preservam a última revisão válida; chaves e erros brutos não entram no log de reparo.
-- **Salvar e aplicar separados:** valide predefinições/controles ou gere nova revisão por conversa, visualize com pausa, mudo e proporções, salve na biblioteca e só então aplique explicitamente ao monitor.
+- **Salvar e aplicar separados:** salve ajustes de parâmetros diretamente; mudanças no código exigem validação de execução, visualize com pausa, mudo e proporções, salve na biblioteca e só então aplique explicitamente ao monitor.
 
 **LM Studio:** carregue um modelo, inicie o servidor e configure `http://127.0.0.1:1234/v1`, o ID real, modo local e automatic. Em outro Mac, prefira túnel SSH ou LAN confiável como `http://model-host.local:1234/v1`; confira o destino na confirmação. Modelos não são incluídos.
 
-**Limites:** código livre usa um HTML ≤256 KiB, gráficos procedurais e fontes do sistema. Sem recursos/fontes externas, rede, áudio, módulos ou múltiplos arquivos. A supervisão WebKit usa SPI verificada e recusa ambientes incompatíveis; não é cota rígida de GPU do sistema nem auditoria de código hostil arbitrário. Backup/restauração/mudança de armazenamento antigos do Creator continuam bloqueados. Reprodução offline não desativa a rede do Workshop/atualizador.
+**Limites:** As revisões híbridas/2.5D S5.2 também aceitam mídia offline importada explicitamente e vinculada ao digest.  código livre usa um HTML ≤256 KiB, gráficos procedurais e fontes do sistema. Sem recursos/fontes externas, rede, áudio, módulos ou múltiplos arquivos. A supervisão WebKit usa SPI verificada e recusa ambientes incompatíveis; não é cota rígida de GPU do sistema nem auditoria de código hostil arbitrário. Backup/restauração/mudança de armazenamento antigos do Creator continuam bloqueados. Reprodução offline não desativa a rede do Workshop/atualizador.
 
 **Verificação:** modelos Mock e WebKit real fora da tela cobrem os três testes S0, falhas de processo, protocolos, monitores simulados, reparo e histórico. O resultado histórico 30/30 e 1.800 segundos refere-se aos modelos anteriores, não aos novos shaders/código livre. macOS 15 físico, DPI/repouso, qualidade visual e energia total/GPU ainda precisam de avaliação.
 
@@ -136,7 +136,7 @@ sem abrir a janela.
 
 ## Por que você pode confiar
 
-Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes de prévia deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
+Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes de prévia deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
 
 - **Código aberto, por inteiro.** O app, o renderizador e o motor de cenas estão todos
   neste repositório sob GPL-3.0-only. Não há núcleo fechado nem recursos pagos: o app
@@ -244,7 +244,7 @@ os nomes das contas Steam são substituídos antes.
 <details>
 <summary><b>Como eu consigo o app?</b></summary>
 
-Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
+Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s52-preview-20261112) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
 
 </details>
 
@@ -285,10 +285,10 @@ detalhes dele. Problemas de segurança são relatados em particular: veja o [SEC
 
 ## Código aberto. Livre para compilar.
 
-Para compilar o Criador com IA, clone a branch `main` deste fork. O suporte a sistemas anteriores depende também da versão mínima de cada biblioteca incluída; veja o [registro de empacotamento macOS 15](https://github.com/pzc163/WallpaperMachine/blob/main/docs/plans/2026-11-11-creator-macos15.md).
+Para compilar o Criador com IA, clone a branch `feat/ai-creator` deste fork. O suporte a sistemas anteriores depende também da versão mínima de cada biblioteca incluída; veja o [registro de empacotamento macOS 15](https://github.com/pzc163/WallpaperMachine/blob/main/docs/plans/2026-11-11-creator-macos15.md).
 
 ```sh
-git clone --branch main https://github.com/pzc163/WallpaperMachine.git
+git clone --branch feat/ai-creator https://github.com/pzc163/WallpaperMachine.git
 cd WallpaperMachine
 ```
 
