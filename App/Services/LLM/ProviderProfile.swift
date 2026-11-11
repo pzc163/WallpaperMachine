@@ -13,8 +13,19 @@ struct ProviderProfile: Codable, Equatable, Sendable {
         var filtersLeadingThinkBlock = false
     }
     struct Limits: Codable, Equatable, Sendable {
+        static let defaultTokenBudget = 24_576
+        static let defaultOutputTokens = 8192
         var requestBudget = 3
-        var tokenBudget = 16_384
+        var tokenBudget = defaultTokenBudget
+
+        static func tokenBudget(from text: String) -> Int? {
+            let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if value.isEmpty { return defaultTokenBudget }
+            guard value.utf8.allSatisfy({ (48...57).contains($0) }),
+                  let number = Int(value), (1...100_000).contains(number) else { return nil }
+            return number
+        }
+        var outputTokensPerRequest: Int { min(Self.defaultOutputTokens, max(1, tokenBudget / max(1, requestBudget))) }
     }
     struct Origin: Codable, Equatable, Sendable {
         let scheme: String
@@ -66,12 +77,12 @@ struct ProviderProfile: Codable, Equatable, Sendable {
               var host = components.host?.lowercased(), !host.isEmpty,
               components.user == nil, components.password == nil,
               components.query == nil, components.fragment == nil,
-              components.percentEncodedHost?.contains("%") == false,
+              LLMLocalEndpoint.safeEncoding(components),
               !components.path.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains),
               components.port.map({ (1...65535).contains($0) }) ?? true,
               components.url != nil else { throw CreatorPersistence.Failure.invalidRecord }
         if host.hasPrefix("["), host.hasSuffix("]") { host = String(host.dropFirst().dropLast()) }
-        let local = protocolKind == .openaiCompatible && localMode && ["127.0.0.1", "localhost", "::1"].contains(host)
+        let local = protocolKind == .openaiCompatible && localMode && LLMLocalEndpoint.allows(host)
         guard !localMode || local, scheme == "https" || local else { throw CreatorPersistence.Failure.invalidRecord }
         return Origin(scheme: scheme, host: host, port: components.port ?? (scheme == "https" ? 443 : 80))
     }

@@ -35,7 +35,7 @@ final class ProviderProfileTests: XCTestCase {
     }
 
     func testHTTPRequiresExplicitLocalOpenAIAndExactHost() throws {
-        for host in ["127.0.0.1", "localhost", "LOCALHOST", "[::1]"] {
+        for host in ["127.0.0.1", "localhost", "LOCALHOST", "[::1]", "10.0.0.1", "10.255.255.255", "172.16.0.1", "172.31.255.255", "192.168.1.1", "[fc00::1]", "[fdff::1]", "[fe80::1]", "[fe80::1%25en0]", "[febf::1]", "studio.local", "Studio.LOCAL"] {
             try profile("http://\(host):8080/v1", local: true).validate()
             try profile("https://\(host)/v1", local: true).validate()
             XCTAssertThrowsError(try profile("http://\(host)/v1").validate())
@@ -44,7 +44,7 @@ final class ProviderProfileTests: XCTestCase {
                 XCTAssertThrowsError(try profile("https://\(host)/v1", kind: kind, local: true).validate())
             }
         }
-        for host in ["127.0.0.2", "127.1", "2130706433", "0x7f000001", "0.0.0.0", "192.168.1.1",
+        for host in ["127.0.0.2", "127.1", "2130706433", "0x7f000001", "0.0.0.0", "172.15.255.255", "172.32.0.1", "192.169.0.1", "100.64.0.1", "169.254.1.1", "8.8.8.8", "010.0.0.1", "10.0.0.256", "192.168.001.1", "[fec0::1]", "[fe80::1%25en0%25bad]", "[fc00::1%25en0]", "[fe7f::1]", "[2001:db8::1]", "[ff02::1]", "local", "-bad.local", "bad..local", "studio.local.example.test",
                      "localhost.example.test", "localhost.", "[::ffff:127.0.0.1]", "[0:0:0:0:0:0:0:1]", "%6cocalhost"] {
             XCTAssertThrowsError(try profile("http://\(host)/v1", local: true).validate(), host)
             XCTAssertThrowsError(try profile("https://\(host)/v1", local: true).validate(), host)
@@ -73,6 +73,12 @@ final class ProviderProfileTests: XCTestCase {
     }
 
     func testMetadataAndBudgetBoundsAreValidated() throws {
+        XCTAssertEqual(ProviderProfile.Limits.tokenBudget(from: ""), 24_576)
+        XCTAssertEqual(ProviderProfile.Limits.tokenBudget(from: " \n"), 24_576)
+        XCTAssertEqual(ProviderProfile.Limits().outputTokensPerRequest, 8192)
+        for invalid in ["-1", "0", "NaN", "1e5", "100001", "999999999999999999999999"] {
+            XCTAssertNil(ProviderProfile.Limits.tokenBudget(from: invalid))
+        }
         let original = profile("https://example.test/v1")
         for requests in [1, 3] { for tokens in [1, 100_000] {
             var value = original; value.limits = .init(requestBudget: requests, tokenBudget: tokens)

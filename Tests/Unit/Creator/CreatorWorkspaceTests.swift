@@ -110,6 +110,7 @@ final class CreatorWorkspaceTests: XCTestCase {
     }
     func testConnectionProbeHasOneRequestAndNoPersistentProject() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
+        c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(#"{"ok":true}"#)])])
         let workspace = Self.workspace(c)
         let before = try await workspace.projects().map(\.id)
         _ = try await workspace.testConnection(c.profile)
@@ -119,6 +120,7 @@ final class CreatorWorkspaceTests: XCTestCase {
     }
     func testSchemaConnectionCheckKeepsOneRequestAndUsesItsOwnSmallSchema() async throws {
         let c = try await LLMTestContext(tokens: 8192, capabilities: .init(jsonMode: .schema)); defer { c.cleanup() }
+        c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(#"{"ok":true}"#)])])
         let workspace = Self.workspace(c)
         let before = try await workspace.projects().map(\.id)
         _ = try await workspace.testConnection(c.profile)

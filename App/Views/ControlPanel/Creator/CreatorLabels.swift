@@ -1,6 +1,20 @@
 import Foundation
 
 @MainActor enum CreatorLabels {
+    static func connection(_ result: CreatorWorkspace.ConnectionResult) -> String {
+        let mode: String
+        if result.protocolKind == .geminiGenerateContent { mode = L("Native JSON") }
+        else if result.protocolKind == .anthropicMessages { mode = L("Prompt JSON") }
+        else {
+            switch result.mode {
+            case .schema: mode = L("JSON Schema (strict)")
+            case .required: mode = L("JSON object (required)")
+            case .disabled: mode = L("Prompt JSON")
+            case .automatic: mode = L("Automatic (with fallback)")
+            }
+        }
+        return String(format: L("Connection verified: %@ · %@ · %@ s"), result.model, mode, result.elapsed.formatted(.number.precision(.fractionLength(1))))
+    }
     static func phase(_ phase: CreatorModel.Phase) -> String {
         switch phase {
         case .idle: L("Ready to create")

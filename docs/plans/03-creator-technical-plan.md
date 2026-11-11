@@ -276,14 +276,14 @@ P0 / S1.2 已实现 `openaiCompatible`、`anthropicMessages`、`geminiGenerateCo
 #### openaiCompatible
 
 - 首版协议范围为 Chat Completions SSE（`chat/completions`），不是 OpenAI Responses API。使用 `Authorization: Bearer <Key>`；系统约束放入该协议支持的 system 消息。
-- 默认强制 HTTPS 和非空 Key。**仅显式本地模式且规范化 host 严格等于 `127.0.0.1`、`localhost` 或 `::1` 时，允许 HTTP 与空 Key**；IPv6 URL 使用 `[::1]`，比较时去除方括号。空 Key 时省略鉴权头，不发送空 Bearer。HTTPS 本地地址也只有满足该显式模式和白名单才可空 Key。
-- 不将 `127.0.0.0/8`、内网地址、`0.0.0.0`、相似域名、DNS 恰好解析到回环的远程域名或其他 IP 表示法自动视为本地。URL 禁止 userinfo/凭据 query，TLS 验证不得关闭；HTTP 例外不扩散到另外两个 Codec。
+- 默认强制 HTTPS 和非空 Key。显式本地模式可允许回环、RFC1918 IPv4、IPv6 `fc00::/7` / `fe80::/10` 及合法 `.local` 主机使用 HTTP 与空 Key；链路本地 IPv6 可带 `%25en0` 形式的接口作用域，作用域保留在 origin 中。无凭据时省略鉴权头。
+- 不将其他 `127.0.0.0/8`、`0.0.0.0`、公网地址、相似域名、远程域名的 DNS 解析结果或其他数字 IP 表示法自动视为本地。URL 禁止 userinfo/凭据 query，TLS 验证不得关闭；例外不扩散到另外两个 Codec。
 - 请求设置 `stream: true`，支持 `stream_options.include_usage: true`。Profile 可显式声明本地端点不支持该请求字段；此时省略选项，不自动发第二次请求试探。即便请求了用量，也接受本地正常结束但不返回 usage 的流，显示“未知”。不能因为缺少用量放宽结束/完整性检查。
 - Profile 的可选 `jsonMode` 为 `automatic` / `required` / `schema` / `disabled`，缺省等于 automatic 并保留旧记录字节。automatic 在原生请求携带结构约束时发送 `response_format: {"type":"json_schema","json_schema":{"name":"template_parameter_output_v1","strict":true,"schema":...}}`，无约束的通用请求保留 json_object；required 明确要求 json_object，schema 要求原生 Schema 并强制 json_schema，disabled 省略 response_format。required/schema 均不降级。
 - 请求用 Schema 由原生目录单独导出：根对象封闭、字段全必填、parameters 内嵌 anyOf 三个完整模板字典、裸标量类型/枚举、properties 固定为空对象；不直接发送含 `$schema`/`$defs`/根 oneOf/const/allOf 的完整合同。范围、文本、跨 templateID 匹配和资源上限继续由原校验器强制检查。完整 `CreatorOutputSchema` 和 `CreatorOutputValidator` 合同不变；Prompt 给出扁平骨架及原生默认值生成的完整时钟例子，明确 backgroundMotion、无 motionSpeed/clockVisible，避免跨模板抄键。
-- 仅服务端 400 的结构化错误明确报告 `response_format`、`.type`、`.json_schema` 或 `.json_schema.schema` 及 unsupported/unknown 参数码时，automatic 可在同一预算内直接降级为纯提示词一次；不根据自由错误文案猜测、不对 401、invalid_json_schema 或无关 400 试探。按需 smoke/benchmark 均支持四种模式且默认 automatic；smoke 的 requestBudget=1 不因此放宽。当前发送 `max_tokens`，不自动猜测其他模型专属请求字段。
+- automatic 按 json_schema → json_object → 提示词 JSON 协商。400/422 的有界错误必须指向 response_format/JSON 格式功能；无关错误及 401 不降级。完整响应的结构错误也可协商；范围/资源错误继续走有限内容修复。连接探针与创作共用规则，返回实际模式与耗时。协商不额外增加预算：请求总计最多三次；内容修复仍最多两次，分别持久化计数。失败与取消不返还预留。按需 smoke 的单请求预算不放宽。
 - 只收集选定 choice 的答案正文；接受最后 `choices: []` 的 usage 专用块，忽略中间 `usage: null`，保留请求级用量而不逐块累加。收到 `finish_reason` 后仍需处理末尾用量及 `[DONE]`，不能提前关闭流。详见 [Chat Completions 请求及用量](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) 与 [流式事件](https://developers.openai.com/api/reference/resources/chat/subresources/completions/streaming-events)。
-- 过滤兼容端点的 `reasoning_content` 和显式思维块；这些是兼容扩展，不是所有 OpenAI 服务都返回的字段。对于 Profile 声明的前置 `<think>…</think>` 等包裹，使用跨分片状态处理，在输出首个 JSON 字符前剔除；不对 JSON 字符串中的普通文字做全局正则删除。思维块不闭合、未知包裹或结构歧义按无效/截断响应拒绝，不猜测正文边界。
+- 过滤兼容端点的 `reasoning_content` 和显式思维块；这些是兼容扩展，不是所有 OpenAI 服务都返回的字段。对于前置 `<think>…</think>` 包裹默认，使用跨分片状态处理，在输出首个 JSON 字符前剔除；不对 JSON 字符串中的普通文字做全局正则删除。思维块不闭合、未知包裹或结构歧义按无效/截断响应拒绝，不猜测正文边界。
 
 #### anthropicMessages
 

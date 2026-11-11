@@ -57,7 +57,7 @@ final class CreatorRepairTests: XCTestCase {
         XCTAssertEqual(c.route.requests.count, 2)
     }
 
-    func testMalformedThenMissingParameterRepairsTwiceWithoutCommittingInvalidDrafts() async throws {
+    func testMalformedThenMissingParameterNegotiatesTwiceWithoutCommittingInvalidDrafts() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         var object = try CreatorGenerationFixtures.object()
         var parameters = object["parameters"] as! [String: Any]; parameters.removeValue(forKey: "starDensity"); object["parameters"] = parameters
@@ -65,7 +65,7 @@ final class CreatorRepairTests: XCTestCase {
         let result = try await flow(c).createAndSave(request(c))
         let document = try await c.store.conversation(projectID: result.projectID)
         let turn = try XCTUnwrap(document.turns.last)
-        XCTAssertEqual(turn.requestCount, 3); XCTAssertEqual(turn.repairCount, 2)
+        XCTAssertEqual(turn.requestCount, 3); XCTAssertEqual(turn.repairCount, 0); XCTAssertEqual(turn.negotiationCount, 2)
         XCTAssertEqual(turn.attempts[1].issue?.fields, [.init(path: "parameters.starDensity", rule: .missing)])
         let project = try await c.store.project(result.projectID)
         XCTAssertEqual(project.revisionIDs, [result.draft.id, result.sealed.id])
@@ -122,6 +122,25 @@ final class CreatorRepairTests: XCTestCase {
         XCTAssertEqual(c.route.requests.count, 1)
     }
 
+    func testAutomaticNegotiationDoesNotRequireContentRepairPermission() async throws {
+        let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
+        let rejection = Data(#"{"error":{"message":"response_format unsupported"}}"#.utf8)
+        c.route.replace([.init(status: 400, chunks: [rejection]), .init(status: 422, chunks: [rejection]),
+            try reply("<think>private thought</think>" + CreatorGenerationFixtures.fenced(CreatorGenerationFixtures.output()))])
+        let result = try await flow(c).createAndSave(request(c, repairs: 0))
+        let conversation = try await c.store.conversation(projectID: result.projectID)
+        let turn = try XCTUnwrap(conversation.turns.last)
+        XCTAssertEqual(turn.requestCount, 3); XCTAssertEqual(turn.negotiationCount, 2)
+        XCTAssertEqual(turn.maxRepairs, 0); XCTAssertEqual(turn.repairCount, 0)
+        XCTAssertEqual(turn.reservedOutputTokens, 6144)
+        XCTAssertEqual(turn.state, .completed)
+        for (index, sent) in c.route.requests.enumerated() {
+            let object = try XCTUnwrap(JSONSerialization.jsonObject(with: try XCTUnwrap(sent.httpBody)) as? [String: Any])
+            let format = (object["response_format"] as? [String: Any])?["type"] as? String
+            XCTAssertEqual(format, ["json_schema", "json_object", nil][index])
+        }
+    }
+
     func testAutomaticJSONModeFallbackUsesOneOfTheSameThreeRequests() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         c.route.replace([.init(status: 400, chunks: [Data(#"{"error":{"param":"response_format","code":"unsupported_parameter"}}"#.utf8)]),
@@ -134,12 +153,13 @@ final class CreatorRepairTests: XCTestCase {
         for (index, request) in c.route.requests.enumerated() {
             let body = try XCTUnwrap(request.httpBody)
             let object = try XCTUnwrap(JSONSerialization.jsonObject(with: body) as? [String: Any])
-            XCTAssertEqual(object["response_format"] != nil, index == 0)
+            XCTAssertNotNil(object["response_format"])
+            if index > 0 { XCTAssertEqual((object["response_format"] as? [String: Any])?["type"] as? String, "json_object") }
             if index == 0 { XCTAssertEqual((object["response_format"] as? [String: Any])?["type"] as? String, "json_schema") }
         }
     }
 
-    func testClockNestedValuesAndCrossTemplateKeysRepairWithoutSavingRejectedDrafts() async throws {
+    func testClockNestedValuesAndCrossTemplateKeysNegotiateWithoutSavingRejectedDrafts() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         var nested = try CreatorGenerationFixtures.object("clock-v2")
         var values = nested["parameters"] as! [String: Any]
@@ -153,9 +173,9 @@ final class CreatorRepairTests: XCTestCase {
         let result = try await flow(c).createAndSave(request(c, prompt: "创建缓慢背景的时钟"))
         let conversation = try await c.store.conversation(projectID: result.projectID)
         let turn = try XCTUnwrap(conversation.turns.last)
-        XCTAssertEqual(turn.requestCount, 3); XCTAssertEqual(turn.repairCount, 2)
+        XCTAssertEqual(turn.requestCount, 3); XCTAssertEqual(turn.repairCount, 0); XCTAssertEqual(turn.negotiationCount, 2)
         XCTAssertEqual(turn.attempts[0].issue?.fields, [.init(path: "parameters.backgroundMotion", rule: .type)])
-        XCTAssertEqual(turn.attempts[1].issue?.category, .policyViolation)
+        XCTAssertEqual(turn.attempts[1].issue?.category, .jsonModeUnsupported)
         XCTAssertEqual(turn.attempts[1].issue?.fields, [.init(path: "parameters", rule: .unexpected)])
         XCTAssertEqual(result.sealed.templateID, "clock-v2")
         XCTAssertNotNil(result.sealed.normalizedParameters["backgroundMotion"])

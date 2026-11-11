@@ -25,6 +25,15 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator model negotiation and LAN profiles
+
+- Automatic OpenAI format negotiation is shared by connection probes and creation: schema, JSON object, prompt JSON; each request consumes the same bounded ledger.
+- Native validation errors retain allowlisted field details; format negotiation is independent of the maximum two content repairs.
+- Local mode accepts strict private IPv4, local IPv6 and mDNS names; origin/configuration credential binding and explicit connection confirmation remain mandatory.
+- Connection success banners include actual mode, model and elapsed time in all six app languages; stale or cancelled results cannot restore success.
+- Focused native suites: 56 passed, 0 failed. Full python3 scripts/test.py: 720 script tests and 5006 native tests passed, 0 failed, 72 native skips.
+- No live API, personal Keychain, visible UI, desktop replacement or hardware acceptance was exercised. S4 remains closed in this commit.
+
 ## 2026-11-11 — Creator macOS 15 ad-hoc packaging
 
 - Added explicit ad-hoc Rehearsal mode; production publishing remains gated and notarized by default.
@@ -134,16 +143,3 @@ S1.3 catalog-derived prompts, strict parameter validation and immutable native d
 - `python3 scripts/tests/test_doc_links.py` — exit 0, 11 passed; `git diff --check` passed. Planning mirrors, 28 tested-file hashes, frozen generator/assertion bytes and task scope checked.
 - Static evidence only: runtime/posterCapture notChecked. No paid/live provider call, personal Keychain, new UI, desktop operation, Release build, install or push. No parameter auto-repair; S1.4/S4 untouched.
 - Raw test bundles/logs are disposable and removed after retaining the stage report and machine-readable summary; no other task artifacts are cleaned.
-
-## 2026-11-10 — Creator S1.2 profile-bound model transport and three codecs
-
-S1.2 adds profile-bound native model connections after local rollback commit `37f2c603`; see [connection implementation](../features/creator-llm.md). This stage has no creator UI or live model/Keychain test.
-
-- Targeted `python3 scripts/test.py --only SSEParserTests --only LLMCodecTests --only ProviderCredentialStoreTests --only LLMProviderTests --only LLMStreamTransportTests --only ProviderProfileTests --only CreatorSettingsStoreTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests` — exit 0; 87 passed, 0 failed, 0 skipped. All 49 new tests pass.
-- Earlier targeted integration run: 74 passed, 1 failed because URLSession moved the request body into httpBodyStream; corrected the offline fixture capture. Final runs also cover CRLF raw-byte limits at every split.
-- One full `python3 scripts/test.py` — exit 0; 687 Python tests across 32 modules; 4,860 native passed, 0 failed, 69 skipped of 4,929 in 150 seconds. No full-gate retry.
-- Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference render. S4 remains closed.
-- Two existing main-thread runtime warnings in AppUpdate signature verification and VideoFormatSupport cache tests; those tests pass and their production code is unchanged. No new LLM/Creator compiler warning.
-- `python3 scripts/tests/test_doc_links.py` and `git diff --check` — exit 0. Plans and implementation docs updated; frozen generators and golden digest assertions unchanged.
-- Model traffic is intercepted for every URL by Mock URLProtocol; credentials use injected MemoryKeychain. No paid/real provider calls, personal Keychain access, desktop/UI operations, installation or Release build.
-- Real endpoint/TLS/proxy/Keychain-permission interoperability is unverified. Output reservations are not billing limits; S1.3 strict schema and S1.4 UI/cover/publication remain pending. S1.2 changes remain uncommitted; no push.

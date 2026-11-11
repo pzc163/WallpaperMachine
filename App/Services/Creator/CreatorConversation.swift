@@ -33,6 +33,13 @@ struct CreatorConversation: Codable, Equatable, Sendable {
         var resultRevisionID: UUID? = nil
         var failure: CreatorRepairIssue? = nil
         var budgetExhausted = false
+        // Absent in historical conversations; those retain their original one-call-per-repair rule.
+        var negotiatesJSON: Bool? = nil
+        var negotiationCount: Int? = nil
+        var effectiveJSONMode: ProviderProfile.Capabilities.JSONMode? {
+            guard negotiatesJSON == true else { return nil }
+            switch negotiationCount ?? 0 { case 0: return .schema; case 1: return .required; default: return .disabled }
+        }
         var requestCount: Int { attempts.count }
         var reservedOutputTokens: Int { attempts.reduce(0) { $0 + $1.reservedOutputTokens } }
     }
@@ -46,7 +53,10 @@ struct CreatorConversation: Codable, Equatable, Sendable {
               turns.dropLast().allSatisfy({ $0.state.terminal }) else { throw CreatorPersistence.Failure.invalidRecord }
         for turn in turns {
             guard turn.createdAt >= 0, (0...2).contains(turn.maxRepairs), (0...turn.maxRepairs).contains(turn.repairCount),
-                  (1...min(3, 1 + turn.maxRepairs)).contains(turn.requestBudget), (1...100_000).contains(turn.tokenBudget),
+                  (1...(turn.negotiatesJSON == true ? 3 : min(3, 1 + turn.maxRepairs))).contains(turn.requestBudget),
+                  (0...2).contains(turn.negotiationCount ?? 0),
+                  turn.negotiatesJSON == true || turn.negotiationCount == nil,
+                  (turn.negotiationCount ?? 0) <= turn.requestCount, (1...100_000).contains(turn.tokenBudget),
                   turn.attempts.count <= turn.requestBudget, Set(turn.attempts.map(\.jobID)).count == turn.attempts.count,
                   turn.attempts.allSatisfy({ (1...100_000).contains($0.reservedOutputTokens) }),
                   turn.reservedOutputTokens <= turn.tokenBudget,

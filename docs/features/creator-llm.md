@@ -74,10 +74,13 @@ made directly in a different process's system Keychain are not watched in this
 stage. Test coverage uses independent store instances plus external atomic file
 replacement, not real cross-process Keychain notifications.
 
-Default HTTPS/TLS validation stays enabled. Only explicit local OpenAI-compatible
-profiles with exact normalized `127.0.0.1`, `localhost` or `::1` hosts may use HTTP
-or omit the key. Missing local keys omit Authorization; stale/malformed bindings
-are rejected even in local mode. No DNS-derived or alternative IP exception exists.
+Default HTTPS/TLS validation stays enabled. Explicit local OpenAI-compatible profiles
+may use HTTP or an empty key for exact loopback hosts, RFC1918 private IPv4,
+IPv6 `fc00::/7` and `fe80::/10`, and valid `.local` mDNS names. Link-local IPv6
+may include a literal interface scope encoded as `%25en0`; that scope remains part
+of the credential origin. Numeric/octal IPv4 aliases, public HTTP and encoded-host
+ambiguities are refused. Missing local keys omit Authorization; stale bindings
+remain invalid. This is explicit target consent, not network discovery.
 
 ## Streaming, limits and errors
 
@@ -103,7 +106,7 @@ or invalid UTF-8 are rejected. Parsing `[DONE]` does not ignore a malformed tail
 | Error body inspected for JSON-mode fallback | 4 KiB; never logged |
 | Input text | 16 KiB total; 1–32 messages, ending in a user message |
 | Request body | 128 KiB after native JSON encoding |
-| Request deadline | 60 seconds by default; injected limit must be positive and at most 300 seconds |
+| Request deadline | 60 seconds by default; injected limit must be positive and at most 600 seconds |
 | Concurrency | 4 jobs per provider, 32 coordinator registrations; one in-process request owner per job |
 
 Swift task cancellation immediately cancels/invalidate the session and completes
@@ -119,7 +122,8 @@ app diagnostics, not arbitrary operating-system tracing enabled outside the app.
 401/403 do not retry. 429 accepts delta-seconds or HTTP-date Retry-After, defaults
 to one second when absent/invalid, and returns an error when the requested wait
 exceeds 30 seconds rather than retrying sooner. 5xx retries use bounded backoff.
-Timeout, malformed/truncated stream, refusal and network failure do not retry.
+Timeout, truncated stream, refusal and network failure do not internally retry. Complete
+format violations may negotiate only in automatic OpenAI mode.
 
 Each attempt atomically consumes the native job's request budget (at most three)
 and reserves `maxOutputTokens` against the smaller job/Profile token budget before
@@ -145,33 +149,34 @@ Anthropic/Gemini append `/v1` or `/v1beta` unless that is already the last path
 segment. Profiles contain base URLs, not complete operation endpoints. Protocol
 queries are constructed natively; Profile base URLs cannot contain any query.
 
-OpenAI `jsonMode` defaults to `automatic` (including an absent legacy field): use
-`json_schema` with `strict: true` when the native caller supplies a structured-output
-hint; otherwise retain `json_object`. `required` explicitly requests `json_object`,
-`schema` requires a native schema and requests `json_schema`, and `disabled` omits
-the format. Neither `required` nor `schema` automatically downgrades. Creator
-generation supplies `template_parameter_output_v1`; the one-request connection
-probe supplies its own small `connection_check` schema for forced schema mode.
+OpenAI `jsonMode` defaults to `automatic` (including an absent legacy field).
+Creation and connection checks negotiate `json_schema` → `json_object` → prompt JSON
+using the same provider. Calls without a native schema start at JSON object.
+`schema`, `required` and `disabled` are fixed modes and do not downgrade.
+Creation supplies `template_parameter_output_v1`; the probe supplies `connection_check`
+and requires exactly `{"ok":true}`. The returned connection result includes the
+actual mode, model, request count, usage and elapsed time, not merely HTTP success.
 
-Only automatic mode permits one budgeted downgrade directly to prompt-only output
-for HTTP 400 explicitly naming `response_format`, `.type`, `.json_schema` or
-`.json_schema.schema`, with an unsupported/unknown parameter code. Invalid schemas,
-unrelated 400s and free-form error messages do not trigger probing. The fallback
-still consumes the same job/conversation request and token budget; a one-request
-probe cannot send a second request. No free-form error-message heuristic is used. Explicit
-`requestsUsage = false` omits stream_options without probing with another request.
-Actual endpoint/model differences, including support for `max_tokens`, remain
-unverified; no Responses API, tool calling or model-specific option negotiation
-is implemented.
+A bounded 400/422 error must identify response-format support (parameter or message);
+unrelated parameter errors and 401 do not negotiate. Invalid complete JSON shapes can
+negotiate as well; native range/resource violations remain content repairs. Every
+candidate still passes the same strict native validator. Leading `<think>...</think>`
+blocks are filtered incrementally by default, `reasoning_content`/typed thought blocks
+are discarded, and one complete Markdown JSON fence is unwrapped. Tags inside JSON
+strings remain literal. Unknown/unclosed wrappers, ambiguous text and truncated streams
+are refused; filtering never refunds request/token usage.
 
-OpenAI reasoning_content and typed thought blocks are discarded. Only an explicit
-Profile capability enables leading `<think>...</think>` filtering, incrementally
-across deltas; unknown/unclosed wrappers fail, while literal tags inside JSON
-strings remain unchanged. Anthropic thinking/redacted_thinking/signature blocks
-and Gemini thought=true parts are skipped. Usage snapshots merge by field without
-summing cumulative deltas; absent values remain unknown, not zero, and malformed
-or decreasing cumulative counts fail. Thought-token counts are retained separately
-when supplied, never inferred from visible text.
+Negotiation and up to two content repairs share one maximum-three-request ledger.
+Negotiation does not require enabling content repair; its counter is persisted separately.
+New Profiles default to 24,576 reserved output tokens, with up to 8,192 per request;
+smaller configured budgets remain hard limits. The UI treats blank input as the default,
+rejects invalid/overflowing input, and shows the default explicitly. Existing stored
+limits are not silently rewritten. Unknown usage stays unknown. No raw response,
+thought text, key or arbitrary error description enters diagnostic logs.
+
+Anthropic/Gemini retain their native contracts and cumulative usage semantics. Explicit
+`requestsUsage = false` omits stream_options without probing. No Responses API, tool
+calling or automatic model-name/max-token-field discovery is implemented.
 
 ## Verification and remaining work
 

@@ -37,6 +37,7 @@ live under `testing/`.
 | [plans/03-creator-technical-plan.md](plans/03-creator-technical-plan.md) | Creator architecture, contracts, stages and implemented storage boundaries (03) |
 | [plans/2026-11-10-creator-s0.md](plans/2026-11-10-creator-s0.md) | Creator S0 implementation scope, steps and verification gates |
 | [plans/2026-11-10-creator-s1-s4.md](plans/2026-11-10-creator-s1-s4.md) | Creator template parameters, native covers, staged model contracts and gates for unrestricted source |
+| [plans/2026-11-11-creator-s3-s4-upgrade.md](plans/2026-11-11-creator-s3-s4-upgrade.md) | Shared output negotiation, LAN model access, versioned WebGL templates and independently verified free-code execution |
 | [conventions.md](conventions.md) | Code, test, documentation, commit and pull-request rules |
 | [release.md](release.md) | Versioning, release specs, notes generation, CI pipeline, in-app updater contract |
 | [plans/2026-11-11-creator-macos15.md](plans/2026-11-11-creator-macos15.md) | macOS 15 arm64 ad-hoc acceptance build, dependency audit and isolated pre-release delivery |

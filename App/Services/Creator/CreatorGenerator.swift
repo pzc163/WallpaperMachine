@@ -65,7 +65,7 @@ actor CreatorGenerator {
             let current = try await store.iteration(iteration)
             guard current.state == .generating, current.profileID == profile.id, current.configurationID == profile.configurationID,
                   current.baseRevisionID == request.baseRevisionID,
-                  (current.repairCount == 0 && request.repair == nil) || (current.repairCount > 0 && request.repair == current.failure)
+                  (current.requestCount == 0 && request.repair == nil) || (current.requestCount > 0 && request.repair == current.failure)
             else { throw CreatorPersistence.Failure.staleJob }
             prompt = current.userMessage; turn = current
             if request.repair != nil, let candidate = current.attempts.reversed().compactMap(\.draftRevisionID).first {
@@ -91,9 +91,11 @@ actor CreatorGenerator {
         do {
             try await checkpoint(.beforeRequest); try Task.checkCancellation()
             let completed = try await provider.generate(input, profileID: profile.id, configurationID: profile.configurationID,
-                ticket: ticket, store: store, retrying: turn == nil,
-                disableAutomaticJSONMode: turn?.attempts.contains(where: { $0.issue?.category == .jsonModeUnsupported }) == true)
-            if let iteration = request.iteration { try await store.recordIterationUsage(iteration, jobID: ticket.id, usage: completed.response.usage) }
+                ticket: ticket, store: store, retrying: turn == nil, outputMode: turn?.effectiveJSONMode,
+                validate: { text in _ = try CreatorOutputValidator.detailed(text) },
+                received: { response in
+                    if let iteration = request.iteration { try await store.recordIterationUsage(iteration, jobID: ticket.id, usage: response.usage) }
+                })
             try await checkpoint(.afterResponse); try Task.checkCancellation()
             let output = try turn == nil ? CreatorOutputValidator.parse(completed.response.text) : CreatorOutputValidator.detailed(completed.response.text)
             // Even schema-valid display metadata must not persist credentials echoed by a provider.

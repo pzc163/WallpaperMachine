@@ -11,6 +11,7 @@ struct CreatorSettingsSection: View {
     @State private var key = ""
     @State private var expectedRevision = 0
     @State private var loaded = false
+    @State private var tokenBudgetText = ""
 
     var body: some View {
         SettingsPage(.models) {
@@ -42,6 +43,8 @@ struct CreatorSettingsSection: View {
             else { expectedRevision = controller.creator.configuration.revision; if !loaded { loadSelected() } }
         }
         .onChange(of: draft.baseURL) { _, _ in key = "" }
+        .onChange(of: draft) { _, _ in controller.creator.connectionNotice = nil }
+        .onChange(of: tokenBudgetText) { _, value in draft.limits.tokenBudget = ProviderProfile.Limits.tokenBudget(from: value) ?? 0 }
         .onChange(of: draft.protocolKind) { _, kind in
             key = ""; draft.localMode = false; draft.capabilities = .init()
             if kind != .openaiCompatible { draft.localMode = false }
@@ -59,7 +62,7 @@ struct CreatorSettingsSection: View {
                 }
             }
             Button("Add connection") {
-                key = ""; draft = ProviderProfile(name: "", protocolKind: .openaiCompatible, baseURL: "", model: "")
+                key = ""; tokenBudgetText = ""; draft = ProviderProfile(name: "", protocolKind: .openaiCompatible, baseURL: "", model: "")
                 expectedRevision = controller.creator.configuration.revision; loaded = true
             }.accessibilityIdentifier("creator-profile-add")
         }
@@ -93,7 +96,7 @@ struct CreatorSettingsSection: View {
             TextField("Model", text: $draft.model).accessibilityIdentifier("creator-profile-model")
             if draft.protocolKind == .openaiCompatible {
                 Toggle("Local server mode", isOn: $draft.localMode).toggleStyle(.checkbox)
-                Text("HTTP and an empty key are allowed only for localhost, 127.0.0.1 or ::1.").font(.caption).foregroundStyle(.secondary)
+                Text("Local mode allows HTTP and an empty key on loopback, private LAN addresses and .local hosts only. Use a trusted network; public endpoints require HTTPS.").font(.caption).foregroundStyle(.secondary)
             }
             SecureField("API key", text: $key).privacySensitive().accessibilityIdentifier("creator-profile-key")
             Picker("Request budget", selection: $draft.limits.requestBudget) {
@@ -101,8 +104,10 @@ struct CreatorSettingsSection: View {
             }.accessibilityIdentifier("creator-request-budget")
             HStack {
                 Text("Token budget")
-                TextField("Token budget", value: $draft.limits.tokenBudget, format: .number).accessibilityIdentifier("creator-token-budget")
+                TextField("Token budget", text: $tokenBudgetText, prompt: Text(verbatim: String(ProviderProfile.Limits.defaultTokenBudget)))
+                    .accessibilityIdentifier("creator-token-budget")
             }
+            Text("Blank uses 24,576 reserved output tokens, with up to 8,192 per request. Negotiation and repairs share the budget.").font(.caption).foregroundStyle(.secondary)
         }.textFieldStyle(.roundedBorder)
     }
     private var buttons: some View {
@@ -135,7 +140,8 @@ struct CreatorSettingsSection: View {
     }
     private var savedProfile: ProviderProfile? { controller.creator.configuration.profiles.first { $0.id == draft.id } }
     private func edit(_ profile: ProviderProfile) {
-        key = ""; draft = profile; expectedRevision = controller.creator.configuration.revision; loaded = true
+        key = ""; draft = profile; tokenBudgetText = String(profile.limits.tokenBudget)
+        expectedRevision = controller.creator.configuration.revision; loaded = true
     }
     private func loadSelected() {
         if let profile = controller.creator.profile { edit(profile) }

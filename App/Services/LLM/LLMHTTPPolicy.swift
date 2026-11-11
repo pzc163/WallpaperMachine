@@ -25,11 +25,12 @@ enum LLMHTTPPolicy {
     }
     static func unsupportedJSONMode(_ data: Data) -> Bool {
         guard data.count <= 4096, let text = String(data: data, encoding: .utf8),
-              let object = try? LLMJSON.object(text), let error = object["error"] as? [String: Any],
-              let parameter = error["param"] as? String,
-              ["response_format", "response_format.type", "response_format.json_schema", "response_format.json_schema.schema"].contains(parameter),
-              let code = error["code"] as? String
+              let object = try? LLMJSON.object(text), let error = object["error"] as? [String: Any]
         else { return false }
-        return ["unsupported_parameter", "unsupported_value", "unknown_parameter"].contains(code)
+        let parameter = (error["param"] as? String ?? "").lowercased()
+        let message = (error["message"] as? String ?? "").lowercased()
+        if !parameter.isEmpty && parameter != "response_format" && !parameter.hasPrefix("response_format.") { return false }
+        return parameter == "response_format" || parameter.hasPrefix("response_format.")
+            || ["response_format", "json_schema", "json_object", "structured output", "guided_json"].contains(where: message.contains)
     }
 }

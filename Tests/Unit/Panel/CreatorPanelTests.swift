@@ -79,9 +79,17 @@ import XCTest
             XCTAssertTrue(confirmation.detail.contains(c.profile.baseURL)); XCTAssertTrue(confirmation.detail.contains(c.profile.model))
             XCTAssertFalse(confirmation.detail.contains(LLMTestFixtures.key))
             panel.dialogs.confirmAnswer = true
+            c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(#"{"ok":true}"#)])])
             try await panel.controller.testCreatorConnection(c.profile)
             XCTAssertEqual(c.route.requests.count, 1); XCTAssertFalse(panel.controller.creator.isTestingConnection)
             XCTAssertEqual(panel.controller.creator.connectionStatus, L("Connection succeeded"))
+            let notice = try XCTUnwrap(panel.controller.creator.connectionNotice)
+            XCTAssertEqual(notice.model, c.profile.model)
+            XCTAssertEqual(notice.mode, .schema)
+            XCTAssertGreaterThanOrEqual(notice.elapsed, 0)
+            XCTAssertTrue(CreatorLabels.connection(notice).contains(c.profile.model))
+            panel.controller.creator.connectionNotice = nil
+            XCTAssertNil(panel.controller.creator.connectionNotice)
         } catch { await panel.shutdown(); throw error }
         await panel.shutdown()
     }

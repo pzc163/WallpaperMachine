@@ -22,11 +22,12 @@ final class CreatorModel {
     var recovered = false
     var recovery: CreatorRevisionStore.Recovery?
     var connectionStatus: String?
+    var connectionNotice: CreatorWorkspace.ConnectionResult?
     var isTestingConnection = false
     var isBusy = false
     @ObservationIgnored var recoveryTask: Task<CreatorRevisionStore.Recovery, Error>?
     @ObservationIgnored var operation: Task<Void, Error>?
-    @ObservationIgnored var connection: Task<LLMResponse.Usage, Error>?
+    @ObservationIgnored var connection: Task<CreatorWorkspace.ConnectionResult, Error>?
     @ObservationIgnored var operationID = UUID()
     @ObservationIgnored var preview: CreatorPreviewWindow?
     var filteredProjects: [CreatorRevisionStore.WorkspaceProject] {

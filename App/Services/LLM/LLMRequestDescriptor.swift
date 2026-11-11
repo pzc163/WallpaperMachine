@@ -19,7 +19,7 @@ struct LLMRequestDescriptor: Sendable {
     }
     static func decoder(for profile: ProviderProfile) -> any LLMProtocolCodec {
         switch profile.protocolKind {
-        case .openaiCompatible: return OpenAICompatibleCodec(allowsLeadingThought: profile.capabilities.filtersLeadingThinkBlock)
+        case .openaiCompatible: return OpenAICompatibleCodec(allowsLeadingThought: true)
         case .anthropicMessages: return AnthropicMessagesCodec()
         case .geminiGenerateContent: return GeminiGenerateContentCodec()
         }

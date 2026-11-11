@@ -94,7 +94,7 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             guard responseCode == nil, let http = response as? HTTPURLResponse,
                   http.url == request.url else { return (false, .protocolViolation) }
             responseCode = http.statusCode
-            if http.statusCode == 400 { return (true, nil) }
+            if [400, 422].contains(http.statusCode) { return (true, nil) }
             if let failure = LLMHTTPPolicy.failure(for: http) { return (false, failure) }
             guard http.value(forHTTPHeaderField: "Content-Type")?.split(separator: ";").first?.trimmingCharacters(in: .whitespaces).lowercased() == "text/event-stream"
             else { return (false, .protocolViolation) }
@@ -107,8 +107,8 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
         let failure: LLMFailure? = lock.withLock {
             guard outcome == nil else { return nil }
             guard let responseCode else { return .protocolViolation }
-            if responseCode == 400 {
-                guard data.count <= 4096 - errorBody.count else { return .http(400) }
+            if [400, 422].contains(responseCode) {
+                guard data.count <= 4096 - errorBody.count else { return .http(responseCode) }
                 errorBody.append(data); return nil
             }
             do { for event in try parser.append(data) { try decoder.consume(event) }; return nil }
@@ -120,7 +120,7 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
         let result: Result<LLMResponse, LLMFailure>? = lock.withLock {
             guard outcome == nil else { return nil }
             if let error { return .failure(LLMFailure.sanitized(error)) }
-            if responseCode == 400 { return .failure(LLMHTTPPolicy.unsupportedJSONMode(errorBody) ? .jsonModeUnsupported : .http(400)) }
+            if let responseCode, [400, 422].contains(responseCode) { return .failure(LLMHTTPPolicy.unsupportedJSONMode(errorBody) ? .jsonModeUnsupported : .http(responseCode)) }
             guard responseCode != nil else { return .failure(.network) }
             do { try parser.finish(); return .success(try decoder.finish()) }
             catch { return .failure(LLMFailure.sanitized(error)) }

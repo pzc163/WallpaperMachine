@@ -28,14 +28,15 @@ import XCTest
                 XCTAssertEqual(c.route.requests.count, sent)
                 try await controller.saveCreatorProfile(saved, key: LLMTestFixtures.key, expectedRevision: controller.creator.configuration.revision)
                 XCTAssertEqual(controller.creator.profile?.configurationID, saved.configurationID)
+                c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(#"{"ok":true}"#)])])
                 try await controller.testCreatorConnection(saved)
                 XCTAssertEqual(c.route.requests.count, sent + 1)
                 let body = try XCTUnwrap(JSONSerialization.jsonObject(with: try XCTUnwrap(c.route.requests.last?.httpBody)) as? [String: Any])
                 let format = body["response_format"] as? [String: Any]
                 switch mode {
-                case .schema: XCTAssertEqual(format?["type"] as? String, "json_schema")
+                case .schema, .automatic: XCTAssertEqual(format?["type"] as? String, "json_schema")
                 case .required: XCTAssertEqual(format?["type"] as? String, "json_object")
-                case .automatic, .disabled: XCTAssertNil(format, "Automatic connection probes do not retry JSON mode")
+                case .disabled: XCTAssertNil(format)
                 }
             }
             XCTAssertFalse(try String(contentsOf: c.settings.url, encoding: .utf8).contains(LLMTestFixtures.key))
@@ -60,6 +61,7 @@ import XCTest
             do { try await controller.saveCreatorProfile(c.profile, key: LLMTestFixtures.key, expectedRevision: revision); XCTFail("Stale draft accepted") } catch {}
             XCTAssertEqual(controller.creator.configuration, saved)
             XCTAssertFalse(controller.creator.isTestingConnection)
+            XCTAssertNil(controller.creator.connectionNotice)
             XCTAssertEqual(c.route.requests.count, 1)
             XCTAssertFalse(c.diagnostics.lines.joined().contains(LLMTestFixtures.key))
         } catch { await panel.shutdown(); throw error }

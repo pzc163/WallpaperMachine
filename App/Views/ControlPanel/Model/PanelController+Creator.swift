@@ -68,7 +68,7 @@ extension PanelController {
             let token = self.creator.operationID
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
-                maxOutputTokens: min(2048, profile.limits.tokenBudget), maxRepairs: repairs)
+                maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs)
             request.progress = { [self] stage, attempt, limit in
                 await MainActor.run {
                     guard self.creator.operationID == token else { return }
@@ -151,6 +151,7 @@ extension PanelController {
     func pauseCreatorPreview(_ paused: Bool) throws { try creator.preview?.pause(paused) }
     func setCreatorPreviewAspect(_ aspect: CreatorPreviewWindow.Aspect) { creator.preview?.setAspect(aspect) }
     func saveCreatorProfile(_ profile: ProviderProfile, key: String, expectedRevision: Int) async throws {
+        creator.connectionNotice = nil
         creator.cancel()
         try await run(.immediate) {
             do { creator.configuration = try await creatorWorkspace.saveProfile(profile, key: key, expectedRevision: expectedRevision) }
@@ -161,25 +162,33 @@ extension PanelController {
         }
     }
     func selectCreatorProfile(_ id: UUID) async throws {
+        creator.connectionNotice = nil
         creator.configuration = try await creatorWorkspace.selectProfile(id, expectedRevision: creator.configuration.revision)
     }
     func deleteCreatorProfile(_ id: UUID) async throws {
+        creator.connectionNotice = nil
         guard await dialogs.confirm(L("Delete model connection?"), detail: L("Its saved key will also be removed."), button: L("Delete")) else { return }
         creator.cancel()
         creator.configuration = try await creatorWorkspace.removeProfile(id, expectedRevision: creator.configuration.revision)
     }
-    func cancelCreatorConnection() { creator.connection?.cancel() }
+    func cancelCreatorConnection() { creator.connectionNotice = nil; creator.connection?.cancel() }
     func testCreatorConnection(_ profile: ProviderProfile) async throws {
         guard !creator.isTestingConnection else { return }
-        let detail = profile.baseURL + "\n" + profile.model + "\n\n" + L("This sends one small request and may incur a charge. You can cancel at any time; a sent request may still be billed.")
+        let detail = profile.baseURL + "\n" + profile.model + "\n\n" + L("This tests the saved model and may negotiate output modes within your request and token budgets. Requests may incur charges. You can cancel at any time.")
         guard await dialogs.confirm(L("Test model connection?"), detail: detail, button: L("Test connection")) else { return }
-        creator.isTestingConnection = true; creator.connectionStatus = nil
+        creator.isTestingConnection = true; creator.connectionStatus = nil; creator.connectionNotice = nil
         let task = Task { try await creatorWorkspace.testConnection(profile) }
         creator.connection = task
         defer { creator.connection = nil; creator.isTestingConnection = false }
         do {
-            _ = try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
+            let result = try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
+            try Task.checkCancellation()
+            let latest = try await creatorWorkspace.configuration()
+            guard !task.isCancelled, latest.profiles.contains(where: {
+                $0.id == result.profileID && $0.configurationID == result.configurationID
+            }) else { throw LLMFailure.staleProfile }
             creator.connectionStatus = L("Connection succeeded")
+            creator.connectionNotice = result
         } catch {
             let issue = CreatorRepairIssue.from(error)
             creator.connectionStatus = CreatorLabels.issue(issue.category)

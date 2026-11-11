@@ -34,10 +34,12 @@ extension CreatorRevisionStore {
             }
             try cancelActiveIteration(projectID)
             var document = try readConversation(projectID)
+            let automatic = LLMOutputNegotiation.automatic(profile)
             let turn = CreatorConversation.Turn(id: UUID(), token: UUID(), createdAt: CreatorPersistence.timestamp(),
                 baseRevisionID: base?.revisionID, baseRevisionDigest: base?.revisionDigest,
                 profileID: profile.id, configurationID: profile.configurationID, userMessage: message,
-                maxRepairs: maxRepairs, requestBudget: min(1 + maxRepairs, profile.limits.requestBudget), tokenBudget: profile.limits.tokenBudget)
+                maxRepairs: maxRepairs, requestBudget: min(automatic ? 3 : 1 + maxRepairs, profile.limits.requestBudget), tokenBudget: profile.limits.tokenBudget,
+                negotiatesJSON: automatic ? true : nil, negotiationCount: automatic ? 0 : nil)
             document.turns.append(turn)
             try document.validate()
             let ticket = CreatorConversation.Ticket(id: turn.id, projectID: projectID, token: turn.token)
@@ -90,8 +92,9 @@ extension CreatorRevisionStore {
                 guard [.generating, .runtime].contains(turn.state) else { throw CreatorPersistence.Failure.staleJob }
                 turn.failure = issue
                 if !turn.attempts.isEmpty { turn.attempts[turn.attempts.count - 1].issue = issue }
+                let negotiation = issue.category == .jsonModeUnsupported && turn.negotiatesJSON == true && (turn.negotiationCount ?? 0) < 2
                 allowed = issue.repairable && turn.requestCount > 0 && turn.requestCount < turn.requestBudget
-                    && turn.repairCount < turn.maxRepairs && outputTokens > 0
+                    && (negotiation || turn.repairCount < turn.maxRepairs) && outputTokens > 0
                     && outputTokens <= turn.tokenBudget - turn.reservedOutputTokens
                 if allowed { turn.state = .repairPending }
             }
@@ -102,9 +105,12 @@ extension CreatorRevisionStore {
         try locked {
             try Task.checkCancellation()
             try updateIteration(ticket) { turn in
-                guard turn.state == .repairPending, turn.repairCount < turn.maxRepairs,
+                let negotiation = turn.failure?.category == .jsonModeUnsupported && turn.negotiatesJSON == true && (turn.negotiationCount ?? 0) < 2
+                guard turn.state == .repairPending, negotiation || turn.repairCount < turn.maxRepairs,
                       turn.requestCount < turn.requestBudget else { throw LLMFailure.budgetExhausted }
-                turn.repairCount += 1; turn.state = .generating; turn.currentJobID = nil
+                if negotiation { turn.negotiationCount = (turn.negotiationCount ?? 0) + 1 }
+                else { turn.repairCount += 1 }
+                turn.state = .generating; turn.currentJobID = nil
             }
         }
     }

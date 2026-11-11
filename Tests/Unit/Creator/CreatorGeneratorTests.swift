@@ -105,7 +105,7 @@ final class CreatorGeneratorTests: XCTestCase {
             (try LLMTestFixtures.openAI(CreatorGenerationFixtures.output(), done: false), .malformedOutput),
         ]
         for (body, expected) in cases {
-            let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
+            let c = try await LLMTestContext(tokens: 8192, capabilities: .init(jsonMode: .required)); defer { c.cleanup() }
             c.route.replace([.init(chunks: [body])])
             let generator = CreatorGenerator(store: c.store, settings: c.settings, provider: c.provider)
             let result = await failure { try await generator.generate(request(c)) }

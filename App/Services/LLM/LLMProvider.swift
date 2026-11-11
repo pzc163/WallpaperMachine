@@ -9,6 +9,7 @@ actor LLMProvider {
         let attempts: Int
         let reservedOutputTokens: Int
         let elapsed: TimeInterval
+        let effectiveJSONMode: ProviderProfile.Capabilities.JSONMode
     }
     private let settings: CreatorSettingsStore
     private let credentials: ProviderCredentialStore
@@ -24,7 +25,9 @@ actor LLMProvider {
     }
     func generate(_ input: LLMRequest, profileID: UUID, configurationID: UUID,
                   ticket: GenerationJob.Ticket, store: CreatorRevisionStore, retrying: Bool = true,
-                  disableAutomaticJSONMode: Bool = false) async throws -> Completion {
+                  outputMode: ProviderProfile.Capabilities.JSONMode? = nil,
+                  validate: @escaping @Sendable (String) throws -> Void = { _ in },
+                  received: @escaping @Sendable (LLMResponse) async throws -> Void = { _ in }) async throws -> Completion {
         guard active[ticket.id] == nil, active.count < 4 else { throw LLMFailure.busy }
         let cancellation = LLMCancellation()
         active[ticket.id] = (ticket, cancellation)
@@ -33,18 +36,19 @@ actor LLMProvider {
         let operation = Task {
             try await Self.run(input, profileID: profileID, configurationID: configurationID, ticket: ticket, store: store,
                 settings: settings, credentials: credentials, transport: transport, cancellation: cancellation, log: log, wait: wait,
-                retrying: retrying, disableAutomaticJSONMode: disableAutomaticJSONMode)
+                retrying: retrying, outputMode: outputMode, validate: validate, received: received)
         }
         cancellation.install { operation.cancel() }
         do {
             return try await withTaskCancellationHandler { try await operation.value } onCancel: { cancellation.cancel() }
         } catch {
-            let failure = cancellation.failure ?? LLMFailure.sanitized(error)
+            let failure = cancellation.failure ?? Self.diagnostic(error)
             log(.failed(failure))
             // A competing provider or file-lock owner must not have its job cancelled by us.
             if failure != .busy {
                 do { try await store.cancel(ticket) } catch { log(.failed(.invalidJob)) }
             }
+            if cancellation.failure == nil, let issue = error as? CreatorRepairIssue { throw issue }
             throw failure
         }
     }
@@ -58,11 +62,21 @@ actor LLMProvider {
         return texts.map { CreatorConversationText.sanitize(grant.redacting($0)) }
     }
 
+    private static func diagnostic(_ error: Error) -> LLMFailure {
+        if let issue = error as? CreatorRepairIssue {
+            return issue.category == .jsonModeUnsupported ? .jsonModeUnsupported : .protocolViolation
+        }
+        return LLMFailure.sanitized(error)
+    }
+
     private static func run(_ input: LLMRequest, profileID: UUID, configurationID: UUID, ticket: GenerationJob.Ticket,
                             store: CreatorRevisionStore, settings: CreatorSettingsStore, credentials: ProviderCredentialStore,
                             transport: LLMStreamTransport, cancellation: LLMCancellation,
                             log: @Sendable (LLMLogEvent) -> Void,
-                            wait: @Sendable (TimeInterval) async throws -> Void, retrying: Bool, disableAutomaticJSONMode: Bool) async throws -> Completion {
+                            wait: @Sendable (TimeInterval) async throws -> Void, retrying: Bool,
+                            outputMode: ProviderProfile.Capabilities.JSONMode?,
+                            validate: @Sendable (String) throws -> Void,
+                            received: @Sendable (LLMResponse) async throws -> Void) async throws -> Completion {
         try input.validate(); try cancellation.check()
         let profile: ProviderProfile
         do { profile = try await settings.profile(id: profileID, configurationID: configurationID) }
@@ -89,12 +103,13 @@ actor LLMProvider {
         }
         defer { monitor.cancel() }
         let started = ContinuousClock.now
-        var jsonMode = profile.capabilities.jsonMode != .disabled
-        if disableAutomaticJSONMode && (profile.capabilities.jsonMode ?? .automatic) == .automatic { jsonMode = false }
+        var mode = LLMOutputNegotiation.initial(profile, input: input, override: outputMode)
         while true {
             try cancellation.check()
             let grant = try await credentials.resolve(for: profile, settings: settings)
-            let descriptor = try LLMRequestDescriptor.make(profile: profile, input: input, jsonMode: jsonMode)
+            var wireProfile = profile
+            if profile.protocolKind == .openaiCompatible { wireProfile.capabilities.jsonMode = mode }
+            let descriptor = try LLMRequestDescriptor.make(profile: wireProfile, input: input, jsonMode: mode != .disabled)
             let request = try grant.request(descriptor)
             let job: GenerationJob
             do { job = try await store.reserveLLMAttempt(ticket, profile: profile, outputTokens: input.maxOutputTokens) }
@@ -102,7 +117,7 @@ actor LLMProvider {
             catch { throw LLMFailure.invalidJob }
             log(.started(attempt: job.attemptCount))
             do {
-                let response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile)) { task in
+                var response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile)) { task in
                     try cancellation.check()
                     do { _ = try await store.generatingJob(ticket) } catch { throw LLMFailure.invalidJob }
                     try await settings.withCurrentProfile(profile) { _ in
@@ -113,28 +128,42 @@ actor LLMProvider {
                 try cancellation.check()
                 try await settings.withCurrentProfile(profile) { _ in }
                 do { _ = try await store.generatingJob(ticket) } catch { throw LLMFailure.invalidJob }
+                response.text = try LLMJSONEnvelope.unwrap(response.text)
+                try await received(response)
+                try validate(response.text)
                 log(.completed(attempts: job.attemptCount))
                 let elapsed = started.duration(to: .now).components
                 return Completion(response: response, profile: profile, ticket: ticket, attempts: job.attemptCount,
-                    reservedOutputTokens: job.reservedOutputTokens ?? 0, elapsed: Double(elapsed.seconds) + Double(elapsed.attoseconds) / 1e18)
+                    reservedOutputTokens: job.reservedOutputTokens ?? 0, elapsed: Double(elapsed.seconds) + Double(elapsed.attoseconds) / 1e18,
+                    effectiveJSONMode: mode)
             } catch {
                 try cancellation.check()
-                let failure = LLMFailure.sanitized(error)
+                let failure = diagnostic(error)
                 log(.failed(failure))
-                guard retrying else { throw failure }
+                let nextMode = LLMOutputNegotiation.automatic(profile) && LLMOutputNegotiation.formatFailure(error)
+                    ? LLMOutputNegotiation.next(mode) : nil
+                // An iteration owns its ledger and starts a separate immutable attempt for negotiation.
+                guard retrying else {
+                    if nextMode != nil {
+                        if let issue = error as? CreatorRepairIssue {
+                            throw CreatorRepairIssue(category: .jsonModeUnsupported, fields: issue.fields)
+                        }
+                        throw LLMFailure.jsonModeUnsupported
+                    }
+                    throw error
+                }
                 let delay: TimeInterval
-                switch failure {
-                case .jsonModeUnsupported where profile.protocolKind == .openaiCompatible && jsonMode && (profile.capabilities.jsonMode ?? .automatic) == .automatic:
-                    jsonMode = false; delay = 0
+                if let nextMode { mode = nextMode; delay = 0 }
+                else { switch failure {
                 case .rateLimited(let retryAfter):
                     delay = retryAfter ?? 1
                     guard delay <= 30 else { throw failure }
                 case .server: delay = min(2, 0.5 * pow(2, Double(job.attemptCount - 1)))
-                default: throw failure
-                }
+                default: throw error
+                } }
                 guard job.attemptCount < min(job.requestBudget, profile.limits.requestBudget),
                       input.maxOutputTokens <= min(job.tokenBudget, profile.limits.tokenBudget) - (job.reservedOutputTokens ?? 0)
-                else { throw failure }
+                else { throw error }
                 log(.retry(attempt: job.attemptCount + 1))
                 try await wait(delay)
             }

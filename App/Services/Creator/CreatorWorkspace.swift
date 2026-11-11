@@ -145,19 +145,33 @@ actor CreatorWorkspace {
         try await credentials.remove(for: profile, settings: settings)
         return try await settings.removeProfile(id, expectedRevision: expectedRevision)
     }
-    /// A deliberate, confirmed one-request probe. No response text or key is persisted.
-    func testConnection(_ profile: ProviderProfile) async throws -> LLMResponse.Usage {
+    struct ConnectionResult: Equatable, Sendable {
+        let profileID: UUID
+        let configurationID: UUID
+        let model: String
+        let protocolKind: ProviderProfile.ProtocolKind
+        let mode: ProviderProfile.Capabilities.JSONMode
+        let elapsed: TimeInterval
+        let attempts: Int
+        let usage: LLMResponse.Usage
+    }
+    /// Confirmed, budgeted protocol negotiation. No response text or key is persisted.
+    func testConnection(_ profile: ProviderProfile) async throws -> ConnectionResult {
         try beforeWrite()
         let root = FileManager.default.temporaryDirectory.appendingPathComponent("creator-connection-" + UUID().uuidString)
         let temporary = CreatorRevisionStore(root: root)
         defer { try? FileManager.default.removeItem(at: root) }
         let project = try await temporary.createProject(title: "Connection")
-        let ticket = try await temporary.beginJob(projectID: project.id, requestBudget: 1, tokenBudget: min(64, profile.limits.tokenBudget))
+        let ticket = try await temporary.beginJob(projectID: project.id, requestBudget: profile.limits.requestBudget, tokenBudget: profile.limits.tokenBudget)
         let completion = try await provider.generate(LLMRequest(system: "Connection check.", messages: [.init(role: .user, content: "Return {\"ok\":true}.")],
-            maxOutputTokens: min(64, profile.limits.tokenBudget), structuredOutput: .init(name: "connection_check",
+            maxOutputTokens: profile.limits.outputTokensPerRequest, structuredOutput: .init(name: "connection_check",
                 schema: Data(#"{"type":"object","properties":{"ok":{"type":"boolean"}},"required":["ok"],"additionalProperties":false}"#.utf8))), profileID: profile.id, configurationID: profile.configurationID,
-            ticket: ticket, store: temporary, retrying: false, disableAutomaticJSONMode: true)
+            ticket: ticket, store: temporary, validate: { text in
+                guard (try? CreatorJSON.parse(text)) == .object(["ok": .bool(true)]) else { throw LLMFailure.protocolViolation }
+            })
         try await temporary.cancel(ticket)
-        return completion.response.usage
+        return .init(profileID: profile.id, configurationID: profile.configurationID, model: profile.model,
+            protocolKind: profile.protocolKind, mode: completion.effectiveJSONMode, elapsed: completion.elapsed,
+            attempts: completion.attempts, usage: completion.response.usage)
     }
 }

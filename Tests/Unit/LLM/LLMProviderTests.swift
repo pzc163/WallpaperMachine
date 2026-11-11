@@ -135,13 +135,13 @@ final class LLMProviderTests: XCTestCase {
                 let body = try XCTUnwrap(JSONSerialization.jsonObject(with: try XCTUnwrap(request.httpBody)) as? [String: Any])
                 let format = body["response_format"] as? [String: Any]
                 if index == 0 { XCTAssertEqual(format?["type"] as? String, mode == .required ? "json_object" : "json_schema") }
-                else { XCTAssertNil(format) }
+                else { XCTAssertEqual(format?["type"] as? String, "json_object") }
             }
             XCTAssertFalse(c.diagnostics.lines.joined().contains("synthetic-secret"))
         }
         XCTAssertFalse(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"param":"model","code":"unsupported_value","message":"response_format"}}"#.utf8)))
-        XCTAssertFalse(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"param":"response_format","code":"invalid_json_schema"}}"#.utf8)))
-        XCTAssertFalse(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"message":"response_format is unsupported"}}"#.utf8)))
+        XCTAssertTrue(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"param":"response_format","code":"invalid_json_schema"}}"#.utf8)))
+        XCTAssertTrue(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"message":"response_format is unsupported"}}"#.utf8)))
     }
 
     func testJSONModeFallbackIsExplicitNarrowAndBudgeted() async throws {

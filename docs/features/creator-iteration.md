@@ -40,8 +40,12 @@ their earlier typed errors.
 
 ## One budget for the complete turn
 
-The total request limit is `min(1 + maxRepairs, profile.requestBudget)`, never more
-than three. Every attempt reserves its maximum output tokens under the same
+For fixed output modes the request limit is `min(1 + maxRepairs, profile.requestBudget)`.
+Automatic OpenAI negotiation may use the configured request budget even with repairs
+disabled; the combined limit is still three. Optional `negotiatesJSON` and
+`negotiationCount` fields distinguish format negotiation from content repairs and
+preserve the old budget semantics when absent. Native field diagnostics survive
+negotiation, and invalid candidate bytes are never committed. Every attempt reserves its maximum output tokens under the same
 Profile/turn token cap. A new child Job has one request; Provider internal retries
 are disabled. A 429, 5xx, timeout, disconnected/truncated stream, invalid answer,
 runtime failure or automatic JSON-mode fallback cannot open another budget.

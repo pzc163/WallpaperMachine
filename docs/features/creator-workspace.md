@@ -73,7 +73,7 @@ endpoint/model, request budget 1–3 and token budget 1–100000. An entered key
 bound explicitly through ProviderCredentialStore; views never read it back. A
 changed target clears the field, saving rotates the configuration generation,
 and old requests are cancelled. An empty field never approves a previous key for
-a new configuration. Explicit loopback OpenAI mode retains the lower-layer rules.
+a new configuration. Explicit local OpenAI mode uses the loopback/LAN allowlist in [model connections](creator-llm.md).
 
 OpenAI-compatible profiles expose **JSON output mode**: Automatic (with fallback),
 JSON Schema (strict), JSON object (required), and Prompt only. An absent mode still
@@ -87,8 +87,11 @@ the strict native parameter validator. The eight added labels/notes and existing
 preset names cover all six app languages.
 
 Test connection asks for confirmation with the saved target, model and possible
-charge. It sends one small request, with no compatibility retry, through the same
-provider checks; cancel remains available. Its temporary project is removed and
+charge. It uses the same bounded three-mode negotiation as creation, within the
+saved request/token budget; cancel remains available. Success displays a dismissible
+native top banner with model, effective output mode and elapsed time. New tests and
+configuration edits clear stale success. Blank token input uses a 24,576-token total
+reservation, up to 8,192 per request. Its temporary project is removed and
 no response text is saved. Cancelling does not refund an already sent request.
 Classification text and native diagnostic fields exclude secrets and sensitive
 paths. Token output reservations are not a monetary cap; absent usage is Unknown.

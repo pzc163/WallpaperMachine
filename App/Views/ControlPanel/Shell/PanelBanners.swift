@@ -16,7 +16,8 @@ struct PanelBanners: View {
     let showsUpdate = update != nil && !controller.updater.isDeferred
       && (controller.updater.state.availableVersion == nil
         || controller.updater.state.availableVersion != controller.updater.skippedVersion)
-    let hasContent = message != nil || drive != nil || !held.isEmpty || showsUpdate
+    let connection = controller.creator.connectionNotice
+    let hasContent = message != nil || drive != nil || !held.isEmpty || showsUpdate || connection != nil
     VStack(spacing: 8) {
       if showsUpdate, let update {
         BannerRow(systemImage: "arrow.down.circle", tint: Color.accentColor, message: update.title) {
@@ -37,6 +38,16 @@ struct PanelBanners: View {
       }
       if let message {
         ErrorBanner(message: message) { controller.dismissError() }
+      }
+      if let connection {
+        let message = CreatorLabels.connection(connection)
+        BannerRow(systemImage: "checkmark.circle.fill", tint: .green, message: message) {
+          Button("Dismiss") { controller.creator.connectionNotice = nil }
+            .controlSize(.small).accessibilityIdentifier("creator-connection-dismiss")
+        }
+        .accessibilityIdentifier("creator-connection-success-banner")
+        .onAppear { controller.shell.announce(message) }
+        .onChange(of: connection) { _, _ in controller.shell.announce(message) }
       }
       if let drive {
         LibraryDriveBanner(message: drive)

@@ -38,7 +38,7 @@ final class LLMCodecTests: XCTestCase {
             XCTAssertNil(response.usage.inputTokens); XCTAssertNil(response.usage.outputTokens)
         }
     }
-    func testOpenAILeadingThoughtTagsAreStrippedAcrossContentDeltasOnlyWhenDeclared() throws {
+    func testOpenAILeadingThoughtTagsAreStrippedAcrossContentDeltasWithLegacyProfiles() throws {
         let fragments = [" <th", "ink>hidden {bad JSON}", "</thi", "nk>", LLMTestFixtures.answer]
         var data = Data()
         for part in fragments { data.append(try LLMTestFixtures.frame(["choices": [["index": 0, "delta": ["content": part], "finish_reason": NSNull()]]])) }
@@ -46,7 +46,7 @@ final class LLMCodecTests: XCTestCase {
         var profile = LLMTestFixtures.profile(); profile.capabilities.filtersLeadingThinkBlock = true
         XCTAssertEqual(try LLMTestFixtures.decode(data, profile: profile).text, LLMTestFixtures.answer)
         profile.capabilities.filtersLeadingThinkBlock = false
-        XCTAssertThrowsError(try LLMTestFixtures.decode(data, profile: profile))
+        XCTAssertEqual(try LLMTestFixtures.decode(data, profile: profile).text, LLMTestFixtures.answer)
         profile.capabilities.filtersLeadingThinkBlock = true
         XCTAssertThrowsError(try LLMTestFixtures.decode(LLMTestFixtures.openAI("<think>not closed"), profile: profile))
         XCTAssertThrowsError(try LLMTestFixtures.decode(LLMTestFixtures.openAI("<analysis>unknown</analysis>{}"), profile: profile))
