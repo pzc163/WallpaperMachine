@@ -40,3 +40,11 @@ subsequent full native gates; no application source was changed for it.
 CI is configured but has not run: the fork currently has no registered workflows.
 This artifact was assembled locally from the verified app and official macOS 15
 dependencies; it is not a claim that a hosted macOS 15 build or physical S3 run passed.
+
+The verified image was published as
+[s3-macos15-93eb2aa5](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)
+with `prerelease=true`, never Latest. A fresh download matches the recorded SHA-256;
+the original S3 release and `main` are unchanged. The build configuration is in
+commit `62c3655e`. Both workflow enablement and direct dispatch returned HTTP 404;
+the file exists on the default branch, but Actions still lists no registered
+workflows. This is an unresolved hosted-CI activation limitation, not a passing run.

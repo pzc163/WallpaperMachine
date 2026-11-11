@@ -113,9 +113,21 @@
   "boundaries": {
     "appleNotarization": false,
     "physicalMacOS15Acceptance": "not run",
-    "macOS15HostedCI": "configured; not run (fork has no registered workflows yet)",
+    "macOS15HostedCI": "Not run: Actions lists zero registered workflows; enable and direct dispatch both returned HTTP 404 although rehearsal.yml exists on the default branch. No main changes were made to activate it.",
     "desktopChanged": false,
     "liveLLMRequests": false,
     "S4Enabled": false
+  },
+  "packagingCommit": "62c3655e232a75565893a2a6db47956b3063879b",
+  "releaseVerification": {
+    "release": "https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5",
+    "download": "https://github.com/pzc163/WallpaperMachine/releases/download/s3-macos15-93eb2aa5/WallpaperMachine-S3-macOS15-93eb2aa5.dmg",
+    "sha256": "5b77d15e7e44a8d8cb1149e5e2deaa4f28d6a85b19e789224e53df93ed236f82",
+    "bytes": 40260696,
+    "prerelease": true,
+    "latest": false,
+    "oldReleaseUnchanged": true,
+    "mainUnchanged": true,
+    "downloadVerified": true
   }
 }
