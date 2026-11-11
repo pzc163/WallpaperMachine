@@ -26,7 +26,9 @@ final class CreatorTemplateRenderingTests: XCTestCase {
                       values: [String: CreatorTemplateCatalog.Value]? = nil, deterministic: Bool = true,
                       initialPauseDelay: Int = 0) async throws -> WebWallpaperPreviewSurface {
         let store = CreatorDraftStore(root: root.appendingPathComponent(UUID().uuidString))
-        let directory = try await store.create(definition.specification(parameters: values))
+        var specification = try definition.specification(parameters: values)
+        specification.rendererRevision = nil // Persisted revision 2 must retain its behavior.
+        let directory = try await store.create(specification)
         let result = try await CreatorPreview.make(directory: directory, store: store)
         let surface = result.surface
         surface.view.setFrameSize(NSSize(width: 320, height: 180))
@@ -337,7 +339,7 @@ final class CreatorTemplateRenderingTests: XCTestCase {
       return {hash:String(hash),opaque,samples,errors:__probe.errors};
       """
 
-    private static let clockAndCounters = """
+    static let clockAndCounters = """
       (()=>{
         const NativeDate=Date, fixed=new NativeDate(2026,0,2,13,4,5).getTime();
         window.Date=class extends NativeDate { constructor(...args) { super(...(args.length?args:[fixed])); } static now(){return fixed;} };

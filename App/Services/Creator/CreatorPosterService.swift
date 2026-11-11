@@ -159,6 +159,8 @@ final class CreatorPosterService {
         }});
         const fill=CanvasRenderingContext2D.prototype.fillRect;
         CanvasRenderingContext2D.prototype.fillRect=function(...args){const value=fill.apply(this,args);s.paints++;return value;};
+        const draw=WebGLRenderingContext.prototype.drawArrays;
+        WebGLRenderingContext.prototype.drawArrays=function(...args){const value=draw.apply(this,args);s.paints++;return value;};
         for(const type of ['error','unhandledrejection','securitypolicyviolation']) addEventListener(type,()=>{s.errors++;});
       })();
       """

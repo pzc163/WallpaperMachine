@@ -91,6 +91,7 @@ actor CreatorWorkspace {
         guard let templateID = spec.templateID else { throw CreatorGenerationFailure.policyViolation }
         try CreatorTemplateCatalog.definition(templateID).validate(parameters)
         spec.parameters = parameters
+        spec.rendererRevision = 3
         return try await rebuild(spec, base: revision)
     }
     func duplicate(_ id: UUID, title: String) async throws -> UUID {

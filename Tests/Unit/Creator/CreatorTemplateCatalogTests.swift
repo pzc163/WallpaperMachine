@@ -105,6 +105,27 @@ final class CreatorTemplateCatalogTests: XCTestCase {
         }
     }
 
+    func testLegacyV2BytesAndNewRendererVersionBoundary() throws {
+        let id = UUID(uuidString: "00000000-0000-0000-0000-000000000001")!
+        let digests = ["gradient-v2": "272ba8225a84468e15d08b7a8b0f34221bcad20bf0c4ee4191adc774a89bdb9b",
+                       "stars-v2": "11e992410ed7f925919fa89d601b9940864c0f6090bba964d119bc82ec599aaa",
+                       "clock-v2": "3a80ebb27bbc9cd1a86b2c165e94e4571973a5c344990990fd885531b245b98c"]
+        for definition in CreatorTemplateCatalog.all {
+            var spec = try definition.specification(projectID: id)
+            XCTAssertEqual(spec.rendererRevision, 3)
+            XCTAssertEqual(CreatorBundleManifest.templateIdentity(spec).revision, 3)
+            let modern = try CreatorTemplate.files(for: spec)
+            spec.rendererRevision = nil
+            XCTAssertEqual(CreatorTemplate.digest(try CreatorTemplate.files(for: spec)), digests[definition.id])
+            XCTAssertNotEqual(CreatorTemplate.digest(modern), digests[definition.id])
+            XCTAssertEqual(CreatorBundleManifest.templateIdentity(spec).revision, 2)
+            for invalid in [0, 1, 2, 4, Int.max] {
+                spec.rendererRevision = invalid
+                XCTAssertThrowsError(try CreatorTemplate.files(for: spec))
+            }
+        }
+    }
+
     func testUnknownRevisionsMixedLegacyFieldsAndKindMismatchFailClosed() throws {
         var spec = try CreatorTemplateCatalog.definition("stars-v2").specification()
         spec.templateID = "stars-v3"

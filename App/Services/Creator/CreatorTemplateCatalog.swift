@@ -146,7 +146,7 @@ enum CreatorTemplateCatalog {
         func specification(projectID: UUID = UUID(), parameters values: [String: Value]? = nil) throws -> CreatorTemplate.Specification {
             let values = values ?? defaults
             try validate(values)
-            return .init(projectID: projectID, kind: kind, templateID: id, parameters: values)
+            return .init(projectID: projectID, kind: kind, templateID: id, parameters: values, rendererRevision: 3)
         }
 
         func properties(for values: [String: Value]) throws -> [String: Any] {

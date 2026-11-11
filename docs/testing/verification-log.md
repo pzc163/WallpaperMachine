@@ -25,6 +25,15 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Versioned WebGL Creator templates
+
+- New template specifications use rendererRevision 3; existing S0 and revision 2 bytes are frozen and checked with golden digests.
+- The native catalog retains 10/12/10 parameters, six presets, a 30 FPS paint ceiling and 2073600 pixels. New kernels use simplex flow fields, a dark parallax starfield and measured DOM clock typography.
+- Real offscreen WebGL snapshots cover all parameter effects, 144 Hz callback pacing, extreme canvas sizes, heterogeneous clock anchors, actual context loss/restoration and forced no-GPU fallback.
+- Native poster and short-soak instrumentation now checks WebGL draws and pixels; capture remains a whole-page WKWebView snapshot.
+- Focused suites: 26 passed, 0 failed. Full python3 scripts/test.py: 720 script tests, 5012 native tests passed, 0 failed, 72 native skips.
+- No live model, visible application or desktop changes. Physical display quality, macOS 15 hardware, energy and a new 30-minute soak remain unverified; prior soak evidence does not certify the new renderer.
+
 ## 2026-11-11 — Creator model negotiation and LAN profiles
 
 - Automatic OpenAI format negotiation is shared by connection probes and creation: schema, JSON object, prompt JSON; each request consumes the same bounded ledger.
@@ -130,16 +139,3 @@ Added the native AI Creator tab and model settings, with explicit generate/save/
 - Skips: 3 S0 unrestricted probes, 62 opt-in media/device checks, 3 live Steam checks, 1 reference job and 1 creator live test. No real model request, personal Keychain, UI/desktop, Release delivery or S4 validation.
 - Four main-thread runtime warnings in passing unchanged AppUpdate, VideoFormatSupport, WebMPlayer and WebMOpening tests; no source locations. The two WebM warnings were additionally observed this run. Full compilation has 28 warning lines outside the changed sources/tests.
 - `python3 scripts/tests/test_doc_links.py` — exit 0; 11 passed. Planning mirrors, frozen v1 generators/golden assertions, tested-source hashes, branch/scope and `git diff --check` verified; XcodeGen generated the project.
-
-## 2026-11-10 — Creator S1.3 structured parameter generation
-
-S1.3 catalog-derived prompts, strict parameter validation and immutable native drafts; see [implementation and boundaries](../features/creator-generation.md). S1.2 rollback commit `e3a61f55` was made before implementation; S1.3 remains uncommitted.
-
-- `python3 scripts/test.py --only CreatorGeneratorTests CreatorOutputValidatorTests CreatorPromptBuilderTests CreatorDraftTests CreatorRevisionStoreTests CreatorStorageFormatTests CreatorRuntimeRegistryTests CreatorTemplateCatalogTests LLMCodecTests LLMProviderTests` — exit 0; final targeted 98 passed, 0 failed/skipped; earlier successful subsets 47 and 95. An initial new-parser compile error was fixed before these passes.
-- `python3 scripts/test.py` — exit 0, run once: 687 Python tests / 32 modules; native 4,888 passed, 0 failed, 69 skipped of 4,957. All 28 additions passed. Existing rustup PATH was used; no installation.
-- Skipped: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference render; S4 remains closed.
-- Two existing main-thread runtime warnings: AppUpdate signature-copy check and VideoFormatSupport changed-file check; both passed. No new/modified Creator/LLM compiler warning; other existing targeted-build warnings remain.
-- Offline three-codec × three-template streams, explicit-base history, malformed/policy output, cancellation, Profile/base changes, budget/usage, metadata tampering and both commit-boundary interruptions covered with MemoryKeychain and all-URL Mock interception.
-- `python3 scripts/tests/test_doc_links.py` — exit 0, 11 passed; `git diff --check` passed. Planning mirrors, 28 tested-file hashes, frozen generator/assertion bytes and task scope checked.
-- Static evidence only: runtime/posterCapture notChecked. No paid/live provider call, personal Keychain, new UI, desktop operation, Release build, install or push. No parameter auto-repair; S1.4/S4 untouched.
-- Raw test bundles/logs are disposable and removed after retaining the stage report and machine-readable summary; no other task artifacts are cleaned.

@@ -15,7 +15,7 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
     var presentation: CreatorBundlePresentation? = nil
 
     static func templateIdentity(_ specification: CreatorTemplate.Specification) -> (id: String, revision: Int) {
-        (specification.templateID ?? specification.kind.rawValue + "-v1", specification.templateID == nil ? 1 : 2)
+        (specification.templateID ?? specification.kind.rawValue + "-v1", specification.templateID == nil ? 1 : (specification.rendererRevision ?? 2))
     }
 
     static func parameters(_ specification: CreatorTemplate.Specification) -> [String: CreatorTemplateCatalog.Value] {

@@ -150,9 +150,12 @@ enum CreatorSoakHarness {
         let deadline = ContinuousClock.now + .seconds(5)
         repeat {
             let value = try await evaluate(surface.page.webView, """
-                (()=>{const s=window.__creatorSoak,c=document.querySelector('canvas');
+                (()=>{const s=window.__creatorSoak,c=document.getElementById('fallback')||document.querySelector('canvas');
                 if(!s||!c||!s.general||!s.properties) return {};
-                return {...s,opaque:c.width>0&&c.height>0&&c.getContext('2d').getImageData(c.width>>1,c.height>>1,1,1).data[3]>0};})()
+                const ctx=c.getContext('2d'),gl=ctx?null:c.getContext('webgl');let alpha=0;
+                if(ctx)alpha=ctx.getImageData(c.width>>1,c.height>>1,1,1).data[3];
+                else if(gl){const pixel=new Uint8Array(4);gl.readPixels(c.width>>1,c.height>>1,1,1,gl.RGBA,gl.UNSIGNED_BYTE,pixel);alpha=pixel[3];}
+                return {...s,opaque:c.width>0&&c.height>0&&alpha>0};})()
                 """) as? [String: Any] ?? [:]
             if value["paused"] as? Bool == paused, (value["paints"] as? Int ?? 0) > minimumPaints { return value }
             try await Task.sleep(for: .milliseconds(10))
@@ -202,6 +205,8 @@ enum CreatorSoakHarness {
         }});
         const fill=CanvasRenderingContext2D.prototype.fillRect;
         CanvasRenderingContext2D.prototype.fillRect=function(...a){s.paints++;return fill.apply(this,a)};
+        const draw=WebGLRenderingContext.prototype.drawArrays;
+        WebGLRenderingContext.prototype.drawArrays=function(...a){const r=draw.apply(this,a);s.paints++;return r;};
         const external=u=>/^https?:|^wss?:|^ftp:/i.test(String(u));
         const count=u=>{if(external(u))s.external++};
         const fetch=window.fetch;window.fetch=function(u,...a){count(u?.url||u);return fetch.call(this,u,...a)};

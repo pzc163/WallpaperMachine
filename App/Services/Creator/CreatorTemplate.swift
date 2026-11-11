@@ -17,6 +17,7 @@ enum CreatorTemplate {
         var speed: Double = 0.5
         var templateID: String? = nil
         var parameters: [String: CreatorTemplateCatalog.Value]? = nil
+        var rendererRevision: Int? = nil
 
         var wallpaperID: String { CreatorTemplate.idPrefix + projectID.uuidString.lowercased() }
     }
@@ -27,6 +28,7 @@ enum CreatorTemplate {
         guard spec.version == policyVersion, spec.hue.isFinite, (0...360).contains(spec.hue),
               spec.speed.isFinite, (0...2).contains(spec.speed) else { throw Failure.invalidSpecification }
         if spec.templateID != nil || spec.parameters != nil { return try CreatorTemplateRenderer.files(for: spec) }
+        guard spec.rendererRevision == nil else { throw Failure.invalidSpecification }
         // Freeze this legacy generator: existing S0 bundles must reconstruct to the same bytes.
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]

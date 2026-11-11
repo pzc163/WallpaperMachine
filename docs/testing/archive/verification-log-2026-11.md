@@ -9,6 +9,19 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-10 — Creator S1.3 structured parameter generation
+
+S1.3 catalog-derived prompts, strict parameter validation and immutable native drafts; see [implementation and boundaries](../../features/creator-generation.md). S1.2 rollback commit `e3a61f55` was made before implementation; S1.3 remains uncommitted.
+
+- `python3 scripts/test.py --only CreatorGeneratorTests CreatorOutputValidatorTests CreatorPromptBuilderTests CreatorDraftTests CreatorRevisionStoreTests CreatorStorageFormatTests CreatorRuntimeRegistryTests CreatorTemplateCatalogTests LLMCodecTests LLMProviderTests` — exit 0; final targeted 98 passed, 0 failed/skipped; earlier successful subsets 47 and 95. An initial new-parser compile error was fixed before these passes.
+- `python3 scripts/test.py` — exit 0, run once: 687 Python tests / 32 modules; native 4,888 passed, 0 failed, 69 skipped of 4,957. All 28 additions passed. Existing rustup PATH was used; no installation.
+- Skipped: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference render; S4 remains closed.
+- Two existing main-thread runtime warnings: AppUpdate signature-copy check and VideoFormatSupport changed-file check; both passed. No new/modified Creator/LLM compiler warning; other existing targeted-build warnings remain.
+- Offline three-codec × three-template streams, explicit-base history, malformed/policy output, cancellation, Profile/base changes, budget/usage, metadata tampering and both commit-boundary interruptions covered with MemoryKeychain and all-URL Mock interception.
+- `python3 scripts/tests/test_doc_links.py` — exit 0, 11 passed; `git diff --check` passed. Planning mirrors, 28 tested-file hashes, frozen generator/assertion bytes and task scope checked.
+- Static evidence only: runtime/posterCapture notChecked. No paid/live provider call, personal Keychain, new UI, desktop operation, Release build, install or push. No parameter auto-repair; S1.4/S4 untouched.
+- Raw test bundles/logs are disposable and removed after retaining the stage report and machine-readable summary; no other task artifacts are cleaned.
+
 ## 2026-11-10 — Creator S1.2 profile-bound model transport and three codecs
 
 S1.2 adds profile-bound native model connections after local rollback commit `37f2c603`; see [connection implementation](../../features/creator-llm.md). This stage has no creator UI or live model/Keychain test.

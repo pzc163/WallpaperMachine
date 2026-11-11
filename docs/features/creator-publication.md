@@ -57,7 +57,9 @@ pause delivery, loaded fonts and canvas dimensions; errors, unhandled rejections
 and CSP violations fail the session without preserving page text. It freezes
 the initialized frame and requests a resize redraw before `takeSnapshot`, then
 checks state/errors again before encoding. This is deterministic initialization,
-not identical JPEG bytes across different wall-clock/animation times.
+not identical JPEG bytes across different wall-clock/animation times. Revision 3
+templates retain their WebGL color buffer for capture; the observer counts real
+WebGL draw calls and the native whole-page snapshot includes the clock typography.
 
 The page/load/snapshot wait is at most five seconds, without an automatic second
 snapshot. Cancellation, failure or timeout stops the surface and invalidates

@@ -47,6 +47,12 @@ catalog parameters, 30 FPS, at most 2,073,600 pixels and a deterministic capture
 Clock typography uses a high-DPI overlay and measured safe insets. Context loss/recovery,
 pause/resume/resize/stop and a safe non-GPU fallback require regression evidence.
 
+Stage 2 focused verification: 26/26 native tests passed, including real WebGL
+compilation, native JPEG pixels, context loss/restoration and forced fallback. The
+old S0 and v2 bundle digests remain pinned. The routine gate passed all 720 script tests and 5,012 native tests, with zero
+failures and 72 explicit skips. S4 remains closed until its independent isolation
+gate passes.
+
 ## 3. Free-code execution and external test package
 
 Free code is a distinct versioned contract and runtime policy. It must pass the original
