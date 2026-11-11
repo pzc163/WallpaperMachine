@@ -25,6 +25,14 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — S5.2 provider center and shared model selection
+
+- Added 11 cloud presets, local/custom groups, enabled models per credential-owning Profile, offline LobeHub 1.102.0 SVG assets and complete MIT notices.
+- Targeted CreatorProviderCenterTests, CreatorSettingsStoreTests, ProviderCredentialStoreTests and CreatorPanelTests: 36 passed, 0 failed, 0 skipped.
+- Localization catalogs: 8 passed; panel localization: 9 passed; documentation links: 11 passed.
+- First sandboxed build could not discover the installed Metal toolchain; retry in the normal build environment passed. No toolchain installation or system setting change.
+- No real model calls, personal credential reads, visible UI or desktop changes. Full gate and Release follow completion of S5.2.
+
 ## 2026-11-11 — S5.1 offline engines and nine master artworks
 
 Native Shader/Three shells, an offline pinned library, declarative parameters and a native master gallery; no visible application, live model or desktop changes.
@@ -97,12 +105,3 @@ Native Shader/Three shells, an offline pinned library, declarative parameters an
 - Native poster and short-soak instrumentation now checks WebGL draws and pixels; capture remains a whole-page WKWebView snapshot.
 - Focused suites: 26 passed, 0 failed. Full python3 scripts/test.py: 720 script tests, 5012 native tests passed, 0 failed, 72 native skips.
 - No live model, visible application or desktop changes. Physical display quality, macOS 15 hardware, energy and a new 30-minute soak remain unverified; prior soak evidence does not certify the new renderer.
-
-## 2026-11-11 — Creator model negotiation and LAN profiles
-
-- Automatic OpenAI format negotiation is shared by connection probes and creation: schema, JSON object, prompt JSON; each request consumes the same bounded ledger.
-- Native validation errors retain allowlisted field details; format negotiation is independent of the maximum two content repairs.
-- Local mode accepts strict private IPv4, local IPv6 and mDNS names; origin/configuration credential binding and explicit connection confirmation remain mandatory.
-- Connection success banners include actual mode, model and elapsed time in all six app languages; stale or cancelled results cannot restore success.
-- Focused native suites: 56 passed, 0 failed. Full python3 scripts/test.py: 720 script tests and 5006 native tests passed, 0 failed, 72 native skips.
-- No live API, personal Keychain, visible UI, desktop replacement or hardware acceptance was exercised. S4 remains closed in this commit.

@@ -69,6 +69,7 @@ CRATE_LICENSE_FILE = re.compile(r"^(LICEN[CS]E|COPYING|UNLICENSE|COPYRIGHT)([-_.
 # Vendored code, by closure name: the license files in the repository. A header is
 # `(path, marker)`: the notice is the tail of the file from the marker's line.
 VENDORED_FILES = {
+    "lobehub-icons": [THIRD_PARTY / "lobehub-icons/LICENSE"],
     "three": [THIRD_PARTY / "three/LICENSE"],
     "miniaudio": [THIRD_PARTY / "miniaudio/LICENSE"],
     "stb_vorbis": [THIRD_PARTY / "stb_vorbis/LICENSE"],

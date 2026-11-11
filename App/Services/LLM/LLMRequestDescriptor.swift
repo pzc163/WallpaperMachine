@@ -11,7 +11,16 @@ struct LLMRequestDescriptor: Sendable {
 
     static func make(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool, streaming: Bool = true) throws -> Self {
         do { try profile.validate(); try input.validate() } catch { throw LLMFailure.invalidInput }
+        _ = try input.model(for: profile)
         guard input.maxOutputTokens <= profile.limits.generationTokenBudget else { throw LLMFailure.budgetExhausted }
+        var input = input
+        if let window = profile.limits.contextWindow {
+            // Conservative byte envelope, not a claim to implement a vendor tokenizer.
+            let reservedInput = input.systemInstruction.utf8.count + input.messages.reduce(256) { $0 + $1.content.utf8.count }
+            guard reservedInput < window else { throw LLMFailure.contextWindow }
+            input.maxOutputTokens = min(input.maxOutputTokens, window - reservedInput)
+            input.nativeOutputLimit = false
+        }
         switch profile.protocolKind {
         case .openaiCompatible: return try OpenAICompatibleCodec.request(profile: profile, input: input, jsonMode: jsonMode, streaming: streaming)
         case .anthropicMessages: return try AnthropicMessagesCodec.request(profile: profile, input: input, streaming: streaming)

@@ -27,6 +27,13 @@ struct LLMRequest: Sendable {
     var structuredOutput: StructuredOutput? = nil
     var requiresJSON = true
     var nativeOutputLimit = false
+    var modelID: String? = nil
+
+    func model(for profile: ProviderProfile) throws -> String {
+        let value = modelID ?? profile.model
+        guard profile.permitsModel(value), ProviderProfile.validModel(value, protocolKind: profile.protocolKind) else { throw LLMFailure.staleProfile }
+        return value
+    }
 
     var systemInstruction: String { requiresJSON ? system + "\nReturn one complete JSON object only, without Markdown or reasoning." : system }
     func validate() throws {

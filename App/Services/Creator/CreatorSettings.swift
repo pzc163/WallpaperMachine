@@ -6,6 +6,12 @@ struct CreatorSettings: Codable, Equatable, Sendable {
     var revision = 0
     var profiles: [ProviderProfile] = []
     var selectedProfileID: UUID?
+    var selectedModelID: String? = nil
+
+    var selectedModel: String? {
+        guard let profile = profiles.first(where: { $0.id == selectedProfileID }) else { return nil }
+        return selectedModelID ?? profile.model
+    }
 
     func validate() throws {
         guard schemaVersion == 1 else { throw CreatorPersistence.Failure.unsupportedVersion }
@@ -14,6 +20,9 @@ struct CreatorSettings: Codable, Equatable, Sendable {
               Set(profiles.map(\.configurationID)).count == profiles.count,
               selectedProfileID.map({ id in profiles.contains { $0.id == id } }) ?? true
         else { throw CreatorPersistence.Failure.invalidRecord }
+        if let selectedModelID {
+            guard profiles.first(where: { $0.id == selectedProfileID })?.permitsModel(selectedModelID) == true else { throw CreatorPersistence.Failure.invalidRecord }
+        }
         for profile in profiles {
             try profile.validate()
             guard profile.configurationRevision > 0, profile.configurationRevision <= revision else { throw CreatorPersistence.Failure.invalidRecord }

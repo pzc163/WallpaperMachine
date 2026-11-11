@@ -14,7 +14,7 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
         let body: [String: Any] = ["systemInstruction": ["parts": [["text": input.systemInstruction]]],
             "generationConfig": configuration,
             "contents": input.messages.map { ["role": $0.role == .assistant ? "model" : "user", "parts": [["text": $0.content]]] }]
-        return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1beta", suffix: "models/\(profile.model):" + (streaming ? "streamGenerateContent" : "generateContent"), query: streaming ? [.init(name: "alt", value: "sse")] : []),
+        return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1beta", suffix: "models/\(try input.model(for: profile)):" + (streaming ? "streamGenerateContent" : "generateContent"), query: streaming ? [.init(name: "alt", value: "sse")] : []),
                      headers: [:], body: try LLMRequestDescriptor.encoded(body), authentication: .google)
     }
     mutating func consume(_ event: SSEParser.Event) throws {

@@ -13,6 +13,7 @@ struct CreatorSettingsSection: View {
     @State private var loaded = false
     @State private var tokenBudgetText = ""
     @State private var models: [String] = []
+    @State private var contextText = ""
     @State private var discovery: Task<Void, Never>?
     @State private var discovering = false
 
@@ -20,16 +21,16 @@ struct CreatorSettingsSection: View {
         SettingsPage(.models) {
             SettingsGroup(Self.connections, in: .models) {
                 SettingsRow(Self.profiles, stacked: true) {
-                    VStack(alignment: .leading, spacing: 12) {
-                        profileList
-                        Divider()
-                        fields
-                        Text("Changing the target address clears the entered key. Previously saved credentials are never carried to a different host or configuration.")
-                            .font(.caption).foregroundStyle(.secondary)
-                        buttons
-                        if let status = controller.creator.connectionStatus { Text(verbatim: status).font(.caption).accessibilityIdentifier("creator-connection-status") }
-                        Text("Native maximum depends on the server context window. Token accounting is an estimate, not a spending cap.").font(.caption).foregroundStyle(.secondary)
-                        Text("AI projects and policies cannot be moved or backed up in this version. Keep the current storage location.").font(.caption).foregroundStyle(.secondary)
+                    ViewThatFits(in: .horizontal) {
+                        HStack(alignment: .top, spacing: 20) {
+                            directory.frame(width: 178)
+                            Divider()
+                            detail.frame(minWidth: 310, maxWidth: .infinity, alignment: .leading)
+                        }
+                        VStack(alignment: .leading, spacing: 16) {
+                            Menu("Provider directory") { directoryItems }
+                            detail
+                        }
                     }
                 }
             }
@@ -51,20 +52,57 @@ struct CreatorSettingsSection: View {
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("creator-model-settings")
     }
-    private var profileList: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            ForEach(controller.creator.configuration.profiles, id: \.id) { profile in
-                HStack {
-                    Button { edit(profile) } label: { Text(verbatim: profile.name).frame(maxWidth: .infinity, alignment: .leading) }.buttonStyle(.plain)
-                    if profile.id == controller.creator.configuration.selectedProfileID { Image(systemName: "checkmark").accessibilityLabel(Text("Selected")) }
-                    else { Button("Use this model") { controller.launch { try await controller.selectCreatorProfile(profile.id) } } }
-                }
+    private var detail: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                CreatorProviderIcon(name: CreatorProviderCatalog.icon(profile: draft))
+                Text(verbatim: draft.name.isEmpty ? L("Add connection") : draft.name).font(.headline)
             }
-            Button("Add connection") {
-                key = ""; tokenBudgetText = ""; draft = ProviderProfile(name: "", protocolKind: .openaiCompatible, baseURL: "", model: "")
-                expectedRevision = controller.creator.configuration.revision; loaded = true
-            }.accessibilityIdentifier("creator-profile-add")
+            fields
+            Text("Changing the target address clears the entered key. Previously saved credentials are never carried to a different host or configuration.").font(.caption).foregroundStyle(.secondary)
+            buttons
+            if let status = controller.creator.connectionStatus { Text(verbatim: status).font(.caption).accessibilityIdentifier("creator-connection-status") }
+            Text("Native maximum depends on the server context window. Token accounting is an estimate, not a spending cap.").font(.caption).foregroundStyle(.secondary)
         }
+    }
+    private var directory: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 7) { directoryItems }
+        }.frame(maxHeight: 680).accessibilityIdentifier("creator-provider-directory")
+    }
+    @ViewBuilder private var directoryItems: some View {
+        if !controller.creator.configuration.profiles.isEmpty {
+            Text("My connections").font(.caption).foregroundStyle(.secondary)
+            ForEach(controller.creator.configuration.profiles, id: \.id) { profile in
+                Button { edit(profile) } label: {
+                    HStack(spacing: 8) {
+                        CreatorProviderIcon(name: CreatorProviderCatalog.icon(profile: profile))
+                        Text(verbatim: profile.name).lineLimit(1)
+                        Spacer(minLength: 2)
+                        if draft.id == profile.id { Image(systemName: "checkmark").accessibilityLabel(Text("Selected")) }
+                    }.padding(.vertical, 5).contentShape(Rectangle())
+                }.buttonStyle(.plain)
+            }
+            Divider()
+        }
+        Text("Cloud providers").font(.caption).foregroundStyle(.secondary)
+        ForEach(CreatorProviderCatalog.entries.filter { !$0.local }) { entry in providerButton(entry) }
+        Divider()
+        Text("Local and LAN models").font(.caption).foregroundStyle(.secondary)
+        ForEach(CreatorProviderCatalog.entries.filter(\.local)) { entry in providerButton(entry) }
+    }
+    private func providerButton(_ entry: CreatorProviderCatalog.Entry) -> some View {
+        Button {
+            if !entry.custom, let saved = controller.creator.configuration.profiles.first(where: { $0.providerID == entry.id }) { edit(saved) }
+            else { edit(entry.profile()) }
+        } label: {
+            HStack(spacing: 8) {
+                if entry.custom { Image(systemName: "plus").frame(width: 20) }
+                else { CreatorProviderIcon(name: entry.id == "minicpm" ? "minicpm" : entry.icon) }
+                Text(verbatim: entry.custom ? PanelLocale.shared.catalogString(entry.name) : entry.name)
+                Spacer(minLength: 0)
+            }.padding(.vertical, 5).contentShape(Rectangle())
+        }.buttonStyle(.plain).accessibilityIdentifier("creator-provider-" + entry.id)
     }
     private var fields: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -78,34 +116,40 @@ struct CreatorSettingsSection: View {
                     Text(verbatim: "Gemini GenerateContent").tag(ProviderProfile.ProtocolKind.geminiGenerateContent)
                 }.labelsHidden().accessibilityIdentifier("creator-profile-protocol")
             }
-            field("JSON output mode") {
-                if draft.protocolKind == .openaiCompatible {
-                    Picker("JSON output mode", selection: Binding(get: { draft.capabilities.jsonMode ?? .automatic }, set: { draft.capabilities.jsonMode = $0 })) {
-                        Text("Automatic (with fallback)").tag(ProviderProfile.Capabilities.JSONMode.automatic)
-                        Text("JSON Schema (strict)").tag(ProviderProfile.Capabilities.JSONMode.schema)
-                        Text("JSON object (required)").tag(ProviderProfile.Capabilities.JSONMode.required)
-                        Text("Prompt only").tag(ProviderProfile.Capabilities.JSONMode.disabled)
-                    }.labelsHidden().accessibilityIdentifier("creator-json-mode")
-                } else {
-                    Text(verbatim: draft.protocolKind == .geminiGenerateContent ? L("Gemini uses its native JSON response format.") : L("Anthropic uses the prompt's JSON contract."))
-                        .font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("creator-json-mode-native")
-                }
-            }
             field("Base URL") {
                 TextField("Base URL", text: $draft.baseURL, prompt: Text(verbatim: draft.localMode ? "http://192.168.90.9:1234/v1" : "https://api.example.com/v1"))
                     .accessibilityIdentifier("creator-profile-endpoint")
             }
+            if let entry = draft.providerID.flatMap(CreatorProviderCatalog.entry), entry.endpoints.count > 1 {
+                Menu("Endpoint presets") {
+                    ForEach(entry.endpoints, id: \.self) { endpoint in Button { draft.baseURL = endpoint } label: { Text(verbatim: endpoint) } }
+                }
+            }
             field("Model ID") {
-                VStack(alignment: .leading) {
+                HStack {
                     TextField("Model ID", text: $draft.model).accessibilityIdentifier("creator-profile-model")
-                    if !models.isEmpty {
-                        Picker("Available models", selection: $draft.model) {
-                            Text("Choose a model").tag("")
-                            if !draft.model.isEmpty && !models.contains(draft.model) { Text(verbatim: draft.model).tag(draft.model) }
-                            ForEach(models, id: \.self) { Text(verbatim: $0).tag($0) }
-                        }.accessibilityIdentifier("creator-model-list")
+                    Button("Enable model") { enable(draft.model) }.disabled(!ProviderProfile.validModel(draft.model, protocolKind: draft.protocolKind))
+                }
+            }
+            if !models.isEmpty {
+                Menu("Available models") {
+                    ForEach(models, id: \.self) { id in Button { draft.model = id; enable(id) } label: { Text(verbatim: id) } }
+                }.accessibilityIdentifier("creator-model-list")
+            }
+            if !enabledModels.isEmpty {
+                Text("Enabled models · shared API key").font(.caption).foregroundStyle(.secondary)
+                ForEach(enabledModels, id: \.self) { id in
+                    HStack {
+                        CreatorProviderIcon(name: CreatorProviderCatalog.icon(profile: draft, model: id))
+                        Text(verbatim: id).font(.caption).lineLimit(1)
+                        Spacer(minLength: 4)
+                        Toggle("Vision input", isOn: Binding(get: { draft.visionModelIDs?.contains(id) == true }, set: { enabled in
+                            var ids = draft.visionModelIDs ?? []; ids.removeAll { $0 == id }; if enabled { ids.append(id) }; draft.visionModelIDs = ids.isEmpty ? nil : ids
+                        })).toggleStyle(.checkbox).font(.caption)
+                        Button { disable(id) } label: { Image(systemName: "minus.circle") }.buttonStyle(.plain).help(L("Remove model"))
                     }
                 }
+                Text("Enable vision only for models that accept images. Sending a thumbnail is a separate opt-in.").font(.caption).foregroundStyle(.secondary)
             }
             if draft.protocolKind == .openaiCompatible {
                 Toggle("Local server mode", isOn: $draft.localMode).toggleStyle(.checkbox)
@@ -135,15 +179,42 @@ struct CreatorSettingsSection: View {
                 Picker("Request budget", selection: $draft.limits.requestBudget) { ForEach(1...3, id: \.self) { Text(verbatim: String($0)).tag($0) } }
                     .labelsHidden().accessibilityIdentifier("creator-request-budget")
             }
-            field("Token budget") {
-                TextField("Token budget", text: Binding(get: { tokenBudgetText }, set: { value in
-                    tokenBudgetText = value
-                    draft.limits.tokenBudget = ProviderProfile.Limits.tokenBudget(from: value) ?? 0
-                    draft.limits.nativeOutputLimit = value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                }), prompt: Text("Model maximum (automatic)"))
-                    .accessibilityIdentifier("creator-token-budget")
+            Toggle("Manual context and output limits", isOn: Binding(get: { draft.limits.nativeOutputLimit != true }, set: { manual in
+                draft.limits.nativeOutputLimit = !manual
+                draft.limits.contextWindow = manual ? 131_072 : nil
+                draft.limits.tokenBudget = manual ? 32_768 : ProviderProfile.Limits.defaultTokenBudget
+                contextText = manual ? "131072" : ""; tokenBudgetText = manual ? "32768" : ""
+            })).toggleStyle(.checkbox).accessibilityIdentifier("creator-manual-limits")
+            if draft.limits.nativeOutputLimit != true {
+                field("Context window") {
+                    TextField("Context window", text: Binding(get: { contextText }, set: { value in
+                        contextText = value; draft.limits.contextWindow = Int(value) ?? 0
+                    })).accessibilityIdentifier("creator-context-window")
+                }
+                field("Maximum output tokens") {
+                    TextField("Maximum output tokens", text: Binding(get: { tokenBudgetText }, set: { value in
+                        tokenBudgetText = value; draft.limits.tokenBudget = ProviderProfile.Limits.tokenBudget(from: value) ?? 0
+                    })).accessibilityIdentifier("creator-token-budget")
+                }
+                Text("Manual context uses a conservative byte estimate and reserves room for output; it is not the provider's tokenizer.").font(.caption).foregroundStyle(.secondary)
+            } else {
+                Text("Automatic · model context and output maximum").font(.caption).foregroundStyle(.secondary)
             }
-            Text("Blank uses the model maximum. Or set 1–131,072 output tokens per request. Every fallback and repair counts toward the request budget.").font(.caption).foregroundStyle(.secondary)
+            DisclosureGroup("Advanced options") {
+            field("JSON output mode") {
+                if draft.protocolKind == .openaiCompatible {
+                    Picker("JSON output mode", selection: Binding(get: { draft.capabilities.jsonMode ?? .automatic }, set: { draft.capabilities.jsonMode = $0 })) {
+                        Text("Automatic (with fallback)").tag(ProviderProfile.Capabilities.JSONMode.automatic)
+                        Text("JSON Schema (strict)").tag(ProviderProfile.Capabilities.JSONMode.schema)
+                        Text("JSON object (required)").tag(ProviderProfile.Capabilities.JSONMode.required)
+                        Text("Prompt only").tag(ProviderProfile.Capabilities.JSONMode.disabled)
+                    }.labelsHidden().accessibilityIdentifier("creator-json-mode")
+                } else {
+                    Text(verbatim: draft.protocolKind == .geminiGenerateContent ? L("Gemini uses its native JSON response format.") : L("Anthropic uses the prompt's JSON contract."))
+                        .font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("creator-json-mode-native")
+                }
+            }
+            }.accessibilityIdentifier("creator-advanced-options")
         }.textFieldStyle(.roundedBorder)
     }
     private func field<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
@@ -159,13 +230,13 @@ struct CreatorSettingsSection: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Button("Save connection") {
-                    let profile = draft, secret = key, revision = expectedRevision
+                    let profile = savingProfile, secret = key, revision = expectedRevision
                     key = ""
                     controller.launch(PanelActionCoordinator.key("creator.profile.save")) {
                         try await controller.saveCreatorProfile(profile, key: secret, expectedRevision: revision)
                         if let saved = controller.creator.configuration.profiles.first(where: { $0.id == profile.id }) { edit(saved) }
                     }
-                }.buttonStyle(.panelPrimary).disabled((try? draft.validate()) == nil).accessibilityIdentifier("creator-profile-save")
+                }.buttonStyle(.panelPrimary).disabled((try? savingProfile.validate()) == nil).accessibilityIdentifier("creator-profile-save")
                 if let saved = savedProfile {
                     Button("Delete") { controller.launch { try await controller.deleteCreatorProfile(saved.id); loaded = false; loadSelected() } }
                         .accessibilityIdentifier("creator-profile-delete")
@@ -179,13 +250,35 @@ struct CreatorSettingsSection: View {
                         Button("Cancel") { controller.cancelCreatorConnection() }.accessibilityIdentifier("creator-test-cancel")
                     }
                 }
+                Menu("Use this model") {
+                    ForEach(saved.enabledModels, id: \.self) { id in
+                        Button { controller.launch { try await controller.selectCreatorProfile(saved.id, modelID: id) } } label: { Text(verbatim: id) }
+                    }
+                }
                 Text(verbatim: saved.baseURL + " · " + saved.model).font(.caption).textSelection(.enabled)
             }
         }
     }
+    private var enabledModels: [String] { (draft.modelIDs ?? (draft.model.isEmpty ? [] : [draft.model])) }
+    private var savingProfile: ProviderProfile {
+        var value = draft
+        if value.modelIDs != nil, !value.model.isEmpty, !value.enabledModels.contains(value.model) { value.modelIDs?.append(value.model) }
+        return value
+    }
+    private func enable(_ id: String) {
+        var ids = enabledModels
+        if !ids.contains(id) && ids.count < 64 { ids.append(id) }
+        draft.modelIDs = ids; if draft.model.isEmpty { draft.model = id }
+    }
+    private func disable(_ id: String) {
+        draft.modelIDs = enabledModels.filter { $0 != id }
+        draft.visionModelIDs?.removeAll { $0 == id }
+        if draft.model == id { draft.model = draft.modelIDs?.first ?? "" }
+    }
     private var savedProfile: ProviderProfile? { controller.creator.configuration.profiles.first { $0.id == draft.id } }
     private func edit(_ profile: ProviderProfile) {
         key = ""; draft = profile; tokenBudgetText = profile.limits.nativeOutputLimit == true ? "" : String(profile.limits.outputTokensPerRequest)
+        contextText = profile.limits.contextWindow.map(String.init) ?? "131072"
         expectedRevision = controller.creator.configuration.revision; loaded = true
     }
     private func loadSelected() {

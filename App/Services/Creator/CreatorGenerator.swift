@@ -9,6 +9,7 @@ actor CreatorGenerator {
         let configurationID: UUID
         let prompt: String
         var maxOutputTokens = 2048
+        var modelID: String? = nil
         var mode: CreatorCreationMode = .template
         var engine: CreatorEngine? = nil
         var referenceSource: String? = nil
@@ -92,7 +93,9 @@ actor CreatorGenerator {
             guard request.repair == nil else { throw CreatorGenerationFailure.invalidRequest }
             turn = nil
         }
-        let input = try Self.input(engine: request.engine, referenceSource: request.referenceSource, mode: request.mode, prompt: prompt, base: contextBase, maxOutputTokens: request.maxOutputTokens, repair: request.repair)
+        var input = try Self.input(engine: request.engine, referenceSource: request.referenceSource, mode: request.mode, prompt: prompt, base: contextBase, maxOutputTokens: request.maxOutputTokens, repair: request.repair)
+        input.modelID = request.modelID
+        _ = try input.model(for: profile)
         let engineReference = try CreatorEnginePrompt.reference(base: contextBase, source: request.referenceSource)
         if let source = contextBase?.source ?? request.referenceSource { try await provider.checkSourceContainsNoCredential(source, profile: profile) }
         guard input.maxOutputTokens <= profile.limits.generationTokenBudget else { throw CreatorGenerationFailure.invalidRequest }
@@ -137,7 +140,7 @@ actor CreatorGenerator {
                 reservedOutputTokens: completed.reservedOutputTokens, usage: completed.response.usage,
                 elapsed: completed.elapsed, baseRevisionDigest: base?.revisionDigest, iterationID: request.iteration?.id, repairIndex: turn?.repairCount)
             _ = try await store.stage(specification, for: ticket, summary: CreatorPromptBuilder.promptSummary(prompt),
-                presentation: presentation, generation: metadata, source: source, providerID: profile.id.uuidString.lowercased(), modelID: profile.model)
+                presentation: presentation, generation: metadata, source: source, providerID: profile.id.uuidString.lowercased(), modelID: try input.model(for: profile))
             try await checkpoint(.beforeCommit); try Task.checkCancellation()
             try await settings.withCurrentProfile(profile) { _ in }
             let draft = try await store.commit(ticket, validatingStructure: true)

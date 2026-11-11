@@ -9,6 +9,15 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — Creator model negotiation and LAN profiles
+
+- Automatic OpenAI format negotiation is shared by connection probes and creation: schema, JSON object, prompt JSON; each request consumes the same bounded ledger.
+- Native validation errors retain allowlisted field details; format negotiation is independent of the maximum two content repairs.
+- Local mode accepts strict private IPv4, local IPv6 and mDNS names; origin/configuration credential binding and explicit connection confirmation remain mandatory.
+- Connection success banners include actual mode, model and elapsed time in all six app languages; stale or cancelled results cannot restore success.
+- Focused native suites: 56 passed, 0 failed. Full python3 scripts/test.py: 720 script tests and 5006 native tests passed, 0 failed, 72 native skips.
+- No live API, personal Keychain, visible UI, desktop replacement or hardware acceptance was exercised. S4 remains closed in this commit.
+
 ## 2026-11-11 — Creator macOS 15 ad-hoc packaging
 
 - Added explicit ad-hoc Rehearsal mode; production publishing remains gated and notarized by default.

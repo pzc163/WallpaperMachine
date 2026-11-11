@@ -53,6 +53,7 @@ actor CreatorSettingsStore {
                 next.configurationRevision = previous.configurationRevision + 1
                 next.configurationID = UUID()
                 settings.profiles[index] = next
+                if settings.selectedProfileID == next.id, let model = settings.selectedModelID, !next.permitsModel(model) { settings.selectedModelID = nil }
             } else {
                 guard profile.configurationRevision == 0 else { throw Failure.staleProfile }
                 next.configurationRevision = 1
@@ -62,10 +63,14 @@ actor CreatorSettingsStore {
         }
     }
 
-    func selectProfile(_ id: UUID?, expectedRevision: Int) throws -> CreatorSettings {
+    func selectProfile(_ id: UUID?, modelID: String? = nil, expectedRevision: Int) throws -> CreatorSettings {
         try update(expectedRevision: expectedRevision) { settings in
             guard id.map({ id in settings.profiles.contains { $0.id == id } }) ?? true else { throw Failure.profileMissing }
             settings.selectedProfileID = id
+            if let modelID {
+                guard settings.profiles.first(where: { $0.id == id })?.permitsModel(modelID) == true else { throw Failure.staleProfile }
+            }
+            settings.selectedModelID = modelID
         }
     }
 
@@ -73,7 +78,7 @@ actor CreatorSettingsStore {
         try update(expectedRevision: expectedRevision) { settings in
             guard settings.profiles.contains(where: { $0.id == id }) else { throw Failure.profileMissing }
             settings.profiles.removeAll { $0.id == id }
-            if settings.selectedProfileID == id { settings.selectedProfileID = nil }
+            if settings.selectedProfileID == id { settings.selectedProfileID = nil; settings.selectedModelID = nil }
         }
     }
 

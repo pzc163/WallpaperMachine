@@ -99,7 +99,7 @@ extension PanelController {
             self.creator.artifactTab = .source; self.creator.embedded.close()
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
-                maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs, mode: self.creator.mode, engine: self.creator.mode == .code ? self.creator.engine : nil)
+                maxOutputTokens: profile.limits.outputTokensPerRequest, modelID: self.creator.configuration.selectedModel, maxRepairs: repairs, mode: self.creator.mode, engine: self.creator.mode == .code ? self.creator.engine : nil)
             request.streamProgress = { [weak self] value in
                 mailbox.store(value)
                 Task { @MainActor in
@@ -235,10 +235,10 @@ extension PanelController {
             }
         }
     }
-    func selectCreatorProfile(_ id: UUID) async throws {
+    func selectCreatorProfile(_ id: UUID, modelID: String? = nil) async throws {
         guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
         creator.connectionNotice = nil
-        creator.configuration = try await creatorWorkspace.selectProfile(id, expectedRevision: creator.configuration.revision)
+        creator.configuration = try await creatorWorkspace.selectProfile(id, modelID: modelID, expectedRevision: creator.configuration.revision)
     }
     func deleteCreatorProfile(_ id: UUID) async throws {
         creator.connectionNotice = nil

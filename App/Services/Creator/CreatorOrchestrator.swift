@@ -10,6 +10,7 @@ actor CreatorOrchestrator {
         let configurationID: UUID
         let prompt: String
         var maxOutputTokens = 2048
+        var modelID: String? = nil
         var maxRepairs = 0
         var mode: CreatorCreationMode = .template
         var engine: CreatorEngine? = nil
@@ -88,7 +89,7 @@ actor CreatorOrchestrator {
                 try await checkpoint(stage); try Task.checkCancellation()
                 var input = CreatorGenerator.Request(projectID: projectID, baseRevisionID: request.baseRevisionID,
                     profileID: request.profileID, configurationID: request.configurationID, prompt: request.prompt,
-                    maxOutputTokens: request.maxOutputTokens, mode: request.mode, engine: request.engine, referenceSource: request.referenceSource, streamProgress: request.streamProgress)
+                    maxOutputTokens: request.maxOutputTokens, modelID: request.modelID, mode: request.mode, engine: request.engine, referenceSource: request.referenceSource, streamProgress: request.streamProgress)
                 let iteration = try await generator.beginIteration(input, maxRepairs: request.maxRepairs)
                 ticket = iteration; input.iteration = iteration
                 while true {

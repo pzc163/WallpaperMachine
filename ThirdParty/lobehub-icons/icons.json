@@ -1,0 +1,87 @@
+{
+  "openai": {
+    "source": "package/icons/openai.svg",
+    "sha256": "a595df6b423920c67a7f8f73c063e4bfb72d415948097b6cac063a2366bb5186",
+    "bundledSHA256": "a6f64c2670a20c03c134ae0ccf1dab4dfd817f10a41da21547f720c5c1fb6820"
+  },
+  "anthropic": {
+    "source": "package/icons/anthropic.svg",
+    "sha256": "e833fdfa7e7187a86a05b870925067556a506dcd4239089aed73e1e58c9366a3",
+    "bundledSHA256": "153d6eca248c9192427ce2ade6d65185194187f439536fa75a8dc1f1f1baf09b"
+  },
+  "gemini": {
+    "source": "package/icons/gemini-color.svg",
+    "sha256": "8ab0a9bafec11f7e69bcb9fc4ffd8f1bc927d1ddcbbb6ff36dee5ae8b5a9d602",
+    "bundledSHA256": "8ab0a9bafec11f7e69bcb9fc4ffd8f1bc927d1ddcbbb6ff36dee5ae8b5a9d602"
+  },
+  "google": {
+    "source": "package/icons/google-color.svg",
+    "sha256": "4e6aa8892ef15a6b431f40f2c9045979bf7e2357524e7bbb89b353cf4f32a5ac",
+    "bundledSHA256": "4e6aa8892ef15a6b431f40f2c9045979bf7e2357524e7bbb89b353cf4f32a5ac"
+  },
+  "xai": {
+    "source": "package/icons/xai.svg",
+    "sha256": "89eb7de9f0d02a41cfecd9109e253d7fd3529e27467dee4254faa67f3ac21451",
+    "bundledSHA256": "afb81b82074827e77ea845c66181b2833c1bdc9469bd4257ffd316c4a770ffd9"
+  },
+  "grok": {
+    "source": "package/icons/grok.svg",
+    "sha256": "9175fc90c22655160231976c849f25a03b888d7cc0e04c5f1b987b659bb07c95",
+    "bundledSHA256": "70c65581a2f3e83944663c1813f5956da0fb808dc588c7c9688df140a8fe586f"
+  },
+  "zai": {
+    "source": "package/icons/zai.svg",
+    "sha256": "e748cb5108ce37b116d7a5ba97d37e0ae97eadf6849b0de11afb248e244a01e1",
+    "bundledSHA256": "3d42d414343a645127535745ae4ab6cd64c55255ac9af586527a7aa4c5574373"
+  },
+  "zhipu": {
+    "source": "package/icons/zhipu-color.svg",
+    "sha256": "8174e65ff71647d5c705c920c953a82bd723d9e3e42887bdd4ffc9dfe51207a0",
+    "bundledSHA256": "8174e65ff71647d5c705c920c953a82bd723d9e3e42887bdd4ffc9dfe51207a0"
+  },
+  "kimi": {
+    "source": "package/icons/kimi-color.svg",
+    "sha256": "0bdb95375d7c6e90a1850e91cd36770da2bc98fa33ec2d783f4a8fed027da85f",
+    "bundledSHA256": "91121078bb7e1a2cfbd960495047b03f486a7a0cb16479f828e3a96b595ea990"
+  },
+  "moonshot": {
+    "source": "package/icons/moonshot.svg",
+    "sha256": "435f41b74e6a87639b6bf860e9628f20cbe7d6229bece412d548f4cea3081852",
+    "bundledSHA256": "5e75a11128e4ff00bd3b74d3fa269d17247ab05581620ae0770704c4cc640f03"
+  },
+  "qwen": {
+    "source": "package/icons/qwen-color.svg",
+    "sha256": "a158a0e3ed5b541e4f91384ece02c3acf0a0d81b7b11a46d77bafb248b09e32c",
+    "bundledSHA256": "a158a0e3ed5b541e4f91384ece02c3acf0a0d81b7b11a46d77bafb248b09e32c"
+  },
+  "minimax": {
+    "source": "package/icons/minimax-color.svg",
+    "sha256": "7f7187fa6d9b341ac5f22f6c5a970523afb439dc45566d64eb4f4b9b604d6b01",
+    "bundledSHA256": "7f7187fa6d9b341ac5f22f6c5a970523afb439dc45566d64eb4f4b9b604d6b01"
+  },
+  "hunyuan": {
+    "source": "package/icons/hunyuan-color.svg",
+    "sha256": "510e7bb438506b5aadfaf8b9551d1606efd5b4171161a64a64204c72a453658a",
+    "bundledSHA256": "510e7bb438506b5aadfaf8b9551d1606efd5b4171161a64a64204c72a453658a"
+  },
+  "deepseek": {
+    "source": "package/icons/deepseek-color.svg",
+    "sha256": "deba5f98a5c1796e20fcac3149bcd7eb8a32f0bdd04d048819400b1f28bd1439",
+    "bundledSHA256": "deba5f98a5c1796e20fcac3149bcd7eb8a32f0bdd04d048819400b1f28bd1439"
+  },
+  "lmstudio": {
+    "source": "package/icons/lmstudio.svg",
+    "sha256": "4a575e8382b52ce742ac5d21d361a7d2a08cea7c12390ee1bbb755ef7d3cc25b",
+    "bundledSHA256": "4d9af573850de079212909adbecae7ba2721b60049c88b3d4c59686dff1c98da"
+  },
+  "ollama": {
+    "source": "package/icons/ollama.svg",
+    "sha256": "3a268218fb2e6e81fa31df70f70b51331625047794db81db21d35359428fae7a",
+    "bundledSHA256": "25dcf23ad770e8900f163cc4281f65e5a8c3bb00e23b55411766b0cfff18aea0"
+  },
+  "claude": {
+    "source": "package/icons/claude-color.svg",
+    "sha256": "a3101f3047a119aa11825ad9369510f0c472428c8c52d420e31bc62db44a8364",
+    "bundledSHA256": "a3101f3047a119aa11825ad9369510f0c472428c8c52d420e31bc62db44a8364"
+  }
+}

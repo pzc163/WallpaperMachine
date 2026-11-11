@@ -52,13 +52,25 @@ struct CreatorComposer: View {
         Text(verbatim: CreatorLabels.status(controller.creator)).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("creator-status")
     }
     private var profiles: some View {
-        Picker("Current model", selection: Binding(get: { controller.creator.configuration.selectedProfileID }, set: { id in
-            if let id { controller.launch { try await controller.selectCreatorProfile(id) } }
-        })) {
-            if controller.creator.profile == nil { Text("Choose a model").tag(UUID?.none) }
-            ForEach(controller.creator.configuration.profiles, id: \.id) { Text(verbatim: $0.name).tag(Optional($0.id)) }
-        }.labelsHidden().fixedSize(horizontal: false, vertical: true).accessibilityLabel(Text("Current model")).accessibilityIdentifier("creator-model-picker")
+        Menu {
+            ForEach(controller.creator.configuration.profiles, id: \.id) { profile in
+                Section { ForEach(profile.enabledModels, id: \.self) { id in
+                    Button { controller.launch { try await controller.selectCreatorProfile(profile.id, modelID: id) } } label: {
+                        HStack {
+                            Text(verbatim: id)
+                            if controller.creator.configuration.selectedProfileID == profile.id && controller.creator.configuration.selectedModel == id { Image(systemName: "checkmark") }
+                        }
+                    }
+                } } header: { Text(verbatim: profile.name) }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                if let profile = controller.creator.profile { CreatorProviderIcon(name: CreatorProviderCatalog.icon(profile: profile, model: controller.creator.configuration.selectedModel)) }
+                Text(verbatim: controller.creator.configuration.selectedModel ?? L("Choose a model")).lineLimit(1)
+            }
+        }.accessibilityLabel(Text("Current model")).accessibilityIdentifier("creator-model-picker")
     }
+
     private var modes: some View {
         Picker("Creation engine", selection: Binding(get: {
             controller.creator.mode == .template ? "template" : controller.creator.engine.rawValue

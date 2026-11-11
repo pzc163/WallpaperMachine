@@ -647,5 +647,15 @@
       "integrity": "sha512-JC74bdXcQEpW9KkV326WpZZjLguSZ3DfS8wrrvPMHgQOIEIG/sPXEN/V8IssoJhbefLRcRqw6RQH2NnpdprtMA==",
       "sha256": "dd339e37292a711b2eba546fb1df36dd9f846a849ac3edfd3ac5271b5022f323"
     }
+  },
+  "lobehub-icons": {
+    "version": "1.102.0",
+    "url": "https://registry.npmjs.org/@lobehub/icons-static-svg/-/icons-static-svg-1.102.0.tgz",
+    "integrity": "sha512-3Na6S2kdslmsfnBjuL0PQWQClrmuWe/pWThRN/3J2VzPg5MhVghy8knVu7kd1/lqA9ydZBvwmnKLzuBo0Wm6Qw==",
+    "sha256": "ad3f2ab605d59f3968b9ea57c9b2aab941ee3608da72fca57ac6e0ded301f5a2",
+    "name": "@lobehub/icons-static-svg",
+    "license": "MIT",
+    "licenseSource": "https://github.com/lobehub/lobe-icons/blob/ea434b96e75813517b377825e01c0df61dee8836/LICENSE",
+    "notes": "Selected upstream SVGs bundled in Assets.xcassets; currentColor normalized to black for asset compilation, monochrome assets use native template tint. Per-icon hashes: ThirdParty/lobehub-icons/icons.json. This pinned package has no MiniCPM/ModelBest icon; the app uses a native initial, not an attributed brand logo."
   }
 }

@@ -186,8 +186,8 @@ actor CreatorWorkspace {
         if result.selectedProfileID == nil { result = try await settings.selectProfile(saved.id, expectedRevision: result.revision) }
         return result
     }
-    func selectProfile(_ id: UUID, expectedRevision: Int) async throws -> CreatorSettings {
-        try beforeWrite(); return try await settings.selectProfile(id, expectedRevision: expectedRevision)
+    func selectProfile(_ id: UUID, modelID: String? = nil, expectedRevision: Int) async throws -> CreatorSettings {
+        try beforeWrite(); return try await settings.selectProfile(id, modelID: modelID, expectedRevision: expectedRevision)
     }
     func removeProfile(_ id: UUID, expectedRevision: Int) async throws -> CreatorSettings {
         try beforeWrite()

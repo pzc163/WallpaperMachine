@@ -13,7 +13,7 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
     init(requiresJSON: Bool = true) { answer.requiresJSON = requiresJSON }
 
     static func request(profile: ProviderProfile, input: LLMRequest, streaming: Bool = true) throws -> LLMRequestDescriptor {
-        let body: [String: Any] = ["model": profile.model, "stream": streaming, "max_tokens": input.maxOutputTokens,
+        let body: [String: Any] = ["model": try input.model(for: profile), "stream": streaming, "max_tokens": input.maxOutputTokens,
             "system": input.systemInstruction, "messages": input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
         return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1", suffix: "messages"),
                      headers: ["anthropic-version": "2023-06-01"], body: try LLMRequestDescriptor.encoded(body), authentication: .anthropic)

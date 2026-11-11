@@ -20,6 +20,8 @@ struct ProviderProfile: Codable, Equatable, Sendable {
         var tokenBudget: Int
         // Nil preserves the byte representation and total-reservation semantics of legacy profiles.
         var nativeOutputLimit: Bool? = nil
+        // A caller-selected conservative input/output envelope; nil delegates limits to the server.
+        var contextWindow: Int? = nil
 
         init(requestBudget: Int = 3, tokenBudget: Int? = nil, nativeOutputLimit: Bool? = nil) {
             self.requestBudget = requestBudget
@@ -55,11 +57,25 @@ struct ProviderProfile: Codable, Equatable, Sendable {
     var protocolKind: ProtocolKind
     var baseURL: String
     var model: String
+    var providerID: String? = nil
+    var modelIDs: [String]? = nil
+    var visionModelIDs: [String]? = nil
     // Nil preserves legacy records. Local legacy profiles default to no credential lookup.
     var usesCredential: Bool? = nil
     var localMode = false
     var capabilities = Capabilities()
     var limits = Limits()
+
+    var enabledModels: [String] { modelIDs ?? [model] }
+    func permitsModel(_ id: String) -> Bool { enabledModels.contains(id) }
+    static func validModel(_ value: String, protocolKind: ProtocolKind) -> Bool {
+        guard !value.isEmpty, value.utf8.count <= 128,
+              !value.unicodeScalars.contains(where: CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains) else { return false }
+        if protocolKind == .geminiGenerateContent {
+            return value.unicodeScalars.allSatisfy(CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.").contains)
+        }
+        return true
+    }
 
     var allowsEmptyKey: Bool {
         localMode && protocolKind == .openaiCompatible && (try? origin()) != nil
@@ -73,6 +89,12 @@ struct ProviderProfile: Codable, Equatable, Sendable {
               !model.isEmpty, model.utf8.count <= 128,
               !model.unicodeScalars.contains(where: CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains),
               (1...3).contains(limits.requestBudget), (1...Limits.maximumOutputTokens).contains(limits.tokenBudget)
+        else { throw CreatorPersistence.Failure.invalidRecord }
+        guard (1...64).contains(enabledModels.count), Set(enabledModels).count == enabledModels.count,
+              enabledModels.contains(model), enabledModels.allSatisfy({ Self.validModel($0, protocolKind: protocolKind) }),
+              Set(visionModelIDs ?? []).isSubset(of: Set(enabledModels)),
+              providerID.map({ CreatorProviderCatalog.entry($0) != nil }) ?? true,
+              limits.contextWindow.map({ (256...2_097_152).contains($0) && limits.tokenBudget <= $0 }) ?? true
         else { throw CreatorPersistence.Failure.invalidRecord }
         if protocolKind != .openaiCompatible, capabilities != Capabilities() {
             throw CreatorPersistence.Failure.invalidRecord

@@ -1,5 +1,37 @@
 # Creator model connections
 
+## S5.2 provider center
+
+The native directory includes eleven cloud brands, LM Studio, Ollama and separate
+custom cloud/local entries. Endpoint presets remain editable and use the same
+origin policy as discovery, connection checks and generation. Presets are not a
+claim that an account supports a particular model; enable explicit model IDs or
+discover them from the current local endpoint.
+
+A Profile owns one credential binding and up to 64 enabled model IDs. Selecting a
+model is persisted separately in settings and does not change the Profile's
+configuration generation or reread Keychain. Each outgoing request checks that its
+selected model is enabled. Editing the configuration still invalidates its previous
+credential approval; origin changes never silently reuse a key. Legacy single-model
+records retain their optional-field encoding and default selection.
+
+Automatic context/output delegates ceilings to the server. Manual context accepts
+256–2,097,152 tokens, output 1–131,072, and reserves input using a conservative UTF-8
+byte estimate plus framing overhead; it does not implement a vendor tokenizer.
+An exhausted manual envelope fails before transmission. JSON negotiation remains
+in the collapsed advanced section. Vision capability is explicitly declared per
+model; it does not itself authorize sending an image.
+
+LobeHub icons are pinned to `@lobehub/icons-static-svg` 1.102.0, verified against the
+npm integrity hash, compiled into Assets and included in the MIT notice inventory.
+Per-icon source/output hashes live in `ThirdParty/lobehub-icons/icons.json`.
+MiniCPM has no icon in this pinned upstream package and uses a native initial.
+No brand or model icon is fetched at runtime.
+
+`CreatorProviderCenterTests` covers presets, compiled assets, shared credentials,
+model authorization, manual context and malformed configurations. Existing settings,
+credential and panel tests cover legacy records, origin changes and UI actions.
+
 S1.2 adds the native connection layer after [S1.1 storage](creator-revisions.md).
 It implements the service-level portions of PRD FR-02/10 and AC-07/12/17/18.
 It does not add UI, call a live model during tests, execute returned content, or

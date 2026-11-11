@@ -226,6 +226,7 @@ class Entry:
 
 
 COMPONENTS = {
+    "lobehub-icons": Entry("MIT", "pinned offline vendor and model SVG assets, @lobehub/icons-static-svg"),
     "three": Entry("MIT", "pinned offline JavaScript runtime, Three.js r180 and selected addons"),
     "nlohmann-json": Entry("MIT", "header-only"),
     "argparse": Entry("MIT", "header-only"),
