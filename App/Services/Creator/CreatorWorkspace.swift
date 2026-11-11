@@ -176,7 +176,7 @@ actor CreatorWorkspace {
         let temporary = CreatorRevisionStore(root: root)
         defer { try? FileManager.default.removeItem(at: root) }
         let project = try await temporary.createProject(title: "Connection")
-        let ticket = try await temporary.beginJob(projectID: project.id, requestBudget: profile.limits.requestBudget, tokenBudget: profile.limits.tokenBudget)
+        let ticket = try await temporary.beginJob(projectID: project.id, requestBudget: profile.limits.requestBudget, tokenBudget: profile.limits.generationTokenBudget)
         let completion = try await provider.generate(LLMRequest(system: "Connection check.", messages: [.init(role: .user, content: "Return {\"ok\":true}.")],
             maxOutputTokens: profile.limits.outputTokensPerRequest, structuredOutput: .init(name: "connection_check",
                 schema: Data(#"{"type":"object","properties":{"ok":{"type":"boolean"}},"required":["ok"],"additionalProperties":false}"#.utf8))), profileID: profile.id, configurationID: profile.configurationID,

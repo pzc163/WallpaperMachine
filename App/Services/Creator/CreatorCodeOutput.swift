@@ -3,12 +3,36 @@ import JavaScriptCore
 
 /// A small JSON header followed by one raw HTML block. Source is never JSON-escaped.
 enum CreatorCodeOutput {
-    static let maximumSourceBytes = 32 * 1024
+    static let maximumSourceBytes = 256 * 1024
+    static let maximumEnvelopeBytes = maximumSourceBytes * 6 + 2048
     static let templateID = "generated-html-v1"
     struct Output: Sendable { let presentation: CreatorBundlePresentation; let html: Data }
     static func parse(_ text: String) throws -> Output {
-        guard text.utf8.count <= maximumSourceBytes + 2048 else { throw CreatorRepairIssue.field("$", .resourceBudget, policy: true) }
+        guard text.utf8.count <= maximumEnvelopeBytes else { throw CreatorRepairIssue.field("$", .resourceBudget, policy: true) }
         let text = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if text.hasPrefix("<!") || text.lowercased().hasPrefix("<html") || text.hasPrefix("```") {
+            let source: String
+            if text.hasPrefix("```") {
+                guard text.hasPrefix("```html\n") || text.hasPrefix("```html\r\n"), text.hasSuffix("\n```"),
+                      let firstLine = text.firstIndex(of: "\n") else { throw CreatorRepairIssue.field("$", .syntax) }
+                source = String(text[text.index(after: firstLine)...].dropLast(4))
+                guard !source.contains("```") else { throw CreatorRepairIssue.field("$", .syntax) }
+            } else { source = text }
+            return try rawHTML(source)
+        }
+        // Compatibility with older JSON-string bundles; paths remain a closed, single-file allowlist.
+        if !text.contains("\n<file path=") {
+            guard case .object(let object) = try? CreatorJSON.parse(text, maximumBytes: maximumEnvelopeBytes),
+                  Set(object.keys) == ["schemaVersion", "title", "summary", "files"], object["schemaVersion"] == .number(2),
+                  case .string(let title) = object["title"], case .string(let summary) = object["summary"],
+                  case .array(let files) = object["files"], files.count == 1, case .object(let file) = files[0],
+                  Set(file.keys) == ["path", "content"], file["path"] == .string("index.html"), case .string(let source) = file["content"]
+            else { throw CreatorRepairIssue.field("$", .syntax) }
+            let presentation = CreatorBundlePresentation(title: title, summary: summary)
+            do { try presentation.validate() } catch { throw CreatorRepairIssue.field("title", .text) }
+            let html = Data(source.utf8); try validateHTML(html)
+            return Output(presentation: presentation, html: html)
+        }
         let marker = "\n<file path=\"index.html\">\n", end = "\n</file>"
         guard let split = text.range(of: marker), text.hasSuffix(end), text.components(separatedBy: marker).count == 2 else {
             throw CreatorRepairIssue.field("$", .syntax)
@@ -23,6 +47,15 @@ enum CreatorCodeOutput {
         guard !source.contains("</file>"), !source.contains("<file ") else { throw CreatorRepairIssue.field("$", .syntax) }
         let html = Data(source.utf8); try validateHTML(html)
         return Output(presentation: presentation, html: html)
+    }
+    private static func rawHTML(_ source: String) throws -> Output {
+        let html = Data(source.utf8); try validateHTML(html)
+        var title = "Generated wallpaper"
+        if let match = source.range(of: #"(?is)<title>[^<>]{1,120}</title>"#, options: .regularExpression) {
+            let value = String(source[match].dropFirst(7).dropLast(8)).trimmingCharacters(in: .whitespacesAndNewlines)
+            if (try? CreatorBundlePresentation(title: value, summary: "Procedural HTML wallpaper").validate()) != nil { title = value }
+        }
+        return Output(presentation: .init(title: title, summary: "Procedural HTML wallpaper"), html: html)
     }
     static func validateHTML(_ data: Data) throws {
         guard (32...maximumSourceBytes).contains(data.count), let source = String(data: data, encoding: .utf8),

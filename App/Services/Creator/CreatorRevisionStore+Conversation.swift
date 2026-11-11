@@ -39,7 +39,7 @@ extension CreatorRevisionStore {
             let turn = CreatorConversation.Turn(id: UUID(), token: UUID(), createdAt: CreatorPersistence.timestamp(),
                 baseRevisionID: base?.revisionID, baseRevisionDigest: base?.revisionDigest,
                 profileID: profile.id, configurationID: profile.configurationID, userMessage: message,
-                maxRepairs: maxRepairs, requestBudget: min(automatic ? 3 : min(3, 1 + maxRepairs + (canFallback ? 1 : 0)), profile.limits.requestBudget), tokenBudget: profile.limits.tokenBudget,
+                maxRepairs: maxRepairs, requestBudget: profile.limits.requestBudget, tokenBudget: profile.limits.generationTokenBudget,
                 creationMode: mode == .code ? .code : nil, negotiatesJSON: automatic ? true : nil, allowsStreamFallback: canFallback ? true : nil, negotiationCount: automatic ? 0 : nil)
             document.turns.append(turn)
             try document.validate()
@@ -93,7 +93,7 @@ extension CreatorRevisionStore {
                 guard [.generating, .runtime].contains(turn.state) else { throw CreatorPersistence.Failure.staleJob }
                 turn.failure = issue
                 if !turn.attempts.isEmpty { turn.attempts[turn.attempts.count - 1].issue = issue }
-                let fallback = issue.category == .streamUnsupported && turn.allowsStreamFallback == true && turn.usesNonStream != true
+                let fallback = turn.canNegotiate(issue)
                 let negotiation = issue.category == .jsonModeUnsupported && turn.negotiatesJSON == true && (turn.negotiationCount ?? 0) < 2
                 allowed = issue.repairable && turn.requestCount > 0 && turn.requestCount < turn.requestBudget
                     && (fallback || negotiation || turn.repairCount < turn.maxRepairs) && outputTokens > 0
@@ -107,11 +107,18 @@ extension CreatorRevisionStore {
         try locked {
             try Task.checkCancellation()
             try updateIteration(ticket) { turn in
-                let fallback = turn.failure?.category == .streamUnsupported && turn.allowsStreamFallback == true && turn.usesNonStream != true
+                let fallback = turn.canNegotiate(turn.failure)
                 let negotiation = turn.failure?.category == .jsonModeUnsupported && turn.negotiatesJSON == true && (turn.negotiationCount ?? 0) < 2
                 guard turn.state == .repairPending, fallback || negotiation || turn.repairCount < turn.maxRepairs,
                       turn.requestCount < turn.requestBudget else { throw LLMFailure.budgetExhausted }
-                if fallback { turn.usesNonStream = true }
+                if fallback {
+                    switch turn.failure?.category {
+                    case .streamUnsupported: turn.usesNonStream = true
+                    case .usageUnsupported: turn.omitsUsage = true
+                    case .contextWindow: turn.adaptsOutputLimit = true
+                    default: throw CreatorPersistence.Failure.invalidRecord
+                    }
+                }
                 else if negotiation { turn.negotiationCount = (turn.negotiationCount ?? 0) + 1 }
                 else { turn.repairCount += 1 }
                 turn.state = .generating; turn.currentJobID = nil
@@ -182,7 +189,7 @@ extension CreatorRevisionStore {
         guard turn.state == .generating, turn.profileID == profile.id, turn.configurationID == profile.configurationID,
               job.attemptCount == 0, !turn.attempts.contains(where: { $0.jobID == job.id }),
               turn.requestCount < min(turn.requestBudget, profile.limits.requestBudget),
-              outputTokens <= min(turn.tokenBudget, profile.limits.tokenBudget) - turn.reservedOutputTokens
+              outputTokens <= min(turn.tokenBudget, profile.limits.generationTokenBudget) - turn.reservedOutputTokens
         else { throw LLMFailure.budgetExhausted }
         let ticket = CreatorConversation.Ticket(id: turn.id, projectID: job.projectID, token: turn.token)
         // Reserve the whole-turn budget BEFORE the per-attempt job. A crash may overcount,

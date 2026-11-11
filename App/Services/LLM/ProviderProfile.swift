@@ -13,19 +13,33 @@ struct ProviderProfile: Codable, Equatable, Sendable {
         var filtersLeadingThinkBlock = false
     }
     struct Limits: Codable, Equatable, Sendable {
-        static let defaultTokenBudget = 24_576
-        static let defaultOutputTokens = 8192
-        var requestBudget = 3
-        var tokenBudget = defaultTokenBudget
+        static let maximumOutputTokens = 131_072
+        static let maximumReservedTokens = maximumOutputTokens * 3
+        static let defaultTokenBudget = maximumOutputTokens
+        var requestBudget: Int
+        var tokenBudget: Int
+        // Nil preserves the byte representation and total-reservation semantics of legacy profiles.
+        var nativeOutputLimit: Bool? = nil
 
+        init(requestBudget: Int = 3, tokenBudget: Int? = nil, nativeOutputLimit: Bool? = nil) {
+            self.requestBudget = requestBudget
+            self.tokenBudget = tokenBudget ?? Self.maximumOutputTokens
+            self.nativeOutputLimit = nativeOutputLimit ?? (tokenBudget == nil ? true : nil)
+        }
         static func tokenBudget(from text: String) -> Int? {
             let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
             if value.isEmpty { return defaultTokenBudget }
             guard value.utf8.allSatisfy({ (48...57).contains($0) }),
-                  let number = Int(value), (1...100_000).contains(number) else { return nil }
+                  let number = Int(value), (1...maximumOutputTokens).contains(number) else { return nil }
             return number
         }
-        var outputTokensPerRequest: Int { min(Self.defaultOutputTokens, max(1, tokenBudget / max(1, requestBudget))) }
+        var outputTokensPerRequest: Int {
+            nativeOutputLimit == nil ? max(1, tokenBudget / max(1, requestBudget)) : tokenBudget
+        }
+        /// Reservation accounting is an estimate in native mode, never a promise about server billing.
+        var generationTokenBudget: Int {
+            nativeOutputLimit == nil ? tokenBudget : tokenBudget * max(1, min(3, requestBudget))
+        }
     }
     struct Origin: Codable, Equatable, Sendable {
         let scheme: String
@@ -58,7 +72,7 @@ struct ProviderProfile: Codable, Equatable, Sendable {
               !name.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains),
               !model.isEmpty, model.utf8.count <= 128,
               !model.unicodeScalars.contains(where: CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains),
-              (1...3).contains(limits.requestBudget), (1...100_000).contains(limits.tokenBudget)
+              (1...3).contains(limits.requestBudget), (1...Limits.maximumOutputTokens).contains(limits.tokenBudget)
         else { throw CreatorPersistence.Failure.invalidRecord }
         if protocolKind != .openaiCompatible, capabilities != Capabilities() {
             throw CreatorPersistence.Failure.invalidRecord

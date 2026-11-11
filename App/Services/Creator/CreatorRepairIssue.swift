@@ -3,7 +3,7 @@ import Foundation
 /// Only native categories and catalog field names can enter a repair prompt or durable failure record.
 struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConvertible {
     enum Category: String, Codable, Sendable {
-        case connection, streamUnsupported
+        case connection, streamUnsupported, usageUnsupported, contextWindow
         case malformedOutput, policyViolation, timeout, network, rateLimited, server, runtime, jsonModeUnsupported
         case unauthorized, refused, cancelled, interrupted, staleInput, budgetExhausted, storage, invalidRequest
     }
@@ -17,7 +17,7 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
     var description: String { category.rawValue }
 
     var repairable: Bool {
-        [.connection, .streamUnsupported, .malformedOutput, .policyViolation, .timeout, .network, .rateLimited, .server, .runtime, .jsonModeUnsupported].contains(category)
+        [.connection, .streamUnsupported, .usageUnsupported, .contextWindow, .malformedOutput, .policyViolation, .timeout, .network, .rateLimited, .server, .runtime, .jsonModeUnsupported].contains(category)
             && (retryAfter.map { $0 <= 30 } ?? true)
     }
     func validate() throws {
@@ -54,6 +54,8 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
             switch transport {
             case .unauthorized, .credentialsUnavailable: return .init(category: .unauthorized)
             case .connectionTimeout: return .init(category: .connection)
+            case .usageUnsupported: return .init(category: .usageUnsupported)
+            case .contextWindow: return .init(category: .contextWindow)
             case .streamUnsupported: return .init(category: .streamUnsupported)
             case .timeout: return .init(category: .timeout)
             case .network: return .init(category: .network)

@@ -44,6 +44,7 @@ import Foundation
         case .unauthorized: L("Authentication failed. Check the saved key.")
         case .rateLimited: L("The provider is rate limited. Try again later.")
         case .connection: L("Cannot connect to the model server.")
+        case .usageUnsupported, .contextWindow: L("The model rejected the requested output options.")
         case .streamUnsupported: L("This endpoint does not support streaming.")
         case .timeout: L("The request timed out.")
         case .network, .server: L("The model connection was interrupted.")

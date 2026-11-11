@@ -23,6 +23,23 @@ enum LLMHTTPPolicy {
         guard let date = formatter.date(from: trimmed) else { return nil }
         return max(0, date.timeIntervalSince(now))
     }
+    static func rejectedOutputLimit(_ data: Data) -> Bool {
+        guard data.count <= 4096, let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let error = object["error"] as? [String: Any] else { return false }
+        let parameter = (error["param"] as? String ?? "").lowercased()
+        let message = (error["message"] as? String ?? "").lowercased()
+        let mentionsLimit = ["max_tokens", "max_completion_tokens", "maxoutputtokens"].contains(parameter)
+            || ["max_tokens", "max_completion_tokens", "maxoutputtokens"].contains(where: message.contains)
+        return mentionsLimit && ["context", "exceed", "maximum", "too large", "less than", "at most", "unsupported", "not supported"].contains(where: message.contains)
+    }
+    static func unsupportedUsage(_ data: Data) -> Bool {
+        guard data.count <= 4096, let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let error = object["error"] as? [String: Any] else { return false }
+        let parameter = (error["param"] as? String ?? "").lowercased()
+        let message = (error["message"] as? String ?? "").lowercased()
+        return parameter == "stream_options" || parameter.hasPrefix("stream_options.")
+            || (message.contains("stream_options") && ["unsupported", "not supported", "unknown", "unrecognized"].contains(where: message.contains))
+    }
     static func unsupportedStream(_ data: Data) -> Bool {
         guard data.count <= 4096, let text = String(data: data, encoding: .utf8),
               let object = try? LLMJSON.object(text), let error = object["error"] as? [String: Any] else { return false }

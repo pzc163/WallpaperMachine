@@ -28,7 +28,7 @@ struct GenerationJob: Codable, Equatable, Sendable {
     var isTerminal: Bool { [.completed, .cancelled, .interrupted].contains(state) }
 
     func validate() throws {
-        guard schemaVersion == 1, (1...3).contains(requestBudget), (1...100_000).contains(tokenBudget),
+        guard schemaVersion == 1, (1...3).contains(requestBudget), (1...ProviderProfile.Limits.maximumReservedTokens).contains(tokenBudget),
               (0...requestBudget).contains(attemptCount), createdAt >= 0,
               reservedOutputTokens.map({ (0...tokenBudget).contains($0) }) ?? true,
               baseRevisionDigest.map({ baseRevisionID != nil && CreatorPersistence.validDigest($0) }) ?? true,

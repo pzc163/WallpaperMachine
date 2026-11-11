@@ -8,4 +8,4 @@ Three atomic changes on `feat/ai-creator`; no production app or desktop actions.
 
 Verification: Mock URLProtocol/memory credentials, offscreen views and WebKit checks, targeted tests per stage, then one complete routine gate. Release is Ad-hoc, arm64, macOS 15+, prerelease only; preserve main/latest. Physical LAN privacy and visible UI remain device acceptance items.
 
-Status: implementation in progress.
+Status: stages 1 and 2 implemented. Stage 1: 14 targeted checks; stage 2: 56 regression checks plus 9 corrected/expanded targeted checks passed. Stage 3 and the full gate follow.

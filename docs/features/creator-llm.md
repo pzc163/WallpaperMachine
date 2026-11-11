@@ -122,12 +122,12 @@ or invalid UTF-8 are rejected. Parsing `[DONE]` does not ignore a malformed tail
 
 | Limit | Value |
 | --- | --- |
-| Raw response stream | 1 MiB per attempt |
-| SSE line/event | 64 KiB, including framing bytes |
-| Complete answer | 16 KiB UTF-8 |
+| Raw response stream | 32 MiB per attempt, including reasoning and SSE framing |
+| SSE line/event | 2 MiB, including framing bytes |
+| Complete answer | Template JSON 16 KiB; code source 256 KiB (legacy encoded envelope ≤ 1,574,912 bytes) |
 | Error body inspected for JSON-mode fallback | 4 KiB; never logged |
-| Input text | 16 KiB total; 1–32 messages, ending in a user message |
-| Request body | 128 KiB after native JSON encoding |
+| Input text | Template 16 KiB total; code 280 KiB total / 264 KiB per message; 1–32 messages ending in a user message |
+| Request body | 2 MiB after native JSON encoding |
 | First response | 25 seconds until response headers; unreachable endpoints fail promptly |
 | Stream idle | 90 seconds since response headers or last received bytes, including reasoning/heartbeat data |
 | Request total | 300 seconds by default (including code generation); injected deadlines must be positive and at most 600 seconds |
@@ -213,11 +213,18 @@ are refused; filtering never refunds request/token usage.
 
 Negotiation and up to two content repairs share one maximum-three-request ledger.
 Negotiation does not require enabling content repair; its counter is persisted separately.
-New Profiles default to 24,576 reserved output tokens, with up to 8,192 per request;
-smaller configured budgets remain hard limits. The UI treats blank input as the default,
-rejects invalid/overflowing input, and shows the default explicitly. Existing stored
-limits are not silently rewritten. Unknown usage stays unknown. No raw response,
-thought text, key or arbitrary error description enters diagnostic logs.
+New Profiles default to server-native output (`nativeOutputLimit: true`). Blank input omits
+max_tokens/maxOutputTokens on OpenAI/Gemini. Explicit input permits 1–131,072 output tokens
+per call; total reservation accounting permits at most three such calls (393,216).
+Legacy profiles without the optional flag keep their original total-reservation semantics and
+canonical JSON bytes; editing the token field explicitly opts into the new per-call setting.
+Anthropic requires numeric max_tokens, so native mode sends 131,072. A recognized context/max-token
+400/422 permits one adaptation: OpenAI/Gemini omit the output ceiling, Anthropic halves it.
+This cannot enlarge the request budget, cannot retry forever, and cannot guarantee that a server's
+context/window or native output limit is larger. Reservations in native mode are estimates, not
+hard token/billing caps; missing usage remains unknown. Negotiation failures are fixed enums only.
+An unsupported stream_options response retries once without usage options while retaining SSE;
+only an explicit stream rejection falls back to non-stream. Both consume the same attempt ledger.
 
 Anthropic/Gemini retain their native contracts and cumulative usage semantics. Explicit
 `requestsUsage = false` omits stream_options without probing. No Responses API, tool

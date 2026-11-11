@@ -2,13 +2,15 @@ import Foundation
 
 /// Only allowlisted codes cross the transport boundary; never carry response bodies, URLs or keys.
 enum LLMFailure: Error, Equatable, Sendable, CustomStringConvertible, CustomDebugStringConvertible {
-    case connectionTimeout, streamUnsupported
+    case connectionTimeout, streamUnsupported, usageUnsupported, contextWindow
     case invalidInput, credentialsUnavailable, staleProfile, invalidJob, busy, cancelled, timeout, network
     case unauthorized, rateLimited(retryAfter: Double?), server(Int), http(Int), redirectRejected
     case protocolViolation, truncated, refused, streamLimit, outputLimit, budgetExhausted, jsonModeUnsupported
 
     var description: String {
         switch self {
+        case .usageUnsupported: return "usage_unsupported"
+        case .contextWindow: return "context_window"
         case .connectionTimeout: return "connection_timeout"
         case .streamUnsupported: return "stream_unsupported"
         case .invalidInput: return "invalid_input"

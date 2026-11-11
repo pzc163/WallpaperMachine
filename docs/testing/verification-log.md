@@ -25,6 +25,13 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator native output limits and raw HTML contract
+
+- Protocol/repair/code targeted run: 56 passed; two new test-fixture assertions corrected. Follow-up LLMNativeOutputTests and CreatorModelSettingsTests: 9 passed, 0 failed.
+- 128K explicit request -> context fallback -> usage-option fallback -> 70 KiB raw HTML -> offscreen validation/poster passes in exactly three attempts without content-repair permission.
+- Native maximum omits optional ceilings; Anthropic retains required max_tokens. Legacy profile encoding and immutable packages stay readable; 256 KiB source and 32 MiB wire limits are independent.
+- Document links and panel localization checks passed. No live API, real credentials or desktop actions. Full gate remains for the final stage.
+
 ## 2026-11-11 — Creator editable LAN connection drafts
 
 - Targeted: LLMConnectionUXTests, ProviderProfileTests, CreatorModelSettingsTests — 14 passed, 0 failed, 0 skipped.
@@ -101,15 +108,3 @@ entry's recorded result is not allowed.
 - Additional checks: localization 17/17, document links 11/11, git diff --check; handbook command syntax and all 66 checklist rows/AC coverage checked.
 - Initial build prerequisite: installed Metal toolchain was hidden by a stale xcrun path cache; xcrun --kill-cache restored compiler lookup. No component download.
 - No personal Keychain, visible windows, installed-app quit/launch, desktop application, display/sleep changes or network API calls. Release build is requested after this local commit; real S3 visual/device acceptance remains pending.
-
-## 2026-11-11 — Creator S2.3 final acceptance closeout
-
-S2.3 final closeout; durable evidence: [acceptance](../features/creator-acceptance.md) and [redacted metrics](creator-s23-results.json).
-
-- Reviewed existing live smoke (1 passed), fixed-model/schema benchmark (30/30 first-pass, 100% final) and three-page 1800-second WebKit soak (540 responsive samples, zero observed external attempts/terminations); no new live requests.
-- `python3 scripts/test.py` once: exit 0; 708 Python and 4,994 native passed, 0 failed, 72 skipped of 5,066 native tests; all opt-in flags cleared.
-- Skips: 62 media/device, 3 Steam network, 1 reference render, 3 S0 known-failing probes, and smoke/benchmark/long-soak one each.
-- Warnings: 6 dependency deployment-target link warnings, 1 AppIntents extraction notice, 3 main-thread warnings in existing tests; all affected tests passed, warnings not fixed here.
-- Final document/link and catalog checks passed; three plan mirrors agree; 3,720 non-document files stayed unchanged across the full gate.
-- No Rust/renderer/FFI changes; no extra kernel gate or Release build. No personal Keychain, UI automation, installation or desktop changes.
-- Archived aggregates only; removed all task test logs/results/reports and confirmed temporary test roots. S3 device/visual acceptance awaits authorization; S4 remains disabled.

@@ -150,7 +150,7 @@ actor CreatorRevisionStore {
         try locked {
             try Task.checkCancellation()
             var job = try activeJob(ticket)
-            let total = min(job.tokenBudget, profile.limits.tokenBudget)
+            let total = min(job.tokenBudget, profile.limits.generationTokenBudget)
             guard job.state == .generating, job.attemptCount < min(job.requestBudget, profile.limits.requestBudget),
                   job.reservedOutputTokens != nil || job.attemptCount == 0,
                   outputTokens > 0, outputTokens <= total - (job.reservedOutputTokens ?? 0)

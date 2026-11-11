@@ -148,7 +148,7 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
         let result: Result<LLMResponse, LLMFailure>? = lock.withLock {
             guard outcome == nil else { return nil }
             if let error { return .failure(LLMFailure.sanitized(error)) }
-            if let responseCode, [400, 422].contains(responseCode) { return .failure(LLMHTTPPolicy.unsupportedJSONMode(errorBody) ? .jsonModeUnsupported : LLMHTTPPolicy.unsupportedStream(errorBody) ? .streamUnsupported : .http(responseCode)) }
+            if let responseCode, [400, 422].contains(responseCode) { return .failure(LLMHTTPPolicy.rejectedOutputLimit(errorBody) ? .contextWindow : LLMHTTPPolicy.unsupportedUsage(errorBody) ? .usageUnsupported : LLMHTTPPolicy.unsupportedJSONMode(errorBody) ? .jsonModeUnsupported : LLMHTTPPolicy.unsupportedStream(errorBody) ? .streamUnsupported : .http(responseCode)) }
             guard responseCode != nil else { return .failure(.network) }
             do {
                 if isJSON { try decoder.consumeJSON(jsonBody) } else { try parser.finish() }

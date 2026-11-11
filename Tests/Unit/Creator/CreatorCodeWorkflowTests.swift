@@ -135,7 +135,7 @@ import XCTest
                       Self.output().replacingOccurrences(of: "\"schemaVersion\":2", with: "\"schemaVersion\":1"),
                       Self.output().replacingOccurrences(of: "\"summary\":", with: "\"extra\":0,\"summary\":"),
                       Self.output(Self.html.replacingOccurrences(of: "</body>", with: "<script src='https://example.invalid/x'></script></body>")),
-                      Self.output(Self.html+String(repeating: " ", count: 32768))] {
+                      Self.output(Self.html+String(repeating: " ", count: CreatorCodeOutput.maximumSourceBytes))] {
             XCTAssertThrowsError(try CreatorCodeOutput.parse(value))
         }
     }

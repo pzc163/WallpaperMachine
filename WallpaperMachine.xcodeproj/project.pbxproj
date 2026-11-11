@@ -1233,6 +1233,7 @@
 		F8BA5B3C2FDE61383E823CC4 /* CreatorPromptEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C9A09C9A92A1FEA1E52C37A /* CreatorPromptEditor.swift */; };
 		F8C7D8FA9A752CE71ACB4E24 /* LivePreviewSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C9E5021B532FB24702C9AC3E /* LivePreviewSchedulerTests.swift */; };
 		F8FD259B28D317407668D72A /* WallpaperSpacePinning.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3399BBA7B7F5AA0191EC9CB3 /* WallpaperSpacePinning.swift */; };
+		F90108262567804C5A0AC4A9 /* LLMNativeOutputTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB122D76BA0CD1396E30652 /* LLMNativeOutputTests.swift */; };
 		F905B1F43A3958DB316BAA2F /* CreatorRuntimeRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1045E6EA31E978DDD637BAA2 /* CreatorRuntimeRegistryTests.swift */; };
 		F93EF90727E984D44A84DF86 /* SystemMediaTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37B8CD53F4ABE178F294E2DF /* SystemMediaTestSupport.swift */; };
 		F983604EF2C5E34531BB72FC /* PixivActivityPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0204167A4A829000ACE25482 /* PixivActivityPill.swift */; };
@@ -1405,6 +1406,7 @@
 		0A021AF465EA630EEE493659 /* DragDrivers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DragDrivers.swift; sourceTree = "<group>"; };
 		0A04474B75C2DB42D1E1A8C1 /* CreatorWorkspaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorWorkspaceTests.swift; sourceTree = "<group>"; };
 		0A6C86522CB894F4B52F5EFB /* LockScreenWebMPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenWebMPlayer.swift; sourceTree = "<group>"; };
+		0AB122D76BA0CD1396E30652 /* LLMNativeOutputTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMNativeOutputTests.swift; sourceTree = "<group>"; };
 		0AC7E66BD7E7DA5CDF4E12B0 /* SteamCMDFailureLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteamCMDFailureLog.swift; sourceTree = "<group>"; };
 		0AD496DF2CFFF4AE74B42071 /* DesktopWindowDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopWindowDiagnostics.swift; sourceTree = "<group>"; };
 		0AF5D238C161F5D2DD0AA6C2 /* SeasonHorizon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeasonHorizon.swift; sourceTree = "<group>"; };
@@ -3948,6 +3950,7 @@
 				4830F1CD8DC25234E6539A2C /* LLMCodecTests.swift */,
 				281D2A0A8E932ABF8FF25C2E /* LLMConnectionUXTests.swift */,
 				989E314BD43FC951B21DC740 /* LLMMockURLProtocol.swift */,
+				0AB122D76BA0CD1396E30652 /* LLMNativeOutputTests.swift */,
 				C3B6F00E92DC104CA32E77B1 /* LLMNegotiationTests.swift */,
 				C517AAC89CCEDE4C14790418 /* LLMProviderTests.swift */,
 				27C8A858EA78CF7F0B87AA1D /* LLMStreamingUXTests.swift */,
@@ -5020,6 +5023,7 @@
 				4C1481335ADE738F57C9ACF9 /* LLMCodecTests.swift in Sources */,
 				5432A794F476172C55F5E62B /* LLMConnectionUXTests.swift in Sources */,
 				B4CB4C63A47865DE33D2B114 /* LLMMockURLProtocol.swift in Sources */,
+				F90108262567804C5A0AC4A9 /* LLMNativeOutputTests.swift in Sources */,
 				49082E4709B5FE26482A9856 /* LLMNegotiationTests.swift in Sources */,
 				37E5847ED9B410DD41AAF2A0 /* LLMProviderTests.swift in Sources */,
 				9E6A0E57CC077010469EF7AF /* LLMStreamTransportTests.swift in Sources */,

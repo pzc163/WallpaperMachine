@@ -15,8 +15,8 @@ enum CreatorJSON {
             }
         }
     }
-    static func parse(_ text: String) throws -> Value {
-        guard text.utf8.count <= LLMJSONEnvelope.maximumBytes else { throw CreatorGenerationFailure.malformedOutput }
+    static func parse(_ text: String, maximumBytes: Int = LLMJSONEnvelope.maximumBytes) throws -> Value {
+        guard text.utf8.count <= maximumBytes else { throw CreatorGenerationFailure.malformedOutput }
         var parser = Parser(bytes: Array(text.utf8))
         let result = try parser.value(depth: 0)
         parser.whitespace()

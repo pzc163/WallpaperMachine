@@ -122,8 +122,8 @@ Test connection asks for confirmation with the saved target, model and possible
 charge. It uses the same bounded three-mode negotiation as creation, within the
 saved request/token budget; cancel remains available. Success displays a dismissible
 native top banner with model, effective output mode and elapsed time. New tests and
-configuration edits clear stale success. Blank token input uses a 24,576-token total
-reservation, up to 8,192 per request. Its temporary project is removed and
+configuration edits clear stale success. Blank token input uses the server-native maximum; explicit output limits accept up to 131,072 per request.
+Legacy total reservations remain readable until explicitly edited. Its temporary project is removed and
 no response text is saved. Cancelling does not refund an already sent request.
 Classification text and native diagnostic fields exclude secrets and sensitive
 paths. Token output reservations are not a monetary cap; absent usage is Unknown.

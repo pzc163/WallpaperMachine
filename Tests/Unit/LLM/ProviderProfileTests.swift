@@ -73,10 +73,10 @@ final class ProviderProfileTests: XCTestCase {
     }
 
     func testMetadataAndBudgetBoundsAreValidated() throws {
-        XCTAssertEqual(ProviderProfile.Limits.tokenBudget(from: ""), 24_576)
-        XCTAssertEqual(ProviderProfile.Limits.tokenBudget(from: " \n"), 24_576)
-        XCTAssertEqual(ProviderProfile.Limits().outputTokensPerRequest, 8192)
-        for invalid in ["-1", "0", "NaN", "1e5", "100001", "999999999999999999999999"] {
+        XCTAssertEqual(ProviderProfile.Limits.tokenBudget(from: ""), 131_072)
+        XCTAssertEqual(ProviderProfile.Limits.tokenBudget(from: " \n"), 131_072)
+        XCTAssertEqual(ProviderProfile.Limits().outputTokensPerRequest, 131_072)
+        for invalid in ["-1", "0", "NaN", "1e5", "131073", "999999999999999999999999"] {
             XCTAssertNil(ProviderProfile.Limits.tokenBudget(from: invalid))
         }
         let original = profile("https://example.test/v1")
@@ -88,7 +88,7 @@ final class ProviderProfileTests: XCTestCase {
             var value = original; value.limits.requestBudget = requests
             XCTAssertThrowsError(try value.validate())
         }
-        for tokens in [0, 100_001, Int.max] {
+        for tokens in [0, 131_073, Int.max] {
             var value = original; value.limits.tokenBudget = tokens
             XCTAssertThrowsError(try value.validate())
         }

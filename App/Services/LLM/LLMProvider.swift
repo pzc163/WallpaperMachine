@@ -26,7 +26,7 @@ actor LLMProvider {
     func generate(_ input: LLMRequest, profileID: UUID, configurationID: UUID,
                   ticket: GenerationJob.Ticket, store: CreatorRevisionStore, retrying: Bool = true,
                   outputMode: ProviderProfile.Capabilities.JSONMode? = nil,
-                  streaming: Bool = true,
+                  streaming: Bool = true, omitUsage: Bool = false, adaptOutputLimit: Bool = false,
                   progress: @escaping @Sendable (LLMStreamProgress) -> Void = { _ in },
                   validate: @escaping @Sendable (String) throws -> Void = { _ in },
                   received: @escaping @Sendable (LLMResponse) async throws -> Void = { _ in }) async throws -> Completion {
@@ -38,7 +38,7 @@ actor LLMProvider {
         let operation = Task {
             try await Self.run(input, profileID: profileID, configurationID: configurationID, ticket: ticket, store: store,
                 settings: settings, credentials: credentials, transport: transport, cancellation: cancellation, log: log, wait: wait,
-                retrying: retrying, outputMode: outputMode, streaming: streaming, progress: progress, validate: validate, received: received)
+                retrying: retrying, outputMode: outputMode, streaming: streaming, omitUsage: omitUsage, adaptOutputLimit: adaptOutputLimit, progress: progress, validate: validate, received: received)
         }
         cancellation.install { operation.cancel() }
         do {
@@ -65,7 +65,7 @@ actor LLMProvider {
     }
 
     func checkSourceContainsNoCredential(_ text: String, profile: ProviderProfile) async throws {
-        guard text.utf8.count <= 40 * 1024 else { throw LLMFailure.outputLimit }
+        guard text.utf8.count <= CreatorCodeOutput.maximumEnvelopeBytes else { throw LLMFailure.outputLimit }
         let grant = try await credentials.resolve(for: profile, settings: settings)
         guard grant.redacting(text) == text else { throw CreatorRepairIssue.field("$", .text, policy: true) }
     }
@@ -82,7 +82,7 @@ actor LLMProvider {
                             transport: LLMStreamTransport, cancellation: LLMCancellation,
                             log: @Sendable (LLMLogEvent) -> Void,
                             wait: @Sendable (TimeInterval) async throws -> Void, retrying: Bool,
-                            outputMode: ProviderProfile.Capabilities.JSONMode?, streaming: Bool,
+                            outputMode: ProviderProfile.Capabilities.JSONMode?, streaming: Bool, omitUsage: Bool, adaptOutputLimit: Bool,
                             progress: @escaping @Sendable (LLMStreamProgress) -> Void,
                             validate: @Sendable (String) throws -> Void,
                             received: @Sendable (LLMResponse) async throws -> Void) async throws -> Completion {
@@ -112,14 +112,19 @@ actor LLMProvider {
         }
         defer { monitor.cancel() }
         let started = ContinuousClock.now
-        var usesStream = streaming
+        var usesStream = streaming, omitsUsage = omitUsage, adaptsLimit = adaptOutputLimit
         var mode = LLMOutputNegotiation.initial(profile, input: input, override: outputMode)
         while true {
             try cancellation.check()
             let grant = try await credentials.resolve(for: profile, settings: settings)
             var wireProfile = profile
             if profile.protocolKind == .openaiCompatible { wireProfile.capabilities.jsonMode = mode }
-            let descriptor = try LLMRequestDescriptor.make(profile: wireProfile, input: input, jsonMode: mode != .disabled, streaming: usesStream)
+            if omitsUsage && profile.protocolKind == .openaiCompatible { wireProfile.capabilities.requestsUsage = false }
+            // Anthropic requires a numeric max_tokens. Other protocols can delegate the ceiling to the server.
+            var wireInput = input
+            wireInput.nativeOutputLimit = input.nativeOutputLimit || profile.limits.nativeOutputLimit == true || adaptsLimit
+            if adaptsLimit && profile.protocolKind == .anthropicMessages { wireInput.maxOutputTokens = max(1, input.maxOutputTokens / 2) }
+            let descriptor = try LLMRequestDescriptor.make(profile: wireProfile, input: wireInput, jsonMode: mode != .disabled, streaming: usesStream)
             let request = try grant.request(descriptor)
             let job: GenerationJob
             do { job = try await store.reserveLLMAttempt(ticket, profile: profile, outputTokens: input.maxOutputTokens) }
@@ -164,6 +169,8 @@ actor LLMProvider {
                 }
                 let delay: TimeInterval
                 if let nextMode { mode = nextMode; delay = 0 }
+                else if failure == .contextWindow && !adaptsLimit { adaptsLimit = true; delay = 0 }
+                else if failure == .usageUnsupported && !omitsUsage && profile.protocolKind == .openaiCompatible { omitsUsage = true; delay = 0 }
                 else if failure == .streamUnsupported && usesStream { usesStream = false; delay = 0 }
                 else { switch failure {
                 case .rateLimited(let retryAfter):
@@ -173,7 +180,7 @@ actor LLMProvider {
                 default: throw error
                 } }
                 guard job.attemptCount < min(job.requestBudget, profile.limits.requestBudget),
-                      input.maxOutputTokens <= min(job.tokenBudget, profile.limits.tokenBudget) - (job.reservedOutputTokens ?? 0)
+                      input.maxOutputTokens <= min(job.tokenBudget, profile.limits.generationTokenBudget) - (job.reservedOutputTokens ?? 0)
                 else { throw error }
                 log(.retry(attempt: job.attemptCount + 1))
                 try await wait(delay)

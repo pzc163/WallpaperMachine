@@ -10,8 +10,9 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
     static func request(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool, streaming: Bool = true) throws -> LLMRequestDescriptor {
         let basePath = URLComponents(string: profile.baseURL)?.path ?? ""
         let url = try LLMRequestDescriptor.endpoint(profile, version: basePath.isEmpty || basePath == "/" ? "v1" : nil, suffix: "chat/completions")
-        var body: [String: Any] = ["model": profile.model, "stream": streaming, "max_tokens": input.maxOutputTokens,
+        var body: [String: Any] = ["model": profile.model, "stream": streaming,
             "messages": [["role": "system", "content": input.systemInstruction]] + input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
+        if !input.nativeOutputLimit { body["max_tokens"] = input.maxOutputTokens }
         let mode = profile.capabilities.jsonMode ?? .automatic
         if jsonMode, mode != .disabled {
             if mode == .schema || (mode == .automatic && input.structuredOutput != nil) {

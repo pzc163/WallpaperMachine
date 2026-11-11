@@ -6,21 +6,16 @@
 
 ## 创作合同与版本
 
-`CodeBundleOutput v2` 冻结为单行 JSON 头和一个原始 HTML 块：
+模型首选直接输出完整 `<!DOCTYPE html>…</html>`，或覆盖整个回答的单一 `html` Markdown 围栏。
+不用 JSON grammar，也不将 HTML 转义塞入 JSON 字符串。`<title>` 可提供简短标题，无标题时使用原生默认元数据。
 
-```text
-{"schemaVersion":2,"title":"紫色水墨","summary":"黑底指针互动"}
-<file path="index.html">
-<!doctype html><html><head><style>html,body{margin:0;background:#000}</style></head><body><canvas></canvas><script>/* bounded visual implementation */</script></body></html>
-</file>
-```
-
-- 头部仅允许三个字段；标题/摘要沿用 60/240 Unicode 标量限制及控制字符过滤。
-- HTML 最多 32 KiB UTF-8，完整响应最多 34 KiB。分隔行固定、只接收一个块，保留标签出现在源码中也拒绝；没有正则搜索后忽略尾部的容错。
+- HTML 最多 256 KiB UTF-8；单文件仍固定为 `index.html`。拒绝围栏外解释、截断和多个代码块。
+- 兼容旧 `CodeBundleOutput v2` 三字段元数据头 + `<file path="index.html">` 原始块；也兼容严格四字段 JSON 的 `files:[{path:"index.html",content:…}]`。重复键、其他路径和多文件拒绝。
+- 兼容编码响应上限为 6 × 256 KiB + 2 KiB，容纳 JSON Unicode 转义；解码后的源码仍须满足 256 KiB。模板回答仍为 16 KiB。
 - 文件名只能为 `index.html`。不接受模型路径、其他文件、二进制、外部资源、模块或导入。
 - 第一版只接收不带属性的内联 `<script>`。JavaScriptCore 的 Function 构造器只编译有界脚本体，**不调用函数、不执行模型源码**；语法错进入原生静态修复分类。
 - 通用 HTML 静态检查用于反馈，不作为网络隔离证明。执行仍必须经过真实 WebKit。
-- 三种模型协议共用此合同：代码请求禁用 JSON response_format，Gemini 使用 text/plain；模板请求继续使用 JSON。前置思维片段丢弃，源码原字节保留。
+- 三种模型协议共用此合同：代码请求禁用 JSON response_format，Gemini 使用 text/plain；模板请求继续使用 JSON。前置思维片段与可执行源码分离，源码原字节保留。
 - 模型源码写盘前检查当前合成/真实 Profile Key 的回显；失败信息只记录固定分类，不收录原始脚本错误、路径或日志正文。
 
 资源包继续使用 v2 四文件 `creator.json/project.json/index.html/preview.jpg`，与模型输出 schemaVersion 分开。

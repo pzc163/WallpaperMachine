@@ -81,7 +81,7 @@ durability boundary as the revision store.
 
 Each `ProviderProfile` contains schema version, stable ID, name, protocol enum,
 base URL, model, explicit local mode, capability overrides and bounded request/token
-budgets (1–3 / 1–100,000). `requestsUsage` and `filtersLeadingThinkBlock` are
+budgets (1–3 requests / up to 131,072 output tokens per call for new settings). `requestsUsage` and `filtersLeadingThinkBlock` are
 OpenAI-compatible overrides; S1.2 adds optional `jsonMode` (automatic, required,
 disabled). Missing values preserve S1.1 canonical record bytes and mean automatic.
 The other protocols require their standard values.
@@ -166,7 +166,7 @@ generating -> staged -> committing -> completed
 Only one job is active per project. Its `jobID + projectID + cancellationToken`
 and persisted active pointer fence late callbacks. Starting a newer job cancels
 the old one. Attempts cannot exceed the configured 1–3 request budget; token
-budget metadata is bounded to 1–100,000. S1.2 atomically reserves request attempts
+budget metadata is bounded to 393,216 reserved tokens (at most three 131,072-token calls); old records remain canonical. S1.2 atomically reserves request attempts
 and maximum output tokens before sending; failed attempts are not refunded. The
 optional `reservedOutputTokens` field preserves old canonical bytes when absent,
 and old jobs with attempts but no reservation history cannot start another request.

@@ -189,16 +189,9 @@ S1.3 接收协议正常结束后的完整回答。仅兼容剥离覆盖整个回
 
 ### 4.2 S4 自由代码合同：CodeBundleOutput v2
 
-本轮冻结为单文件合同，替代原多文件 1 MiB 草案。头部恰有 schemaVersion、title、summary，源码使用原始分块，不把 JS 塞入 JSON 字符串。
+当前自由代码优先合同为完整原始 HTML 或覆盖全文的单一 `html` Markdown 围栏，不绑定 JSON 输出模式。HTML ≤256 KiB UTF-8；标题可来自 `<title>`，否则使用原生默认元数据。仅在完整流正常结束后做静态校验和运行检查，不执行部分源码。
+兼容旧三字段元数据头 + 唯一 `<file path="index.html">` 原始块，以及严格 `schemaVersion=2/title/summary/files` JSON 包裹的单文件。路径固定 index.html，重复键/多个文件/歧义尾文/外部依赖/凭据回显仍拒绝。兼容转义包最大 6×256 KiB+2 KiB，解码后 HTML 仍限制 256 KiB；模板合同维持 16 KiB。只允许无属性内联 classic script，原生编译检查不执行源码。
 
-```text
-{"schemaVersion":2,"title":"紫色水墨","summary":"黑底指针互动"}
-<file path="index.html">
-<!doctype html><html><body><canvas></canvas><script>/* bounded visual code */</script></body></html>
-</file>
-```
-
-仅一个固定 `index.html` 块、完整末尾分隔行，无尾部文本、额外路径或保留标签歧义；HTML ≤32 KiB UTF-8、响应 ≤34 KiB。只允许无属性内联 classic script，原生语法编译不执行源码。标题/摘要沿用原长度与控制字符检查。跨 SSE 分片和 UTF-8 由共享流层处理，完整流结束后解析。未知版本、截断、重复头/文件、外部依赖和凭据回显拒绝。
 
 三协议的代码请求显式关闭 JSON grammar（Gemini text/plain）；模板合同保持 JSON 和既有 Schema 不变。没有模型能力请求自动授权；CSP、SDK、资源限制及所有摘要由宿主控制。
 
@@ -264,7 +257,7 @@ P0 / S1.2 已实现 `openaiCompatible`、`anthropicMessages`、`geminiGenerateCo
 
 每个请求维护独立的 Codec 状态，状态作为显式输入/输出，不跨请求共享缓冲、思维块状态或 token 累积。当前使用每请求独立的 ephemeral URLSession，禁用系统凭据库、Cookie 和缓存；TLS 保持系统验证，不接受其他自动鉴权挑战。正文只在合法结束和完整 JSON object 校验后交回原生调用方；S1.3 增加单一完整围栏兼容，并由独立严格校验器拒绝重复键、未知字段及模板参数错误。
 
-共享传输按实际 UTF-8 字节增量处理分片、多行 `data:`、空行分隔、LF/CRLF、注释/心跳及末尾残帧。SSE 分帧与协议 JSON 解码分开；不能把一个网络分片直接当成完整 JSON。正文最终仍受 16 KiB 合同上限约束；原始流上限 1 MiB，单行/单事件上限 64 KiB，默认请求总超时 60 秒（可注入但不超过 600 秒；按需基准默认 90 秒）。被跳过的思维数据、注释和未知 SSE 字段也计入传输限额。取消/结束释放会话，迟到事件不能替换终态。
+共享传输按实际 UTF-8 字节增量处理分片、多行 `data:`、空行分隔、LF/CRLF、注释/心跳及末尾残帧。SSE 分帧与协议 JSON 解码分开；不能把一个网络分片直接当成完整 JSON。正文最终仍受 16 KiB 合同上限约束；原始流上限 32 MiB，单行/单事件上限 2 MiB；首响应头 25 秒、分片空闲 90 秒、总时长 300 秒（可注入但不超过 600 秒）。被跳过的思维数据、注释和未知 SSE 字段也计入传输限额。取消/结束释放会话，迟到事件不能替换终态。
 
 取消必须终止对应 `URLSessionTask` 和消费流，释放缓冲；复用 S1.1 的 `jobID + cancellationToken` 并绑定 Profile 配置代次，丢弃迟到事件。401、429、超时、HTTP 错误及流内错误走同一分类/预算规则，不在 Codec 内自动重试；未结束、截断、取消、拒绝或 token 上限停止都不能变成成功结果。协议结束标志由 Codec 判定，不能只凭连接 EOF 或已经收到一些正文宣布完成。
 

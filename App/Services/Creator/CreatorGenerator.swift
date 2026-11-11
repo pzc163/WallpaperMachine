@@ -48,7 +48,7 @@ actor CreatorGenerator {
         if let id = request.baseRevisionID { base = try await store.generationBase(projectID: request.projectID, revisionID: id) }
         else { base = nil }
         _ = try Self.input(mode: request.mode, prompt: request.prompt, base: base, maxOutputTokens: request.maxOutputTokens, repair: nil)
-        guard request.maxOutputTokens <= profile.limits.tokenBudget else { throw CreatorGenerationFailure.invalidRequest }
+        guard request.maxOutputTokens <= profile.limits.generationTokenBudget else { throw CreatorGenerationFailure.invalidRequest }
         let message = try await provider.sanitizedContext([request.prompt], profile: profile)[0]
         guard !message.isEmpty else { throw CreatorGenerationFailure.invalidRequest }
         return try await store.beginIteration(projectID: request.projectID, base: base, profile: profile, message: message, maxRepairs: maxRepairs, mode: request.mode)
@@ -92,16 +92,16 @@ actor CreatorGenerator {
         }
         let input = try Self.input(mode: request.mode, prompt: prompt, base: contextBase, maxOutputTokens: request.maxOutputTokens, repair: request.repair)
         if let source = contextBase?.source { try await provider.checkSourceContainsNoCredential(source, profile: profile) }
-        guard input.maxOutputTokens <= profile.limits.tokenBudget else { throw CreatorGenerationFailure.invalidRequest }
+        guard input.maxOutputTokens <= profile.limits.generationTokenBudget else { throw CreatorGenerationFailure.invalidRequest }
         try Task.checkCancellation()
         let ticket = try await store.beginJob(projectID: request.projectID, baseRevisionID: request.baseRevisionID,
-            requestBudget: turn == nil ? profile.limits.requestBudget : 1, tokenBudget: profile.limits.tokenBudget,
+            requestBudget: turn == nil ? profile.limits.requestBudget : 1, tokenBudget: profile.limits.generationTokenBudget,
             expectedBaseDigest: base?.revisionDigest, iteration: request.iteration)
         do {
             try await checkpoint(.beforeRequest); try Task.checkCancellation()
             let completed = try await provider.generate(input, profileID: profile.id, configurationID: profile.configurationID,
                 ticket: ticket, store: store, retrying: turn == nil, outputMode: turn?.effectiveJSONMode,
-                streaming: turn?.usesNonStream != true, progress: request.streamProgress,
+                streaming: turn?.usesNonStream != true, omitUsage: turn?.omitsUsage == true, adaptOutputLimit: turn?.adaptsOutputLimit == true, progress: request.streamProgress,
                 validate: { text in
                     if request.mode == .code { _ = try CreatorCodeOutput.parse(text) }
                     else { _ = try CreatorOutputValidator.detailed(text) }

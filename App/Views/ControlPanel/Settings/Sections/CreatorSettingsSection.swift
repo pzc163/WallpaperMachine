@@ -28,7 +28,7 @@ struct CreatorSettingsSection: View {
                             .font(.caption).foregroundStyle(.secondary)
                         buttons
                         if let status = controller.creator.connectionStatus { Text(verbatim: status).font(.caption).accessibilityIdentifier("creator-connection-status") }
-                        Text("Request and token budgets limit attempts and reserved output. They are not a monetary spending cap.").font(.caption).foregroundStyle(.secondary)
+                        Text("Native maximum depends on the server context window. Token accounting is an estimate, not a spending cap.").font(.caption).foregroundStyle(.secondary)
                         Text("AI projects and policies cannot be moved or backed up in this version. Keep the current storage location.").font(.caption).foregroundStyle(.secondary)
                     }
                 }
@@ -47,7 +47,6 @@ struct CreatorSettingsSection: View {
         }
         .onChange(of: draft.baseURL) { _, _ in key = ""; models = []; discovery?.cancel() }
         .onChange(of: draft) { _, _ in controller.creator.connectionNotice = nil; discovery?.cancel() }
-        .onChange(of: tokenBudgetText) { _, value in draft.limits.tokenBudget = ProviderProfile.Limits.tokenBudget(from: value) ?? 0 }
         .onDisappear { key = ""; discovery?.cancel() }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("creator-model-settings")
@@ -137,10 +136,14 @@ struct CreatorSettingsSection: View {
                     .labelsHidden().accessibilityIdentifier("creator-request-budget")
             }
             field("Token budget") {
-                TextField("Token budget", text: $tokenBudgetText, prompt: Text(verbatim: String(ProviderProfile.Limits.defaultTokenBudget)))
+                TextField("Token budget", text: Binding(get: { tokenBudgetText }, set: { value in
+                    tokenBudgetText = value
+                    draft.limits.tokenBudget = ProviderProfile.Limits.tokenBudget(from: value) ?? 0
+                    draft.limits.nativeOutputLimit = value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                }), prompt: Text("Model maximum (automatic)"))
                     .accessibilityIdentifier("creator-token-budget")
             }
-            Text("Blank uses 24,576 reserved output tokens, with up to 8,192 per request. Negotiation and repairs share the budget.").font(.caption).foregroundStyle(.secondary)
+            Text("Blank uses the model maximum. Or set 1–131,072 output tokens per request. Every fallback and repair counts toward the request budget.").font(.caption).foregroundStyle(.secondary)
         }.textFieldStyle(.roundedBorder)
     }
     private func field<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
@@ -182,7 +185,7 @@ struct CreatorSettingsSection: View {
     }
     private var savedProfile: ProviderProfile? { controller.creator.configuration.profiles.first { $0.id == draft.id } }
     private func edit(_ profile: ProviderProfile) {
-        key = ""; draft = profile; tokenBudgetText = String(profile.limits.tokenBudget)
+        key = ""; draft = profile; tokenBudgetText = profile.limits.nativeOutputLimit == true ? "" : String(profile.limits.tokenBudget)
         expectedRevision = controller.creator.configuration.revision; loaded = true
     }
     private func loadSelected() {

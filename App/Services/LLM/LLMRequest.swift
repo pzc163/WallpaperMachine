@@ -26,14 +26,15 @@ struct LLMRequest: Sendable {
     var maxOutputTokens = 4096
     var structuredOutput: StructuredOutput? = nil
     var requiresJSON = true
+    var nativeOutputLimit = false
 
     var systemInstruction: String { requiresJSON ? system + "\nReturn one complete JSON object only, without Markdown or reasoning." : system }
     func validate() throws {
         guard !system.isEmpty, (1...32).contains(messages.count), messages.last?.role == .user,
-              messages.allSatisfy({ !$0.content.isEmpty && $0.content.utf8.count <= (requiresJSON ? 16 : 40) * 1024 }),
+              messages.allSatisfy({ !$0.content.isEmpty && $0.content.utf8.count <= (requiresJSON ? 16 : 264) * 1024 }),
               system.utf8.count <= 16 * 1024,
-              messages.reduce(system.utf8.count, { $0 + $1.content.utf8.count }) <= (requiresJSON ? 16 : 48) * 1024,
-              (1...100_000).contains(maxOutputTokens) else { throw LLMFailure.invalidInput }
+              messages.reduce(system.utf8.count, { $0 + $1.content.utf8.count }) <= (requiresJSON ? 16 : 280) * 1024,
+              (1...ProviderProfile.Limits.maximumOutputTokens).contains(maxOutputTokens) else { throw LLMFailure.invalidInput }
         _ = try structuredOutput?.object()
     }
 }

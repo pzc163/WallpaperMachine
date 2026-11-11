@@ -9,6 +9,18 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — Creator S2.3 final acceptance closeout
+
+S2.3 final closeout; durable evidence: [acceptance](../../features/creator-acceptance.md) and [redacted metrics](../creator-s23-results.json).
+
+- Reviewed existing live smoke (1 passed), fixed-model/schema benchmark (30/30 first-pass, 100% final) and three-page 1800-second WebKit soak (540 responsive samples, zero observed external attempts/terminations); no new live requests.
+- `python3 scripts/test.py` once: exit 0; 708 Python and 4,994 native passed, 0 failed, 72 skipped of 5,066 native tests; all opt-in flags cleared.
+- Skips: 62 media/device, 3 Steam network, 1 reference render, 3 S0 known-failing probes, and smoke/benchmark/long-soak one each.
+- Warnings: 6 dependency deployment-target link warnings, 1 AppIntents extraction notice, 3 main-thread warnings in existing tests; all affected tests passed, warnings not fixed here.
+- Final document/link and catalog checks passed; three plan mirrors agree; 3,720 non-document files stayed unchanged across the full gate.
+- No Rust/renderer/FFI changes; no extra kernel gate or Release build. No personal Keychain, UI automation, installation or desktop changes.
+- Archived aggregates only; removed all task test logs/results/reports and confirmed temporary test roots. S3 device/visual acceptance awaits authorization; S4 remains disabled.
+
 ## 2026-11-11 — Creator prompt and structured-output compatibility
 
 - Native prompt uses flat scalar output, an empty properties default and a catalog-generated clock example; full validator/export schema unchanged.

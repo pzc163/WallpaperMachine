@@ -11,7 +11,7 @@ struct LLMRequestDescriptor: Sendable {
 
     static func make(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool, streaming: Bool = true) throws -> Self {
         do { try profile.validate(); try input.validate() } catch { throw LLMFailure.invalidInput }
-        guard input.maxOutputTokens <= profile.limits.tokenBudget else { throw LLMFailure.budgetExhausted }
+        guard input.maxOutputTokens <= profile.limits.generationTokenBudget else { throw LLMFailure.budgetExhausted }
         switch profile.protocolKind {
         case .openaiCompatible: return try OpenAICompatibleCodec.request(profile: profile, input: input, jsonMode: jsonMode, streaming: streaming)
         case .anthropicMessages: return try AnthropicMessagesCodec.request(profile: profile, input: input, streaming: streaming)
@@ -37,7 +37,7 @@ struct LLMRequestDescriptor: Sendable {
     }
     static func encoded(_ body: [String: Any]) throws -> Data {
         guard let data = try? JSONSerialization.data(withJSONObject: body, options: [.sortedKeys, .withoutEscapingSlashes]),
-              data.count <= 128 * 1024 else { throw LLMFailure.invalidInput }
+              data.count <= 2 * 1024 * 1024 else { throw LLMFailure.invalidInput }
         return data
     }
 }
