@@ -34,7 +34,37 @@ import XCTest
         do { _ = try await catalog.fetch(profile: profile, key: ""); XCTFail("Allowed public HTTP") } catch {}
         XCTAssertEqual(route.requests.count, 1)
     }
+    func testUnsavedLocalDiscoveryIgnoresUnfinishedMetadataAndUsesEnteredKeyAndPath() async throws {
+        for host in ["10.1.2.3", "172.16.4.5", "192.168.90.9", "[fd00::1]", "[fe80::1%25en0]", "studio.local"] {
+            var draft = ProviderProfile(name: "", protocolKind: .openaiCompatible,
+                baseURL: "http://\(host):1234/custom/v1/", model: "not yet chosen")
+            draft.localMode = true; draft.limits.tokenBudget = 0
+            XCTAssertThrowsError(try draft.validate())
+            let target = try LLMModelCatalog.target(for: draft)
+            let url = try LLMRequestDescriptor.endpoint(target, version: nil, suffix: "models")
+            XCTAssertEqual(url.path, "/custom/v1/models")
+            let route = LLMMockURLProtocol.Route([.init(headers: ["Content-Type": "application/json"], chunks: [Data(#"{"data":[{"id":"local-model"}]}"#.utf8)])])
+            LLMMockURLProtocol.register(route, at: url); defer { LLMMockURLProtocol.remove(url) }
+            let catalog = LLMModelCatalog(transport: .init(configuration: LLMMockURLProtocol.configuration()))
+            let models = try await catalog.fetch(profile: draft, key: "lan-fixture")
+            XCTAssertEqual(models, ["local-model"])
+            XCTAssertEqual(route.requests.first?.value(forHTTPHeaderField: "Authorization"), "Bearer lan-fixture")
+            // Saved/test/generation use the same origin allowlist, including the custom port.
+            draft.name = "LAN"; draft.model = "local-model"; draft.limits = .init()
+            try draft.validate()
+            let descriptor = try LLMRequestDescriptor.make(profile: draft, input: LLMTestFixtures.input, jsonMode: false)
+            XCTAssertEqual(try draft.origin(), try target.origin())
+            XCTAssertEqual(descriptor.url.host, url.host)
+            XCTAssertEqual(descriptor.url.port, 1234)
+        }
+        var publicDraft = ProviderProfile(name: "", protocolKind: .openaiCompatible, baseURL: "http://8.8.8.8:1234/v1", model: "")
+        publicDraft.localMode = true
+        XCTAssertThrowsError(try LLMModelCatalog.target(for: publicDraft))
+        publicDraft.baseURL = "http://192.168.1.2/v1/%2e%2e/private"
+        XCTAssertThrowsError(try LLMModelCatalog.target(for: publicDraft))
+    }
     func testBundledATSDeclaresNarrowIPRangesWithoutGlobalNativeBypass() throws {
+        XCTAssertFalse(try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "NSLocalNetworkUsageDescription") as? String).isEmpty)
         let ats = try XCTUnwrap(Bundle.main.object(forInfoDictionaryKey: "NSAppTransportSecurity") as? [String: Any])
         XCTAssertEqual(ats["NSAllowsLocalNetworking"] as? Bool, true)
         XCTAssertNotEqual(ats["NSAllowsArbitraryLoads"] as? Bool, true)

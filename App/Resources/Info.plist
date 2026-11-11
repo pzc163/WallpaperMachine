@@ -75,6 +75,8 @@
 	<string>WallpaperMachine uses this Mac’s approximate location to calculate sunrise and sunset for automatic wallpaper changes.</string>
 	<key>NSAudioCaptureUsageDescription</key>
 	<string>WallpaperMachine captures system audio only when you enable audio-reactive wallpapers.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>WallpaperMachine connects to the local model server you choose to list models and create wallpapers.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsLocalNetworking</key>

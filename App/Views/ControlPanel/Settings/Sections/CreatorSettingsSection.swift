@@ -48,11 +48,8 @@ struct CreatorSettingsSection: View {
         .onChange(of: draft.baseURL) { _, _ in key = ""; models = []; discovery?.cancel() }
         .onChange(of: draft) { _, _ in controller.creator.connectionNotice = nil; discovery?.cancel() }
         .onChange(of: tokenBudgetText) { _, value in draft.limits.tokenBudget = ProviderProfile.Limits.tokenBudget(from: value) ?? 0 }
-        .onChange(of: draft.protocolKind) { _, kind in
-            key = ""; draft.localMode = false; draft.capabilities = .init()
-            if kind != .openaiCompatible { draft.localMode = false }
-        }
         .onDisappear { key = ""; discovery?.cancel() }
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("creator-model-settings")
     }
     private var profileList: some View {
@@ -74,7 +71,9 @@ struct CreatorSettingsSection: View {
         VStack(alignment: .leading, spacing: 10) {
             field("Connection name") { TextField("Connection name", text: $draft.name).accessibilityIdentifier("creator-profile-name") }
             field("Protocol") {
-                Picker("Protocol", selection: $draft.protocolKind) {
+                Picker("Protocol", selection: Binding(get: { draft.protocolKind }, set: {
+                    key = ""; draft.protocolKind = $0; draft.localMode = false; draft.capabilities = .init()
+                })) {
                     Text("OpenAI compatible").tag(ProviderProfile.ProtocolKind.openaiCompatible)
                     Text(verbatim: "Anthropic Messages").tag(ProviderProfile.ProtocolKind.anthropicMessages)
                     Text(verbatim: "Gemini GenerateContent").tag(ProviderProfile.ProtocolKind.geminiGenerateContent)
@@ -94,7 +93,7 @@ struct CreatorSettingsSection: View {
                 }
             }
             field("Base URL") {
-                TextField("Base URL", text: $draft.baseURL, prompt: Text(verbatim: draft.localMode ? "http://192.168.1.x:1234/v1" : "https://api.example.com/v1"))
+                TextField("Base URL", text: $draft.baseURL, prompt: Text(verbatim: draft.localMode ? "http://192.168.90.9:1234/v1" : "https://api.example.com/v1"))
                     .accessibilityIdentifier("creator-profile-endpoint")
             }
             field("Model ID") {
@@ -113,7 +112,6 @@ struct CreatorSettingsSection: View {
                 Toggle("Local server mode", isOn: $draft.localMode).toggleStyle(.checkbox)
                 Text("Local mode allows HTTP and an empty key on loopback, private LAN addresses and .local hosts only. Use a trusted network; public endpoints require HTTPS.").font(.caption).foregroundStyle(.secondary)
                 if draft.localMode {
-                    Text(verbatim: "http://127.0.0.1:1234/v1").font(.caption).foregroundStyle(.secondary)
                     HStack {
                         Button("Fetch models") {
                             let profile = draft, secret = key
@@ -124,12 +122,16 @@ struct CreatorSettingsSection: View {
                                     try Task.checkCancellation()
                                     if draft == profile { models = result }
                             }
-                        }.disabled(discovering || (try? draft.origin()) == nil).accessibilityIdentifier("creator-fetch-models")
+                        }.disabled(discovering || (try? LLMModelCatalog.target(for: draft)) == nil).accessibilityIdentifier("creator-fetch-models")
                         if discovering { Button("Cancel") { discovery?.cancel() } }
                     }
                 }
             }
             field("API key") { SecureField("API key", text: $key).privacySensitive().accessibilityIdentifier("creator-profile-key") }
+            if draft.localMode {
+                Text("API key is optional in local mode. Enter one if your LAN server requires authentication.").font(.caption).foregroundStyle(.secondary)
+                Text("Allow Local Network access in System Settings → Privacy & Security when prompted.").font(.caption).foregroundStyle(.secondary)
+            }
             field("Request budget") {
                 Picker("Request budget", selection: $draft.limits.requestBudget) { ForEach(1...3, id: \.self) { Text(verbatim: String($0)).tag($0) } }
                     .labelsHidden().accessibilityIdentifier("creator-request-budget")

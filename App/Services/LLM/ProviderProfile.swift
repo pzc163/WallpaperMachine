@@ -81,6 +81,7 @@ struct ProviderProfile: Codable, Equatable, Sendable {
               components.query == nil, components.fragment == nil,
               LLMLocalEndpoint.safeEncoding(components),
               !components.path.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains),
+              !components.path.split(separator: "/").contains(where: { $0 == "." || $0 == ".." }),
               components.port.map({ (1...65535).contains($0) }) ?? true,
               components.url != nil else { throw CreatorPersistence.Failure.invalidRecord }
         if host.hasPrefix("["), host.hasSuffix("]") { host = String(host.dropFirst().dropLast()) }

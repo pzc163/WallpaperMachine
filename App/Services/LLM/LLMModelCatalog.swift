@@ -3,14 +3,21 @@ import Foundation
 /// Explicit local discovery uses the entered key in memory, never saved credentials or a model call.
 struct LLMModelCatalog: Sendable {
     var transport = LLMStreamTransport(limits: .init(maximumBytes: 128 * 1024, timeout: 25))
+    /// Discovery depends only on the draft endpoint; unfinished model/name/budget fields are irrelevant.
+    static func target(for draft: ProviderProfile) throws -> ProviderProfile {
+        guard draft.localMode, draft.protocolKind == .openaiCompatible else { throw LLMFailure.invalidInput }
+        _ = try draft.origin()
+        var target = ProviderProfile(name: "Discovery", protocolKind: .openaiCompatible,
+                                     baseURL: draft.baseURL, model: "discovery")
+        target.localMode = true
+        try target.validate()
+        return target
+    }
     func fetch(profile: ProviderProfile, key: String) async throws -> [String] {
         guard profile.localMode, profile.protocolKind == .openaiCompatible,
               key.utf8.count <= 4096, key.utf8.allSatisfy({ (33...126).contains($0) }) else { throw LLMFailure.invalidInput }
-        var target = profile
-        if target.name.isEmpty { target.name = "Discovery" }
-        if target.model.isEmpty { target.model = "discovery" }
-        try target.validate()
-        let url = try LLMRequestDescriptor.endpoint(target, version: "v1", suffix: "models")
+        let target = try Self.target(for: profile)
+        let url = try LLMRequestDescriptor.endpoint(target, version: nil, suffix: "models")
         let descriptor = LLMRequestDescriptor(url: url, headers: [:], body: Data(), authentication: .bearer, method: "GET")
         let request = try ProviderCredentialStore.Grant(profile: target, key: key).request(descriptor)
         let response = try await transport.perform(request, decoder: Decoder()) { task in

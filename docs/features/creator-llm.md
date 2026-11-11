@@ -94,10 +94,15 @@ apply on macOS 14+, covering our macOS 15 minimum. Profile checks remain stricte
 than ATS; Creator WebKit keeps its separate offline CSP/download policies.
 
 Explicit local model discovery asks confirmation for the entered target, performs
-one bounded GET `/v1/models`, rejects redirects, and uses only the entered in-memory
+one bounded GET `<entered baseURL>/models`, rejects redirects, and uses only the entered in-memory
 key. It does not read Keychain, save a Profile or consume generation tokens. It
 validates/deduplicates/sorts at most 512 model IDs; cancellation stops the request.
-This is explicit target consent, not background network discovery.
+This is explicit target consent, not background network discovery. Discovery validates only the
+entered local endpoint/key; an unfinished name, model ID or generation budget cannot block it.
+All connection fields remain editable in local mode, including an optional authentication key.
+Loading a saved profile does not simulate a user protocol change or reset its local-mode consent.
+The six-language `NSLocalNetworkUsageDescription` explains direct LAN access. macOS may ask
+for permission on the first LAN request; automated tests do not trigger that privacy dialog.
 
 ## Streaming, limits and errors
 

@@ -120,6 +120,8 @@ file; pass `rg -u` to search them deliberately.
 
 - [Creator connection stability and workspace UX](plans/2026-11-11-creator-connection-ux.md)
 
+- [Creator LAN, native output limits and streaming artifacts](plans/2026-11-11-creator-stream-artifacts.md)
+
 ## Maintaining these docs
 
 Add every new document to the table for its group and remove deleted ones: a

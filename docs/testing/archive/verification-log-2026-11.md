@@ -9,6 +9,17 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — Creator prompt and structured-output compatibility
+
+- Native prompt uses flat scalar output, an empty properties default and a catalog-generated clock example; full validator/export schema unchanged.
+- OpenAI automatic prefers native json_schema; required/json_object, schema/strict and disabled/prompt-only are explicit. Downgrade uses the same request/token budget.
+- `python3 scripts/test.py --only LLMCodecTests --only LLMProviderTests --only LLMStreamTransportTests --only ProviderProfileTests --only ProviderCredentialStoreTests --only CreatorPromptBuilderTests --only CreatorOutputValidatorTests --only CreatorGeneratorTests --only CreatorRepairTests --only CreatorWorkspaceTests --only CreatorBenchmarkTests --serial` — exit 0; 120 passed, 0 failed, 0 skipped. Mock model streams and real offscreen validation only.
+- `python3 -B scripts/tests/test_creator_live_smoke.py` — 9 passed; `python3 -B scripts/tests/test_creator_acceptance.py` — 8 passed; synthetic credentials and loopback IPC only.
+- `python3 -B scripts/tests/test_doc_links.py` — 11 passed; `git diff --check` — clean.
+- Compiler log: 339 warning lines, none attributed to touched files; zero XCTest runtime warnings.
+- Three pre-existing benchmark artifacts cleaned. No live model request, personal Keychain, visible UI, desktop change, full gate, commit or push; requested targeted scope only.
+- Real-model quality/grammar acceptance remains unmeasured after this patch; single live smoke still has requestBudget=1.
+
 ## 2026-11-10 — Creator S2.3 headless acceptance and benchmark harnesses
 
 S2.3 — headless recovery, publication playback gate, credential-echo rejection and acceptance harnesses.

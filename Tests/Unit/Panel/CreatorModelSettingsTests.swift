@@ -92,6 +92,9 @@ import XCTest
                         hosting.view.layoutSubtreeIfNeeded()
                         let elements = AccessibilityElement.everything(in: hosting.view)
                         if elements.contains(where: { $0.identifier == "creator-model-settings" }) {
+                            for identifier in ["creator-profile-name", "creator-profile-protocol", "creator-profile-endpoint", "creator-profile-model", "creator-profile-key"] {
+                                XCTAssertTrue(elements.contains { $0.identifier == identifier }, "\(language.tag): \(identifier)")
+                            }
                             if kind == .openaiCompatible {
                                 let picker = try XCTUnwrap(elements.first { $0.identifier == "creator-json-mode" }, language.tag)
                                 XCTAssertEqual(picker.value, PanelLocale.shared.catalogString("JSON Schema (strict)"))
