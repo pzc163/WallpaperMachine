@@ -1,8 +1,10 @@
-# Native Creator workspace (S2.2)
+# Native Creator workspace (S2.2 and S3 controls)
 
 S2.1 was verified against its recorded file hashes and committed locally on
 `feat/ai-creator` as `29cd3086ef81b3046a98a1498029ac200c007483` before this work.
-The tree was clean. S2.2 remains uncommitted; nothing was pushed or installed.
+The tree was clean. S2.2 was subsequently committed locally as `35594fb9`.
+S3 control preparation starts from the clean S2.3 baseline `6b2350d8`;
+nothing is pushed or installed by this work.
 This feature uses trusted templates only. It does not unlock S4 execution.
 
 ## Ownership and native shell
@@ -41,6 +43,14 @@ Edits update only an open temporary preview. Validate changes creates an immutab
 child revision and runs native runtime capture again; save/apply stay disabled
 while values differ. A failed runtime check retains the previous valid selection.
 
+The Presets menu takes its entries and complete values from the selected
+revision's native template definition. Selecting one replaces the whole parameter
+dictionary in one validated controller action and updates an open preview, including
+a paused preview. Unknown presets, a different template, busy operations and cancelled
+edits are refused before changing values. Neither revisions nor installed bytes change.
+Validate changes still creates and fully checks a new revision before publication;
+selecting values identical to the current revision does not invent a dirty state.
+
 ## Projects and history
 
 Display names use a versioned `display-name.json` alongside project metadata;
@@ -64,6 +74,17 @@ bound explicitly through ProviderCredentialStore; views never read it back. A
 changed target clears the field, saving rotates the configuration generation,
 and old requests are cancelled. An empty field never approves a previous key for
 a new configuration. Explicit loopback OpenAI mode retains the lower-layer rules.
+
+OpenAI-compatible profiles expose **JSON output mode**: Automatic (with fallback),
+JSON Schema (strict), JSON object (required), and Prompt only. An absent mode still
+displays Automatic without rewriting legacy metadata. The choices store the existing
+`automatic/schema/required/disabled` values; changing a saved mode rotates its
+configuration generation and cancels old requests, so remote credentials need explicit
+rebinding. Explicit local mode can bind an empty key to the new configuration.
+Gemini displays its native JSON response-format policy and Anthropic its prompt JSON
+contract instead of offering OpenAI-specific switches. None of these modes bypasses
+the strict native parameter validator. The eight added labels/notes and existing
+preset names cover all six app languages.
 
 Test connection asks for confirmation with the saved target, model and possible
 charge. It sends one small request, with no compatibility retry, through the same
@@ -105,7 +126,26 @@ This is a documented refusal boundary, not support for copying Creator to a new 
 
 ## Verification and limits
 
-Final verification: 695 Python tests and 4,962 native tests passed,
+S3 controls: `CreatorControlsTests` covers all six presets through an unattached real
+WKWebView, unchanged published/history bytes, revalidation and save/apply gates;
+`CreatorModelSettingsTests` covers all four persisted modes, credential reapproval,
+in-flight cancellation, stale saves, and offscreen controls/layout in six languages.
+These tests use local Mock responses, memory credentials and temporary files only.
+Visible controls, real Keychain, multi-display use and energy remain S3 manual work.
+S3 control gate (2026-11-11): 708 Python and 5,000 native tests passed, zero failed,
+72 skipped; the full routine gate ran once. The skips remain the 62 media/device,
+three Steam-network, one reference, three S0 unrestricted, and three Creator
+live/benchmark/soak opt-ins. Two runtime warnings remain in the result bundle.
+The final preset-focused rerun passed all three tests; the preceding four-suite
+run passed the other 24 and two preset cases but exposed a missing fake library
+snapshot in the publication test. The fixture was corrected before the full gate.
+An earlier compile attempt resolved a stale xcrun Metal path cache; the installed
+toolchain was reused without a download. Localization (17 checks), documentation
+links (11 checks), and the external handbook/checklist checks passed separately.
+Release construction follows the authorized local commit; no visible app launch,
+installed-app shutdown, real credentials, live model calls or desktop action occurs.
+
+Historical S2.2 verification: 695 Python tests and 4,962 native tests passed,
 zero failed and 70 skipped. All 27 new workspace/boundary/controller tests passed.
 The final controller-focused run passed 11 tests. Broader targeted runs recorded
 211 passed/3 skipped, storage 71 passed, and deletion/recovery 38 passed.

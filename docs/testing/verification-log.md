@@ -25,6 +25,17 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — S3 creator JSON mode and native preset controls
+
+- Scope: OpenAI-compatible JSON mode selection, native template presets, six-language strings, typed controller validation and offscreen tests; S4 remains closed.
+- Baseline: local feat/ai-creator at 6b2350d8, initially clean. No push or app installation.
+- Targeted: python3 scripts/test.py --only CreatorControlsTests --only CreatorModelSettingsTests --only CreatorPanelTests --only CreatorWorkspaceTests recorded 26 passed/1 fixture failure; after supplying the fake library snapshot, --only CreatorControlsTests passed 3/3. The full gate covers all 27 cases.
+- python3 scripts/test.py: one final routine run, exit 0; 708 Python passed; native 5,000 passed, 0 failed, 72 skipped, 128s; two runtime warnings.
+- Skips: 62 media/device, 3 Steam network, 1 reference, 3 S0 unrestricted, 3 Creator live/benchmark/soak. Real model and device opt-ins were removed from the runner environment.
+- Additional checks: localization 17/17, document links 11/11, git diff --check; handbook command syntax and all 66 checklist rows/AC coverage checked.
+- Initial build prerequisite: installed Metal toolchain was hidden by a stale xcrun path cache; xcrun --kill-cache restored compiler lookup. No component download.
+- No personal Keychain, visible windows, installed-app quit/launch, desktop application, display/sleep changes or network API calls. Release build is requested after this local commit; real S3 visual/device acceptance remains pending.
+
 ## 2026-11-11 — Creator S2.3 final acceptance closeout
 
 S2.3 final closeout; durable evidence: [acceptance](../features/creator-acceptance.md) and [redacted metrics](creator-s23-results.json).
@@ -139,16 +150,3 @@ S1.1 settings/profile metadata supplement; details and limits are in [creator re
 - Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference rendering job. Runtime main-thread warnings: AppUpdate unsigned-copy check, VideoFormatSupport changed-file cache check, WebMOpening VP9 opening check; all passed, production code untouched.
 - `python3 scripts/tests/test_doc_links.py`: 11 passed. Documentation/mirror/frozen-source checks: 36 passed. `git diff --check`: passed. 02/03/05 and their output copies are synchronized.
 - No external model/Keychain access, desktop/UI run, Release build or install. S1.1 recovery is a service API; Creator settings/history backup/move integration, v2 poster generation/publication and S4 isolation remain future work.
-
-## 2026-11-10 — Creator S1.1 immutable revision storage
-
-S1.1 adds immutable creator revision storage, content-bound structural reports, job cancellation/recovery and strict package routing. No UI, model API, cover capture or desktop changes.
-
-- Safety baseline: local `feat/ai-creator` commit `e3a190c613ce2a95cff2816876b1c94319415f3f`; S1.1 remains uncommitted; no push.
-- `python3 scripts/test.py --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests` — exit 0; 214 passed, 0 failed, 3 known S0 probe skips.
-- `python3 scripts/test.py` — one final full run, exit 0; Python 687 passed (32 modules); native 4,794 passed, 0 failed, 69 skipped of 4,863. All 27 new cases passed.
-- Skips: 3 unresolved S0 unrestricted-source probes, 62 opt-in media/device cases, 3 live Steam cases, 1 reference-render case.
-- Two existing main-thread runtime warnings: `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()` and `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`; source locations absent.
-- Legacy generators and golden digest assertions are unchanged. Tests use temporary stores, synthetic JPEGs and an unattached WKWebView; no visible window or desktop capture.
-- Structural reports explicitly leave runtime/poster capture unchecked; v2 publication, model transport, UI and S4 remain pending. Creator history is not yet in backup/storage-move transactions.
-- Rust/renderer checks and Release build not run: no changes in those domains and no application delivery requested. No install, push or wallpaper activation.

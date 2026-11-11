@@ -4,7 +4,7 @@ struct CreatorSettingsSection: View {
     private static let connections = SettingsItem.Group("connections", title: "Model connections")
     static let profiles = SettingsItem(id: "models.profiles", section: .models, group: connections,
         title: "Provider profiles", note: "Keys are stored separately in Keychain. Changing a connection requires a new key approval.",
-        keywords: ["API key", "Endpoint", "Model", "Request budget", "Token budget", "Test connection"])
+        keywords: ["API key", "Endpoint", "Model", "JSON output mode", "Request budget", "Token budget", "Test connection"])
     static let items = [profiles]
     @Environment(PanelController.self) private var controller
     @State private var draft = ProviderProfile(name: "", protocolKind: .openaiCompatible, baseURL: "", model: "")
@@ -72,6 +72,23 @@ struct CreatorSettingsSection: View {
                 Text(verbatim: "Anthropic Messages").tag(ProviderProfile.ProtocolKind.anthropicMessages)
                 Text(verbatim: "Gemini GenerateContent").tag(ProviderProfile.ProtocolKind.geminiGenerateContent)
             }.accessibilityIdentifier("creator-profile-protocol")
+            if draft.protocolKind == .openaiCompatible {
+                Picker("JSON output mode", selection: Binding(
+                    get: { draft.capabilities.jsonMode ?? .automatic },
+                    set: { draft.capabilities.jsonMode = $0 }
+                )) {
+                    Text("Automatic (with fallback)").tag(ProviderProfile.Capabilities.JSONMode.automatic)
+                    Text("JSON Schema (strict)").tag(ProviderProfile.Capabilities.JSONMode.schema)
+                    Text("JSON object (required)").tag(ProviderProfile.Capabilities.JSONMode.required)
+                    Text("Prompt only").tag(ProviderProfile.Capabilities.JSONMode.disabled)
+                }.accessibilityIdentifier("creator-json-mode")
+            } else if draft.protocolKind == .geminiGenerateContent {
+                Text("Gemini uses its native JSON response format.").font(.caption).foregroundStyle(.secondary)
+                    .accessibilityIdentifier("creator-json-mode-native")
+            } else {
+                Text("Anthropic uses the prompt's JSON contract.").font(.caption).foregroundStyle(.secondary)
+                    .accessibilityIdentifier("creator-json-mode-native")
+            }
             TextField("Endpoint", text: $draft.baseURL).accessibilityIdentifier("creator-profile-endpoint")
             TextField("Model", text: $draft.model).accessibilityIdentifier("creator-profile-model")
             if draft.protocolKind == .openaiCompatible {

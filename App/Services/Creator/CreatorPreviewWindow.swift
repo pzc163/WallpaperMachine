@@ -16,6 +16,11 @@ final class CreatorPreviewWindow: NSObject, NSWindowDelegate {
     @ObservationIgnored private var timeout: Task<Void, Never>?
     var contentView: NSView? { surface?.view }
 
+    init(surface: WebWallpaperPreviewSurface? = nil) {
+        self.surface = surface
+        super.init()
+    }
+
     func open(project: UUID, revision: UUID, store: CreatorRevisionStore, controller: PanelController) async throws {
         close()
         let (_, surface) = try await CreatorPreview.make(projectID: project, revisionID: revision, store: store)

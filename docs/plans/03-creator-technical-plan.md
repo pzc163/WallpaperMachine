@@ -640,6 +640,8 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 
 实现、测试命令和未验证范围见 [creator-workspace.md](../features/creator-workspace.md)。S0/S1.0 三文件黄金字节、四文件摘要及自由代码关口均不放宽。
 
+S3 控件补充：设置中的 JSON 模式选择器只对 OpenAI-compatible 写入既有 `capabilities.jsonMode`，缺省值只按 `automatic` 显示；Gemini/Anthropic 展示各自合同，不写入不适用能力。保存仍复用 SettingsStore 的代次轮换、旧请求取消和凭据绑定。检查器预设从当前 `Definition.presets` 取完整参数，控制器检查模板身份、忙碌/取消状态并统一校验后批量更新预览；不写修订、不发布。必须走原有“验证修改”生成新修订、运行检查与封面流程。
+
 ## 22. S2.3 无界面验收、基准与长稳实施合同
 
 1. `CreatorStartupRecovery` 在 BridgeStore 的引擎 bootstrap 前恢复；`CreatorRecoveryCoordinator` 合并并发恢复。

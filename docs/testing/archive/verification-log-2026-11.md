@@ -9,6 +9,19 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-10 — Creator S1.1 immutable revision storage
+
+S1.1 adds immutable creator revision storage, content-bound structural reports, job cancellation/recovery and strict package routing. No UI, model API, cover capture or desktop changes.
+
+- Safety baseline: local `feat/ai-creator` commit `e3a190c613ce2a95cff2816876b1c94319415f3f`; S1.1 remains uncommitted; no push.
+- `python3 scripts/test.py --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests` — exit 0; 214 passed, 0 failed, 3 known S0 probe skips.
+- `python3 scripts/test.py` — one final full run, exit 0; Python 687 passed (32 modules); native 4,794 passed, 0 failed, 69 skipped of 4,863. All 27 new cases passed.
+- Skips: 3 unresolved S0 unrestricted-source probes, 62 opt-in media/device cases, 3 live Steam cases, 1 reference-render case.
+- Two existing main-thread runtime warnings: `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()` and `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`; source locations absent.
+- Legacy generators and golden digest assertions are unchanged. Tests use temporary stores, synthetic JPEGs and an unattached WKWebView; no visible window or desktop capture.
+- Structural reports explicitly leave runtime/poster capture unchecked; v2 publication, model transport, UI and S4 remain pending. Creator history is not yet in backup/storage-move transactions.
+- Rust/renderer checks and Release build not run: no changes in those domains and no application delivery requested. No install, push or wallpaper activation.
+
 ## 2026-11-10 — Creator S1.0 parameterized templates
 
 S1.0 adds native-owned parameterized templates on the existing S0 host; no model API or desktop activation.

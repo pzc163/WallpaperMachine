@@ -96,9 +96,20 @@ extension PanelController {
         }
     }
     func setCreatorParameter(_ id: String, value: CreatorTemplateCatalog.Value) throws {
-        guard !creator.isBusy, let template = creator.detail?.specification?.templateID else { throw CreatorGenerationFailure.invalidRequest }
+        guard let template = creator.detail?.specification?.templateID else { throw CreatorGenerationFailure.invalidRequest }
         var values = creator.parameters; values[id] = value
-        try CreatorTemplateCatalog.definition(template).validate(values)
+        try setCreatorParameters(values, templateID: template)
+    }
+    func applyCreatorPreset(_ id: String, templateID: String) throws {
+        guard let preset = try CreatorTemplateCatalog.definition(templateID).presets.first(where: { $0.id == id }) else {
+            throw CreatorGenerationFailure.invalidRequest
+        }
+        try setCreatorParameters(preset.parameters, templateID: templateID)
+    }
+    private func setCreatorParameters(_ values: [String: CreatorTemplateCatalog.Value], templateID: String) throws {
+        try Task.checkCancellation()
+        guard !creator.isBusy, creator.detail?.specification?.templateID == templateID else { throw CreatorGenerationFailure.invalidRequest }
+        try CreatorTemplateCatalog.definition(templateID).validate(values)
         creator.parameters = values
         try creator.preview?.properties(values)
     }

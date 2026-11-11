@@ -32,6 +32,21 @@ struct CreatorInspector: View {
                            let definition = try? CreatorTemplateCatalog.definition(template) {
                             Divider()
                             Text("Template properties").font(.system(size: 13, weight: .semibold))
+                            Menu("Presets") {
+                                ForEach(definition.presets, id: \.id) { preset in
+                                    Button {
+                                        controller.launch(PanelActionCoordinator.key("creator.parameters"), policy: .latestWins) {
+                                            try controller.applyCreatorPreset(preset.id, templateID: definition.id)
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(verbatim: PanelLocale.shared.catalogString(preset.label))
+                                            if model.parameters == preset.parameters { Image(systemName: "checkmark") }
+                                        }
+                                    }.accessibilityIdentifier("creator-preset-" + preset.id)
+                                }
+                            }.disabled(model.isBusy).accessibilityIdentifier("creator-presets")
+                            Text("Presets replace all parameters. Validate changes before saving.").font(.caption).foregroundStyle(.secondary)
                             ForEach(definition.parameters, id: \.id) { parameter in CreatorParameterControl(parameter: parameter) }
                             Button("Validate changes") { controller.launch { try await controller.validateCreatorParameters() } }
                                 .disabled(!model.hasParameterChanges || model.isBusy).accessibilityIdentifier("creator-validate-parameters")
@@ -84,6 +99,6 @@ private struct CreatorParameterControl: View {
          .accessibilityLabel(Text(verbatim: PanelLocale.shared.catalogString(parameter.label))).accessibilityIdentifier("creator-parameter-" + parameter.id)
     }
     private func set(_ value: CreatorTemplateCatalog.Value) {
-        controller.launch(PanelActionCoordinator.key("creator.parameter", id: parameter.id), policy: .latestWins) { try controller.setCreatorParameter(parameter.id, value: value) }
+        controller.launch(PanelActionCoordinator.key("creator.parameters"), policy: .latestWins) { try controller.setCreatorParameter(parameter.id, value: value) }
     }
 }
