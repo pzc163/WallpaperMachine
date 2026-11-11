@@ -70,6 +70,7 @@ actor WallpaperImportService {
 
     func importItems(
         _ sources: [URL], into library: URL, duplicates: DuplicatePolicy,
+        creatorPermit: CreatorRuntimeRegistry.Binding? = nil,
         progress: @Sendable (String) async -> Void
     ) async throws -> Report {
         let fm = FileManager.default
@@ -107,7 +108,7 @@ actor WallpaperImportService {
                     await progress(String(localized: "Importing \(name)…"))
                     do {
                         try await importCandidate(candidate, into: managed, staging: staging,
-                                                  duplicates: duplicates, report: &report)
+                                                  duplicates: duplicates, creatorPermit: creatorPermit, report: &report)
                     } catch is CancellationError {
                         throw CancellationError()
                     } catch {
@@ -135,7 +136,8 @@ actor WallpaperImportService {
     /// Imports one candidate into `library`, recording the outcome in `report`. Throws what stops
     /// this candidate; the caller turns that into a failure line and carries on.
     private func importCandidate(
-        _ candidate: URL, into library: URL, staging: URL, duplicates: DuplicatePolicy, report: inout Report
+        _ candidate: URL, into library: URL, staging: URL, duplicates: DuplicatePolicy,
+        creatorPermit: CreatorRuntimeRegistry.Binding? = nil, report: inout Report
     ) async throws {
         let fm = FileManager.default
         let name = candidate.lastPathComponent
@@ -145,6 +147,14 @@ actor WallpaperImportService {
         }
 
         let isDirectory = try downloadMetadata(at: candidate).st_mode & S_IFMT == S_IFDIR
+        let creator: CreatorDraftStore.Snapshot?
+        if isDirectory, CreatorRuntimeRegistry.isCandidate(candidate) {
+            creator = try CreatorDraftStore.read(candidate)
+            if let creator, creator.bundleVersion == 2 {
+                guard let creatorPermit else { throw CreatorPersistence.Failure.incompleteBundle }
+                try CreatorRuntimeRegistry.validateBinding(creatorPermit, snapshot: creator)
+            }
+        } else { creator = nil }
         let ext = candidate.pathExtension.lowercased()
         let kind: CandidateKind
         var id = name
@@ -222,6 +232,10 @@ actor WallpaperImportService {
         }
 
         try validateProject(at: built)
+        if let creator {
+            guard id == creator.wallpaperID else { throw CreatorTemplate.Failure.invalidPath }
+            _ = try CreatorBundleManifest.read(built, scopedRevision: true, expectedDigest: creator.digest)
+        }
         try Task.checkCancellation()
         if replacing {
             try requireInstalledProject(destination)

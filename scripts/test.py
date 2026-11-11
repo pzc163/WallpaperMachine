@@ -18,6 +18,14 @@ Opt-in layers are off by default and are requested through the environment:
 `WALLPAPER_MACHINE_NETWORK_TESTS=1` (live Steam pages and temporary native SteamCMD install).
 `WALLPAPER_MACHINE_WEB_REFERENCE=<job file>` is not a layer of checks but the web page
 renderer of `scripts/we_reference.py render`, which sets it.
+Creator live model smoke additionally requires `TEST_RUNNER_CREATOR_LIVE_LLM=1`
+and `--only CreatorLiveSmokeTests`; see docs/features/creator-publication.md.
+The runner removes API keys before launching children and uses a one-shot memory
+handoff. A full gate cannot opt into the creator live request.
+S2.3 benchmark (TEST_RUNNER_CREATOR_BENCHMARK=1) and long soak
+(TEST_RUNNER_CREATOR_SOAK=1) require their dedicated suites; see
+docs/features/creator-acceptance.md. They run serially with explicit time limits
+and export JSON attachments beside the result bundle.
 """
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -28,6 +36,8 @@ import subprocess
 import sys
 
 from lib.glyphs import markers
+from lib.creator_live_smoke import ConfigurationError, LiveSmoke
+from lib import creator_acceptance
 from lib.paths import BUILD, ROOT, TEST_ARTIFACTS, XCODEPROJ
 from lib.xcode import run_quiet, test_summary
 
@@ -41,6 +51,7 @@ UI_TARGET = "WallpaperMachineUITests"
 # which is what makes these reach the tests that gate themselves on them.
 OPT_IN_VARIABLES = (
     "WALLPAPER_MACHINE_MEDIA_TESTS", "WALLPAPER_MACHINE_NETWORK_TESTS", "WALLPAPER_MACHINE_WEB_REFERENCE",
+    "CREATOR_BENCHMARK_ALLOWANCE", "CREATOR_LIVE_TIMEOUT",
 )
 
 # Xcode's thread performance checker runs inside the test host, and its report of a
@@ -78,7 +89,7 @@ def test_host_environment(environ):
     return env
 
 
-def xcodebuild_command(scheme, target, result, only=None, parallel=True):
+def xcodebuild_command(scheme, target, result, only=None, parallel=True, creator_allowance=None):
     command = [
         "xcodebuild", "-project", XCODEPROJ.name,
         "-scheme", scheme, "-configuration", "Debug", "-derivedDataPath", str(BUILD),
@@ -98,6 +109,11 @@ def xcodebuild_command(scheme, target, result, only=None, parallel=True):
     # shot after opening it (tens of seconds), one wallpaper after another.
     if os.environ.get("WALLPAPER_MACHINE_WEB_REFERENCE"):
         allowance = "3600"
+    if creator_allowance is not None:
+        allowance = str(creator_allowance)
+        # A raised maximum alone leaves XCTest's 600-second default in place.
+        # Each live test also sets its own preferred allowance before doing work.
+        command += ["-default-test-execution-time-allowance", allowance]
     command += ["-maximum-test-execution-time-allowance", allowance, "-test-timeouts-enabled", "YES", "test"]
     return command
 
@@ -156,6 +172,11 @@ def main():
         help="Echo the whole xcodebuild stream instead of only failures; the log gets it either way.",
     )
     args = parser.parse_args()
+    try:
+        live = LiveSmoke(os.environ, only=args.only, ui=args.ui, python_only=args.python_only)
+        creator_allowance = creator_acceptance.allowance(os.environ, args.only, ui=args.ui, python_only=args.python_only)
+    except ConfigurationError as error:
+        parser.error(str(error))
     if args.python_only:
         if args.ui or args.only:
             parser.error("--python-only runs no native tests; drop --ui and --only")
@@ -177,18 +198,23 @@ def main():
     prefix = "UI-" if args.ui else "Tests-"
     result = TEST_ARTIFACTS / (prefix + datetime.now().strftime("%Y%m%d-%H%M%S-%f") + ".xcresult")
     # UI tests drive one desktop and cannot share it with a second worker.
-    command = xcodebuild_command(scheme, target, result, args.only, parallel=not (args.serial or args.ui))
-    env = test_host_environment(os.environ)
-    completed, log = run_quiet(command, result.with_suffix(".log"), cwd=ROOT, env=env, verbose=args.verbose)
+    command = xcodebuild_command(scheme, target, result, args.only,
+        parallel=not (args.serial or args.ui or live.enabled or creator_allowance), creator_allowance=creator_allowance)
+    with live as environment:
+        env = test_host_environment(environment)
+        completed, log = run_quiet(command, result.with_suffix(".log"), cwd=ROOT, env=env, verbose=args.verbose)
     failed = None
     if (result / "Info.plist").exists():
         lines, failed = test_summary(result, cwd=ROOT)
         for line in lines:
             print(line, flush=True)
-    status = MARK.ok if completed.returncode == 0 and not failed else MARK.missing
+    export_status = 0
+    if creator_allowance is not None and (result / "Info.plist").exists():
+        export_status = creator_acceptance.export_reports(result, cwd=ROOT)
+    status = MARK.ok if completed.returncode == 0 and not failed and not export_status else MARK.missing
     print(f"{status} Test evidence: {result} (log: {log.name})", flush=True)
     prune_result_bundles()
-    return completed.returncode
+    return completed.returncode or export_status
 
 
 if __name__ == "__main__":

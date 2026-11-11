@@ -163,9 +163,16 @@ final class BridgeStore {
         }
     }
 
+    /// Runs before the bridge can restore saved playback, including menu-bar-only launches.
+    @ObservationIgnored var recoverCreator: @Sendable () async throws -> Void = {
+        try await CreatorStartupRecovery().recover()
+    }
+
     func bootstrapAsync() async throws {
         libraryLoadState = .loading
         do {
+            try await recoverCreator()
+            try Task.checkCancellation()
             let bundle = try await bridge.bootstrap()
             apply(bundle)
             libraryLoadState = .loaded

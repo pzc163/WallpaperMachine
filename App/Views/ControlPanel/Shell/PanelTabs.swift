@@ -13,7 +13,7 @@ struct PanelTabs: View {
   @Environment(PanelController.self) private var controller
 
   /// The tabs in order.
-  static let pages: [SidebarSelection] = [.wallpaper, .workshop, .pixiv, .settings]
+  static let pages: [SidebarSelection] = [.wallpaper, .creator, .workshop, .pixiv, .settings]
 
   var body: some View {
     let shell = controller.shell
@@ -51,6 +51,7 @@ struct PanelTabs: View {
   static func name(of page: SidebarSelection) -> String {
     switch page {
     case .wallpaper: L("Library")
+    case .creator: L("AI Creator")
     case .workshop: L("Steam Workshop")
     // A proper noun: never translated.
     case .pixiv: "pixiv"
@@ -61,6 +62,7 @@ struct PanelTabs: View {
   static func symbol(of page: SidebarSelection) -> String {
     switch page {
     case .wallpaper: "square.grid.2x2"
+    case .creator: "sparkles"
     case .workshop: "storefront"
     case .pixiv: "paintpalette"
     case .settings: "gearshape"
@@ -70,6 +72,7 @@ struct PanelTabs: View {
   static func identifier(of page: SidebarSelection) -> String {
     switch page {
     case .wallpaper: "library"
+    case .creator: "creator"
     case .workshop: "workshop"
     case .pixiv: "pixiv"
     case .settings: "settings"

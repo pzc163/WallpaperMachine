@@ -29,6 +29,11 @@ INTERESTING = tuple(re.compile(pattern) for pattern in (
     r"^error: ",
     r"^fatal error: ",
     r"^Error: ",
+    # Only the closed, nonsecret benchmark progress grammar reaches a quiet terminal.
+    r"^Creator benchmark (?:[1-9]|[12][0-9]|30)/30 round=[1-3] passed=(?:true|false) "
+    r"attemptCount=[0-3] elapsedSeconds=[0-9]+\.[0-9]{3} "
+    r"failure=(?:none|malformedOutput|policyViolation|timeout|network|rateLimited|server|runtime|jsonModeUnsupported|"
+    r"unauthorized|refused|cancelled|interrupted|staleInput|budgetExhausted|storage|invalidRequest)$",
     r"^The following build commands failed:",
     r"^Command \S+ failed with a nonzero exit code",
     r"^\s*(?:\S+\.swift:\d+: error: |XCTAssert|Executed \d+ tests?, with \d+ failures? \(\d+ unexpected\))",

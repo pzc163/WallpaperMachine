@@ -71,6 +71,7 @@ struct PanelDetail: View {
     case .workshop: WorkshopBrowserPage()
     case .pixiv: PixivBrowserPage()
     case .wallpaper: InstalledPage()
+    case .creator: CreatorPage()
     }
   }
 
@@ -81,6 +82,7 @@ struct PanelDetail: View {
     case .workshop: WorkshopInspector()
     case .pixiv: PixivInspector()
     case .wallpaper: InstalledInspector()
+    case .creator: CreatorInspector()
     }
   }
 }

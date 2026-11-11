@@ -1,0 +1,25 @@
+// @pass BufferA
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;mat2 r=mat2(.8,-.6,.6,.8);for(int i=0;i<5;i++){v+=a*noise(p);p=r*p*2.03+13.7;a*=.5;}return v;}
+vec2 velocity(vec2 uv){return (texture(iChannel0,clamp(uv,vec2(.002),vec2(.998))).rg-.5)*.5;}
+void mainImage(out vec4 color,in vec2 pixel){vec2 uv=pixel/iResolution.xy,aspect=vec2(iResolution.x/iResolution.y,1.);float dt=max(.008,min(iTimeDelta,.05))*p_speed;
+ vec2 q=uv*aspect*3.;float n=fbm(q+vec2(iTime*.04,0));vec2 curl=vec2(fbm(q+vec2(0,.03))-n,n-fbm(q+vec2(.03,0)))/.03;
+ vec2 v=velocity(uv),advected=uv-v*dt;vec4 state=texture(iChannel0,clamp(advected,vec2(.001),vec2(.999)));
+ vec2 px=1./iResolution.xy;vec2 average=(velocity(uv+vec2(px.x,0))+velocity(uv-vec2(px.x,0))+velocity(uv+vec2(0,px.y))+velocity(uv-vec2(0,px.y)))*.25;
+ v=mix((state.rg-.5)*.5,average,.12)+curl*dt*.018*p_swirl;
+ vec2 mouse=vec2(iCursor.x,1.-iCursor.y),delta=(uv-mouse)*aspect;float brush=exp(-dot(delta,delta)/(p_brush*p_brush));
+ v+=vec2(iCursor.z,-iCursor.w)*brush*iActive*dt*.32;v+=vec2(-delta.y,delta.x)*brush*iActive*dt*.9;
+ v*=exp(-dt*.5);v=clamp(v,vec2(-.18),vec2(.18));
+ float seed=pow(max(0.,1.-abs(fbm(q+vec2(fbm(q*1.8),fbm(q*1.8+6.)))*2.-1.)),5.);
+ float density=state.b*exp(-dt*p_dissipation)+brush*iActive*dt*1.8+seed*dt*.045;
+ float pigment=mix(state.a,.5+.45*sin(iTime*.23+q.x),brush*iActive*dt*1.4);
+ if(iFrame==0){density=seed*.65;pigment=fbm(q*.7+22.);v=curl*.014;}
+ color=vec4(.5+v*2.,clamp(density,0.,1.),clamp(pigment,0.,1.));}
+
+// @pass Image
+void mainImage(out vec4 color,in vec2 pixel){vec2 uv=pixel/iResolution.xy,px=1./iResolution.xy;vec4 s=texture(iChannel0,uv);
+ float d=s.b,edge=abs(texture(iChannel0,uv+vec2(px.x*2.,0)).b-d)+abs(texture(iChannel0,uv+vec2(0,px.y*2.)).b-d);
+ float ribbon=pow(max(d,0.),1.7);vec3 pigment=mix(p_violet,p_gold,smoothstep(.26,.8,s.a+edge*3.));
+ vec3 c=pigment*(ribbon*1.35+edge*9.)*p_glow;float vignette=pow(max(0.,16.*uv.x*uv.y*(1.-uv.x)*(1.-uv.y)),.35);
+ c*=vignette;c+=vec3(.002,.001,.004);color=vec4(c,1.);}

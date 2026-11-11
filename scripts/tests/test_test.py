@@ -44,6 +44,20 @@ class TestXcodebuildCommand(unittest.TestCase):
     def test_targeted_run_lists_each_entry(self):
         self.assertEqual(self.only_testing(["A", "B/testX"]), ["-only-testing:T/A", "-only-testing:T/B/testX"])
 
+    def test_creator_opt_in_sets_default_and_maximum_without_changing_routine_gate(self):
+        for seconds in [6000, 7260, 87000]:
+            command = runner.xcodebuild_command("S", "T", Path("/tmp/r.xcresult"), creator_allowance=seconds)
+            for flag in ["-default-test-execution-time-allowance", "-maximum-test-execution-time-allowance"]:
+                self.assertEqual(command[command.index(flag) + 1], str(seconds))
+            self.assertEqual(command[command.index("-test-timeouts-enabled") + 1], "YES")
+        self.assertNotIn("-default-test-execution-time-allowance", runner.xcodebuild_command("S", "T", Path("/tmp/r.xcresult")))
+
+    def test_creator_timing_environment_reaches_test_host(self):
+        for name, value in [("CREATOR_BENCHMARK_ALLOWANCE", "7200"), ("CREATOR_LIVE_TIMEOUT", "600")]:
+            for prefix in ["", "TEST_RUNNER_"]:
+                env = runner.test_host_environment({prefix + name: value})
+                self.assertEqual(env["TEST_RUNNER_" + name], value)
+
     def test_action_stays_last(self):
         self.assertEqual(runner.xcodebuild_command("S", "T", Path("/tmp/r.xcresult"), ["A"])[-1], "test")
 
@@ -155,7 +169,8 @@ class OptInVariables(unittest.TestCase):
     def test_the_opt_in_layers_and_the_web_reference_job_are_forwarded(self):
         self.assertEqual(
             set(runner.OPT_IN_VARIABLES),
-            {"WALLPAPER_MACHINE_MEDIA_TESTS", "WALLPAPER_MACHINE_NETWORK_TESTS", "WALLPAPER_MACHINE_WEB_REFERENCE"},
+            {"WALLPAPER_MACHINE_MEDIA_TESTS", "WALLPAPER_MACHINE_NETWORK_TESTS", "WALLPAPER_MACHINE_WEB_REFERENCE",
+             "CREATOR_BENCHMARK_ALLOWANCE", "CREATOR_LIVE_TIMEOUT"},
         )
 
     def test_a_set_layer_reaches_the_test_host_and_an_unset_one_does_not(self):

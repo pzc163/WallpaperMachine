@@ -1,0 +1,10 @@
+float hash(vec3 p){p=fract(p*.3183099+.1);p*=17.;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float noise(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);}
+float fbm(vec3 p){float v=0.,a=.53;for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.02+vec3(7.3,1.7,9.2);a*=.48;}return v;}
+float density(vec3 p){p.xz+=vec2(iTime*.055*p_speed,0);float mass=fbm(vec3(p.x*.22,0.,p.z*.22));float top=mass*4.2-.65+p_coverage*.8;float billow=noise(p*.85)*.55+noise(p*2.4)*.15;float body=(top-p.y)-billow;return clamp(body*1.6,0.,1.)*smoothstep(-1.4,-.7,p.y)*p_density;}
+void mainImage(out vec4 color,in vec2 pixel){vec2 uv=(pixel-.5*iResolution.xy)/iResolution.y;vec3 ro=vec3(iCursor.x*.6,4.3+p_height,7.);vec3 rd=normalize(vec3(uv.x*.95,uv.y*.88-.24,-1.));vec3 sun=normalize(vec3(-.36,.18,-.9));
+ float horizon=exp(-abs(rd.y)*5.);vec3 sky=mix(p_zenith,p_horizon,horizon);float sundot=max(dot(rd,sun),0.);sky+=vec3(1.,.55,.22)*(pow(sundot,90.)*.7+pow(sundot,1200.)*4.);
+ vec3 light=vec3(0);float trans=1.,distance=0.8;for(int i=0;i<72;i++){vec3 pos=ro+rd*distance;float d=density(pos);float stepLength=.25+distance*.025;
+ if(d>.005){float shadow=0.;for(int j=1;j<=3;j++)shadow+=density(pos+sun*float(j)*.55)*.6;float illumination=exp(-shadow*2.2);vec3 tint=mix(vec3(.055,.09,.16),p_horizon*.85+vec3(.32),illumination);float a=1.-exp(-d*stepLength*1.4);light+=trans*a*tint;trans*=1.-a;}
+ distance+=stepLength;if(trans<.015)break;}
+ vec3 result=sky*trans+light;result+=p_horizon*pow(sundot,12.)*.1;result*=1.-.18*dot(uv,uv);color=vec4(result*p_exposure,1.);}

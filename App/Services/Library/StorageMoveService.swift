@@ -75,6 +75,8 @@ struct StorageMoveService: Sendable {
     /// Checks a move into a `WallpaperMachine` folder inside `parent`, or back into the app-support
     /// folder for nil, without changing anything.
     func plan(moveTo parent: URL?) throws -> Plan {
+        let creatorLease = try CreatorStorageBoundary.lease(support: support)
+        defer { withExtendedLifetime(creatorLease) {} }
         let resolution = StorageLocation.resolve(support: support)
         let source: URL
         switch resolution {
@@ -82,6 +84,7 @@ struct StorageMoveService: Sendable {
         case .chosen(let url): source = url
         case .unavailable: throw StorageMoveError(String(localized: "The current wallpaper library is not available, so it cannot be moved."))
         }
+        try CreatorStorageBoundary.requirePortable(support: support, storage: source)
         guard pending == nil else {
             throw StorageMoveError(String(localized: "A move is already waiting for the next launch. Cancel it before choosing another folder."))
         }
@@ -165,6 +168,9 @@ struct StorageMoveService: Sendable {
     /// records the move for the next launch. Cancelling removes what it copied. `progress` gets the
     /// bytes copied so far.
     func prepare(_ plan: Plan, progress: @escaping @Sendable (Int64) -> Void = { _ in }) throws {
+        let creatorLease = try CreatorStorageBoundary.lease(support: support)
+        defer { withExtendedLifetime(creatorLease) {} }
+        try CreatorStorageBoundary.requirePortable(support: support, storage: plan.source)
         guard pending == nil else {
             throw StorageMoveError(String(localized: "A move is already waiting for the next launch. Cancel it before choosing another folder."))
         }
@@ -241,7 +247,10 @@ struct StorageMoveService: Sendable {
     }
 
     private func finish(_ pending: Pending) throws {
+        let creatorLease = try CreatorStorageBoundary.lease(support: support)
+        defer { withExtendedLifetime(creatorLease) {} }
         let source = URL(fileURLWithPath: pending.source, isDirectory: true)
+        try CreatorStorageBoundary.requirePortable(support: support, storage: source)
         let root = pending.target?.url ?? support
         let current: URL? = switch StorageLocation.resolve(support: support) {
         case .support: support

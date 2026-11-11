@@ -33,8 +33,14 @@ live under `testing/`.
 
 | Document | Purpose |
 |---|---|
+| [plans/02-creator-prd.md](plans/02-creator-prd.md) | Creator product requirements and acceptance criteria (02) |
+| [plans/03-creator-technical-plan.md](plans/03-creator-technical-plan.md) | Creator architecture, contracts, stages and implemented storage boundaries (03) |
+| [plans/2026-11-10-creator-s0.md](plans/2026-11-10-creator-s0.md) | Creator S0 implementation scope, steps and verification gates |
+| [plans/2026-11-10-creator-s1-s4.md](plans/2026-11-10-creator-s1-s4.md) | Creator template parameters, native covers, staged model contracts and gates for unrestricted source |
+| [plans/2026-11-11-creator-s3-s4-upgrade.md](plans/2026-11-11-creator-s3-s4-upgrade.md) | Shared output negotiation, LAN model access, versioned WebGL templates and independently verified free-code execution |
 | [conventions.md](conventions.md) | Code, test, documentation, commit and pull-request rules |
 | [release.md](release.md) | Versioning, release specs, notes generation, CI pipeline, in-app updater contract |
+| [plans/2026-11-11-creator-macos15.md](plans/2026-11-11-creator-macos15.md) | macOS 15 arm64 ad-hoc acceptance build, dependency audit and isolated pre-release delivery |
 | [../CHANGELOG.md](../CHANGELOG.md) | Published versions, newest first; written by `scripts/release_notes.py` |
 | [development-tools.md](development-tools.md) | Optional diagnostic tools (Peekaboo, Instruments, `xctrace`), the safe setup check, and when a desktop run needs authorization |
 | [../AGENTS.md](../AGENTS.md) / [../CLAUDE.md](../CLAUDE.md) | Agent rules; CLAUDE.md is a symlink, not a separate policy |
@@ -52,6 +58,8 @@ live under `testing/`.
 | [testing/runtime-regressions.md](testing/runtime-regressions.md) | Regressions that must stay covered at runtime: native Metal, video, continuous playback, frame pacing, audio, host and display, startup |
 | [testing/manual-smoke.md](testing/manual-smoke.md) | Manual release smoke checklist |
 | [testing/power-benchmark.md](testing/power-benchmark.md) | Configuration manifest, per-process CPU/GPU, whole-machine and package-power measurement, the headless A/B driver (`scripts/perf_bench.py`), runtime counters, condition matrix and comparison rules for power claims |
+| [testing/creator-s23-results.json](testing/creator-s23-results.json) | Redacted S2.3 live benchmark, 30-minute offscreen soak and final routine gate aggregates |
+| [testing/creator-macos15-results.json](testing/creator-macos15-results.json) | macOS 15 ad-hoc package checksum, dependency provenance, binary minimums and verification limits |
 | [testing/verification-log.md](testing/verification-log.md) | Dated verification history, ten newest entries |
 | [testing/archive/](testing/archive/) | Retired verification-log entries, one file per month, written by `scripts/log_verification.py`; historical only |
 | [testing/wallpaper-corpus.md](testing/wallpaper-corpus.md) | Local regression corpus checklist |
@@ -73,6 +81,17 @@ file; pass `rg -u` to search them deliberately.
 
 | Document | Purpose |
 |---|---|
+| [features/creator-free-code.md](features/creator-free-code.md) | S4 raw HTML contract, opaque offline host, native watchdog and cursor bridge |
+| [testing/creator-s4-public-test.md](testing/creator-s4-public-test.md) | External developer install, LAN model and hardware acceptance checklist |
+| [features/creator-acceptance.md](features/creator-acceptance.md) | S2.3 headless recovery, AC evidence matrix, opt-in model benchmark and offscreen soak |
+| [features/creator-workspace.md](features/creator-workspace.md) | S2.2 native creator page, model settings, explicit preview/save/apply actions and startup/storage boundaries |
+| [features/creator-iteration.md](features/creator-iteration.md) | S2.1 bounded parameter repair, conversation budgets, restart cleanup and explicit revision selection |
+| [features/creator-publication.md](features/creator-publication.md) | S1.4 native runtime capture, sealed revision evidence, recoverable publication and opt-in live smoke |
+| [features/creator-generation.md](features/creator-generation.md) | S1.3 catalog-derived prompts, strict parameter contracts, native compilation and atomic revision evidence |
+| [features/creator-llm.md](features/creator-llm.md) | S1.2 shared SSE transport, three protocol codecs, profile-bound credentials and offline verification |
+| [features/creator-revisions.md](features/creator-revisions.md) | S1.1 immutable revision storage, content-bound evidence, cancellation, recovery and policy routing |
+| [features/creator-templates.md](features/creator-templates.md) | S1.0 native parameter catalog, richer Canvas2D templates, bounded rendering and legacy compatibility |
+| [features/creator-s0.md](features/creator-s0.md) | Local creator prototype: trusted templates, draft preview, restricted resources, library import and recovery |
 | [features/control-panel.md](features/control-panel.md) | The native window: language, tabs, toolbar, grid and inspector, pages and Settings, selection versus apply, Now Playing, target display, filtering and local collections, recently used, deleting, downloads and import |
 | [features/first-run.md](features/first-run.md) | The first-run guide over the window, the one-time support prompt after the first downloaded wallpaper, the later star prompt, the performance data question, the battery question, the subscriptions offer and the Discord invitation |
 | [features/wallpaper-properties.md](features/wallpaper-properties.md) | Inspector properties, live preview, property presets, image placement, the compatibility check and the black-bar check |
@@ -98,6 +117,13 @@ file; pass `rg -u` to search them deliberately.
 | [features/crash-recovery.md](features/crash-recovery.md) | The load journal (a wallpaper that was being opened when the app died twice in a row is held back at launch, how strikes, the settle window and release by Apply, the panel's Try again or an update work, the banner and menu line), SIGTERM and SIGHUP as a quit, broken pipes, the one-copy-per-library lock and what a second launch does, and the limits |
 | [features/telemetry.md](features/telemetry.md) | Send performance data: what a report holds (no free text, Workshop ids only), the daily upload, 60 s frame windows and their cost, local files, deletion when turned off, and the website endpoint |
 | [features/diagnostics.md](features/diagnostics.md) | Application log format, load tagging and the line each wallpaper activation leaves, detailed logging, retention, how the log says the previous session ended, and the diagnostics report users attach to bug reports |
+
+- [Creator connection stability and workspace UX](plans/2026-11-11-creator-connection-ux.md)
+
+- [Creator LAN, native output limits and streaming artifacts](plans/2026-11-11-creator-stream-artifacts.md)
+- [Creator engine foundation](features/creator-engines.md)
+- [S5.1 engine acceptance](testing/creator-s51-acceptance.md)
+- [S5.1 engines and master gallery](plans/2026-11-11-creator-s51-engines.md)
 
 ## Maintaining these docs
 

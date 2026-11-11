@@ -1,0 +1,871 @@
+{
+  "version": 1,
+  "masters": [
+    {
+      "id": "ink",
+      "title": "Aurum Ink",
+      "engine": "shader-glsl",
+      "keywords": [
+        "水墨",
+        "流体",
+        "墨",
+        "fluid",
+        "ink"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "swirl",
+            "label": "Vorticity",
+            "type": "number",
+            "default": 1.2,
+            "min": 0.1,
+            "max": 3,
+            "step": 0.01
+          },
+          {
+            "id": "brush",
+            "label": "Brush radius",
+            "type": "number",
+            "default": 0.09,
+            "min": 0.03,
+            "max": 0.22,
+            "step": 0.01
+          },
+          {
+            "id": "dissipation",
+            "label": "Ink dissipation",
+            "type": "number",
+            "default": 0.18,
+            "min": 0.04,
+            "max": 0.8,
+            "step": 0.01
+          },
+          {
+            "id": "glow",
+            "label": "Light intensity",
+            "type": "number",
+            "default": 1.5,
+            "min": 0.3,
+            "max": 3,
+            "step": 0.01
+          },
+          {
+            "id": "violet",
+            "label": "Violet pigment",
+            "type": "color",
+            "default": "#5627b0"
+          },
+          {
+            "id": "gold",
+            "label": "Gold pigment",
+            "type": "color",
+            "default": "#c88730"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "swirl": 1.2,
+          "brush": 0.09,
+          "dissipation": 0.18,
+          "glow": 1.5,
+          "violet": "#5627b0",
+          "gold": "#c88730"
+        }
+      },
+      "file": "ink.txt",
+      "sha256": "22a8d062d451875f4ccd2aa2b1d34d5806f6e813384c42e5031df682b15d314c"
+    },
+    {
+      "id": "clouds",
+      "title": "Luminous Cloudsea",
+      "engine": "shader-glsl",
+      "keywords": [
+        "云",
+        "晨",
+        "黄昏",
+        "cloud",
+        "dawn",
+        "sunset"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "coverage",
+            "label": "Cloud coverage",
+            "type": "number",
+            "default": 0.35,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "density",
+            "label": "Cloud density",
+            "type": "number",
+            "default": 1.4,
+            "min": 0.5,
+            "max": 3,
+            "step": 0.01
+          },
+          {
+            "id": "height",
+            "label": "View height",
+            "type": "number",
+            "default": 0,
+            "min": -1,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "exposure",
+            "label": "Exposure",
+            "type": "number",
+            "default": 0.9,
+            "min": 0.4,
+            "max": 1.5,
+            "step": 0.01
+          },
+          {
+            "id": "zenith",
+            "label": "Sky zenith",
+            "type": "color",
+            "default": "#122b60"
+          },
+          {
+            "id": "horizon",
+            "label": "Horizon light",
+            "type": "color",
+            "default": "#ef9874"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "coverage": 0.35,
+          "density": 1.4,
+          "height": 0,
+          "exposure": 0.9,
+          "zenith": "#122b60",
+          "horizon": "#ef9874"
+        }
+      },
+      "file": "clouds.txt",
+      "sha256": "dcc0aa1e52bf6dc7ec9ad5275c2d6a610274c2b7804a4b1bf450dc3c65349860"
+    },
+    {
+      "id": "blackhole",
+      "title": "Event Horizon",
+      "engine": "shader-glsl",
+      "keywords": [
+        "黑洞",
+        "引力",
+        "深空",
+        "black hole",
+        "gravity",
+        "space"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "zoom",
+            "label": "Field of view",
+            "type": "number",
+            "default": 1.05,
+            "min": 0.6,
+            "max": 1.6,
+            "step": 0.01
+          },
+          {
+            "id": "gravity",
+            "label": "Gravitational bending",
+            "type": "number",
+            "default": 1.6,
+            "min": 0.4,
+            "max": 2.6,
+            "step": 0.01
+          },
+          {
+            "id": "tilt",
+            "label": "Disk inclination",
+            "type": "number",
+            "default": 0,
+            "min": -1.2,
+            "max": 1.2,
+            "step": 0.01
+          },
+          {
+            "id": "parallax",
+            "label": "Camera parallax",
+            "type": "number",
+            "default": 0.6,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "glow",
+            "label": "Light intensity",
+            "type": "number",
+            "default": 1.9,
+            "min": 0.5,
+            "max": 4,
+            "step": 0.01
+          },
+          {
+            "id": "hot",
+            "label": "Hot accretion",
+            "type": "color",
+            "default": "#ff742d"
+          },
+          {
+            "id": "cool",
+            "label": "Blue shift",
+            "type": "color",
+            "default": "#77aaff"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "zoom": 1.05,
+          "gravity": 1.6,
+          "tilt": 0,
+          "parallax": 0.6,
+          "glow": 1.9,
+          "hot": "#ff742d",
+          "cool": "#77aaff"
+        }
+      },
+      "file": "blackhole.txt",
+      "sha256": "27f5f4363c766089925b72d49956b8e4b5b8673d6d6962fe61b74c53e1c1e25b"
+    },
+    {
+      "id": "glass",
+      "title": "Prismatic Atelier",
+      "engine": "three-3d",
+      "keywords": [
+        "玻璃",
+        "折射",
+        "矩阵",
+        "glass",
+        "prism",
+        "matrix"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "parallax",
+            "label": "Camera parallax",
+            "type": "number",
+            "default": 0.35,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "bloom",
+            "label": "Bloom intensity",
+            "type": "number",
+            "default": 0.28,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "frost",
+            "label": "Frost roughness",
+            "type": "number",
+            "default": 0.12,
+            "min": 0.06,
+            "max": 0.55,
+            "step": 0.01
+          },
+          {
+            "id": "transmission",
+            "label": "Transmission",
+            "type": "number",
+            "default": 0.92,
+            "min": 0.3,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "dispersion",
+            "label": "Dispersion",
+            "type": "number",
+            "default": 0.5,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "floatAmount",
+            "label": "Floating depth",
+            "type": "number",
+            "default": 0.25,
+            "min": 0,
+            "max": 0.65,
+            "step": 0.01
+          },
+          {
+            "id": "lightPower",
+            "label": "Key light power",
+            "type": "number",
+            "default": 95,
+            "min": 20,
+            "max": 160,
+            "step": 1
+          },
+          {
+            "id": "tint",
+            "label": "Glass tint",
+            "type": "color",
+            "default": "#cbd5ee"
+          },
+          {
+            "id": "lightColor",
+            "label": "Light color",
+            "type": "color",
+            "default": "#b9c8ff"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "parallax": 0.35,
+          "bloom": 0.28,
+          "frost": 0.12,
+          "transmission": 0.92,
+          "dispersion": 0.5,
+          "floatAmount": 0.25,
+          "lightPower": 95,
+          "tint": "#cbd5ee",
+          "lightColor": "#b9c8ff"
+        }
+      },
+      "file": "glass.txt",
+      "sha256": "2868908a0dde6a8bf322aa8761a94596133c5c31ad7decb2332c50ea1365f9b2"
+    },
+    {
+      "id": "mountains",
+      "title": "Boreal Terrain",
+      "engine": "three-3d",
+      "keywords": [
+        "山",
+        "极光",
+        "地形",
+        "mountain",
+        "aurora",
+        "terrain"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "parallax",
+            "label": "Camera parallax",
+            "type": "number",
+            "default": 0.35,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "bloom",
+            "label": "Bloom intensity",
+            "type": "number",
+            "default": 0.28,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "height",
+            "label": "Terrain height",
+            "type": "number",
+            "default": 1,
+            "min": 0.4,
+            "max": 1.6,
+            "step": 0.01
+          },
+          {
+            "id": "breathing",
+            "label": "Terrain breathing",
+            "type": "number",
+            "default": 0.12,
+            "min": 0,
+            "max": 0.4,
+            "step": 0.01
+          },
+          {
+            "id": "auroraGlow",
+            "label": "Aurora glow",
+            "type": "number",
+            "default": 1.1,
+            "min": 0.2,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "fog",
+            "label": "Atmospheric fog",
+            "type": "number",
+            "default": 0.035,
+            "min": 0.01,
+            "max": 0.07,
+            "step": 0.001
+          },
+          {
+            "id": "terrain",
+            "label": "Terrain color",
+            "type": "color",
+            "default": "#aac9dd"
+          },
+          {
+            "id": "aurora",
+            "label": "Aurora color",
+            "type": "color",
+            "default": "#4dd4bc"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "parallax": 0.35,
+          "bloom": 0.28,
+          "height": 1,
+          "breathing": 0.12,
+          "auroraGlow": 1.1,
+          "fog": 0.035,
+          "terrain": "#aac9dd",
+          "aurora": "#4dd4bc"
+        }
+      },
+      "file": "mountains.txt",
+      "sha256": "1d197e4cdb38cec030da1b677d6b0d145d3172f6f0dcde53d54cd2349275c11f"
+    },
+    {
+      "id": "orbit",
+      "title": "Orbital Relic",
+      "engine": "three-3d",
+      "keywords": [
+        "轨道",
+        "星环",
+        "赛博",
+        "粒子",
+        "orbit",
+        "cyber",
+        "particle"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "parallax",
+            "label": "Camera parallax",
+            "type": "number",
+            "default": 0.35,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "bloom",
+            "label": "Bloom intensity",
+            "type": "number",
+            "default": 0.28,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "density",
+            "label": "Particle density",
+            "type": "number",
+            "default": 1700,
+            "min": 400,
+            "max": 2048,
+            "step": 1
+          },
+          {
+            "id": "radiance",
+            "label": "Particle radiance",
+            "type": "number",
+            "default": 2.4,
+            "min": 0.5,
+            "max": 4,
+            "step": 0.01
+          },
+          {
+            "id": "tilt",
+            "label": "Pointer tilt",
+            "type": "number",
+            "default": 0.8,
+            "min": 0,
+            "max": 1.5,
+            "step": 0.01
+          },
+          {
+            "id": "pulse",
+            "label": "Core pulse",
+            "type": "number",
+            "default": 0.5,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "coreColor",
+            "label": "Core color",
+            "type": "color",
+            "default": "#28455a"
+          },
+          {
+            "id": "ringColor",
+            "label": "Orbit color",
+            "type": "color",
+            "default": "#5eaaff"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "parallax": 0.35,
+          "bloom": 0.28,
+          "density": 1700,
+          "radiance": 2.4,
+          "tilt": 0.8,
+          "pulse": 0.5,
+          "coreColor": "#28455a",
+          "ringColor": "#5eaaff"
+        }
+      },
+      "file": "orbit.txt",
+      "sha256": "a9af459f3b6655713b447d620c35da75d20bedea1bcac267352968db1e59b872"
+    },
+    {
+      "id": "mycelium",
+      "title": "Bioluminescent Mycelium",
+      "engine": "html-canvas",
+      "keywords": [
+        "菌",
+        "生物",
+        "光网",
+        "mycelium",
+        "organic",
+        "network"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.2,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "density",
+            "label": "Particle density",
+            "type": "number",
+            "default": 2000,
+            "min": 500,
+            "max": 2400,
+            "step": 1
+          },
+          {
+            "id": "sense",
+            "label": "Sensor distance",
+            "type": "number",
+            "default": 13,
+            "min": 4,
+            "max": 28,
+            "step": 1
+          },
+          {
+            "id": "attraction",
+            "label": "Pointer attraction",
+            "type": "number",
+            "default": 1,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "fade",
+            "label": "Trail decay",
+            "type": "number",
+            "default": 0.06,
+            "min": 0.015,
+            "max": 0.16,
+            "step": 0.005
+          },
+          {
+            "id": "glow",
+            "label": "Light intensity",
+            "type": "number",
+            "default": 4,
+            "min": 0,
+            "max": 9,
+            "step": 0.1
+          },
+          {
+            "id": "tint",
+            "label": "Filament color",
+            "type": "color",
+            "default": "#638bd1"
+          },
+          {
+            "id": "accent",
+            "label": "Accent color",
+            "type": "color",
+            "default": "#d2a862"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "density": 2000,
+          "sense": 13,
+          "attraction": 1,
+          "fade": 0.06,
+          "glow": 4,
+          "tint": "#638bd1",
+          "accent": "#d2a862"
+        }
+      },
+      "file": "mycelium.html",
+      "sha256": "85a4f8a84b47b3d9a31b0de8712cf16e15f9bfed969ffd341cb3159159cd8753"
+    },
+    {
+      "id": "clockwork",
+      "title": "Celestial Tourbillon",
+      "engine": "html-canvas",
+      "keywords": [
+        "钟",
+        "齿轮",
+        "机械",
+        "clock",
+        "gear",
+        "watch"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Gear speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "scale",
+            "label": "Dial scale",
+            "type": "number",
+            "default": 1,
+            "min": 0.6,
+            "max": 1.2,
+            "step": 0.01
+          },
+          {
+            "id": "glow",
+            "label": "Light intensity",
+            "type": "number",
+            "default": 3,
+            "min": 0,
+            "max": 8,
+            "step": 0.1
+          },
+          {
+            "id": "seconds",
+            "label": "Second hand",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "id": "date",
+            "label": "Date display",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "id": "metal",
+            "label": "Brushed metal",
+            "type": "color",
+            "default": "#c0a77e"
+          },
+          {
+            "id": "accent",
+            "label": "Accent color",
+            "type": "color",
+            "default": "#7ebec8"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "scale": 1,
+          "glow": 3,
+          "seconds": true,
+          "date": true,
+          "metal": "#c0a77e",
+          "accent": "#7ebec8"
+        }
+      },
+      "file": "clockwork.html",
+      "sha256": "34a0ba8e6d805c002eba9ef5713bb220691a9f47e8c379ee8f09db396f4d4678"
+    },
+    {
+      "id": "bauhaus",
+      "title": "Form in Motion",
+      "engine": "html-canvas",
+      "keywords": [
+        "包豪斯",
+        "几何",
+        "排版",
+        "bauhaus",
+        "geometry",
+        "type"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "motion",
+            "label": "Motion amplitude",
+            "type": "number",
+            "default": 1,
+            "min": 0,
+            "max": 1.5,
+            "step": 0.01
+          },
+          {
+            "id": "parallax",
+            "label": "Camera parallax",
+            "type": "number",
+            "default": 0.5,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "clock",
+            "label": "Time display",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "id": "paper",
+            "label": "Paper color",
+            "type": "color",
+            "default": "#e9e2d4"
+          },
+          {
+            "id": "ink",
+            "label": "Ink color",
+            "type": "color",
+            "default": "#202327"
+          },
+          {
+            "id": "red",
+            "label": "Vermilion",
+            "type": "color",
+            "default": "#d64a31"
+          },
+          {
+            "id": "blue",
+            "label": "Ultramarine",
+            "type": "color",
+            "default": "#264ba1"
+          },
+          {
+            "id": "yellow",
+            "label": "Ochre",
+            "type": "color",
+            "default": "#e4b849"
+          }
+        ],
+        "values": {
+          "speed": 1,
+          "motion": 1,
+          "parallax": 0.5,
+          "clock": true,
+          "paper": "#e9e2d4",
+          "ink": "#202327",
+          "red": "#d64a31",
+          "blue": "#264ba1",
+          "yellow": "#e4b849"
+        }
+      },
+      "file": "bauhaus.html",
+      "sha256": "9deae37c73cad85ad580dfe769940aa7e5df6093bcb9ee76a395e6697be0776e"
+    }
+  ]
+}

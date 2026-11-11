@@ -8,7 +8,7 @@ enum SettingsRegistry {
     + DesktopSettingsSection.items + PlaybackSettingsSection.items
     + PerformanceSettingsSection.items + DisplaysSettingsSection.items
     + ShortcutsSettingsSection.items + LibrarySettingsSection.items + StorageSettingsSection.items
-    + AboutSettingsSection.items
+    + CreatorSettingsSection.items + AboutSettingsSection.items
 
   static func items(in section: SettingsSection) -> [SettingsItem] {
     items.filter { $0.section == section }
@@ -23,6 +23,7 @@ enum SettingsRegistry {
     QuickSettingsSection.unofferedItems(controller)
       .union(PlaybackSettingsSection.unofferedItems(controller))
       .union(PerformanceSettingsSection.unofferedItems(controller))
+      .union(AboutSettingsSection.unofferedItems(controller))
   }
 
   /// What is wrong with a list of items, one line per problem; empty when it is sound. Ids are

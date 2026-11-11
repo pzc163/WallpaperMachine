@@ -25,117 +25,84 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
-## 2026-11-09 — Web wallpaper submitted background for Stage Manager
+## 2026-11-11 — S5.1 offline engines and nine master artworks
 
-- The desktop web container now submits one opaque black 1×1 Metal frame per backing layer and retains it through resize and page suspension, with no recurring GPU submission or rendering loop. The bounded allocation trade-off was approved; battery impact was not measured.
-- On the Dell display, the user reported that a submitted surface kept Belle smooth, removing it or replacing it with an empty Metal queue brought the freeze back, and using the submitted surface as the existing black background looked normal and stayed smooth.
-- The earlier tag-only Release candidate and native backing-flattening override failed the visible Stage Manager check. The override is removed; the existing transition tag remains alongside the submitted background.
-- `python3 scripts/test.py --only WebWallpaperWindowCompositionTests` — before the Metal implementation, 3 passed and 2 new regressions failed; final run: 7 passed, 0 failed, 0 skipped. Coverage includes a real submitted frame, resize, suspension/resume and the no-Metal fallback.
-- `python3 scripts/test.py` — passed: Python checks and XcodeGen succeeded; native suite: 4,698 passed, 0 failed, 66 skipped. Three unrelated runtime warnings concerned main-thread use in video and app-update tests.
-- `python3 scripts/build.py --renderer-only` rebuilt current upstream dependencies; `python3 scripts/build.py --swift-only --configuration Release` passed. No renderer source changes were made by this fix.
-- The clean Release app was restarted with the original covered-desktop preference restored. Runtime inspection confirmed attached web views and submitted 1×1 Metal backgrounds on both the Dell and built-in displays, with no diagnostic layer or runtime patch.
-- The additional clean-build Stage Manager and Mission Control visual check was requested but remains unconfirmed. The accepted smoothness result above is from the working prototype, not a claimed final-build visual observation.
-- Wallpaper Engine reference-frame comparison and measured power consumption were not performed; this change addresses host-window presentation rather than wallpaper content rendering.
+Native Shader/Three shells, an offline pinned library, declarative parameters and a native master gallery; no visible application, live model or desktop changes.
 
-## 2026-11-09 — Issue #177 rebuilt candidate rejected
+- Targeted phases: 28 + 17 foundation/store checks; 25 engine checks and 5 after uniform caching; 35 gallery/master checks; 5 final lifecycle/protocol/timeout acceptance checks passed.
+- python3 scripts/test.py — exit 0; script checks passed; native 5,088 passed, 0 failed, 69 opt-in checks skipped of 5,157, 127 seconds.
+- Nine masters rendered real offscreen JPEGs and passed animation, paused parameter changes, portrait resume, bounded frame scheduling and stop checks. Visual snapshots were reviewed; no placeholder substitutes.
+- Three runtime main-thread warnings attributed to VideoFormatSupportTests, AppUpdateTests and LockScreenWebMPlayerTests; each passed, no source location in the issue records.
+- Skipped: real paid model traffic, new-engine long soak, visible desktop, multi-display sleep, energy measurement and physical macOS 15. Native WebGL2 remains required; WebKit supervision is not an audit of arbitrary hostile code.
 
-- The user tested the Release app from local commit 5cb12719 and reported that the issue was not fixed. Its prior passing gate and manual flag-toggle trials do not establish a fix.
-- Read-only process inspection confirmed the running executable was build/Build/Products/Release/WallpaperMachine.app/Contents/MacOS/WallpaperMachine.
-- WindowServer readback acknowledged tag 55 on both the Built-in Retina Display and DELL U2725QE web windows. The debugger detached after inspection; no window policy was changed.
-- The built-in window contained its live web view. The Dell window contained an NSImageView suspension poster; session logs recorded repeated presentation suspend/resume decisions for display 3.
-- The foreground-app rule was Keep running, covered-desktop behavior was the default Pause, and the power source was External. The relationship between this pause and the reported stutter remains unconfirmed; a controlled manual retest with the coverage rule disabled is pending authorization.
-- No new fix, desktop automation, app restart or settings mutation was performed. The candidate remains local and must not be treated as resolving #177.
+## 2026-11-11 — Creator streaming thoughts and verified artifacts
 
-## 2026-11-09 — Web transition composition final review (#177)
+- Added session-only, bounded and credential-redacted model thinking/source streams, six-language artifact tabs, and publication-validated embedded WebKit previews. Legacy JSON source is checked again after decoding for credential leakage.
+- Targeted stream/artifact/panel/composer suites: 31 passed; follow-up revision/stream/artifact regression suite: 25 passed; final native-output/artifact suite: 11 passed, all with zero failures.
+- Final python3 scripts/test.py: 720 Python checks; 5066 native passed, 0 failed, 69 conditional skips; two system API main-thread runtime warnings.
+- Earlier full runs exposed an obsolete token-limit fixture (corrected), a transient GPU energy-counter threshold failure (13 isolated checks passed without threshold changes), and a replaced-navigation WebKit file-open failure (10 isolated checks passed unchanged). Final full gate passed unchanged after these investigations.
+- Document links, generated project and six-language catalogs checked. Test model traffic used Mock URLProtocol; memory credentials and offscreen WebKit only. Live models, benchmark, soak and visible UI/device acceptance were not run.
+- No personal model Keychain, production app, real wallpaper, main/latest update, Rust or renderer changes. Physical macOS 15 LAN authorization, visible UI, multi-display, sleep and full-process energy remain device acceptance work.
 
-- Reviewed the web-window transition policy and live-resize restoration against current main; retained the general fix without wallpaper-specific behavior or per-frame work.
-- python3 scripts/test.py --only WebWallpaperWindowCompositionTests: 3 passed, 0 failed, 0 skipped; reads WindowServer policy on unordered windows and exercises an AppKit live-resize cycle.
-- python3 scripts/test.py: all 32 Python suites passed; 4,667 native passed, 0 failed, 66 skipped. The skipped asset, media, network and desktop-dependent checks are not passing coverage.
-- One runtime warning in AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy: a method called on the main thread may cause unresponsiveness; unrelated to web transition composition.
-- python3 scripts/build.py --swift-only --configuration Release: passed; built build/Build/Products/Release/WallpaperMachine.app. Existing linker deployment-target warnings remain.
-- Prior same-window Belle manual trials recorded smooth playback with tag 55 set, stutter after clearing it, and smooth playback after setting it again; the prior rebuilt app readback also showed the flag set automatically.
-- Final rebuilt-app visual acceptance remains unconfirmed. No desktop automation, wallpaper changes or app restart were performed during this final review. No valid Wallpaper Engine frame comparison is available.
+## 2026-11-11 — Creator native output limits and raw HTML contract
 
-## 2026-11-09 — Preload desktop wallpapers and preserve their uncleared frames
+- Protocol/repair/code targeted run: 56 passed; two new test-fixture assertions corrected. Follow-up LLMNativeOutputTests and CreatorModelSettingsTests: 9 passed, 0 failed.
+- 128K explicit request -> context fallback -> usage-option fallback -> 70 KiB raw HTML -> offscreen validation/poster passes in exactly three attempts without content-repair permission.
+- Native maximum omits optional ceilings; Anthropic retains required max_tokens. Legacy profile encoding and immutable packages stay readable; 256 KiB source and 32 MiB wire limits are independent.
+- Document links and panel localization checks passed. No live API, real credentials or desktop actions. Full gate remains for the final stage.
 
-- Scope: serial preparation of inactive desktop scene, video and web wallpapers, parked-instance reuse and bounded shared still windows for repeated assignments.
-- python3 scripts/build.py --renderer-only passed and regenerated Swift bridge bindings; XcodeGen regenerated the project for the source and test additions.
-- Targeted scripts/test.py run passed: 240 native tests across parking, pinning, replicas, switch holds and video/web host lifecycles.
-- Full scripts/test.py gate passed with local-only XCODE_XCCONFIG_FILE bundle identities: 4,686 native tests passed, 66 skipped; all 32 Python test modules passed.
-- scripts/check_rust.py passed in an isolated child-process home with serial tests: core 428, bridge 941, all selected integration and shader suites passed; five desktop-window cases were excluded.
-- Five targeted Metal regressions passed three consecutive rounds (15/15); all 77 render graph contract tests passed.
-- python3 scripts/check_renderer.py passed: all registered binaries succeeded, 12 generated pooled/isolated frame comparisons matched and eight generated projects reloaded twice successfully.
-- Uncleared output preserves prior pixels before partial writes; overflow coverage asserts draw admission without an Inf/NaN pixel-equivalence claim, while finite inputs retain exact frame comparisons.
-- Asset-dependent renderer cases were skipped; desktop/media/network opt-ins, real Space animations, WindowServer stacking and Wallpaper Engine reference comparisons were not checked. No Release app was built or installed.
-- Gitleaks scans of 1,278 existing commits, candidate staged differences and full staged files found no leaks; agent paths, private assets and build output are excluded.
+## 2026-11-11 — Creator editable LAN connection drafts
 
-## 2026-11-08 — Issue 177: rejected candidates and visible-frame regression
+- Targeted: LLMConnectionUXTests, ProviderProfileTests, CreatorModelSettingsTests — 14 passed, 0 failed, 0 skipped.
+- Local discovery uses the unsaved endpoint and optional memory key; invalid unrelated fields do not block it. Six-language native purpose text and ATS CIDR contract checked.
+- No real LAN/API, personal Keychain or visible desktop actions. Physical macOS 15 LAN privacy prompt remains manual; full routine gate follows the remaining stages.
 
-Issue #177 remains unresolved. The user rejected the delivered candidate after repeating the Stage Manager desktop transition; passing callback timing and unit checks did not establish smooth visible playback.
+## 2026-11-11 — Creator native composer and connection preview gate
 
-- The `isVisible` override and its offscreen-only regression were removed; they did not fix the reported desktop behavior.
-- A Release candidate adding `canJoinAllApplications` also still froze with original Belle. That source change was reverted.
-- That candidate's checks passed: `python3 scripts/test.py --only WebWallpaperSuspensionTests` (24 passed), `python3 scripts/test.py` (32 Python suites; 4,658 native passed, 66 skipped, 0 failed; 3 runtime warnings), and `python3 scripts/build.py --swift-only --configuration Release`. These results are not a fix verification.
-- During a user-confirmed 90-second freeze reproduction, animation callbacks continued with no visibility changes; after startup, the largest recorded callback gap was 29 ms. Callback timing does not measure screen presentation.
-- The asset-free WebGL, Canvas 2D and CSS [continuity fixture](../../Tests/UI/Fixtures/WebFrameContinuity/project.json) also froze, including with the control panel closed. A one-tile library did not prevent the freeze. The [manual regression](manual-smoke.md#native-desktop-posters-and-mission-control) requires repeated visible transitions because the failure is intermittent.
-- Raising the web window one level, with coverage probes moved above it, failed a controlled repeat: the same window retained its raised level while the user observed freezes. An earlier smooth run was inconclusive because wallpapers changed during it. Original levels were restored.
-- Wallpaper Engine comparison was **not done**: the available VM's captures did not show Belle, so they cannot serve as reference frames. The VM was suspended again.
-- `python3 scripts/tests/test_doc_links.py` passed 11 tests. No fix was committed.
+- Workspace/controller/settings targeted suite: 29 passed; expanded composer and native growth/scrolling suite: 5 passed. Six languages and compact layouts tested offscreen.
+- Full python3 scripts/test.py: 720 Python checks, 5048 native passed, 0 failed, 69 skipped; 2 runtime warnings. First run exposed two old deadline assertions; updated contract checks and full rerun passed.
+- No live API, personal model Keychain, visible window, production app or desktop access. Physical macOS 15/LAN privacy, visible IME/UX and hardware acceptance remain manual.
+- Feature branch only; Release and Ad-hoc macOS 15 packaging requested. Package-specific signatures, dependency minima and hash are attached to creator-ux-preview-20261111, outside the source verification record.
 
-## 2026-11-08 — Belle Release build and Stage Manager retest
+## 2026-11-11 — Creator streaming deadlines and progress
 
-Requested Release build and repeat desktop test for [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The candidate visibility change remains uncommitted; the reported Stage Manager stutter is **not verified as resolved**.
+- Three-protocol codec, transport, bounded repair and code workflow checks: 53 passed, 0 failed. Final response-header/idle boundary rerun: 12 passed, 0 failed.
+- Added independent first-response/idle/total deadlines, redacted phase/count updates, and bounded non-stream negotiation using the existing ledger. Documentation (11), localization catalog (8) and panel localization (9) checks passed.
+- Only deterministic Mock flows and offscreen WebKit; no real APIs, personal Keychain, visible windows or desktop changes. Full routine gate remains scheduled after workspace UX.
 
-- `python3 scripts/build.py --swift-only --configuration Release` — exit 0; built and ran `build/Build/Products/Release/WallpaperMachine.app`, binary UUID `C60DA559-5CD2-3C21-BE10-2ED77F3A5D02`. The installed app was not overwritten.
-- Five automated panel-focus / Show Desktop cycles in installed 1.9.3 and five in the updated build on macOS 27.0.1, external 3840×2160 @2x / 120 Hz, wallpaper 60 fps / scale 1.0. A disposable copy measured animation callbacks and calls into the wallpaper's drawing function; production code contains no wallpaper detection.
-- Longest measured draw gap during the automated cycle intervals: baseline 95 ms, updated 113 ms. Neither reproduced the reported approximately 600 ms hold. No page visibility changes or forwarded desktop clicks were recorded in those intervals; these cycles are not the exact mouse-click reproduction.
-- The user reported visible stuttering in reply to the baseline question after the updated app had started. That observation lacks a timestamp identifying the binary/transition, and no separate updated-build manual verdict was received. Page callback timing cannot exclude a compositor-held frame. Current main also includes earlier changes absent from installed 1.9.3, so this is not an isolated patch A/B.
-- The unchanged candidate code previously passed the full routine gate: 32 Python suites, XcodeGen, 4,659 native passed, zero failed, 66 skipped. The gate was not repeated for this build/test-only follow-up. Wallpaper Engine comparison remains **not done**: the available VM's captures did not contain Belle; no pixel metrics are claimed.
-- Restored Lost Tower on the primary display and Stage Manager off, retained the internal display wallpaper, moved the temporary import to Trash and cleared the search. The updated Release build remains running. No commit, push or issue closure.
+## 2026-11-11 — Creator connection form and local credential sessions
 
-## 2026-11-08 — Desktop web scheduling during window visibility changes
+- Targeted LLMConnectionUXTests, ProviderCredentialStoreTests, CreatorModelSettingsTests and LLMStreamTransportTests: 21 passed, 0 failed, 0 skipped.
+- Documentation links (11), panel localization (9) and localization catalog (8) checks passed. Full routine gate follows after all three atomic changes.
+- Memory Keychain and Mock URLProtocol only; offscreen six-language form checks. No production app, LAN host, personal Keychain or model API accessed. macOS 15 physical LAN authorization remains a device check.
 
-Investigation of [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The change repairs an independently reproduced window-visibility scheduling gap; its connection to the reporter's exact Stage Manager transition remains unconfirmed.
+## 2026-11-11 — S4 offline code creation and developer preview
 
-- The attached video holds different last frames for roughly 0.6 s on repeated returns to the desktop. The attached logs show no matching host presentation suspension; the CPU sample was taken later with another wallpaper active.
-- WebKit checks window visibility separately from occlusion. An attached desktop page now remains schedulable until the host suspends it; no wallpaper identification, timer, polling loop or extra render pass was added.
-- Before the fix, `python3 scripts/test.py --only WebWallpaperSuspensionTests/testDesktopPageSchedulingFollowsHostSuspensionWithoutAnOrderedWindow` failed: zero animation frames while the host permitted playback.
-- After the fix, `python3 scripts/test.py --only WebWallpaperSuspensionTests --only WebWallpaperHostLifecycleTests --only WebWallpaperFramePacingTests` passed: 74 tests, no failures or skips. The regression also measures stopped frames during explicit suspension and resumed frames without reloading.
-- `python3 scripts/test.py` passed: all 32 Python suites, XcodeGen, and 4,659 native tests; zero failures, 66 skipped of 4,725. Skips: 62 opt-in video/media asset cases, one live Steam install, two Workshop cases and the opt-in web reference renderer.
-- One runtime warning came from `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`: a method called on the main thread may cause UI unresponsiveness. No warning was attributed to the new scheduling regression.
-- Wallpaper Engine comparison **not done**. The Windows VM was available, but two muted `scripts/we_reference.py capture` attempts produced a black desktop with the Start menu, not Belle. The attempted native reference render also failed with `DecodingError.typeMismatch`; no valid before/after pixel metrics are claimed.
-- Authorized desktop probing of installed 1.9.3 on macOS 27.0.1 did not reproduce the reporter's repeatable macOS 27.2 stall. This is not confirmation of the changed app's visual behavior. The previous wallpaper and Stage Manager setting were restored, the temporary import was removed, and the VM was suspended again.
-- Updated the [web runtime description](../features/web-wallpapers.md#runtime-shape) and [test coverage](coverage.md#webwallpaper). No renderer/Rust changes or corresponding gates; no Release build, installation, commit or push.
+- Stage 1 commit 8fccf4b9: bounded schema/object/prompt negotiation, LAN endpoints and native success banner; 720 script and 5006 native passed, 72 skipped.
+- Stage 2 commit c9ada8b3: versioned WebGL templates, legacy byte reconstruction, native covers and context recovery; 720 script and 5012 native passed, 72 skipped.
+- S4: single raw HTML contract, immutable code revisions, three protocol codecs, native snapshot publication and bounded repair/history.
+- Opaque sandbox iframe and positive-control network matrix; the original download/EventSource/media probes execute and pass.
+- Native process ownership and external deadline: synchronous loop, microtask starvation, bounded memory/log overload, release and coexistence tests passed.
+- Cursor and dual-display host tested using inert surfaces/monitor; no visible window or desktop assignment.
+- Focused S4 18/18, broader regression 68/68, controller/S4 27/27 passed.
+- Full python3 scripts/test.py: 720 script tests and 5034 native passed, 0 failed, 69 skipped; two runtime warnings retained.
+- Documentation 11, catalog localization 8 and panel localization 9 checks passed. No live model, personal Keychain or physical S3 operation.
+- WebKit SPI availability checked at runtime; GPU hard quotas, macOS 15 hardware, visible quality, sleep and whole-system energy remain separate public acceptance items.
 
-## 2026-11-07 — Mission Control composition and desktop poster refresh
+## 2026-11-11 — Versioned WebGL Creator templates
 
-PR #175, including author updates 070caaa7 and 2ce3da8d, capture-cancellation fixes and native exported-web scheduling.
+- New template specifications use rendererRevision 3; existing S0 and revision 2 bytes are frozen and checked with golden digests.
+- The native catalog retains 10/12/10 parameters, six presets, a 30 FPS paint ceiling and 2073600 pixels. New kernels use simplex flow fields, a dark parallax starfield and measured DOM clock typography.
+- Real offscreen WebGL snapshots cover all parameter effects, 144 Hz callback pacing, extreme canvas sizes, heterogeneous clock anchors, actual context loss/restoration and forced no-GPU fallback.
+- Native poster and short-soak instrumentation now checks WebGL draws and pixels; capture remains a whole-page WKWebView snapshot.
+- Focused suites: 26 passed, 0 failed. Full python3 scripts/test.py: 720 script tests, 5012 native tests passed, 0 failed, 72 native skips.
+- No live model, visible application or desktop changes. Physical display quality, macOS 15 hardware, energy and a new 30-minute soak remain unverified; prior soak evidence does not certify the new renderer.
 
-- `python3 scripts/build.py --renderer-only` — exit 0; renderer built and Swift bindings regenerated. The later author commits leave Renderer sources unchanged.
-- `python3 scripts/test.py` — exit 0 on the final integrated tree: 687 Python tests passed; 4,648 native tests passed, 0 failed, 66 skipped (4,714 total).
-- Native skips cover opt-in live Steam, media/device integration and Wallpaper Engine web-reference jobs. One runtime warning remains: a method called on the main thread may cause UI unresponsiveness.
-- `python3 scripts/check_rust.py` — exit 0; 2,476 passing tests. Five desktop-window tests explicitly excluded; desktop/media/network opt-ins disabled.
-- `cmake --build artifacts/renderer/bin --parallel 6` — exit 0; completed the cold build separately after the renderer check hit its 600-second build limit.
-- `python3 scripts/check_renderer.py --skip-build` — exit 0; all 109 registered binaries succeeded, with seven local-asset-dependent cases skipped. All 12 generated scenes matched between pooled and isolated rendering; eight projects completed two reload cycles.
-- Regression coverage checks final-settle publication over a black startup picture, intermediate-frame retention, appearance refresh precedence, cancellation of replaced timers, and cache reuse. Native exported web layers retain the existing 10/20 FPS and pause/resume assertions.
-- Live Mission Control transitions, cancelled swipes and multiple displays were not exercised. No desktop automation or Release app build.
+## 2026-11-11 — Creator model negotiation and LAN profiles
 
-## 2026-11-07 — Update cache ownership — final follow-up
-
-Final updater inspection added a cache-directory symlink guard and an explicit byte-count bound while rehashing a recovered package. The routine gate had already passed and was not repeated.
-
-- python3 scripts/test.py --only AppUpdatePolicyTests --only AppUpdatePersistenceTests --only AppUpdateTests — passed: 83 passed, 0 failed, 0 skipped; covers the final code including preservation of files behind a linked cache directory.
-- Earlier feature gate: python3 scripts/test.py — 4,642 native tests passed, 66 skipped, all Python modules passed. Targeted follow-up is additional evidence, not a replacement full-gate claim.
-- Live desktop update, real release migration/signing/publication and Release delivery build remain unrun. No installed app or user wallpaper data changed.
-
-## 2026-11-07 — Persistent, nonintrusive app updates
-
-Existing updater retained: three modes, conservative migration, per-version postponement, verified complete-package recovery, passive update surfaces and artifact-derived publish metadata.
-
-- python3 -m unittest scripts.tests.test_update_manifest scripts.tests.test_publish_release scripts.tests.test_dmg scripts.tests.test_package scripts.tests.test_localization_catalogs — passed, 76 tests; real synthetic signed DMG metadata round trip included.
-- python3 scripts/test.py --only AppUpdatePolicyTests --only AppUpdatePersistenceTests --only AppUpdateTests --only AppReleaseHistoryTests --only UpdateWindowTests --only UpdatePresentationTests --only AboutSettingsTests --only StatusPanelModelTests --only StatusPanelControllerTests --only StatusPanelRenderTests --only FirstRunModelTests --only WelcomeRenderTests --only SettingsSectionsLocalizationTests — passed, 199 tests at the targeted checkpoint; final additional coordinator coverage included in the full gate.
-- python3 scripts/test.py — passed once at completion: all 32 Python modules passed; native 4,642 passed, 0 failed, 66 skipped of 4,708. One runtime warning reported by the runner; skips are not passing evidence.
-- Cache and installer tests use isolated temporary paths/defaults and fake restart/open actions; they do not replace the installed app.
-- git diff --check and introduced documentation-link targets — passed. CLAUDE.md remains a relative symlink to AGENTS.md.
-- Not run: authorized desktop/UI session, live old-to-new release update, production signing/notarization/publishing, or a Release delivery build. No app launch/restart, release or push performed.
-- Rust/C++ renderer checks not applicable: no renderer changes. Task-owned transient test artifacts removed after recording the results.
+- Automatic OpenAI format negotiation is shared by connection probes and creation: schema, JSON object, prompt JSON; each request consumes the same bounded ledger.
+- Native validation errors retain allowlisted field details; format negotiation is independent of the maximum two content repairs.
+- Local mode accepts strict private IPv4, local IPv6 and mDNS names; origin/configuration credential binding and explicit connection confirmation remain mandatory.
+- Connection success banners include actual mode, model and elapsed time in all six app languages; stale or cancelled results cannot restore success.
+- Focused native suites: 56 passed, 0 failed. Full python3 scripts/test.py: 720 script tests and 5006 native tests passed, 0 failed, 72 native skips.
+- No live API, personal Keychain, visible UI, desktop replacement or hardware acceptance was exercised. S4 remains closed in this commit.

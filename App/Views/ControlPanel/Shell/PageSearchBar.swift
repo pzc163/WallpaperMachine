@@ -30,6 +30,7 @@ struct PageSearchBar: View {
 
   private var field: PageSearchFieldView.Field? {
     switch selection {
+    case .creator: return nil // Project search belongs to its sidebar.
     case .wallpaper:
       let model = controller.library
       return .init(

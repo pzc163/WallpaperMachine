@@ -167,6 +167,13 @@ self-contained, and wraps it in the drag-to-install disk image
 It exits with `Build the application first using scripts/build.py` when that
 bundle is absent.
 
+For a macOS 15.0 acceptance image without a paid Developer ID account, use the
+explicit [ad-hoc rehearsal](release.md#rehearsal-rehearsalyml). It builds on macOS 15
+arm64, uses `--require-deployment-target --require-notices`, and signs with `-`.
+There is no certificate import, Apple notarization or automatic publication on
+that route. The resulting image is an acceptance build, not a notarized release.
+Changing `LSMinimumSystemVersion` alone cannot make newer dependencies compatible.
+
 0. **Preflight**, before anything is modified (`--check` runs only this step
    and leaves the bundle unchanged):
    - The bundle must be fresh build output. A bundle that already carries
@@ -200,7 +207,9 @@ bundle is absent.
      `Resources/AppIcon.icns`. Otherwise `Missing disk image input:` or
      `… not twice …` names the file, and since nothing has been touched yet,
      regenerating the art and rerunning is enough.
-   - Every library to bundle is checked with `vtool -show-build` against the
+   - Every Mach-O in the app, nested extensions/frameworks and dependency closure
+     must contain arm64 code. Its highest slice minimum is checked with
+     `vtool -show-build` against the
      bundle's `LSMinimumSystemVersion` (the deployment target). A Homebrew
      bottle records the release it was built for, so on a newer host some
      libraries need a newer macOS than the app claims. By default packaging

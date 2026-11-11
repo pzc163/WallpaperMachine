@@ -807,6 +807,36 @@ final class InstalledBrowserModelTests: PanelTestCase {
     XCTAssertEqual(model.selectedIDs, ["w02", "w00"], "the selection stays")
   }
 
+  /// Adding says how many were added. A playlist that is off, or plays something other than its
+  /// list, will not show them, so the notice says that too and offers the playlist's settings.
+  func testAddToPlaylistSaysWhatItDidAndWhetherThePlaylistPlaysTheList() async throws {
+    let panel = try makeController()
+    defer { Task { await panel.shutdown() } }
+    let model = panel.controller.library
+    try await installNames(panel, count: 4)
+    model.toggleChecked("w00")
+    model.toggleChecked("w01")
+    await model.addSelectionToPlaylist()?.value
+    XCTAssertEqual(
+      model.notice, L("Added \(2) wallpapers to this display’s list. Its playlist is not playing the list."))
+    XCTAssertEqual(model.noticeLink, .playlistSettings, "a playlist that is off is one click from its settings")
+
+    panel.playlists.update("primary") {
+      $0.mode = .rotate
+      $0.source = .list
+    }
+    model.toggleChecked("w02")
+    await model.addSelectionToPlaylist()?.value
+    XCTAssertEqual(model.notice, L("Added 1 wallpaper to this display’s list."))
+    XCTAssertNil(model.noticeLink, "a playlist that rotates through its list needs no settings")
+    await model.addSelectionToPlaylist()?.value
+    XCTAssertEqual(model.notice, L("Already on this display’s list."))
+
+    panel.playlists.update("primary") { $0.source = .all }
+    await model.addSelectionToPlaylist()?.value
+    XCTAssertEqual(model.noticeLink, .playlistSettings, "it plays the whole library, not the list")
+  }
+
   func testAddToPlaylistNeedsADisplayThatCanHaveOne() async throws {
     let panel = try makeController()
     defer { Task { await panel.shutdown() } }
@@ -1444,6 +1474,56 @@ final class InstalledBrowserModelTests: PanelTestCase {
     XCTAssertTrue(ImportActivityPill.isActive(in: controller), "the popover keeps its anchor while it is open")
     model.closeImport()
     XCTAssertFalse(ImportActivityPill.isActive(in: controller), "it has been looked at")
+  }
+
+  /// Files and folders dropped on the page import as the picker's would, with no window to ask
+  /// in; a drop that holds no file is not taken.
+  func testFilesDroppedOnTheLibraryAreImportedAndADropWithoutFilesIsNotTaken() async throws {
+    let panel = try makeController()
+    defer { Task { await panel.shutdown() } }
+    let controller = panel.controller
+    let model = controller.library
+    XCTAssertNil(model.importDropped([try XCTUnwrap(URL(string: "https://example.com/wallpaper"))]))
+    XCTAssertNil(model.importDropped([]))
+
+    let source = panel.root.appendingPathComponent("dropped/123456")
+    try FileManager.default.createDirectory(at: source, withIntermediateDirectories: true)
+    try Data("movie".utf8).write(to: source.appendingPathComponent("movie.mp4"))
+    try JSONSerialization.data(withJSONObject: ["title": "T", "type": "video", "file": "movie.mp4"])
+      .write(to: source.appendingPathComponent("project.json"))
+
+    await model.importDropped([source])?.value
+    try await panel.waitUntil(timeout: 10) { controller.importState.report != nil && !controller.imports.isBusy }
+    XCTAssertEqual(controller.importState.report?.failures.count, 0)
+    try await panel.waitUntil {
+      model.importPill.state.report != nil && !model.importPill.state.isBusy
+    }
+    XCTAssertEqual(model.importPill.label, L("1 imported · 0 skipped"))
+  }
+
+  /// The favorite tool makes the ticked wallpapers favorites, and takes them all out when every
+  /// one of them already is. The selection stays.
+  func testTheFavoriteToolFavoritesTheSelectionAndTakesAFullyFavoritedOneOut() async throws {
+    let panel = try makeController()
+    defer { Task { await panel.shutdown() } }
+    let controller = panel.controller
+    let model = controller.library
+    try await installNames(panel, count: 4)
+    XCTAssertNil(model.favoriteSelection(), "nothing is ticked")
+    try await controller.toggleFavorite("w00")
+    model.toggleChecked("w00")
+    model.toggleChecked("w01")
+    XCTAssertFalse(model.selectionIsAllFavorites, "one of the two is not a favorite yet")
+
+    await model.favoriteSelection()?.value
+    XCTAssertEqual(controller.favoriteIDs, ["w00", "w01"])
+    XCTAssertEqual(PanelPreferences.favorites(in: panel.defaults), ["w00", "w01"])
+    XCTAssertTrue(model.selectionIsAllFavorites)
+
+    await model.favoriteSelection()?.value
+    XCTAssertTrue(controller.favoriteIDs.isEmpty, "all favorites: the tool takes them out")
+    XCTAssertTrue(PanelPreferences.favorites(in: panel.defaults).isEmpty)
+    XCTAssertEqual(model.selectedIDs, ["w00", "w01"], "the selection stays")
   }
 
   func testAReportThatArrivesWhileThePopoverIsOpenNeedsNoPill() async throws {

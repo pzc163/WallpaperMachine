@@ -1,6 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "NSLocalNetworkUsageDescription" : {"extractionState": "manual", "localizations": {"en": {"stringUnit": {"state": "translated", "value": "WallpaperMachine connects to the local model server you choose to list models and create wallpapers."}}, "zh-Hans": {"stringUnit": {"state": "translated", "value": "WallpaperMachine 连接你选择的本地模型服务器，以获取模型列表并创作壁纸。"}}, "zh-Hant": {"stringUnit": {"state": "translated", "value": "WallpaperMachine 連接你選擇的本機模型伺服器，以取得模型清單並創作桌布。"}}, "ja": {"stringUnit": {"state": "translated", "value": "WallpaperMachineは、選択したローカルモデルサーバーに接続してモデル一覧を取得し、壁紙を作成します。"}}, "ko": {"stringUnit": {"state": "translated", "value": "WallpaperMachine은 선택한 로컬 모델 서버에 연결하여 모델 목록을 가져오고 배경화면을 만듭니다."}}, "pt-BR": {"stringUnit": {"state": "translated", "value": "O WallpaperMachine conecta-se ao servidor de modelos local escolhido para listar modelos e criar papéis de parede."}}}},
     "NSAudioCaptureUsageDescription" : {
       "extractionState" : "manual",
       "localizations" : {

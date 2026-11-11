@@ -34,6 +34,63 @@ class RaisedMinimumTests(unittest.TestCase):
         self.assertEqual(floor, "15.10")
         self.assertEqual(list(newer), ["libfreetype.6.dylib"])
 
+    def test_equivalent_version_spellings_do_not_raise_the_target(self):
+        self.assertEqual(package.raised_minimum("15.0", {"framework": "15.0.0"}), ("15.0", {}))
+
+
+class DeploymentAuditTests(unittest.TestCase):
+    def minimum(self, listing):
+        with mock.patch.object(package, "output", return_value=listing):
+            return package.minimum_system_version(Path("test-binary"))
+
+    def test_universal_binary_uses_the_highest_slice_minimum(self):
+        self.assertEqual(self.minimum("cmd LC_BUILD_VERSION\nplatform MACOS\nminos 15.0\n"
+                                      "cmd LC_BUILD_VERSION\nplatform MACOS\nminos 26.0\n"), "26.0")
+
+    def test_legacy_macos_load_command_is_read(self):
+        self.assertEqual(self.minimum("cmd LC_VERSION_MIN_MACOSX\nversion 14.0\nsdk 15.0\n"), "14.0")
+
+    def test_linker_version_is_not_a_deployment_target(self):
+        self.assertEqual(self.minimum("cmd LC_BUILD_VERSION\nplatform MACOS\nminos 15.0\n"
+                                      "sdk 27.2\nntools 1\ntool LD\nversion 27106.1\n"), "15.0")
+
+    def test_foreign_missing_or_malformed_deployment_record_is_rejected(self):
+        for listing in ("platform IOS\nminos 15.0", "platform MACOS\nsdk 15.0", "minos 15.0",
+                        "platform MACOS\nminos unknown"):
+            with self.subTest(listing=listing), self.assertRaises(package.PackagingError):
+                self.minimum(listing)
+
+    def test_frameworks_and_extensions_cannot_hide_a_newer_minimum(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            app = Path(temporary) / "Sample.app"
+            relative = ("Contents/MacOS/Sample", "Contents/Frameworks/Video.framework/Versions/A/Video",
+                        "Contents/Extensions/Display.appex/Contents/MacOS/Display")
+            for name in relative:
+                path = app / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(bytes.fromhex("cffaedfe") + b"test")
+            (app / "Contents/Resources").mkdir()
+            (app / "Contents/Resources/picture").write_bytes(b"not executable")
+            (app / "Contents/Frameworks/Video.framework/Video").symlink_to("Versions/A/Video")
+
+            def output(args):
+                if args[0] == "lipo":
+                    return "arm64"
+                version = "26.0" if Path(args[-1]).name == "Video" else "15.0"
+                return f"cmd LC_BUILD_VERSION\nplatform MACOS\nminos {version}\n"
+
+            with mock.patch.object(package, "output", side_effect=output):
+                minimums = package.deployment_minimums(app, {})
+            self.assertEqual(set(minimums), set(relative))
+            floor, newer = package.raised_minimum("15.0", minimums)
+            self.assertEqual(floor, "26.0")
+            self.assertEqual(newer, {relative[1]: "26.0"})
+
+    def test_dependency_without_arm64_is_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary, mock.patch.object(package, "output", return_value="x86_64"):
+            with self.assertRaisesRegex(package.PackagingError, "Missing arm64"):
+                package.deployment_minimums(Path(temporary), {"libtest.dylib": Path("libtest.dylib")})
+
 
 def otool_listing(file, *loads):
     """`otool -L` output: the header line, then one load command per line."""

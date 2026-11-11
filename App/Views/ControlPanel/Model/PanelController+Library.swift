@@ -73,7 +73,11 @@ extension PanelController {
     let displayID = try standaloneDisplayID(displayID)
     guard playlists.playlist(for: displayID).mode == .rotate else {
       try await run(.queued, slot: BridgeStore.activationSlot(displayId: displayID)) {
-        guard let id = store.nextWallpaperID(displayId: displayID) else { return }
+        // Said, as a rotating playlist with nothing else to show says it below: a button or a
+        // shortcut that does nothing looks broken.
+        guard let id = store.nextWallpaperID(displayId: displayID) else {
+          throw WallpaperActionError(message: L("There is no other wallpaper to change to."))
+        }
         try await store.activateWallpaperAsync(id: id, displayId: displayID, origin: .user)
       }
       return
@@ -183,6 +187,19 @@ extension PanelController {
       let id = try installedWallpaperID(id)
       if !favoriteIDs.insert(id).inserted { favoriteIDs.remove(id) }
       try PanelPreferences.saveFavorites(favoriteIDs, in: defaults)
+    }
+  }
+
+  /// `favoriteMany`: makes every installed wallpaper of `ids` a favorite, or takes them all out.
+  /// Direct, like `toggleFavorite`, and one write whatever the number.
+  func setFavorite(_ favorite: Bool, ids: [String]) async throws {
+    try await run(.direct) {
+      let ids = try installedWallpaperIDs(ids)
+      var updated = favoriteIDs
+      if favorite { updated.formUnion(ids) } else { updated.subtract(ids) }
+      guard updated != favoriteIDs else { return }
+      try PanelPreferences.saveFavorites(updated, in: defaults)
+      favoriteIDs = updated
     }
   }
 

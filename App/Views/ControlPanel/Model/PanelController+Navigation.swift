@@ -13,12 +13,16 @@ extension PanelController {
   /// it with `.latestWins` under `PanelActionCoordinator.key("navigate")`, so the newest page wins.
   func navigate(_ selection: SidebarSelection) async throws {
     try await run(.immediate) {
+      if selection != .creator { hideCreatorArtifact() }
       navigation.selection = selection
       switch selection {
       case .workshop:
         if !workshop.hasLoaded && !workshop.isLoading { workshop.search() }
       case .pixiv:
         if !pixiv.hasLoaded && !pixiv.isLoading { pixiv.apply(pixiv.query) }
+      case .creator:
+        try await recoverCreator()
+        try await loadCreator()
       case .wallpaper, .settings:
         break
       }

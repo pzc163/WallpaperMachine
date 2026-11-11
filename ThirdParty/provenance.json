@@ -622,5 +622,30 @@
     "implementation": "Independently implemented for this application; no Unayung GPLv3 source copied.",
     "license": "GPL-3.0-only"
   },
-  "distributionStatus": "Source license GPL-3.0-only since 2026-10-22 (root LICENSE, the unmodified GPLv3 text); it was GPL-2.0-only, inherited from the imported renderer and scene engine, until every part carrying substantial upstream expression had been rewritten clean-room (renderer.cleanRoomCompletion2026_10_22, LICENSING.md Source license). Releases are a free download built from a Git tag, whose corresponding source is this repository at that tag; the optional Supporter purchase sells a sponsor place and priority support, never the software, and every recipient keeps every GPL right (LICENSING.md). Components removed under the earlier GPL-2.0-only policy (FFmpeg, the Vulkan/MoltenVK/SPIRV/glslang libraries, spirv_reflect, the spirv crate, Eigen) stay removed by product decision. scripts/check_licenses.py fails GPL-2.0-only, GPLv3-incompatible and unknown licenses in the link closure. Builds are signed ad hoc or with a self-signed project certificate and are not notarized."
+  "distributionStatus": "Source license GPL-3.0-only since 2026-10-22 (root LICENSE, the unmodified GPLv3 text); it was GPL-2.0-only, inherited from the imported renderer and scene engine, until every part carrying substantial upstream expression had been rewritten clean-room (renderer.cleanRoomCompletion2026_10_22, LICENSING.md Source license). Releases are a free download built from a Git tag, whose corresponding source is this repository at that tag; the optional Supporter purchase sells a sponsor place and priority support, never the software, and every recipient keeps every GPL right (LICENSING.md). Components removed under the earlier GPL-2.0-only policy (FFmpeg, the Vulkan/MoltenVK/SPIRV/glslang libraries, spirv_reflect, the spirv crate, Eigen) stay removed by product decision. scripts/check_licenses.py fails GPL-2.0-only, GPLv3-incompatible and unknown licenses in the link closure. Builds are signed ad hoc or with a self-signed project certificate and are not notarized.",
+  "three": {
+    "name": "three",
+    "version": "0.180.0",
+    "url": "https://registry.npmjs.org/three/-/three-0.180.0.tgz",
+    "integrity": "sha512-o+qycAMZrh+TsE01GqWUxUIKR1AL0S8pq7zDkYOQw8GqfX8b8VoCKYUoHbhiX5j+7hr8XsuHDVU6+gkQJQKg9w==",
+    "sha256": "ad66d724565ee29a2467277fa84daa5ed0211d6b8d446e9ef29f6bae0cd14144",
+    "bundleSHA256": "63f73063f78d79844ff47b189ff8649b6142bfc28dbd4f75c6f6485255d21597",
+    "builder": {
+      "name": "esbuild",
+      "version": "0.25.10",
+      "url": "https://registry.npmjs.org/esbuild/-/esbuild-0.25.10.tgz",
+      "integrity": "sha512-9RiGKvCwaqxO2owP61uQ4BgNborAQskMR6QusfWzQqv7AZOg5oGehdY2pRJMTKuwxd1IDBP4rSbI5lHzU7SMsQ==",
+      "sha256": "2d82790b31e70c83fbf1399a892cbed7287b43b604b12d3aa074a56808bcd59f"
+    },
+    "entry": "entry.js",
+    "license": "MIT",
+    "notes": "Unmodified upstream source bundled as a classic IIFE. Core WebGL2 plus RoomEnvironment, EffectComposer, RenderPass, UnrealBloomPass and OutputPass; no CDN or runtime fetch is used by the host.",
+    "builderBinary": {
+      "name": "@esbuild/darwin-arm64",
+      "version": "0.25.10",
+      "url": "https://registry.npmjs.org/@esbuild/darwin-arm64/-/darwin-arm64-0.25.10.tgz",
+      "integrity": "sha512-JC74bdXcQEpW9KkV326WpZZjLguSZ3DfS8wrrvPMHgQOIEIG/sPXEN/V8IssoJhbefLRcRqw6RQH2NnpdprtMA==",
+      "sha256": "dd339e37292a711b2eba546fb1df36dd9f846a849ac3edfd3ac5271b5022f323"
+    }
+  }
 }

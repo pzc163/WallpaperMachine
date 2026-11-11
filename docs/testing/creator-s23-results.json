@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-11",
+  "benchmark": {
+    "samples": 30,
+    "requests": 30,
+    "firstPassRate": 1,
+    "repairedPassRate": 1,
+    "knownInputTokens": 90588,
+    "knownOutputTokens": 5800,
+    "knownTotalTokens": 96388,
+    "unknownUsageAttempts": 0,
+    "incompleteUsageAttempts": 0,
+    "reservedOutputTokens": 61440,
+    "latencySeconds": {
+      "count": 30,
+      "maximum": 6.231405458,
+      "minimum": 4.586154083,
+      "p50": 5.050556417,
+      "p95": 6.229075417
+    },
+    "sampleElapsedTotalSeconds": 156.61810546,
+    "jsonMode": "schema",
+    "protocol": "openaiCompatible",
+    "corpusVersion": 1,
+    "roundCounts": {
+      "1": 10,
+      "2": 10,
+      "3": 10
+    },
+    "generatedTemplates": {
+      "gradient-v2": 9,
+      "stars-v2": 12,
+      "clock-v2": 9
+    },
+    "requestedTemplateMatches": 30,
+    "model": "qwen3.8-flash-next",
+    "mode": "live",
+    "complete": true,
+    "targetEstablished": true
+  },
+  "soak": {
+    "requestedSeconds": 1800,
+    "elapsedSeconds": 1800.093200917,
+    "intervalSeconds": 10,
+    "stoppedPages": 3,
+    "hostBaselineBytes": 37668016,
+    "hostFinalBytes": 32916800,
+    "hostPeakBytes": 37733552,
+    "hostAfterStopBytes": 32916800,
+    "hostDeltaBytes": -4751216,
+    "hostPeakGrowthBytes": 65536,
+    "passed": true,
+    "completedThirtyMinutes": true,
+    "sampleCount": 540,
+    "responsiveSamples": 540,
+    "externalAttemptsMaximum": 0,
+    "processTerminationsMaximum": 0,
+    "minPaints": 1,
+    "pauseStates": [
+      false,
+      true
+    ],
+    "sizes": [
+      "1080x1920",
+      "1920x1080",
+      "1920x1200"
+    ],
+    "templateSamples": {
+      "gradient-v2": 180,
+      "stars-v2": 180,
+      "clock-v2": 180
+    }
+  },
+  "xctest": [
+    {
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "totalTestCount": 1,
+      "elapsedSeconds": 1803.3700001239777,
+      "test": "soak"
+    },
+    {
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "totalTestCount": 1,
+      "elapsedSeconds": 16.55900001525879,
+      "test": "smoke"
+    },
+    {
+      "passedTests": 1,
+      "failedTests": 0,
+      "skippedTests": 0,
+      "totalTestCount": 1,
+      "elapsedSeconds": 158.64299988746643,
+      "test": "benchmark"
+    }
+  ],
+  "cases": [
+    {
+      "suite": "CreatorSoakLiveTests",
+      "passed": true
+    },
+    {
+      "suite": "CreatorLiveSmokeTests",
+      "passed": true
+    },
+    {
+      "suite": "CreatorBenchmarkLiveTests",
+      "passed": true
+    }
+  ],
+  "provenance": "Reviewed existing XCTest summaries and structured report attachments; no new live requests during closeout.",
+  "limitations": [
+    "Results apply only to the named model, schema mode and fixed corpus v1.",
+    "Runnable output is not a measurement of visual preference or paid API cost.",
+    "Footprint is the host process only; WebContent and GPU memory are excluded.",
+    "Offscreen resize-assisted samples do not establish desktop frame rate, energy use or absence of leaks.",
+    "Visible UI, real desktop, multiple displays, sleep/wake and physical offline acceptance remain in S3; free code remains disabled."
+  ],
+  "routineGate": {
+    "command": "python3 scripts/test.py",
+    "executions": 1,
+    "exitCode": 0,
+    "elapsedSeconds": 127.429,
+    "optInFlagsCleared": true,
+    "python": {
+      "modules": 34,
+      "passed": 708,
+      "failed": 0
+    },
+    "native": {
+      "passed": 4994,
+      "failed": 0,
+      "skipped": 72,
+      "total": 5066,
+      "elapsedSeconds": 108.706,
+      "skippedBySuite": {
+        "CreatorBenchmarkLiveTests": 1,
+        "CreatorLiveSmokeTests": 1,
+        "CreatorPreviewTests": 3,
+        "CreatorSoakLiveTests": 1,
+        "NativeVideoPlayerMediaTests": 54,
+        "SteamCMDLiveInstallTests": 1,
+        "VideoLetterboxProbeMediaTests": 6,
+        "VideoPosterMediaTests": 2,
+        "WebWallpaperReferenceRenderTests": 1,
+        "WorkshopTests": 2
+      }
+    },
+    "warnings": {
+      "dependencyDeploymentTarget": 6,
+      "appIntentsMetadataSkipped": 1,
+      "mainThreadRuntime": 3,
+      "runtimeWarningTests": [
+        "AppUpdateTests/testSignatureCheckRefusesAnUnsignedOrAlteredCopy()",
+        "VideoFormatSupportTests/testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()",
+        "WebMOpeningTests/testAVp9FileOpensWithItsFormatSizeAndLength()"
+      ]
+    },
+    "unchangedSourceAndConfigFilesAcrossGate": 3720,
+    "additionalRustRendererGateRequired": false,
+    "releaseBuildPerformed": false
+  }
+}

@@ -37,12 +37,12 @@ class PanelTestCase: XCTestCase {
   func makeController(
     displayTitles: DisplayTitleResolver = .renderer, supportPrompt: SupportPromptStore? = nil,
     spaces: WallpaperSpaceMonitor? = nil, welcomeSeen: Bool = true,
-    letterbox: VideoLetterboxStore? = nil
+    letterbox: VideoLetterboxStore? = nil, creatorWorkspace: CreatorWorkspace? = nil
   ) throws -> PanelFixture {
     let fixture = makeStore(supportPrompt: supportPrompt)
     return try PanelFixture(
       store: fixture.store, bridge: fixture.bridge, displayTitles: displayTitles, spaces: spaces,
-      welcomeSeen: welcomeSeen, letterbox: letterbox)
+      welcomeSeen: welcomeSeen, letterbox: letterbox, creatorWorkspace: creatorWorkspace)
   }
 
   /// `makeController` that is started, handed to `body` and always shut down afterwards.
@@ -341,6 +341,7 @@ final class RecordingDialogs: PanelDialogs {
 /// `presentation` stands in for one (`show()` and `hide()`).
 @MainActor
 final class PanelFixture {
+  let creatorWorkspace: CreatorWorkspace?
   let root = FileManager.default.temporaryDirectory.appendingPathComponent("panel-fixture-\(UUID().uuidString)")
   let store: BridgeStore
   let bridge: LayoutSnapshotBridge
@@ -390,7 +391,8 @@ final class PanelFixture {
 
   init(store: BridgeStore, bridge: LayoutSnapshotBridge, displayTitles: DisplayTitleResolver,
     pixivTransport: (any PixivTransport)? = nil, spaces: WallpaperSpaceMonitor? = nil,
-    welcomeSeen: Bool = true, letterbox: VideoLetterboxStore? = nil) throws {
+    welcomeSeen: Bool = true, letterbox: VideoLetterboxStore? = nil, creatorWorkspace: CreatorWorkspace? = nil) throws {
+    self.creatorWorkspace = creatorWorkspace
     self.store = store
     self.bridge = bridge
     self.displayTitles = displayTitles
@@ -500,7 +502,7 @@ final class PanelFixture {
       backup: backup, imagePlacement: imagePlacement, compatibility: compatibility, letterbox: letterbox,
       automations: automations, solarLocationTracker: solarLocationTracker,
       spaces: self.spaces, systemConditions: systemConditions,
-      searchTranslation: .fake(defaults: defaults, backend: translation, language: language))
+      searchTranslation: .fake(defaults: defaults, backend: translation, language: language), creatorWorkspace: creatorWorkspace)
     controller.signInToPixiv = { nil }
     return controller
   }

@@ -26,6 +26,7 @@ struct PanelTitle: Equatable {
   ) -> PanelTitle {
     let locale = locale ?? .shared
     switch selection {
+    case .creator: return PanelTitle(title: locale.string("AI Creator"), subtitle: nil)
     case .wallpaper:
       return library(scope: scope, counts: counts, locale: locale)
     case .workshop:

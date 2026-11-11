@@ -896,7 +896,7 @@ final class WebWallpaperHost {
     /// window tree. The first such page installs the monitor; the last one
     /// leaving removes it, and the next resume installs it again.
     private func refreshPointerMonitor() {
-        let live = windows.values.contains { $0.page.isLoaded && !$0.page.hostSuspended }
+        let live = windows.values.contains { $0.page.acceptsPointer }
         mouse.setActive(live)
     }
 

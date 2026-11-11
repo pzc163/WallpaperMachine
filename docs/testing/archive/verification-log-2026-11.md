@@ -9,6 +9,309 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — Creator macOS 15 ad-hoc packaging
+
+- Added explicit ad-hoc Rehearsal mode; production publishing remains gated and notarized by default.
+- Package audit now covers all embedded Mach-O files, arm64 architecture, minimum deployment versions and linker-version parsing.
+- Final python3 scripts/test.py: 720 script tests and 5000 native tests passed; 0 failed, 72 opt-in skipped, 2 runtime warnings.
+- Initial existing WebKit Cannot open file failure passed in isolation and two subsequent complete native gates; runtime source unchanged.
+- Local package uses verified identical-version official macOS 15 bottles; all 567 original exports retained and all 8 Mach-O minimums are 15.0.
+- DMG mount, deep strict signatures, dependency closure and source-app preservation verified; details in docs/testing/creator-macos15-results.json.
+- No Apple notarization, hosted macOS 15 CI run, physical display test, live model request, desktop change or S4 enablement.
+
+## 2026-11-11 — S3 creator JSON mode and native preset controls
+
+- Scope: OpenAI-compatible JSON mode selection, native template presets, six-language strings, typed controller validation and offscreen tests; S4 remains closed.
+- Baseline: local feat/ai-creator at 6b2350d8, initially clean. No push or app installation.
+- Targeted: python3 scripts/test.py --only CreatorControlsTests --only CreatorModelSettingsTests --only CreatorPanelTests --only CreatorWorkspaceTests recorded 26 passed/1 fixture failure; after supplying the fake library snapshot, --only CreatorControlsTests passed 3/3. The full gate covers all 27 cases.
+- python3 scripts/test.py: one final routine run, exit 0; 708 Python passed; native 5,000 passed, 0 failed, 72 skipped, 128s; two runtime warnings.
+- Skips: 62 media/device, 3 Steam network, 1 reference, 3 S0 unrestricted, 3 Creator live/benchmark/soak. Real model and device opt-ins were removed from the runner environment.
+- Additional checks: localization 17/17, document links 11/11, git diff --check; handbook command syntax and all 66 checklist rows/AC coverage checked.
+- Initial build prerequisite: installed Metal toolchain was hidden by a stale xcrun path cache; xcrun --kill-cache restored compiler lookup. No component download.
+- No personal Keychain, visible windows, installed-app quit/launch, desktop application, display/sleep changes or network API calls. Release build is requested after this local commit; real S3 visual/device acceptance remains pending.
+
+## 2026-11-11 — Creator S2.3 final acceptance closeout
+
+S2.3 final closeout; durable evidence: [acceptance](../../features/creator-acceptance.md) and [redacted metrics](../creator-s23-results.json).
+
+- Reviewed existing live smoke (1 passed), fixed-model/schema benchmark (30/30 first-pass, 100% final) and three-page 1800-second WebKit soak (540 responsive samples, zero observed external attempts/terminations); no new live requests.
+- `python3 scripts/test.py` once: exit 0; 708 Python and 4,994 native passed, 0 failed, 72 skipped of 5,066 native tests; all opt-in flags cleared.
+- Skips: 62 media/device, 3 Steam network, 1 reference render, 3 S0 known-failing probes, and smoke/benchmark/long-soak one each.
+- Warnings: 6 dependency deployment-target link warnings, 1 AppIntents extraction notice, 3 main-thread warnings in existing tests; all affected tests passed, warnings not fixed here.
+- Final document/link and catalog checks passed; three plan mirrors agree; 3,720 non-document files stayed unchanged across the full gate.
+- No Rust/renderer/FFI changes; no extra kernel gate or Release build. No personal Keychain, UI automation, installation or desktop changes.
+- Archived aggregates only; removed all task test logs/results/reports and confirmed temporary test roots. S3 device/visual acceptance awaits authorization; S4 remains disabled.
+
+## 2026-11-11 — Creator prompt and structured-output compatibility
+
+- Native prompt uses flat scalar output, an empty properties default and a catalog-generated clock example; full validator/export schema unchanged.
+- OpenAI automatic prefers native json_schema; required/json_object, schema/strict and disabled/prompt-only are explicit. Downgrade uses the same request/token budget.
+- `python3 scripts/test.py --only LLMCodecTests --only LLMProviderTests --only LLMStreamTransportTests --only ProviderProfileTests --only ProviderCredentialStoreTests --only CreatorPromptBuilderTests --only CreatorOutputValidatorTests --only CreatorGeneratorTests --only CreatorRepairTests --only CreatorWorkspaceTests --only CreatorBenchmarkTests --serial` — exit 0; 120 passed, 0 failed, 0 skipped. Mock model streams and real offscreen validation only.
+- `python3 -B scripts/tests/test_creator_live_smoke.py` — 9 passed; `python3 -B scripts/tests/test_creator_acceptance.py` — 8 passed; synthetic credentials and loopback IPC only.
+- `python3 -B scripts/tests/test_doc_links.py` — 11 passed; `git diff --check` — clean.
+- Compiler log: 339 warning lines, none attributed to touched files; zero XCTest runtime warnings.
+- Three pre-existing benchmark artifacts cleaned. No live model request, personal Keychain, visible UI, desktop change, full gate, commit or push; requested targeted scope only.
+- Real-model quality/grammar acceptance remains unmeasured after this patch; single live smoke still has requestBudget=1.
+
+## 2026-11-10 — Creator S2.3 headless acceptance and benchmark harnesses
+
+S2.3 — headless recovery, publication playback gate, credential-echo rejection and acceptance harnesses.
+
+- S2.2 baseline committed locally as `35594fb9` on `feat/ai-creator`; no push. S2.3 remains uncommitted.
+- Final targeted: 52 passed, 0 failed, 3 existing S0 probes skipped; broader targeted: 105 passed, 0 failed, 5 skipped.
+- `python3 scripts/test.py` — one full run, exit 0; 701 Python tests; native 4,978 passed, 0 failed, 72 skipped (5,050 total).
+- New tests: 16 native + 6 Python passed; 1,246 source/test/config hashes unchanged across the full gate; 9 frozen sources preserved.
+- Skip groups: 62 media/device, 3 Steam network, 1 reference renderer, 3 S0 unrestricted probes, 3 creator live/benchmark/soak opt-ins.
+- Two main-thread warnings in VideoFormatSupportTests and AppUpdateTests; both tests passed, warnings not claimed fixed.
+- Mock 10×3: first 60%, final 90%, 48 requests, 24 unknown usages; not a live quality result. Real WK short soak 0.825 s, not 30 minutes.
+- AC-01–14 matrix, exact commands and limits: [creator-acceptance.md](../../features/creator-acceptance.md). S3 device/UI and S4 isolation remain open.
+- No live API, personal Keychain, visible UI, desktop change, Release build or installation; structured evidence retained before cleaning this task's logs/results.
+
+## 2026-11-10 — Native creator workspace and model settings (S2.2)
+
+Added the native AI Creator tab and model settings, with explicit generate/save/apply actions, trusted previews and controller-start recovery. [Feature and boundaries](../../features/creator-workspace.md).
+
+- S2.1 baseline committed locally as `29cd3086` on `feat/ai-creator`; S2.2 remains uncommitted, no push or install.
+- Targeted Creator/shell/settings/image/backup run: 211 passed, zero failed, three S0 skips. Storage/move/backup: 71 passed; deletion/recovery: 38 passed; final controller suite: 11 passed.
+- Final `python3 scripts/test.py`: 695 Python tests and 4,962 native tests passed, zero failures, 70 skips. All 27 new tests passed; source/test/generated-project hashes were unchanged during the gate.
+- Gate attempts: first interrupted for a preview-session lifecycle correction (exit 73, not accepted as passed); second failed in an unchanged WebKit navigation replacement test; isolated recheck passed, then the final full recheck passed without source/assertion/threshold changes.
+- The WebKit failure reported `Cannot open file`; cause unresolved. Final build had seven existing linker/metadata warning lines and two main-thread runtime warnings recorded in passing existing tests.
+- Skips: three S0 unrestricted probes, 62 opt-in media/device checks, three Steam network checks, one reference job, one creator live smoke. No real provider requests, personal Keychain or desktop actions.
+- Legacy v1 golden bytes and v2 validation stay intact. Draft display names are separate workspace metadata; draft deletion preserves installed bytes and runtime policy.
+- Existing backup/restore/storage moves explicitly refuse Creator data, with a shared lease and durable first-write marker. Full Creator migration/backup is not implemented.
+- Six-language keys and offscreen narrow layouts checked; visible appearance, VoiceOver, actual preview-window interaction, real providers/Keychain and desktop activation remain unverified. S4 remains closed; no Release/long-run power test.
+- Final documentation/link/scope checks and cleanup retain structured test results; disposable test logs and result bundles are removed after collection.
+
+## 2026-11-10 — Creator S2.1 bounded repair, conversation budget and rollback
+
+[S2.1 bounded repair and iteration](../../features/creator-iteration.md) implements FR-07/08 and AC-02/03/07 service behavior; no UI or live desktop.
+
+- Baseline: checked the user's prior CreatorLiveSmokeTests (1 passed, 0 failed, 0 skipped; protocol/model user-reported); removed only its temporary log/result and committed S1.4 locally as `8c1480b0` on `feat/ai-creator`; clean before S2.1, no push.
+- Targeted `python3 scripts/test.py --only <Creator/LLM classes>`: exit 0, 210 passed, 0 failed, 4 skipped; all 28 new S2.1 cases passed. Local Mock URLProtocol and MemoryKeychain; successful repairs use real offscreen WebKit/JPEG.
+- First full `python3 scripts/test.py`: exit 65; 695 Python passed; native 4,934 passed, 1 failed, 70 skipped. Unchanged GPU energy-counter test measured about 0.87 mW against a 10 mW lower bound.
+- Isolated `python3 scripts/test.py --only EnergyUsageMonitorTests/testKernelCountersForThisProcessAdvanceWithGPUWork`: exit 0, 1 passed, 0 failed/skipped; no source or threshold changes. Root cause of the sampling variation remains unconfirmed.
+- Failure-only full-gate retry: exit 0; 695 Python (33 modules), native 4,935 passed, 0 failed, 70 skipped (5,005 total). Exactly two full runs; source/test/generated-project SHA-256 identical between runs and after verification.
+- Skips: 3 S0 unrestricted probes, 62 media/device opt-ins, 3 Steam network tests, 1 reference job and 1 Creator live smoke. No real-provider request, personal Keychain access, desktop operation or Release/install this stage.
+- Final compiler-warning lines: targeted 28, full 0, none in changed sources/tests. Runtime warnings in passing untouched tests: `WebMOpeningTests.testAVp9FileOpensWithItsFormatSizeAndLength()`, `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`, `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()`.
+- Updated 02/03/05, feature owners and index; final documentation/source/scope checks and links recorded in the S2.1 report. Task-only artifacts removed after preserving counts; S2.1 remains uncommitted and stops here.
+
+## 2026-11-10 — Creator S1.4 native runtime, sealed publication and opt-in smoke
+
+[S1.4 native publication](../../features/creator-publication.md) connects template generation, real unattached WebKit snapshots, immutable four-file evidence and recoverable library import. S1.3 was committed locally as `ac28cf34`; S1.4 remains uncommitted, with no push or desktop change.
+
+- `python3 scripts/test.py --only CreatorPublicationTests --only CreatorPosterTests --only CreatorOrchestratorTests --only CreatorLiveSmokeTests --only CreatorGeneratorTests --only CreatorDraftTests --only CreatorRuntimeRegistryTests --only CreatorPublisherTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only CreatorPreviewTests --only ImportTests --only WallpaperImportStagingTests --only WebWallpaperPreviewSurfaceTests --only LibraryPreviewFetcherTests` — exit 0; 189 passed, 0 failed, 4 skipped.
+- `python3 scripts/tests/test_creator_live_smoke.py` and `python3 scripts/tests/test_test.py` — exit 0; 8 and 18 passed, synthetic loopback credentials only.
+- `python3 scripts/test.py` — exit 0, once; 695 Python tests in 33 modules; 4,907 native passed, 0 failed, 70 skipped of 4,977. All 19 new routine native tests passed; live smoke skipped.
+- Skips: 3 S0 unrestricted probes, 62 opt-in media/device checks, 3 live Steam checks, 1 reference job and 1 creator live test. No real model request, personal Keychain, UI/desktop, Release delivery or S4 validation.
+- Four main-thread runtime warnings in passing unchanged AppUpdate, VideoFormatSupport, WebMPlayer and WebMOpening tests; no source locations. The two WebM warnings were additionally observed this run. Full compilation has 28 warning lines outside the changed sources/tests.
+- `python3 scripts/tests/test_doc_links.py` — exit 0; 11 passed. Planning mirrors, frozen v1 generators/golden assertions, tested-source hashes, branch/scope and `git diff --check` verified; XcodeGen generated the project.
+
+## 2026-11-10 — Creator S1.3 structured parameter generation
+
+S1.3 catalog-derived prompts, strict parameter validation and immutable native drafts; see [implementation and boundaries](../../features/creator-generation.md). S1.2 rollback commit `e3a61f55` was made before implementation; S1.3 remains uncommitted.
+
+- `python3 scripts/test.py --only CreatorGeneratorTests CreatorOutputValidatorTests CreatorPromptBuilderTests CreatorDraftTests CreatorRevisionStoreTests CreatorStorageFormatTests CreatorRuntimeRegistryTests CreatorTemplateCatalogTests LLMCodecTests LLMProviderTests` — exit 0; final targeted 98 passed, 0 failed/skipped; earlier successful subsets 47 and 95. An initial new-parser compile error was fixed before these passes.
+- `python3 scripts/test.py` — exit 0, run once: 687 Python tests / 32 modules; native 4,888 passed, 0 failed, 69 skipped of 4,957. All 28 additions passed. Existing rustup PATH was used; no installation.
+- Skipped: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference render; S4 remains closed.
+- Two existing main-thread runtime warnings: AppUpdate signature-copy check and VideoFormatSupport changed-file check; both passed. No new/modified Creator/LLM compiler warning; other existing targeted-build warnings remain.
+- Offline three-codec × three-template streams, explicit-base history, malformed/policy output, cancellation, Profile/base changes, budget/usage, metadata tampering and both commit-boundary interruptions covered with MemoryKeychain and all-URL Mock interception.
+- `python3 scripts/tests/test_doc_links.py` — exit 0, 11 passed; `git diff --check` passed. Planning mirrors, 28 tested-file hashes, frozen generator/assertion bytes and task scope checked.
+- Static evidence only: runtime/posterCapture notChecked. No paid/live provider call, personal Keychain, new UI, desktop operation, Release build, install or push. No parameter auto-repair; S1.4/S4 untouched.
+- Raw test bundles/logs are disposable and removed after retaining the stage report and machine-readable summary; no other task artifacts are cleaned.
+
+## 2026-11-10 — Creator S1.2 profile-bound model transport and three codecs
+
+S1.2 adds profile-bound native model connections after local rollback commit `37f2c603`; see [connection implementation](../../features/creator-llm.md). This stage has no creator UI or live model/Keychain test.
+
+- Targeted `python3 scripts/test.py --only SSEParserTests --only LLMCodecTests --only ProviderCredentialStoreTests --only LLMProviderTests --only LLMStreamTransportTests --only ProviderProfileTests --only CreatorSettingsStoreTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests` — exit 0; 87 passed, 0 failed, 0 skipped. All 49 new tests pass.
+- Earlier targeted integration run: 74 passed, 1 failed because URLSession moved the request body into httpBodyStream; corrected the offline fixture capture. Final runs also cover CRLF raw-byte limits at every split.
+- One full `python3 scripts/test.py` — exit 0; 687 Python tests across 32 modules; 4,860 native passed, 0 failed, 69 skipped of 4,929 in 150 seconds. No full-gate retry.
+- Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference render. S4 remains closed.
+- Two existing main-thread runtime warnings in AppUpdate signature verification and VideoFormatSupport cache tests; those tests pass and their production code is unchanged. No new LLM/Creator compiler warning.
+- `python3 scripts/tests/test_doc_links.py` and `git diff --check` — exit 0. Plans and implementation docs updated; frozen generators and golden digest assertions unchanged.
+- Model traffic is intercepted for every URL by Mock URLProtocol; credentials use injected MemoryKeychain. No paid/real provider calls, personal Keychain access, desktop/UI operations, installation or Release build.
+- Real endpoint/TLS/proxy/Keychain-permission interoperability is unverified. Output reservations are not billing limits; S1.3 strict schema and S1.4 UI/cover/publication remain pending. S1.2 changes remain uncommitted; no push.
+
+## 2026-11-10 — Creator settings and provider profiles
+
+S1.1 settings/profile metadata supplement; details and limits are in [creator revisions](../../features/creator-revisions.md). Provider transport, Keychain and UI remain deferred.
+
+- Saved the previously verified tree as local baseline `f7d6168f` on `feat/ai-creator`; no push. The supplement remains uncommitted.
+- Added versioned nonsecret `CreatorSettings`/`ProviderProfile` records, actor/file-lock atomic updates, revision conflict checks and configuration fencing.
+- `python3 scripts/test.py --only CreatorSettingsStoreTests --only ProviderProfileTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests`: final 231 passed, 0 failed, 3 skipped; initial run 230 passed, 3 skipped.
+- First `python3 scripts/test.py`: Python 687 passed; native 4,809 passed, 1 failed, 69 skipped. Preset pixel reproducibility raced native state replay; a controlled 200 ms delay reproduced it before the test-only acknowledgement fix. No kernel or golden digest changes.
+- Full-gate retry after the fix: Python 687 passed (32 modules); native 4,811 passed, 0 failed, 69 skipped (4,880 total). All 16 metadata additions and the delayed-replay regression passed. No further full-gate run.
+- Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference rendering job. Runtime main-thread warnings: AppUpdate unsigned-copy check, VideoFormatSupport changed-file cache check, WebMOpening VP9 opening check; all passed, production code untouched.
+- `python3 scripts/tests/test_doc_links.py`: 11 passed. Documentation/mirror/frozen-source checks: 36 passed. `git diff --check`: passed. 02/03/05 and their output copies are synchronized.
+- No external model/Keychain access, desktop/UI run, Release build or install. S1.1 recovery is a service API; Creator settings/history backup/move integration, v2 poster generation/publication and S4 isolation remain future work.
+
+## 2026-11-10 — Creator S1.1 immutable revision storage
+
+S1.1 adds immutable creator revision storage, content-bound structural reports, job cancellation/recovery and strict package routing. No UI, model API, cover capture or desktop changes.
+
+- Safety baseline: local `feat/ai-creator` commit `e3a190c613ce2a95cff2816876b1c94319415f3f`; S1.1 remains uncommitted; no push.
+- `python3 scripts/test.py --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests` — exit 0; 214 passed, 0 failed, 3 known S0 probe skips.
+- `python3 scripts/test.py` — one final full run, exit 0; Python 687 passed (32 modules); native 4,794 passed, 0 failed, 69 skipped of 4,863. All 27 new cases passed.
+- Skips: 3 unresolved S0 unrestricted-source probes, 62 opt-in media/device cases, 3 live Steam cases, 1 reference-render case.
+- Two existing main-thread runtime warnings: `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()` and `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`; source locations absent.
+- Legacy generators and golden digest assertions are unchanged. Tests use temporary stores, synthetic JPEGs and an unattached WKWebView; no visible window or desktop capture.
+- Structural reports explicitly leave runtime/poster capture unchecked; v2 publication, model transport, UI and S4 remain pending. Creator history is not yet in backup/storage-move transactions.
+- Rust/renderer checks and Release build not run: no changes in those domains and no application delivery requested. No install, push or wallpaper activation.
+
+## 2026-11-10 — Creator S1.0 parameterized templates
+
+S1.0 adds native-owned parameterized templates on the existing S0 host; no model API or desktop activation.
+
+- `python3 scripts/test.py --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests` — exit 0; 43 passed, 0 failed, 3 known S0 unrestricted-source probes skipped.
+- `python3 scripts/test.py` — exit 0; run once after final implementation; 687 Python tests passed in 32 modules; native 4,767 passed, 0 failed, 69 skipped of 4,836.
+- Native skips: 3 S0 probes, 62 opt-in media/device checks, 3 live Steam checks, 1 reference-render job; S4 remains blocked by its existing gates.
+- Two runtime main-thread warnings: unchanged `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()` and `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`; no source locations reported.
+- `python3 scripts/tests/test_localization_catalogs.py`, `python3 scripts/tests/test_doc_links.py`, `git diff --check` — exit 0; 8 and 11 Python checks respectively.
+- 18 new tests cover all 32 parameter dimensions, six presets, actual offscreen pixels, aggregate resource budgets, cadence/lifecycle, strict reconstruction and legacy recovery.
+- Real-clock offscreen first paint/edits passed; animation/FPS use a controlled clock in WebKit. Visible desktop quality, frame time, energy and arbitrary-code termination remain unverified. No Release build, install, commit or push.
+
+## 2026-11-10 — Creator S0 trusted-template prototype
+
+Creator S0 validates a service-level trusted-template workflow. Arbitrary-source isolation remains blocked by reproducible probes; see [the feature record](../../features/creator-s0.md).
+
+- Baseline: `7025ba39f4c92f6c1af221aa3060c62aefb0e2a2`; macOS 27.2 (26B123), arm64; no LLM, creator UI or Release delivery.
+- `PATH=/opt/homebrew/opt/rustup/bin:$PATH python3 scripts/build.py --renderer-only` — exit 0; generated prerequisite renderer/bridge outputs without changing their source.
+- `python3 scripts/test.py --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only WebWallpaperPageTests --only WebWallpaperPreviewSurfaceTests --only WallpaperPlaybackPreflightTests --only ImportTests --only LockScreenWallpaperServiceTests/testCreatorPrototypeCannotDowngradeIntoNativeFileHost` — exit 0; 113 passed, 0 failed, 3 known exploratory skips.
+- `PATH=/opt/homebrew/opt/rustup/bin:$PATH python3 scripts/test.py` — exit 0; 687 Python tests passed; native 4,749 passed, 0 failed, 69 skipped. Run once at the final gate.
+- Skips: 3 known-failing creator probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference-render job. The S0 cases themselves were 26 passed, 3 skipped.
+- `TEST_RUNNER_CREATOR_UNRESTRICTED_PROBES=1 python3 scripts/test.py --only CreatorPreviewTests/testDownloadLinksAreBlockedBeforeConnecting --only CreatorPreviewTests/testEventSourceIsBlockedBeforeConnecting --only CreatorPreviewTests/testMediaIsBlockedBeforeConnecting` — exit 65; all 3 failures reproduced, not counted as passes.
+- Real offscreen WebKit and real importer exercised with temporary bundles: properties, stop, snapshot validation, cancellation and unconfirmed-publication recovery. Actual desktop switching/recovery, devices, arbitrary-code termination, power-loss recovery and performance remain unverified.
+- Full gate runtime warning: existing `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()` reported a main-thread call; no source location supplied.
+- `git diff --check` and new-document relative-link checks passed; Xcode project regenerated by XcodeGen. Durable contract and known gaps are in the feature record; disposable evidence is not committed.
+
+## 2026-11-10 — Library tile menu, drop to import, keyboard and batch favorites; service fixes
+
+Installed gains a right-click menu on tiles (the inspector's More actions list, shared as WallpaperActionItems), files dropped on the page import, Command-Delete and Command-Return on the grid, File › Import… and Refresh Library, and a favorite tool for the ticked selection. The same change fixes six service defects (unreadable saved entries no longer erase their neighbours; an automatic command replacing a queued rule or Focus change no longer marks it handled; a day and night display keeps a manual choice across a relaunch; a shuffle round ends without a wallpaper that keeps failing; a stale Steam request no longer signs out a newer session; equal day and night start times are refused), adds feedback where actions were silent, and gathers the renderer's leftover material constants into one log line per scene.
+
+- `python3 scripts/test.py` — exit 0; 4789 tests: 4723 passed, 0 failed, 66 skipped (the first run failed two tests that asserted the old batch-limit error; both were updated and the gate rerun)
+- `python3 scripts/check_renderer.py` — exit 0; generated scenes pixel-equal pooled and isolated, 0 reload-cycle diagnostics; the local-corpus tests (particle corpus, local projects through the native backend, poster pictures, energy, corpus stamps, a local clip) skipped: no corpus configured
+- New unit tests: PreservedJSONTests; unreadable entries in WallpaperAutomationStoreTests, PlaylistStoreTests, WallpaperCollectionStoreTests and PlaybackPreferencesTests; queue outcomes in UserCommandQueueTests; a Focus change replaced by a reload in WallpaperAutomationSchedulerTests; relaunch and shuffle rounds in PlaylistSchedulerTests; the Steam session in WorkshopSourceTests
+- New panel tests: add-to-playlist and refresh notices, the unreadable-library state, the failed-still mark (offscreen render), drop import, the favorite tool, Command-Delete and Command-Return on the hosted grid, equal start times, preset and batch-limit refusals
+- Renderer: two gtest cases for UnmatchedConstantTally in material_constant_behavior_test; no frame output changed, so no Wallpaper Engine reference comparison was made
+- Not exercised: the tile's context menu, the drop outline and a real Finder drag, and the File menu items with their shortcuts in a real window. They need desktop control, which was not authorized; the menu's item rules are InspectorPolicy's existing tests, and the drop and menu actions are covered through the model
+- Not rebuilt: no Release build was made, so the delivered app does not contain these changes
+- Runtime warnings in the result bundle (2, main-thread call) come from AppUpdateTests and WebMOpeningTests, which this change does not touch
+
+## 2026-11-09 — Web wallpaper submitted background for Stage Manager
+
+- The desktop web container now submits one opaque black 1×1 Metal frame per backing layer and retains it through resize and page suspension, with no recurring GPU submission or rendering loop. The bounded allocation trade-off was approved; battery impact was not measured.
+- On the Dell display, the user reported that a submitted surface kept Belle smooth, removing it or replacing it with an empty Metal queue brought the freeze back, and using the submitted surface as the existing black background looked normal and stayed smooth.
+- The earlier tag-only Release candidate and native backing-flattening override failed the visible Stage Manager check. The override is removed; the existing transition tag remains alongside the submitted background.
+- `python3 scripts/test.py --only WebWallpaperWindowCompositionTests` — before the Metal implementation, 3 passed and 2 new regressions failed; final run: 7 passed, 0 failed, 0 skipped. Coverage includes a real submitted frame, resize, suspension/resume and the no-Metal fallback.
+- `python3 scripts/test.py` — passed: Python checks and XcodeGen succeeded; native suite: 4,698 passed, 0 failed, 66 skipped. Three unrelated runtime warnings concerned main-thread use in video and app-update tests.
+- `python3 scripts/build.py --renderer-only` rebuilt current upstream dependencies; `python3 scripts/build.py --swift-only --configuration Release` passed. No renderer source changes were made by this fix.
+- The clean Release app was restarted with the original covered-desktop preference restored. Runtime inspection confirmed attached web views and submitted 1×1 Metal backgrounds on both the Dell and built-in displays, with no diagnostic layer or runtime patch.
+- The additional clean-build Stage Manager and Mission Control visual check was requested but remains unconfirmed. The accepted smoothness result above is from the working prototype, not a claimed final-build visual observation.
+- Wallpaper Engine reference-frame comparison and measured power consumption were not performed; this change addresses host-window presentation rather than wallpaper content rendering.
+
+## 2026-11-09 — Issue #177 rebuilt candidate rejected
+
+- The user tested the Release app from local commit 5cb12719 and reported that the issue was not fixed. Its prior passing gate and manual flag-toggle trials do not establish a fix.
+- Read-only process inspection confirmed the running executable was build/Build/Products/Release/WallpaperMachine.app/Contents/MacOS/WallpaperMachine.
+- WindowServer readback acknowledged tag 55 on both the Built-in Retina Display and DELL U2725QE web windows. The debugger detached after inspection; no window policy was changed.
+- The built-in window contained its live web view. The Dell window contained an NSImageView suspension poster; session logs recorded repeated presentation suspend/resume decisions for display 3.
+- The foreground-app rule was Keep running, covered-desktop behavior was the default Pause, and the power source was External. The relationship between this pause and the reported stutter remains unconfirmed; a controlled manual retest with the coverage rule disabled is pending authorization.
+- No new fix, desktop automation, app restart or settings mutation was performed. The candidate remains local and must not be treated as resolving #177.
+
+## 2026-11-09 — Web transition composition final review (#177)
+
+- Reviewed the web-window transition policy and live-resize restoration against current main; retained the general fix without wallpaper-specific behavior or per-frame work.
+- python3 scripts/test.py --only WebWallpaperWindowCompositionTests: 3 passed, 0 failed, 0 skipped; reads WindowServer policy on unordered windows and exercises an AppKit live-resize cycle.
+- python3 scripts/test.py: all 32 Python suites passed; 4,667 native passed, 0 failed, 66 skipped. The skipped asset, media, network and desktop-dependent checks are not passing coverage.
+- One runtime warning in AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy: a method called on the main thread may cause unresponsiveness; unrelated to web transition composition.
+- python3 scripts/build.py --swift-only --configuration Release: passed; built build/Build/Products/Release/WallpaperMachine.app. Existing linker deployment-target warnings remain.
+- Prior same-window Belle manual trials recorded smooth playback with tag 55 set, stutter after clearing it, and smooth playback after setting it again; the prior rebuilt app readback also showed the flag set automatically.
+- Final rebuilt-app visual acceptance remains unconfirmed. No desktop automation, wallpaper changes or app restart were performed during this final review. No valid Wallpaper Engine frame comparison is available.
+
+## 2026-11-09 — Preload desktop wallpapers and preserve their uncleared frames
+
+- Scope: serial preparation of inactive desktop scene, video and web wallpapers, parked-instance reuse and bounded shared still windows for repeated assignments.
+- python3 scripts/build.py --renderer-only passed and regenerated Swift bridge bindings; XcodeGen regenerated the project for the source and test additions.
+- Targeted scripts/test.py run passed: 240 native tests across parking, pinning, replicas, switch holds and video/web host lifecycles.
+- Full scripts/test.py gate passed with local-only XCODE_XCCONFIG_FILE bundle identities: 4,686 native tests passed, 66 skipped; all 32 Python test modules passed.
+- scripts/check_rust.py passed in an isolated child-process home with serial tests: core 428, bridge 941, all selected integration and shader suites passed; five desktop-window cases were excluded.
+- Five targeted Metal regressions passed three consecutive rounds (15/15); all 77 render graph contract tests passed.
+- python3 scripts/check_renderer.py passed: all registered binaries succeeded, 12 generated pooled/isolated frame comparisons matched and eight generated projects reloaded twice successfully.
+- Uncleared output preserves prior pixels before partial writes; overflow coverage asserts draw admission without an Inf/NaN pixel-equivalence claim, while finite inputs retain exact frame comparisons.
+- Asset-dependent renderer cases were skipped; desktop/media/network opt-ins, real Space animations, WindowServer stacking and Wallpaper Engine reference comparisons were not checked. No Release app was built or installed.
+- Gitleaks scans of 1,278 existing commits, candidate staged differences and full staged files found no leaks; agent paths, private assets and build output are excluded.
+
+## 2026-11-08 — Issue 177: rejected candidates and visible-frame regression
+
+Issue #177 remains unresolved. The user rejected the delivered candidate after repeating the Stage Manager desktop transition; passing callback timing and unit checks did not establish smooth visible playback.
+
+- The `isVisible` override and its offscreen-only regression were removed; they did not fix the reported desktop behavior.
+- A Release candidate adding `canJoinAllApplications` also still froze with original Belle. That source change was reverted.
+- That candidate's checks passed: `python3 scripts/test.py --only WebWallpaperSuspensionTests` (24 passed), `python3 scripts/test.py` (32 Python suites; 4,658 native passed, 66 skipped, 0 failed; 3 runtime warnings), and `python3 scripts/build.py --swift-only --configuration Release`. These results are not a fix verification.
+- During a user-confirmed 90-second freeze reproduction, animation callbacks continued with no visibility changes; after startup, the largest recorded callback gap was 29 ms. Callback timing does not measure screen presentation.
+- The asset-free WebGL, Canvas 2D and CSS [continuity fixture](../../../Tests/UI/Fixtures/WebFrameContinuity/project.json) also froze, including with the control panel closed. A one-tile library did not prevent the freeze. The [manual regression](../manual-smoke.md#native-desktop-posters-and-mission-control) requires repeated visible transitions because the failure is intermittent.
+- Raising the web window one level, with coverage probes moved above it, failed a controlled repeat: the same window retained its raised level while the user observed freezes. An earlier smooth run was inconclusive because wallpapers changed during it. Original levels were restored.
+- Wallpaper Engine comparison was **not done**: the available VM's captures did not show Belle, so they cannot serve as reference frames. The VM was suspended again.
+- `python3 scripts/tests/test_doc_links.py` passed 11 tests. No fix was committed.
+
+## 2026-11-08 — Belle Release build and Stage Manager retest
+
+Requested Release build and repeat desktop test for [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The candidate visibility change remains uncommitted; the reported Stage Manager stutter is **not verified as resolved**.
+
+- `python3 scripts/build.py --swift-only --configuration Release` — exit 0; built and ran `build/Build/Products/Release/WallpaperMachine.app`, binary UUID `C60DA559-5CD2-3C21-BE10-2ED77F3A5D02`. The installed app was not overwritten.
+- Five automated panel-focus / Show Desktop cycles in installed 1.9.3 and five in the updated build on macOS 27.0.1, external 3840×2160 @2x / 120 Hz, wallpaper 60 fps / scale 1.0. A disposable copy measured animation callbacks and calls into the wallpaper's drawing function; production code contains no wallpaper detection.
+- Longest measured draw gap during the automated cycle intervals: baseline 95 ms, updated 113 ms. Neither reproduced the reported approximately 600 ms hold. No page visibility changes or forwarded desktop clicks were recorded in those intervals; these cycles are not the exact mouse-click reproduction.
+- The user reported visible stuttering in reply to the baseline question after the updated app had started. That observation lacks a timestamp identifying the binary/transition, and no separate updated-build manual verdict was received. Page callback timing cannot exclude a compositor-held frame. Current main also includes earlier changes absent from installed 1.9.3, so this is not an isolated patch A/B.
+- The unchanged candidate code previously passed the full routine gate: 32 Python suites, XcodeGen, 4,659 native passed, zero failed, 66 skipped. The gate was not repeated for this build/test-only follow-up. Wallpaper Engine comparison remains **not done**: the available VM's captures did not contain Belle; no pixel metrics are claimed.
+- Restored Lost Tower on the primary display and Stage Manager off, retained the internal display wallpaper, moved the temporary import to Trash and cleared the search. The updated Release build remains running. No commit, push or issue closure.
+
+## 2026-11-08 — Desktop web scheduling during window visibility changes
+
+Investigation of [issue #177](https://github.com/MMFoundation/WallpaperMachine/issues/177). The change repairs an independently reproduced window-visibility scheduling gap; its connection to the reporter's exact Stage Manager transition remains unconfirmed.
+
+- The attached video holds different last frames for roughly 0.6 s on repeated returns to the desktop. The attached logs show no matching host presentation suspension; the CPU sample was taken later with another wallpaper active.
+- WebKit checks window visibility separately from occlusion. An attached desktop page now remains schedulable until the host suspends it; no wallpaper identification, timer, polling loop or extra render pass was added.
+- Before the fix, `python3 scripts/test.py --only WebWallpaperSuspensionTests/testDesktopPageSchedulingFollowsHostSuspensionWithoutAnOrderedWindow` failed: zero animation frames while the host permitted playback.
+- After the fix, `python3 scripts/test.py --only WebWallpaperSuspensionTests --only WebWallpaperHostLifecycleTests --only WebWallpaperFramePacingTests` passed: 74 tests, no failures or skips. The regression also measures stopped frames during explicit suspension and resumed frames without reloading.
+- `python3 scripts/test.py` passed: all 32 Python suites, XcodeGen, and 4,659 native tests; zero failures, 66 skipped of 4,725. Skips: 62 opt-in video/media asset cases, one live Steam install, two Workshop cases and the opt-in web reference renderer.
+- One runtime warning came from `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`: a method called on the main thread may cause UI unresponsiveness. No warning was attributed to the new scheduling regression.
+- Wallpaper Engine comparison **not done**. The Windows VM was available, but two muted `scripts/we_reference.py capture` attempts produced a black desktop with the Start menu, not Belle. The attempted native reference render also failed with `DecodingError.typeMismatch`; no valid before/after pixel metrics are claimed.
+- Authorized desktop probing of installed 1.9.3 on macOS 27.0.1 did not reproduce the reporter's repeatable macOS 27.2 stall. This is not confirmation of the changed app's visual behavior. The previous wallpaper and Stage Manager setting were restored, the temporary import was removed, and the VM was suspended again.
+- Updated the [web runtime description](../../features/web-wallpapers.md#runtime-shape) and [test coverage](../coverage.md#webwallpaper). No renderer/Rust changes or corresponding gates; no Release build, installation, commit or push.
+
+## 2026-11-07 — Mission Control composition and desktop poster refresh
+
+PR #175, including author updates 070caaa7 and 2ce3da8d, capture-cancellation fixes and native exported-web scheduling.
+
+- `python3 scripts/build.py --renderer-only` — exit 0; renderer built and Swift bindings regenerated. The later author commits leave Renderer sources unchanged.
+- `python3 scripts/test.py` — exit 0 on the final integrated tree: 687 Python tests passed; 4,648 native tests passed, 0 failed, 66 skipped (4,714 total).
+- Native skips cover opt-in live Steam, media/device integration and Wallpaper Engine web-reference jobs. One runtime warning remains: a method called on the main thread may cause UI unresponsiveness.
+- `python3 scripts/check_rust.py` — exit 0; 2,476 passing tests. Five desktop-window tests explicitly excluded; desktop/media/network opt-ins disabled.
+- `cmake --build artifacts/renderer/bin --parallel 6` — exit 0; completed the cold build separately after the renderer check hit its 600-second build limit.
+- `python3 scripts/check_renderer.py --skip-build` — exit 0; all 109 registered binaries succeeded, with seven local-asset-dependent cases skipped. All 12 generated scenes matched between pooled and isolated rendering; eight projects completed two reload cycles.
+- Regression coverage checks final-settle publication over a black startup picture, intermediate-frame retention, appearance refresh precedence, cancellation of replaced timers, and cache reuse. Native exported web layers retain the existing 10/20 FPS and pause/resume assertions.
+- Live Mission Control transitions, cancelled swipes and multiple displays were not exercised. No desktop automation or Release app build.
+
+## 2026-11-07 — Update cache ownership — final follow-up
+
+Final updater inspection added a cache-directory symlink guard and an explicit byte-count bound while rehashing a recovered package. The routine gate had already passed and was not repeated.
+
+- python3 scripts/test.py --only AppUpdatePolicyTests --only AppUpdatePersistenceTests --only AppUpdateTests — passed: 83 passed, 0 failed, 0 skipped; covers the final code including preservation of files behind a linked cache directory.
+- Earlier feature gate: python3 scripts/test.py — 4,642 native tests passed, 66 skipped, all Python modules passed. Targeted follow-up is additional evidence, not a replacement full-gate claim.
+- Live desktop update, real release migration/signing/publication and Release delivery build remain unrun. No installed app or user wallpaper data changed.
+
+## 2026-11-07 — Persistent, nonintrusive app updates
+
+Existing updater retained: three modes, conservative migration, per-version postponement, verified complete-package recovery, passive update surfaces and artifact-derived publish metadata.
+
+- python3 -m unittest scripts.tests.test_update_manifest scripts.tests.test_publish_release scripts.tests.test_dmg scripts.tests.test_package scripts.tests.test_localization_catalogs — passed, 76 tests; real synthetic signed DMG metadata round trip included.
+- python3 scripts/test.py --only AppUpdatePolicyTests --only AppUpdatePersistenceTests --only AppUpdateTests --only AppReleaseHistoryTests --only UpdateWindowTests --only UpdatePresentationTests --only AboutSettingsTests --only StatusPanelModelTests --only StatusPanelControllerTests --only StatusPanelRenderTests --only FirstRunModelTests --only WelcomeRenderTests --only SettingsSectionsLocalizationTests — passed, 199 tests at the targeted checkpoint; final additional coordinator coverage included in the full gate.
+- python3 scripts/test.py — passed once at completion: all 32 Python modules passed; native 4,642 passed, 0 failed, 66 skipped of 4,708. One runtime warning reported by the runner; skips are not passing evidence.
+- Cache and installer tests use isolated temporary paths/defaults and fake restart/open actions; they do not replace the installed app.
+- git diff --check and introduced documentation-link targets — passed. CLAUDE.md remains a relative symlink to AGENTS.md.
+- Not run: authorized desktop/UI session, live old-to-new release update, production signing/notarization/publishing, or a Release delivery build. No app launch/restart, release or push performed.
+- Rust/C++ renderer checks not applicable: no renderer changes. Task-owned transient test artifacts removed after recording the results.
+
 ## 2026-11-07 — Preserve saved sign-ins when keychain updates fail
 
 - pixiv and Steam Community now share generic-password storage; refused updates preserve the saved item and the original keychain status.

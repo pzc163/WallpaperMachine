@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-11",
+  "sourceAppCommit": "93eb2aa5dd1a43445c35352eb747b1508218b0d1",
+  "method": "Reused the verified Release app compiled with deployment target 15.0; replaced incompatible libraries only in an isolated staging copy using identical-version official arm64_sequoia bottles. No load-command minimum was lowered.",
+  "package": {
+    "version": "1.9.4",
+    "bundle_identifier": "app.wallpapermachine",
+    "minimum_system_version": "15.0",
+    "architectures": [
+      "arm64"
+    ],
+    "image": "WallpaperMachine-S3-macOS15-93eb2aa5.dmg",
+    "size": 40260696,
+    "sha256": "5b77d15e7e44a8d8cb1149e5e2deaa4f28d6a85b19e789224e53df93ed236f82",
+    "deployment_minimums": {
+      "Contents/Extensions/WallpaperMachineExtension.appex/Contents/MacOS/WallpaperMachineExtension": "15.0",
+      "Contents/Frameworks/MediaRemoteAdapter.framework/Versions/A/MediaRemoteAdapter": "15.0",
+      "Contents/MacOS/WallpaperMachine": "15.0",
+      "dependency/libbrotlicommon.1.dylib": "15.0",
+      "dependency/libbrotlidec.1.dylib": "15.0",
+      "dependency/liblz4.1.dylib": "15.0",
+      "dependency/libpng16.16.dylib": "15.0",
+      "dependency/libqjs.0.dylib": "15.0"
+    },
+    "notarized": false
+  },
+  "dependencyBottles": [
+    {
+      "formula": "quickjs-ng",
+      "version": "0.18.0",
+      "platform": "arm64_sequoia",
+      "url": "https://ghcr.io/v2/homebrew/core/quickjs-ng/blobs/sha256:afe831ce1bf92ee1be4e11bc028525f36f6892e0d231a67996144fda7377f8b0",
+      "sha256": "afe831ce1bf92ee1be4e11bc028525f36f6892e0d231a67996144fda7377f8b0"
+    },
+    {
+      "formula": "libpng",
+      "version": "1.6.59",
+      "platform": "arm64_sequoia",
+      "url": "https://ghcr.io/v2/homebrew/core/libpng/blobs/sha256:6461c4dde6a693b559c531357b32126bd649ab67f53db5a5b70c25a5c12de4f1",
+      "sha256": "6461c4dde6a693b559c531357b32126bd649ab67f53db5a5b70c25a5c12de4f1"
+    },
+    {
+      "formula": "brotli",
+      "version": "1.2.1",
+      "platform": "arm64_sequoia",
+      "url": "https://ghcr.io/v2/homebrew/core/brotli/blobs/sha256:7b92f3978056e44ac3f4bb6f5fc1ec31278a6b5972706236e8988e7c255cb3d4",
+      "sha256": "7b92f3978056e44ac3f4bb6f5fc1ec31278a6b5972706236e8988e7c255cb3d4"
+    }
+  ],
+  "abiChecks": [
+    {
+      "library": "libqjs.0.dylib",
+      "formula": "quickjs-ng",
+      "version": "0.18.0",
+      "export_compatibility": "all original exports retained",
+      "library_version": [
+        "0.0.0",
+        "0.18.0"
+      ],
+      "minimum_macos": "15.0",
+      "sha256": "ef00eba61ff58dd1ac73f7c5a26f1aae9a52d69ef9d305d4ca5f3d931e969d79"
+    },
+    {
+      "library": "libpng16.16.dylib",
+      "formula": "libpng",
+      "version": "1.6.59",
+      "export_compatibility": "all original exports retained",
+      "library_version": [
+        "76.0.0",
+        "76.0.0"
+      ],
+      "minimum_macos": "15.0",
+      "sha256": "e4bd58a91432d5ec9b421dc4018ca4b53b0a0589d8c3ef00f17b7dc4597761bd"
+    },
+    {
+      "library": "libbrotlidec.1.dylib",
+      "formula": "brotli",
+      "version": "1.2.1",
+      "export_compatibility": "all original exports retained",
+      "library_version": [
+        "1.0.0",
+        "1.2.1"
+      ],
+      "minimum_macos": "15.0",
+      "sha256": "d5f3a73570e05fe5ec0d7668319a844c7b42316d4e7ccd5491b717b889541bc6"
+    },
+    {
+      "library": "libbrotlicommon.1.dylib",
+      "formula": "brotli",
+      "version": "1.2.1",
+      "export_compatibility": "all original exports retained",
+      "library_version": [
+        "1.0.0",
+        "1.2.1"
+      ],
+      "minimum_macos": "15.0",
+      "sha256": "f3945ad1bdf51270fb9c82469172e834fe07f7418a878266b0d39f3efc3a7550"
+    }
+  ],
+  "verification": {
+    "pythonPassed": 720,
+    "nativePassed": 5000,
+    "nativeFailed": 0,
+    "nativeSkipped": 72,
+    "nativeSeconds": 106,
+    "runtimeWarnings": 2,
+    "initialGate": "An existing WebWallpaperPageTests navigation case failed with Cannot open file. Isolated rerun and two subsequent complete native gates passed without changing runtime code.",
+    "mountedImageCodesignDeepStrict": "passed",
+    "externalHomebrewDependencies": 0,
+    "originalReleaseUnchanged": true
+  },
+  "boundaries": {
+    "appleNotarization": false,
+    "physicalMacOS15Acceptance": "not run",
+    "macOS15HostedCI": "Not run: Actions lists zero registered workflows; enable and direct dispatch both returned HTTP 404 although rehearsal.yml exists on the default branch. No main changes were made to activate it.",
+    "desktopChanged": false,
+    "liveLLMRequests": false,
+    "S4Enabled": false
+  },
+  "packagingCommit": "62c3655e232a75565893a2a6db47956b3063879b",
+  "releaseVerification": {
+    "release": "https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5",
+    "download": "https://github.com/pzc163/WallpaperMachine/releases/download/s3-macos15-93eb2aa5/WallpaperMachine-S3-macOS15-93eb2aa5.dmg",
+    "sha256": "5b77d15e7e44a8d8cb1149e5e2deaa4f28d6a85b19e789224e53df93ed236f82",
+    "bytes": 40260696,
+    "prerelease": true,
+    "latest": false,
+    "oldReleaseUnchanged": true,
+    "mainUnchanged": true,
+    "downloadVerified": true
+  }
+}
