@@ -25,6 +25,16 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — S5.1 offline engines and nine master artworks
+
+Native Shader/Three shells, an offline pinned library, declarative parameters and a native master gallery; no visible application, live model or desktop changes.
+
+- Targeted phases: 28 + 17 foundation/store checks; 25 engine checks and 5 after uniform caching; 35 gallery/master checks; 5 final lifecycle/protocol/timeout acceptance checks passed.
+- python3 scripts/test.py — exit 0; script checks passed; native 5,088 passed, 0 failed, 69 opt-in checks skipped of 5,157, 127 seconds.
+- Nine masters rendered real offscreen JPEGs and passed animation, paused parameter changes, portrait resume, bounded frame scheduling and stop checks. Visual snapshots were reviewed; no placeholder substitutes.
+- Three runtime main-thread warnings attributed to VideoFormatSupportTests, AppUpdateTests and LockScreenWebMPlayerTests; each passed, no source location in the issue records.
+- Skipped: real paid model traffic, new-engine long soak, visible desktop, multi-display sleep, energy measurement and physical macOS 15. Native WebGL2 remains required; WebKit supervision is not an audit of arbitrary hostile code.
+
 ## 2026-11-11 — Creator streaming thoughts and verified artifacts
 
 - Added session-only, bounded and credential-redacted model thinking/source streams, six-language artifact tabs, and publication-validated embedded WebKit previews. Legacy JSON source is checked again after decoding for credential leakage.
@@ -96,13 +106,3 @@ entry's recorded result is not allowed.
 - Connection success banners include actual mode, model and elapsed time in all six app languages; stale or cancelled results cannot restore success.
 - Focused native suites: 56 passed, 0 failed. Full python3 scripts/test.py: 720 script tests and 5006 native tests passed, 0 failed, 72 native skips.
 - No live API, personal Keychain, visible UI, desktop replacement or hardware acceptance was exercised. S4 remains closed in this commit.
-
-## 2026-11-11 — Creator macOS 15 ad-hoc packaging
-
-- Added explicit ad-hoc Rehearsal mode; production publishing remains gated and notarized by default.
-- Package audit now covers all embedded Mach-O files, arm64 architecture, minimum deployment versions and linker-version parsing.
-- Final python3 scripts/test.py: 720 script tests and 5000 native tests passed; 0 failed, 72 opt-in skipped, 2 runtime warnings.
-- Initial existing WebKit Cannot open file failure passed in isolation and two subsequent complete native gates; runtime source unchanged.
-- Local package uses verified identical-version official macOS 15 bottles; all 567 original exports retained and all 8 Mach-O minimums are 15.0.
-- DMG mount, deep strict signatures, dependency closure and source-app preservation verified; details in docs/testing/creator-macos15-results.json.
-- No Apple notarization, hosted macOS 15 CI run, physical display test, live model request, desktop change or S4 enablement.

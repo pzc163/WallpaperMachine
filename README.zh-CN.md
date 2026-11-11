@@ -67,6 +67,8 @@
 
 <a id="ai-creator"></a>
 
+S5.1 新增九套本地渲染母版，详见引擎验收记录。 [S5.1](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s51-acceptance.md).
+
 ## AI 创作：当前已实现的功能
 
 **精调模板模式**与**自由代码模式（HTML5 / Canvas / WebGL）**共用原生创作页、对话、不可变历史、独立预览、JPEG 封面与发布流程。经典模板仍可选择；自由代码可描述“纯黑背景，随鼠标移动晕染的紫色流体水墨”，并通过追问继续调整。

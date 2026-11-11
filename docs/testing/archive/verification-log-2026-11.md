@@ -9,6 +9,16 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — Creator macOS 15 ad-hoc packaging
+
+- Added explicit ad-hoc Rehearsal mode; production publishing remains gated and notarized by default.
+- Package audit now covers all embedded Mach-O files, arm64 architecture, minimum deployment versions and linker-version parsing.
+- Final python3 scripts/test.py: 720 script tests and 5000 native tests passed; 0 failed, 72 opt-in skipped, 2 runtime warnings.
+- Initial existing WebKit Cannot open file failure passed in isolation and two subsequent complete native gates; runtime source unchanged.
+- Local package uses verified identical-version official macOS 15 bottles; all 567 original exports retained and all 8 Mach-O minimums are 15.0.
+- DMG mount, deep strict signatures, dependency closure and source-app preservation verified; details in docs/testing/creator-macos15-results.json.
+- No Apple notarization, hosted macOS 15 CI run, physical display test, live model request, desktop change or S4 enablement.
+
 ## 2026-11-11 — S3 creator JSON mode and native preset controls
 
 - Scope: OpenAI-compatible JSON mode selection, native template presets, six-language strings, typed controller validation and offscreen tests; S4 remains closed.

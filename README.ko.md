@@ -69,6 +69,8 @@
 
 <a id="ai-creator"></a>
 
+S5.1은 로컬 렌더링 마스터 9개를 제공합니다. 엔진 검증 기록을 참고하세요. [S5.1](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s51-acceptance.md).
+
 ## AI 제작: 제공 기능
 
 **S5.1 다중 엔진 마스터 갤러리:** 새 프로젝트는 Shader GLSL로 시작하며 Three.js 3D 조명과 자유 HTML5/Canvas도 선택할 수 있습니다. 유체 잉크, 체적 구름, 중력 렌즈, 굴절 유리, 오로라 산맥, 궤도 입자, 균사, 천문 시계, 바우하우스 기하학 등 9개 마스터를 제공합니다. 모델 호출 없이 열고 네이티브 매개변수를 조정한 후 새 리비전을 검증하세요. 수정 시 기존 핵심 소스를 유지하고 빈 프로젝트에는 선택한 엔진의 참조를 제공합니다. Three.js는 CDN 없이 제한된 `wm-lib://`로 로컬에서 로드합니다. [엔진 계약과 제한](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-engines.md).

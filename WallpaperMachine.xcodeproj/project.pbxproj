@@ -895,6 +895,7 @@
 		B273DF738110013C85356602 /* PanelController+EngineOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D111B8D64BB2D9EC420396A4 /* PanelController+EngineOptions.swift */; };
 		B27632A861C12FED041D1DB3 /* CreatorConversationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F67753AE95951C92B89C42 /* CreatorConversationTests.swift */; };
 		B28906907F17BF10BE332187 /* SystemBatteryLevel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA6B2F1D9005C4B0F4BFADE /* SystemBatteryLevel.swift */; };
+		B29CE15E91A480123C9BB39B /* CreatorEngineAcceptanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 517CC74D55F72F49217B592B /* CreatorEngineAcceptanceTests.swift */; };
 		B2B67C7720799362A5AC6F8F /* SceneEngineOptionsBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6CFAD58004F62200F13D3CC /* SceneEngineOptionsBinding.swift */; };
 		B3159A0332DAFC6055051763 /* PixivTestSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70B62679495FD4E065F09AAD /* PixivTestSupport.swift */; };
 		B318EE561ECE2646184E943F /* TransferEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60AEB320A0D801025439FAB1 /* TransferEstimator.swift */; };
@@ -1782,6 +1783,7 @@
 		50C25B094039C8D7E8CA22C0 /* PlaybackPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackPreferences.swift; sourceTree = "<group>"; };
 		5114356599B0E8F7E80642B1 /* PanelValueRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelValueRules.swift; sourceTree = "<group>"; };
 		515248F47D7C603E01F22AED /* LLMJSONEnvelope.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMJSONEnvelope.swift; sourceTree = "<group>"; };
+		517CC74D55F72F49217B592B /* CreatorEngineAcceptanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorEngineAcceptanceTests.swift; sourceTree = "<group>"; };
 		5193DA73C84D919E3DBC30CC /* LetterboxZoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterboxZoom.swift; sourceTree = "<group>"; };
 		51CC8D386FAEFAE590B302E6 /* PixivInstalledPages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixivInstalledPages.swift; sourceTree = "<group>"; };
 		51EAB5554535D8D9F3F2E9D2 /* WallpaperFocusFilterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperFocusFilterTests.swift; sourceTree = "<group>"; };
@@ -3677,6 +3679,7 @@
 				B8793ED448088A5D7F99D2DA /* CreatorCodeWorkflowTests.swift */,
 				44F67753AE95951C92B89C42 /* CreatorConversationTests.swift */,
 				A792756F26A8D54DD76A1153 /* CreatorDraftTests.swift */,
+				517CC74D55F72F49217B592B /* CreatorEngineAcceptanceTests.swift */,
 				D4E9CAA360E38BB07BB9DA5B /* CreatorEngineTests.swift */,
 				537562FB3739FF2AD4E175E9 /* CreatorGenerationFixtures.swift */,
 				970FB217B718C9AA9141B05A /* CreatorGeneratorTests.swift */,
@@ -5005,6 +5008,7 @@
 				CC880E02A5112F2EF63D5043 /* CreatorControlsTests.swift in Sources */,
 				B27632A861C12FED041D1DB3 /* CreatorConversationTests.swift in Sources */,
 				237D1C81DE2C083E9269377C /* CreatorDraftTests.swift in Sources */,
+				B29CE15E91A480123C9BB39B /* CreatorEngineAcceptanceTests.swift in Sources */,
 				0787055EE00997B4648444EB /* CreatorEngineTests.swift in Sources */,
 				CCF14D577EBDD0439CFC3140 /* CreatorGalleryTests.swift in Sources */,
 				FB02617F5144C3801B6CA332 /* CreatorGenerationFixtures.swift in Sources */,

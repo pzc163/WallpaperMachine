@@ -73,6 +73,8 @@ The upstream website and Homebrew distribute the upstream app without this fork�
 
 <a id="ai-creator"></a>
 
+S5.1 adds nine locally rendered masters; see the engine acceptance record. [S5.1](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s51-acceptance.md).
+
 ## AI Creator: available features
 
 **Template tuning** and **Free code (HTML5 / Canvas / WebGL)** share the native workspace, conversation, immutable history, separate preview, JPEG cover and publication flow. Legacy parameter templates remain available. Free code accepts requests such as “a black background with violet fluid ink following the pointer” and further conversational edits.

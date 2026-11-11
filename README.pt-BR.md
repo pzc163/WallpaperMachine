@@ -69,11 +69,13 @@ O site original e o Homebrew não distribuem o Criador com IA deste fork. Cenas,
 
 <a id="ai-creator"></a>
 
+S5.1 inclui nove modelos renderizados localmente; consulte o registro de aceitação. [S5.1](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s51-acceptance.md).
+
 ## Criador com IA: recursos disponíveis
 
 **Galeria S5.1 com vários motores:** novos projetos começam em Shader GLSL; também há Three.js 3D e HTML5/Canvas livre. Nove modelos locais incluem tinta fluida, nuvens volumétricas, lente gravitacional, vidro refrativo, montanhas com aurora, partículas orbitais, micélio, relógio astronômico e geometria Bauhaus. Abra sem chamar um modelo, ajuste controles nativos e valide uma nova revisão. Edições usam o núcleo anterior; criações vazias recebem uma referência do motor escolhido. Three.js é local, via lista fechada `wm-lib://`, sem CDN. [Contratos e limites](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-engines.md).
 
-**Ajuste de modelos visuais** e **Código livre (HTML5 / Canvas / WebGL)** compartilham espaço nativo, conversa, histórico imutável, prévia independente, capa JPEG e publicação. Os modelos continuam sendo o padrão. No modo código, descreva tinta violeta fluida seguindo o ponteiro sobre fundo preto e refine pela conversa.
+**Ajuste de modelos visuais** e **Código livre (HTML5 / Canvas / WebGL)** compartilham espaço nativo, conversa, histórico imutável, prévia independente, capa JPEG e publicação. Os modelos clássicos continuam disponíveis. No modo código, descreva tinta violeta fluida seguindo o ponteiro sobre fundo preto e refine pela conversa.
 
 | Modelo visual | Parâmetros | Predefinições |
 | --- | --- | --- |
