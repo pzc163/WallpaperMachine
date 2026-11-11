@@ -52,6 +52,9 @@ struct LLMAnswerBuffer: Sendable {
                 if !requiresJSON && (prefix == "<!doctype html" || prefix == "<html") {
                     phase = .answer; try appendAnswer(marker); marker = ""; continue
                 }
+                if !requiresJSON && !(allowsLeadingThought && "<think>".hasPrefix(marker)) {
+                    phase = .answer; try appendAnswer(marker); marker = ""; continue
+                }
                 if allowsLeadingThought && marker == "<think>" { marker = ""; phase = .thought; continue }
                 guard (allowsLeadingThought && "<think>".hasPrefix(marker))
                     || (!requiresJSON && ["<!doctype html", "<html"].contains(where: { $0.hasPrefix(prefix) }))

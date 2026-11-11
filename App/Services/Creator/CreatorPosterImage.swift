@@ -18,13 +18,14 @@ enum CreatorPosterImage {
         bitmap.interpolationQuality = .high
         bitmap.draw(source, in: CGRect(x: 0, y: 0, width: width, height: height))
         let bytes = raw.assumingMemoryBound(to: UInt8.self)
-        var opaque = 0, colors = Set<UInt32>()
+        var opaque = 0, lit = 0, colors = Set<UInt32>()
         for y in 0..<32 { for x in 0..<32 {
             let offset = (min(height - 1, (2 * y + 1) * height / 64) * width + min(width - 1, (2 * x + 1) * width / 64)) * 4
             if bytes[offset + 3] >= 250 { opaque += 1 }
+            if max(bytes[offset], bytes[offset + 1], bytes[offset + 2]) >= 12 { lit += 1 }
             colors.insert(UInt32(bytes[offset] / 4) << 16 | UInt32(bytes[offset + 1] / 4) << 8 | UInt32(bytes[offset + 2] / 4))
         } }
-        guard opaque >= 922, colors.count >= 2, let pixels = bitmap.makeImage() else { throw CreatorRuntimeFailure.invalidCapture }
+        guard opaque >= 922, lit >= 4, colors.count >= 2, let pixels = bitmap.makeImage() else { throw CreatorRuntimeFailure.invalidCapture }
         let metrics = ["posterWidth": Double(width), "posterHeight": Double(height), "opaqueSamples": Double(opaque),
                        "pixelSamples": 1024.0, "distinctColors": Double(colors.count)]
         for quality in [0.86, 0.68] {

@@ -77,3 +77,13 @@ loading, property delivery, damped coordinates, deterministic pause/resume and
 native parameter revision derivation. Existing offline attack and code generation
 regressions remain active. Visible UI, physical display performance and macOS 15
 permissions still require device acceptance; no production app is launched here.
+
+## 两套核心源码引擎
+
+`shader-glsl` 的模型合同为裸 GLSL 或单一 `glsl` 围栏；单 Pass 使用 `mainImage`，双 Pass 依次用 `// @pass BufferA`、`// @pass Image` 分隔。宿主提供标准时间、帧、像素尺寸、鼠标 uniforms，以及 `iCursor`、`iActive` 和 `p_<id>` 参数。BufferA 读取上一帧，Image 读取本帧 BufferA；无 BufferA 时 Image 自反馈。使用可用的 RGBA16F，缺少浮点附件时使用 RGBA8，作者必须兼容编码后的状态。最终显示统一 ACES/sRGB/抖动，不应在作者代码重复执行。
+
+`three-3d` 的模型合同为裸 classic JavaScript 或单一 `javascript` 围栏，提供 `setupScene(api)` 和 `updateScene(api, dt)`。宿主建立透视相机、程序化 RoomEnvironment 的 128 像素 PMREM、RenderPass/UnrealBloomPass/OutputPass；作者负责场景、材质、灯光和有界更新，不另建渲染循环。`api` 包含 THREE、scene、camera、renderer、composer、bloom、parameters、cursor、environment、time、state、target、basePosition、onDispose。无外部 HDRI、纹理或字体。
+
+两类源码可以以 `/* @param <version-1 参数 JSON> */` 开头；未声明时继承已有修订/母版参数。原生将核心源码封装为确定性 HTML，`wm-engine` 记录引擎版本，外壳重建必须逐字节一致，仍封闭为原有四文件 v2 包。未来引擎枚举不代表开放执行权限。
+
+原生验证先通过外部监督的健康检查，再调用有界的引擎首帧探针推进三帧，然后使用 WKWebView 整页快照。黑帧、全透明、非有限颜色或非有限 3D 变换不能获得发布报告。离屏页面的原生 rAF 可被 WebKit 暂停，因此首帧推进不冒充长时间动画/能耗验证。GLSL 使用 `#line 1` 把驱动位置映射到作者源码；持久化仅保留 Image/BufferA、1～16384 行号及 syntax/type/undeclared/link/nonfinite 枚举，最多四条，不保存原始驱动消息。

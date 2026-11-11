@@ -91,11 +91,11 @@ final class CreatorPosterService {
             guard code.ready, !code.stopped, code.failure == nil, let frame = code.frame else { again(); return }
             guard code.samples >= 2 else { again(); return }
             code.pause(true)
-            surface.page.webView.callAsyncJavaScript("await document.fonts.ready; return document.readyState==='complete';",
+            surface.page.webView.callAsyncJavaScript("await document.fonts.ready; if(document.readyState!=='complete') return false; window.__wmValidateFrame?.(); return !document.documentElement.hasAttribute('data-creator-fault');",
                 arguments: [:], in: frame, in: .page) { [weak self] result in
                 guard let self, !stopped else { return }
                 if case .success(let value) = result, value as? Bool == true { snapshot() }
-                else { again() }
+                else { finish(.failure(CreatorRuntimeFailure.invalidCapture)) }
             }
         }
         func again() {

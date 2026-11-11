@@ -85,14 +85,20 @@ import WebKit
         checking = true
         if pendingSince == nil { pendingSince = .now }
         let epoch = epoch
-        view.evaluateJavaScript("({ready:document.readyState!=='loading',errors:window.__creatorCodeErrors||0,reason:window.__creatorCodeReason||'script'})", in: frame, in: .defaultClient) { [weak self] result in
+        view.evaluateJavaScript("({ready:document.readyState!=='loading',errors:window.__creatorCodeErrors||0,reason:window.__creatorCodeReason||'script',diagnostics:document.documentElement.getAttribute('data-wm-diagnostics')||''})", in: frame, in: .defaultClient) { [weak self] result in
             guard let self, !self.stopped, self.epoch == epoch else { return }
             guard case .success(let value) = result, let result = value as? [String: Any] else {
                 self.fail(.init(category: .runtime, runtimeReason: .pageFailed)); return
             }
             if (result["errors"] as? Int ?? 1) > 0 {
                 let reason = (result["reason"] as? String).flatMap(CreatorRepairIssue.RuntimeReason.init(rawValue:)) ?? .pageFailed
-                self.fail(.init(category: .runtime, runtimeReason: reason)); return
+                var issue = CreatorRepairIssue(category: .runtime, runtimeReason: reason)
+                if reason == .shader, let text = result["diagnostics"] as? String, text.utf8.count <= 1024,
+                   let decoded = try? JSONDecoder().decode([CreatorRepairIssue.ShaderDiagnostic].self, from: Data(text.utf8)) {
+                    issue.shaderDiagnostics = decoded
+                    if (try? issue.validate()) == nil { issue.shaderDiagnostics = nil }
+                }
+                self.fail(issue); return
             }
             self.checking = false
             self.samples += 1

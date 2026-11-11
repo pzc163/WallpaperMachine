@@ -67,6 +67,9 @@ enum CreatorCodeOutput {
         guard source.range(of: #"(?i)<\s*(?:iframe|frame|object|embed|applet|base|form|link|audio|video)\b|(?:https?|wss?|file|ftp)\s*:\s*//|/Users/|/private/|/Volumes/"#, options: .regularExpression) == nil
         else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
         _ = try CreatorParameterSchema.read(source)
+        if let document = try CreatorEngineDocument.read(source) {
+            guard try document.html() == source else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
+        }
         try checkScriptSyntax(source)
     }
     /// Compiles bounded classic-script bodies without invoking them. The native
@@ -81,9 +84,10 @@ enum CreatorCodeOutput {
         for match in expression.matches(in: html, range: NSRange(location: 0, length: text.length)) {
             let attributes = text.substring(with: match.range(at: 1))
             let trimmed = attributes.trimmingCharacters(in: .whitespacesAndNewlines)
-            if trimmed == "id=\"wm-params\" type=\"application/json\"" { continue }
-            if trimmed == "src=\"wm-lib://three/bundle.js\"", text.substring(with: match.range(at: 2)).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { continue }
-            guard trimmed.isEmpty else {
+            if ["id=\"wm-params\" type=\"application/json\"", "id=\"wm-engine\" type=\"application/json\"",
+                "id=\"wm-image\" type=\"x-shader/x-fragment\"", "id=\"wm-buffer\" type=\"x-shader/x-fragment\""].contains(trimmed) { continue }
+            if CreatorLibrary.assets.keys.contains(where: { trimmed == "src=\"" + $0 + "\"" }), text.substring(with: match.range(at: 2)).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { continue }
+            guard trimmed.isEmpty || trimmed == "id=\"wm-source\"" else {
                 // V1 author surface is inline classic scripts only; no module,
                 // import map, external source or MIME-dependent execution.
                 throw CreatorRepairIssue.field("$", .unexpected, policy: true)

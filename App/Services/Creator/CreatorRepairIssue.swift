@@ -10,10 +10,18 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
     enum Rule: String, Codable, Sendable { case syntax, missing, unexpected, type, range, choice, text, defaultMismatch, resourceBudget }
     struct Field: Codable, Equatable, Sendable { let path: String; let rule: Rule }
     enum RuntimeReason: String, Codable, Sendable { case timeout, pageFailed, invalidCapture, syntax, script, unhandled, shader, resource, policy }
+    struct ShaderDiagnostic: Codable, Equatable, Sendable {
+        enum Pass: String, Codable, Sendable { case Image, BufferA }
+        enum Code: String, Codable, Sendable { case syntax, type, undeclared, link, nonfinite }
+        let pass: Pass
+        let line: Int
+        let code: Code
+    }
     let category: Category
     var fields: [Field] = []
     var retryAfter: Double? = nil
     var runtimeReason: RuntimeReason? = nil
+    var shaderDiagnostics: [ShaderDiagnostic]? = nil
     var description: String { category.rawValue }
 
     var repairable: Bool {
@@ -27,7 +35,8 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
             allowed.insert("properties." + parameter.id)
             allowed.insert("properties." + parameter.id + ".default")
         }
-        guard fields.count <= 16, fields.allSatisfy({ allowed.contains($0.path) }),
+        guard shaderDiagnostics.map({ category == .runtime && runtimeReason == .shader && $0.count <= 4 && $0.allSatisfy { (1...16384).contains($0.line) } }) ?? true,
+              fields.count <= 16, fields.allSatisfy({ allowed.contains($0.path) }),
               runtimeReason == nil || category == .runtime,
               retryAfter.map({ category == .rateLimited && $0.isFinite && $0 >= 0 && $0 <= 86_400 }) ?? true
         else { throw CreatorPersistence.Failure.invalidRecord }

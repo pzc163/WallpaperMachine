@@ -10,6 +10,8 @@ actor CreatorGenerator {
         let prompt: String
         var maxOutputTokens = 2048
         var mode: CreatorCreationMode = .template
+        var engine: CreatorEngine? = nil
+        var referenceSource: String? = nil
         var iteration: CreatorConversation.Ticket? = nil
         var repair: CreatorRepairIssue? = nil
         var streamProgress: @Sendable (LLMStreamProgress) -> Void = { _ in }
@@ -47,16 +49,16 @@ actor CreatorGenerator {
         let base: CreatorPromptBuilder.Base?
         if let id = request.baseRevisionID { base = try await store.generationBase(projectID: request.projectID, revisionID: id) }
         else { base = nil }
-        _ = try Self.input(mode: request.mode, prompt: request.prompt, base: base, maxOutputTokens: request.maxOutputTokens, repair: nil)
+        _ = try Self.input(engine: request.engine, referenceSource: request.referenceSource, mode: request.mode, prompt: request.prompt, base: base, maxOutputTokens: request.maxOutputTokens, repair: nil)
         guard request.maxOutputTokens <= profile.limits.generationTokenBudget else { throw CreatorGenerationFailure.invalidRequest }
         let message = try await provider.sanitizedContext([request.prompt], profile: profile)[0]
         guard !message.isEmpty else { throw CreatorGenerationFailure.invalidRequest }
         return try await store.beginIteration(projectID: request.projectID, base: base, profile: profile, message: message, maxRepairs: maxRepairs, mode: request.mode)
     }
 
-    private static func input(mode: CreatorCreationMode, prompt: String, base: CreatorPromptBuilder.Base?,
+    private static func input(engine: CreatorEngine?, referenceSource: String?, mode: CreatorCreationMode, prompt: String, base: CreatorPromptBuilder.Base?,
                               maxOutputTokens: Int, repair: CreatorRepairIssue?) throws -> LLMRequest {
-        if mode == .code { return try CreatorCodePrompt.build(prompt: prompt, base: base, maxOutputTokens: maxOutputTokens, repair: repair) }
+        if mode == .code { return try CreatorEnginePrompt.build(engine: engine, prompt: prompt, base: base, referenceSource: referenceSource, maxOutputTokens: maxOutputTokens, repair: repair) }
         return try CreatorPromptBuilder.build(prompt: prompt, base: base, maxOutputTokens: maxOutputTokens, repair: repair)
     }
 
@@ -90,8 +92,9 @@ actor CreatorGenerator {
             guard request.repair == nil else { throw CreatorGenerationFailure.invalidRequest }
             turn = nil
         }
-        let input = try Self.input(mode: request.mode, prompt: prompt, base: contextBase, maxOutputTokens: request.maxOutputTokens, repair: request.repair)
-        if let source = contextBase?.source { try await provider.checkSourceContainsNoCredential(source, profile: profile) }
+        let input = try Self.input(engine: request.engine, referenceSource: request.referenceSource, mode: request.mode, prompt: prompt, base: contextBase, maxOutputTokens: request.maxOutputTokens, repair: request.repair)
+        let engineReference = try CreatorEnginePrompt.reference(base: contextBase, source: request.referenceSource)
+        if let source = contextBase?.source ?? request.referenceSource { try await provider.checkSourceContainsNoCredential(source, profile: profile) }
         guard input.maxOutputTokens <= profile.limits.generationTokenBudget else { throw CreatorGenerationFailure.invalidRequest }
         try Task.checkCancellation()
         let ticket = try await store.beginJob(projectID: request.projectID, baseRevisionID: request.baseRevisionID,
@@ -103,7 +106,7 @@ actor CreatorGenerator {
                 ticket: ticket, store: store, retrying: turn == nil, outputMode: turn?.effectiveJSONMode,
                 streaming: turn?.usesNonStream != true, omitUsage: turn?.omitsUsage == true, adaptOutputLimit: turn?.adaptsOutputLimit == true, progress: request.streamProgress,
                 validate: { text in
-                    if request.mode == .code { _ = try CreatorCodeOutput.parse(text) }
+                    if request.mode == .code { _ = try CreatorEnginePrompt.output(text, engine: request.engine, reference: engineReference) }
                     else { _ = try CreatorOutputValidator.detailed(text) }
                 },
                 received: { response in
@@ -113,7 +116,7 @@ actor CreatorGenerator {
             let specification: CreatorTemplate.Specification, presentation: CreatorBundlePresentation
             let source: Data?
             if request.mode == .code {
-                let output = try CreatorCodeOutput.parse(completed.response.text)
+                let output = try CreatorEnginePrompt.output(completed.response.text, engine: request.engine, reference: engineReference)
                 try await provider.checkSourceContainsNoCredential(completed.response.text, profile: profile)
                 // Legacy JSON may escape the key; check the decoded file bytes as well as the envelope.
                 try await provider.checkSourceContainsNoCredential(String(decoding: output.html, as: UTF8.self), profile: profile)
