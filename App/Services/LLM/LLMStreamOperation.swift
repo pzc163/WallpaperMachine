@@ -10,6 +10,8 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
     private var decoder: any LLMProtocolCodec
     private var responseCode: Int?
     private var errorBody = Data()
+    private var jsonBody = Data()
+    private var isJSON = false
     private var outcome: Result<LLMResponse, LLMFailure>?
     private var continuation: CheckedContinuation<LLMResponse, Error>?
     private var session: URLSession?
@@ -96,8 +98,9 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             responseCode = http.statusCode
             if [400, 422].contains(http.statusCode) { return (true, nil) }
             if let failure = LLMHTTPPolicy.failure(for: http) { return (false, failure) }
-            guard http.value(forHTTPHeaderField: "Content-Type")?.split(separator: ";").first?.trimmingCharacters(in: .whitespaces).lowercased() == "text/event-stream"
-            else { return (false, .protocolViolation) }
+            let mime = http.value(forHTTPHeaderField: "Content-Type")?.split(separator: ";").first?.trimmingCharacters(in: .whitespaces).lowercased()
+            isJSON = mime == "application/json" && decoder.acceptsJSON
+            guard mime == "text/event-stream" || isJSON else { return (false, .protocolViolation) }
             return (true, nil)
         }
         if let failure = result.1 { finish(.failure(failure)) }
@@ -111,6 +114,10 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
                 guard data.count <= 4096 - errorBody.count else { return .http(responseCode) }
                 errorBody.append(data); return nil
             }
+            if isJSON {
+                guard data.count <= limits.maximumBytes - jsonBody.count else { return .streamLimit }
+                jsonBody.append(data); return nil
+            }
             do { for event in try parser.append(data) { try decoder.consume(event) }; return nil }
             catch { return LLMFailure.sanitized(error) }
         }
@@ -122,7 +129,10 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             if let error { return .failure(LLMFailure.sanitized(error)) }
             if let responseCode, [400, 422].contains(responseCode) { return .failure(LLMHTTPPolicy.unsupportedJSONMode(errorBody) ? .jsonModeUnsupported : .http(responseCode)) }
             guard responseCode != nil else { return .failure(.network) }
-            do { try parser.finish(); return .success(try decoder.finish()) }
+            do {
+                if isJSON { try decoder.consumeJSON(jsonBody) } else { try parser.finish() }
+                return .success(try decoder.finish())
+            }
             catch { return .failure(LLMFailure.sanitized(error)) }
         }
         if let result { finish(result) }
@@ -132,7 +142,7 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             guard outcome == nil else { return nil }
             outcome = result
             let values = (continuation, session, launch, deadline)
-            continuation = nil; session = nil; task = nil; launch = nil; deadline = nil; errorBody.removeAll()
+            continuation = nil; session = nil; task = nil; launch = nil; deadline = nil; errorBody.removeAll(); jsonBody.removeAll()
             return values
         }
         guard let cleanup else { return }

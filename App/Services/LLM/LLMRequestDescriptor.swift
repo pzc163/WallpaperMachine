@@ -7,6 +7,7 @@ struct LLMRequestDescriptor: Sendable {
     let headers: [String: String]
     let body: Data
     let authentication: Authentication
+    var method = "POST"
 
     static func make(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool) throws -> Self {
         do { try profile.validate(); try input.validate() } catch { throw LLMFailure.invalidInput }

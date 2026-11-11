@@ -15,7 +15,7 @@ actor ProviderCredentialStore {
     struct Grant: Sendable, CustomStringConvertible, CustomDebugStringConvertible, CustomReflectable {
         private let profile: ProviderProfile
         private let key: String
-        fileprivate init(profile: ProviderProfile, key: String) { self.profile = profile; self.key = key }
+        init(profile: ProviderProfile, key: String) { self.profile = profile; self.key = key }
         var description: String { "ProviderCredentialGrant(<redacted>)" }
         var debugDescription: String { description }
         var customMirror: Mirror { Mirror(self, children: [:]) }
@@ -34,9 +34,10 @@ actor ProviderCredentialStore {
             var target = profile; target.baseURL = components.string ?? ""
             guard (try? target.origin()) == (try? profile.origin()), (try? target.origin()) != nil else { throw LLMFailure.staleProfile }
             var request = URLRequest(url: descriptor.url)
-            request.httpMethod = "POST"; request.httpBody = descriptor.body
+            guard ["POST", "GET"].contains(descriptor.method) else { throw LLMFailure.invalidInput }
+            request.httpMethod = descriptor.method; request.httpBody = descriptor.method == "GET" ? nil : descriptor.body
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+            request.setValue(descriptor.method == "GET" ? "application/json" : "text/event-stream", forHTTPHeaderField: "Accept")
             request.setValue("no-store", forHTTPHeaderField: "Cache-Control")
             switch (profile.protocolKind, descriptor.authentication) {
             case (.openaiCompatible, .bearer):
@@ -54,6 +55,7 @@ actor ProviderCredentialStore {
             return request
         }
     }
+    private let cache = ProviderCredentialCache()
     private let calls: any KeychainItemCalls
     init(calls: any KeychainItemCalls = SystemKeychain()) { self.calls = calls }
 
@@ -61,6 +63,11 @@ actor ProviderCredentialStore {
     func bind(_ key: String, to profile: ProviderProfile, settings: CreatorSettingsStore) async throws {
         try Self.validateKey(key, for: profile)
         try await settings.withCurrentProfile(profile) { _ in }
+        cache.invalidate(profileID: profile.id)
+        if key.isEmpty {
+            LLMRequestCoordinator.shared.credentialChanged(at: settings.url, profileID: profile.id)
+            return
+        }
         do {
             let binding = Binding(schemaVersion: 1, profileID: profile.id, origin: try profile.origin(),
                 configurationID: profile.configurationID, configurationRevision: profile.configurationRevision,
@@ -68,10 +75,19 @@ actor ProviderCredentialStore {
             try item(profile.id).write(CreatorPersistence.record(binding))
         } catch { throw LLMFailure.credentialsUnavailable }
         LLMRequestCoordinator.shared.credentialChanged(at: settings.url, profileID: profile.id)
-        try await settings.withCurrentProfile(profile) { _ in }
+        let cache = cache
+        try await settings.withCurrentProfile(profile) { _ in
+            if profile.allowsEmptyKey { cache.store(key, profile: profile, settingsURL: settings.url) }
+        }
     }
     func resolve(for profile: ProviderProfile, settings: CreatorSettingsStore) async throws -> Grant {
         try await settings.withCurrentProfile(profile) { _ in }
+        if let cached = cache.key(profile: profile, settingsURL: settings.url) {
+            return Grant(profile: profile, key: cached)
+        }
+        if profile.allowsEmptyKey && profile.usesCredential != true {
+            return Grant(profile: profile, key: "")
+        }
         let key: String
         do {
             if let data = try item(profile.id).read() {
@@ -87,11 +103,14 @@ actor ProviderCredentialStore {
             }
             try Self.validateKey(key, for: profile)
         } catch { throw LLMFailure.credentialsUnavailable }
-        try await settings.withCurrentProfile(profile) { _ in }
+        let cache = cache
+        try await settings.withCurrentProfile(profile) { _ in cache.store(key, profile: profile, settingsURL: settings.url) }
         return Grant(profile: profile, key: key)
     }
     func remove(for profile: ProviderProfile, settings: CreatorSettingsStore) async throws {
         try await settings.withCurrentProfile(profile) { _ in }
+        cache.invalidate(profileID: profile.id)
+        if profile.allowsEmptyKey && profile.usesCredential != true { return }
         do { try item(profile.id).delete() } catch { throw LLMFailure.credentialsUnavailable }
         LLMRequestCoordinator.shared.credentialChanged(at: settings.url, profileID: profile.id)
     }

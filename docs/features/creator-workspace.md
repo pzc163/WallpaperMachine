@@ -74,6 +74,10 @@ rollback only changes the selected work/preview pointer.
 
 ## Connections and cancellation
 
+Settings uses aligned visible labels (stacked in narrow windows), a local/LAN Base URL hint,
+and explicit cancellable model discovery with a selectable result list. Changing the draft
+cancels discovery and ignores stale results.
+
 Settings adds Provider Profile CRUD and active selection, all three codecs,
 endpoint/model, request budget 1–3 and token budget 1–100000. An entered key is
 bound explicitly through ProviderCredentialStore; views never read it back. A
@@ -86,7 +90,7 @@ JSON Schema (strict), JSON object (required), and Prompt only. An absent mode st
 displays Automatic without rewriting legacy metadata. The choices store the existing
 `automatic/schema/required/disabled` values; changing a saved mode rotates its
 configuration generation and cancels old requests, so remote credentials need explicit
-rebinding. Explicit local mode can bind an empty key to the new configuration.
+rebinding. Explicit local mode with an empty key bypasses Keychain entirely.
 Gemini displays its native JSON response-format policy and Anthropic its prompt JSON
 contract instead of offering OpenAI-specific switches. None of these modes bypasses
 the strict native parameter validator. The eight added labels/notes and existing

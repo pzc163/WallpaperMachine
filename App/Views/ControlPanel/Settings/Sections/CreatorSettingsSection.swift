@@ -12,6 +12,9 @@ struct CreatorSettingsSection: View {
     @State private var expectedRevision = 0
     @State private var loaded = false
     @State private var tokenBudgetText = ""
+    @State private var models: [String] = []
+    @State private var discovery: Task<Void, Never>?
+    @State private var discovering = false
 
     var body: some View {
         SettingsPage(.models) {
@@ -42,14 +45,14 @@ struct CreatorSettingsSection: View {
             if let saved = savedProfile { edit(saved) }
             else { expectedRevision = controller.creator.configuration.revision; if !loaded { loadSelected() } }
         }
-        .onChange(of: draft.baseURL) { _, _ in key = "" }
-        .onChange(of: draft) { _, _ in controller.creator.connectionNotice = nil }
+        .onChange(of: draft.baseURL) { _, _ in key = ""; models = []; discovery?.cancel() }
+        .onChange(of: draft) { _, _ in controller.creator.connectionNotice = nil; discovery?.cancel() }
         .onChange(of: tokenBudgetText) { _, value in draft.limits.tokenBudget = ProviderProfile.Limits.tokenBudget(from: value) ?? 0 }
         .onChange(of: draft.protocolKind) { _, kind in
             key = ""; draft.localMode = false; draft.capabilities = .init()
             if kind != .openaiCompatible { draft.localMode = false }
         }
-        .onDisappear { key = "" }
+        .onDisappear { key = ""; discovery?.cancel() }
         .accessibilityIdentifier("creator-model-settings")
     }
     private var profileList: some View {
@@ -69,46 +72,83 @@ struct CreatorSettingsSection: View {
     }
     private var fields: some View {
         VStack(alignment: .leading, spacing: 10) {
-            TextField("Connection name", text: $draft.name).accessibilityIdentifier("creator-profile-name")
-            Picker("Protocol", selection: $draft.protocolKind) {
-                Text("OpenAI compatible").tag(ProviderProfile.ProtocolKind.openaiCompatible)
-                Text(verbatim: "Anthropic Messages").tag(ProviderProfile.ProtocolKind.anthropicMessages)
-                Text(verbatim: "Gemini GenerateContent").tag(ProviderProfile.ProtocolKind.geminiGenerateContent)
-            }.accessibilityIdentifier("creator-profile-protocol")
-            if draft.protocolKind == .openaiCompatible {
-                Picker("JSON output mode", selection: Binding(
-                    get: { draft.capabilities.jsonMode ?? .automatic },
-                    set: { draft.capabilities.jsonMode = $0 }
-                )) {
-                    Text("Automatic (with fallback)").tag(ProviderProfile.Capabilities.JSONMode.automatic)
-                    Text("JSON Schema (strict)").tag(ProviderProfile.Capabilities.JSONMode.schema)
-                    Text("JSON object (required)").tag(ProviderProfile.Capabilities.JSONMode.required)
-                    Text("Prompt only").tag(ProviderProfile.Capabilities.JSONMode.disabled)
-                }.accessibilityIdentifier("creator-json-mode")
-            } else if draft.protocolKind == .geminiGenerateContent {
-                Text("Gemini uses its native JSON response format.").font(.caption).foregroundStyle(.secondary)
-                    .accessibilityIdentifier("creator-json-mode-native")
-            } else {
-                Text("Anthropic uses the prompt's JSON contract.").font(.caption).foregroundStyle(.secondary)
-                    .accessibilityIdentifier("creator-json-mode-native")
+            field("Connection name") { TextField("Connection name", text: $draft.name).accessibilityIdentifier("creator-profile-name") }
+            field("Protocol") {
+                Picker("Protocol", selection: $draft.protocolKind) {
+                    Text("OpenAI compatible").tag(ProviderProfile.ProtocolKind.openaiCompatible)
+                    Text(verbatim: "Anthropic Messages").tag(ProviderProfile.ProtocolKind.anthropicMessages)
+                    Text(verbatim: "Gemini GenerateContent").tag(ProviderProfile.ProtocolKind.geminiGenerateContent)
+                }.labelsHidden().accessibilityIdentifier("creator-profile-protocol")
             }
-            TextField("Endpoint", text: $draft.baseURL).accessibilityIdentifier("creator-profile-endpoint")
-            TextField("Model", text: $draft.model).accessibilityIdentifier("creator-profile-model")
+            field("JSON output mode") {
+                if draft.protocolKind == .openaiCompatible {
+                    Picker("JSON output mode", selection: Binding(get: { draft.capabilities.jsonMode ?? .automatic }, set: { draft.capabilities.jsonMode = $0 })) {
+                        Text("Automatic (with fallback)").tag(ProviderProfile.Capabilities.JSONMode.automatic)
+                        Text("JSON Schema (strict)").tag(ProviderProfile.Capabilities.JSONMode.schema)
+                        Text("JSON object (required)").tag(ProviderProfile.Capabilities.JSONMode.required)
+                        Text("Prompt only").tag(ProviderProfile.Capabilities.JSONMode.disabled)
+                    }.labelsHidden().accessibilityIdentifier("creator-json-mode")
+                } else {
+                    Text(verbatim: draft.protocolKind == .geminiGenerateContent ? L("Gemini uses its native JSON response format.") : L("Anthropic uses the prompt's JSON contract."))
+                        .font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("creator-json-mode-native")
+                }
+            }
+            field("Base URL") {
+                TextField("Base URL", text: $draft.baseURL, prompt: Text(verbatim: draft.localMode ? "http://192.168.1.x:1234/v1" : "https://api.example.com/v1"))
+                    .accessibilityIdentifier("creator-profile-endpoint")
+            }
+            field("Model ID") {
+                VStack(alignment: .leading) {
+                    TextField("Model ID", text: $draft.model).accessibilityIdentifier("creator-profile-model")
+                    if !models.isEmpty {
+                        Picker("Available models", selection: $draft.model) {
+                            Text("Choose a model").tag("")
+                            if !draft.model.isEmpty && !models.contains(draft.model) { Text(verbatim: draft.model).tag(draft.model) }
+                            ForEach(models, id: \.self) { Text(verbatim: $0).tag($0) }
+                        }.accessibilityIdentifier("creator-model-list")
+                    }
+                }
+            }
             if draft.protocolKind == .openaiCompatible {
                 Toggle("Local server mode", isOn: $draft.localMode).toggleStyle(.checkbox)
                 Text("Local mode allows HTTP and an empty key on loopback, private LAN addresses and .local hosts only. Use a trusted network; public endpoints require HTTPS.").font(.caption).foregroundStyle(.secondary)
+                if draft.localMode {
+                    Text(verbatim: "http://127.0.0.1:1234/v1").font(.caption).foregroundStyle(.secondary)
+                    HStack {
+                        Button("Fetch models") {
+                            let profile = draft, secret = key
+                            discovering = true
+                            discovery = controller.launch {
+                                defer { discovering = false; discovery = nil }
+                                    let result = try await controller.creatorModels(profile, key: secret)
+                                    try Task.checkCancellation()
+                                    if draft == profile { models = result }
+                            }
+                        }.disabled(discovering || (try? draft.origin()) == nil).accessibilityIdentifier("creator-fetch-models")
+                        if discovering { Button("Cancel") { discovery?.cancel() } }
+                    }
+                }
             }
-            SecureField("API key", text: $key).privacySensitive().accessibilityIdentifier("creator-profile-key")
-            Picker("Request budget", selection: $draft.limits.requestBudget) {
-                ForEach(1...3, id: \.self) { Text(verbatim: String($0)).tag($0) }
-            }.accessibilityIdentifier("creator-request-budget")
-            HStack {
-                Text("Token budget")
+            field("API key") { SecureField("API key", text: $key).privacySensitive().accessibilityIdentifier("creator-profile-key") }
+            field("Request budget") {
+                Picker("Request budget", selection: $draft.limits.requestBudget) { ForEach(1...3, id: \.self) { Text(verbatim: String($0)).tag($0) } }
+                    .labelsHidden().accessibilityIdentifier("creator-request-budget")
+            }
+            field("Token budget") {
                 TextField("Token budget", text: $tokenBudgetText, prompt: Text(verbatim: String(ProviderProfile.Limits.defaultTokenBudget)))
                     .accessibilityIdentifier("creator-token-budget")
             }
             Text("Blank uses 24,576 reserved output tokens, with up to 8,192 per request. Negotiation and repairs share the budget.").font(.caption).foregroundStyle(.secondary)
         }.textFieldStyle(.roundedBorder)
+    }
+    private func field<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(verbatim: PanelLocale.shared.catalogString(label)).frame(width: 132, alignment: .trailing)
+                content().frame(minWidth: 150, maxWidth: .infinity, alignment: .leading)
+            }
+            VStack(alignment: .leading, spacing: 5) { Text(verbatim: PanelLocale.shared.catalogString(label)); content() }
+        }
     }
     private var buttons: some View {
         VStack(alignment: .leading, spacing: 8) {

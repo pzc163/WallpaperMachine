@@ -11,6 +11,11 @@ final class LLMRequestCoordinator: @unchecked Sendable {
         let cancel: @Sendable (LLMFailure) -> Void
     }
     private let lock = NSLock()
+    private var credentialObservers: [UUID: @Sendable (URL, CreatorSettings?, UUID?) -> Void] = [:]
+    func observeCredentials(_ action: @escaping @Sendable (URL, CreatorSettings?, UUID?) -> Void) -> UUID {
+        lock.withLock { let id = UUID(); credentialObservers[id] = action; return id }
+    }
+    func removeCredentialObserver(_ id: UUID) { _ = lock.withLock { credentialObservers.removeValue(forKey: id) } }
     private var entries: [UUID: Entry] = [:]
 
     func register(settingsURL: URL, profile: ProviderProfile, jobURL: URL, ticket: GenerationJob.Ticket,
@@ -30,11 +35,13 @@ final class LLMRequestCoordinator: @unchecked Sendable {
             }.map(\.cancel)
         }
         callbacks.forEach { $0(.staleProfile) }
+        lock.withLock { Array(credentialObservers.values) }.forEach { $0(url, settings, nil) }
     }
     func credentialChanged(at url: URL, profileID: UUID) {
         let location = path(url)
         let callbacks = lock.withLock { entries.values.filter { $0.settingsPath == location && $0.profile.id == profileID }.map(\.cancel) }
         callbacks.forEach { $0(.credentialsUnavailable) }
+        lock.withLock { Array(credentialObservers.values) }.forEach { $0(url, nil, profileID) }
     }
     func jobCancelled(at url: URL, ticket: GenerationJob.Ticket) {
         let location = path(url)

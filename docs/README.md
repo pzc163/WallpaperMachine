@@ -118,6 +118,8 @@ file; pass `rg -u` to search them deliberately.
 | [features/telemetry.md](features/telemetry.md) | Send performance data: what a report holds (no free text, Workshop ids only), the daily upload, 60 s frame windows and their cost, local files, deletion when turned off, and the website endpoint |
 | [features/diagnostics.md](features/diagnostics.md) | Application log format, load tagging and the line each wallpaper activation leaves, detailed logging, retention, how the log says the previous session ended, and the diagnostics report users attach to bug reports |
 
+- [Creator connection stability and workspace UX](plans/2026-11-11-creator-connection-ux.md)
+
 ## Maintaining these docs
 
 Add every new document to the table for its group and remove deleted ones: a

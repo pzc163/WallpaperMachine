@@ -179,6 +179,11 @@ extension PanelController {
         creator.cancel()
         creator.configuration = try await creatorWorkspace.removeProfile(id, expectedRevision: creator.configuration.revision)
     }
+    func creatorModels(_ profile: ProviderProfile, key: String) async throws -> [String] {
+        guard await dialogs.confirm(L("Fetch model list?"), detail: profile.baseURL, button: L("Fetch models")) else { return [] }
+        do { return try await creatorWorkspace.models(profile: profile, key: key) }
+        catch { throw CreatorPanelFailure(message: CreatorLabels.issue(CreatorRepairIssue.from(error).category)) }
+    }
     func cancelCreatorConnection() { creator.connectionNotice = nil; creator.connection?.cancel() }
     func testCreatorConnection(_ profile: ProviderProfile) async throws {
         guard !creator.isTestingConnection else { return }

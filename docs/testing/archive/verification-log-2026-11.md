@@ -9,6 +9,19 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-10 — Creator S2.1 bounded repair, conversation budget and rollback
+
+[S2.1 bounded repair and iteration](../../features/creator-iteration.md) implements FR-07/08 and AC-02/03/07 service behavior; no UI or live desktop.
+
+- Baseline: checked the user's prior CreatorLiveSmokeTests (1 passed, 0 failed, 0 skipped; protocol/model user-reported); removed only its temporary log/result and committed S1.4 locally as `8c1480b0` on `feat/ai-creator`; clean before S2.1, no push.
+- Targeted `python3 scripts/test.py --only <Creator/LLM classes>`: exit 0, 210 passed, 0 failed, 4 skipped; all 28 new S2.1 cases passed. Local Mock URLProtocol and MemoryKeychain; successful repairs use real offscreen WebKit/JPEG.
+- First full `python3 scripts/test.py`: exit 65; 695 Python passed; native 4,934 passed, 1 failed, 70 skipped. Unchanged GPU energy-counter test measured about 0.87 mW against a 10 mW lower bound.
+- Isolated `python3 scripts/test.py --only EnergyUsageMonitorTests/testKernelCountersForThisProcessAdvanceWithGPUWork`: exit 0, 1 passed, 0 failed/skipped; no source or threshold changes. Root cause of the sampling variation remains unconfirmed.
+- Failure-only full-gate retry: exit 0; 695 Python (33 modules), native 4,935 passed, 0 failed, 70 skipped (5,005 total). Exactly two full runs; source/test/generated-project SHA-256 identical between runs and after verification.
+- Skips: 3 S0 unrestricted probes, 62 media/device opt-ins, 3 Steam network tests, 1 reference job and 1 Creator live smoke. No real-provider request, personal Keychain access, desktop operation or Release/install this stage.
+- Final compiler-warning lines: targeted 28, full 0, none in changed sources/tests. Runtime warnings in passing untouched tests: `WebMOpeningTests.testAVp9FileOpensWithItsFormatSizeAndLength()`, `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`, `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()`.
+- Updated 02/03/05, feature owners and index; final documentation/source/scope checks and links recorded in the S2.1 report. Task-only artifacts removed after preserving counts; S2.1 remains uncommitted and stops here.
+
 ## 2026-11-10 — Creator S1.4 native runtime, sealed publication and opt-in smoke
 
 [S1.4 native publication](../../features/creator-publication.md) connects template generation, real unattached WebKit snapshots, immutable four-file evidence and recoverable library import. S1.3 was committed locally as `ac28cf34`; S1.4 remains uncommitted, with no push or desktop change.

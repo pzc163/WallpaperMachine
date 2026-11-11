@@ -13,6 +13,8 @@ final class MemoryKeychain: KeychainItemCalls, @unchecked Sendable {
 
     private let lock = NSLock()
     private var items: [String: Item] = [:]
+    private var reads = 0
+    var readCount: Int { lock.withLock { reads } }
     private var refusedUpdate: OSStatus?
 
     func data(service: String, account: String) -> Data? {
@@ -29,6 +31,7 @@ final class MemoryKeychain: KeychainItemCalls, @unchecked Sendable {
 
     func copyMatching(_ query: [String: Any]) -> (status: OSStatus, item: CFTypeRef?) {
         lock.withLock {
+            reads += 1
             guard let item = items[Self.key(query)] else { return (errSecItemNotFound, nil) }
             if item.savedByAnotherBuild { return (errSecAuthFailed, nil) }
             return (errSecSuccess, item.data as CFData)

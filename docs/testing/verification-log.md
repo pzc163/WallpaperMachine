@@ -25,6 +25,12 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator connection form and local credential sessions
+
+- Targeted LLMConnectionUXTests, ProviderCredentialStoreTests, CreatorModelSettingsTests and LLMStreamTransportTests: 21 passed, 0 failed, 0 skipped.
+- Documentation links (11), panel localization (9) and localization catalog (8) checks passed. Full routine gate follows after all three atomic changes.
+- Memory Keychain and Mock URLProtocol only; offscreen six-language form checks. No production app, LAN host, personal Keychain or model API accessed. macOS 15 physical LAN authorization remains a device check.
+
 ## 2026-11-11 — S4 offline code creation and developer preview
 
 - Stage 1 commit 8fccf4b9: bounded schema/object/prompt negotiation, LAN endpoints and native success banner; 720 script and 5006 native passed, 72 skipped.
@@ -128,16 +134,3 @@ Added the native AI Creator tab and model settings, with explicit generate/save/
 - Existing backup/restore/storage moves explicitly refuse Creator data, with a shared lease and durable first-write marker. Full Creator migration/backup is not implemented.
 - Six-language keys and offscreen narrow layouts checked; visible appearance, VoiceOver, actual preview-window interaction, real providers/Keychain and desktop activation remain unverified. S4 remains closed; no Release/long-run power test.
 - Final documentation/link/scope checks and cleanup retain structured test results; disposable test logs and result bundles are removed after collection.
-
-## 2026-11-10 — Creator S2.1 bounded repair, conversation budget and rollback
-
-[S2.1 bounded repair and iteration](../features/creator-iteration.md) implements FR-07/08 and AC-02/03/07 service behavior; no UI or live desktop.
-
-- Baseline: checked the user's prior CreatorLiveSmokeTests (1 passed, 0 failed, 0 skipped; protocol/model user-reported); removed only its temporary log/result and committed S1.4 locally as `8c1480b0` on `feat/ai-creator`; clean before S2.1, no push.
-- Targeted `python3 scripts/test.py --only <Creator/LLM classes>`: exit 0, 210 passed, 0 failed, 4 skipped; all 28 new S2.1 cases passed. Local Mock URLProtocol and MemoryKeychain; successful repairs use real offscreen WebKit/JPEG.
-- First full `python3 scripts/test.py`: exit 65; 695 Python passed; native 4,934 passed, 1 failed, 70 skipped. Unchanged GPU energy-counter test measured about 0.87 mW against a 10 mW lower bound.
-- Isolated `python3 scripts/test.py --only EnergyUsageMonitorTests/testKernelCountersForThisProcessAdvanceWithGPUWork`: exit 0, 1 passed, 0 failed/skipped; no source or threshold changes. Root cause of the sampling variation remains unconfirmed.
-- Failure-only full-gate retry: exit 0; 695 Python (33 modules), native 4,935 passed, 0 failed, 70 skipped (5,005 total). Exactly two full runs; source/test/generated-project SHA-256 identical between runs and after verification.
-- Skips: 3 S0 unrestricted probes, 62 media/device opt-ins, 3 Steam network tests, 1 reference job and 1 Creator live smoke. No real-provider request, personal Keychain access, desktop operation or Release/install this stage.
-- Final compiler-warning lines: targeted 28, full 0, none in changed sources/tests. Runtime warnings in passing untouched tests: `WebMOpeningTests.testAVp9FileOpensWithItsFormatSizeAndLength()`, `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`, `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()`.
-- Updated 02/03/05, feature owners and index; final documentation/source/scope checks and links recorded in the S2.1 report. Task-only artifacts removed after preserving counts; S2.1 remains uncommitted and stops here.

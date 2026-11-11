@@ -41,6 +41,8 @@ struct ProviderProfile: Codable, Equatable, Sendable {
     var protocolKind: ProtocolKind
     var baseURL: String
     var model: String
+    // Nil preserves legacy records. Local legacy profiles default to no credential lookup.
+    var usesCredential: Bool? = nil
     var localMode = false
     var capabilities = Capabilities()
     var limits = Limits()

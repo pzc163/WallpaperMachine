@@ -128,9 +128,15 @@ actor CreatorWorkspace {
             throw error
         }
     }
+    func models(profile: ProviderProfile, key: String) async throws -> [String] {
+        try await LLMModelCatalog().fetch(profile: profile, key: key)
+    }
     func saveProfile(_ profile: ProviderProfile, key: String, expectedRevision: Int) async throws -> CreatorSettings {
         try beforeWrite()
-        var result = try await settings.saveProfile(profile, expectedRevision: expectedRevision)
+        var draft = profile
+        if !key.isEmpty && draft.allowsEmptyKey { draft.usesCredential = true }
+        else if draft.allowsEmptyKey { draft.usesCredential = false }
+        var result = try await settings.saveProfile(draft, expectedRevision: expectedRevision)
         guard let saved = result.profiles.first(where: { $0.id == profile.id }) else { throw LLMFailure.staleProfile }
         // Blank input means no credential action. Old bindings cannot authorize a new generation.
         if !key.isEmpty || saved.allowsEmptyKey { try await credentials.bind(key, to: saved, settings: settings) }

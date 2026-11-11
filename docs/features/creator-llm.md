@@ -55,6 +55,13 @@ Host, scheme, port, base path, model, capabilities or other Profile metadata
 changes invalidate the binding. Deleting and recreating the same Profile ID gets
 a new configuration UUID and cannot revive an old key. A stale Keychain item may
 remain, but cannot authorize a request. Same-host profiles have independent keys.
+Nonempty credentials are loaded lazily into a process-only cache keyed by the full
+Profile/configuration and settings location. UI refresh/selection never reads Keychain.
+Settings/key changes synchronously invalidate caches. Local profiles without an explicit
+`usesCredential` marker do not read or write empty Keychain records; legacy local
+credentials require explicit re-entry to opt in. External Keychain edits take effect
+on next process launch or explicit rebinding.
+
 Keys are bounded visible ASCII header values, with no whitespace/CRLF; metadata,
 jobs, codecs and model input never receive a key. Grants redact ordinary string,
 debug-string and Mirror representations. This is not protection from a debugger
@@ -80,7 +87,17 @@ IPv6 `fc00::/7` and `fe80::/10`, and valid `.local` mDNS names. Link-local IPv6
 may include a literal interface scope encoded as `%25en0`; that scope remains part
 of the credential origin. Numeric/octal IPv4 aliases, public HTTP and encoded-host
 ambiguities are refused. Missing local keys omit Authorization; stale bindings
-remain invalid. This is explicit target consent, not network discovery.
+remain invalid. The app declares `NSAllowsLocalNetworking` and ATS insecure-HTTP exceptions only
+for loopback/RFC1918/link-local/ULA CIDRs. No global native ATS bypass is enabled.
+[Apple's CIDR exceptions](https://developer.apple.com/documentation/bundleresources/information-property-list/nsapptransportsecurity/nsexceptiondomains)
+apply on macOS 14+, covering our macOS 15 minimum. Profile checks remain stricter
+than ATS; Creator WebKit keeps its separate offline CSP/download policies.
+
+Explicit local model discovery asks confirmation for the entered target, performs
+one bounded GET `/v1/models`, rejects redirects, and uses only the entered in-memory
+key. It does not read Keychain, save a Profile or consume generation tokens. It
+validates/deduplicates/sorts at most 512 model IDs; cancellation stops the request.
+This is explicit target consent, not background network discovery.
 
 ## Streaming, limits and errors
 
