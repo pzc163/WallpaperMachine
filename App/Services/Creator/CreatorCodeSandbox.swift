@@ -21,6 +21,7 @@ import WebKit
     private var monitor: Task<Void, Never>?
     private var pendingSince: ContinuousClock.Instant?
     private let timeout: Duration
+    private let startupTimeout: Duration
     private let interval: Duration
     private let memoryLimit: UInt64
     private var epoch = UUID()
@@ -29,8 +30,9 @@ import WebKit
     private var hostSuspended = false
     private var playbackPaused = false
     private var previousUsage: (clock: ContinuousClock.Instant, cpu: UInt64)?
-    init(view: WKWebView, timeout: Duration = .seconds(2), interval: Duration = .milliseconds(250), memoryLimit: UInt64 = 512 * 1024 * 1024) {
+    init(view: WKWebView, timeout: Duration = .seconds(2), interval: Duration = .milliseconds(250), memoryLimit: UInt64 = 512 * 1024 * 1024, startupTimeout: Duration? = nil) {
         self.view = view; self.timeout = timeout; self.interval = interval; self.memoryLimit = min(512 * 1024 * 1024, max(64 * 1024 * 1024, memoryLimit))
+        self.startupTimeout = min(.seconds(5), max(timeout, startupTimeout ?? timeout))
         super.init()
         CreatorCodeProcess.observe(view)
         view.configuration.userContentController.addUserScript(WKUserScript(source: CreatorCodeSDK.source,
@@ -65,7 +67,7 @@ import WebKit
     }
     private func tick() {
         guard let pid = processID, CreatorCodeProcess.identifier(view) == pid else { fail(.init(category: .runtime, runtimeReason: .pageFailed)); return }
-        if let since = pendingSince, since.duration(to: .now) >= timeout { fail(.init(category: .runtime, runtimeReason: .timeout)); return }
+        if let since = pendingSince, since.duration(to: .now) >= (ready ? timeout : startupTimeout) { fail(.init(category: .runtime, runtimeReason: .timeout)); return }
         if let usage = CreatorCodeProcess.usage(pid) {
             if usage.ri_phys_footprint > memoryLimit { fail(.field("$", .resourceBudget, policy: true)); return }
             let cpu = usage.ri_user_time + usage.ri_system_time

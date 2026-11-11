@@ -35,6 +35,7 @@ import XCTest
             let settings = try await workspace.configuration()
             _ = try await workspace.selectProfile(c.profile.id, expectedRevision: settings.revision)
             try await controller.selectCreatorProject(c.ticket.projectID)
+            try await controller.setCreatorMode(.template)
             controller.creator.prompt = "A calm blue sky"; try CreatorWorkspaceTests.response(c)
             controller.creator.preview = CreatorPreviewWindow() // No window or renderer is opened.
             try await controller.generateCreator()
@@ -58,7 +59,7 @@ import XCTest
             _ = try await workspace.selectProfile(c.profile.id, expectedRevision: settings.revision)
             let controller = panel.controller
             try await controller.selectCreatorProject(c.ticket.projectID)
-            try await controller.setCreatorMode(.code)
+            try await controller.setCreatorEngine(.htmlCanvas)
             XCTAssertNil(controller.creator.selectedProjectID)
             controller.creator.prompt = "紫色水墨"
             c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(CreatorCodeWorkflowTests.output())])])

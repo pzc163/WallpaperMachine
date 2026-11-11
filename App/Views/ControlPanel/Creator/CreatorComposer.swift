@@ -60,12 +60,19 @@ struct CreatorComposer: View {
         }.labelsHidden().fixedSize(horizontal: false, vertical: true).accessibilityLabel(Text("Current model")).accessibilityIdentifier("creator-model-picker")
     }
     private var modes: some View {
-        Picker("Creation mode", selection: Binding(get: { controller.creator.mode }, set: { mode in
-            controller.launch { try await controller.setCreatorMode(mode) }
+        Picker("Creation engine", selection: Binding(get: {
+            controller.creator.mode == .template ? "template" : controller.creator.engine.rawValue
+        }, set: { value in
+            controller.launch {
+                if value == "template" { try await controller.setCreatorMode(.template) }
+                else if let engine = CreatorEngine(rawValue: value) { try await controller.setCreatorEngine(engine) }
+            }
         })) {
-            Text("Fine-tune template").tag(CreatorCreationMode.template)
-            Text("Code · HTML5/WebGL").tag(CreatorCreationMode.code)
-        }.pickerStyle(.segmented).accessibilityIdentifier("creator-mode")
+            ForEach(CreatorEngine.allCases.filter(\.available), id: \.self) { engine in
+                Text(verbatim: CreatorEngineLabels.title(engine)).tag(engine.rawValue)
+            }
+            Text("Fine-tune template").tag("template")
+        }.labelsHidden().accessibilityLabel(Text("Creation engine")).accessibilityIdentifier("creator-mode")
     }
     private func send() {
         guard controller.creator.canGenerate else { return }

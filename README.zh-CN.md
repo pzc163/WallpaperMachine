@@ -15,20 +15,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="许可证：GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 或更高版本，Apple 芯片">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 星标"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="下载 AI 创作预览版"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="下载 AI 创作预览版"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/zh/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="上游在线演示"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111">发布说明与校验和</a></sub>
+  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111">发布说明与校验和</a></sub>
 </p>
 
 <p align="center">
@@ -57,7 +57,7 @@
 
 ## 快速开始
 
-推荐下载 **[S4 开发者公测包](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111)**：macOS 15.0+，Apple Silicon / arm64，Ad-hoc 签名，未经过 Apple 公证，不支持 Intel。旧的 [S3 macOS 15 包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)和 [S3 原始包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)保留用于回归；原始包要求 macOS 27.2+。
+推荐下载 **[S4 开发者公测包](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)**：macOS 15.0+，Apple Silicon / arm64，Ad-hoc 签名，未经过 Apple 公证，不支持 Intel。旧的 [S3 macOS 15 包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)和 [S3 原始包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5)保留用于回归；原始包要求 macOS 27.2+。
 
 1. 下载 DMG 并核对 Release 页的 SHA-256。推荐使用独立 macOS 测试账户，不覆盖正式副本，不在同一账户同时运行两个版本。
 2. 仅在核验来源和校验值后，按[公测安装说明](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md)对测试副本执行 `xattr -cr`，或使用系统“隐私与安全性 → 仍要打开”。不关闭系统安全设置。
@@ -69,7 +69,9 @@
 
 ## AI 创作：当前已实现的功能
 
-**精调模板模式**与**自由代码模式（HTML5 / Canvas / WebGL）**共用原生创作页、对话、不可变历史、独立预览、JPEG 封面与发布流程。模板模式为默认；自由代码可描述“纯黑背景，随鼠标移动晕染的紫色流体水墨”，并通过追问继续调整。
+**精调模板模式**与**自由代码模式（HTML5 / Canvas / WebGL）**共用原生创作页、对话、不可变历史、独立预览、JPEG 封面与发布流程。经典模板仍可选择；自由代码可描述“纯黑背景，随鼠标移动晕染的紫色流体水墨”，并通过追问继续调整。
+
+**S5.1 多引擎母版画廊：** 新工程默认进入纯 Shader GLSL，也可选择 Three.js 3D 光影、自由 HTML5/Canvas。首批九套母版覆盖流体水墨、体积云海、黑洞引力透镜、折射玻璃、极光山脉、轨道星环、发光菌丝、天文机械钟和包豪斯几何。打开母版不调用模型；滑块和颜色控件直接微调，重新验证后保存新修订。一句话修改继承母版核心，空白创作会在所选引擎内匹配参考。Three.js 经严格白名单 `wm-lib://` 从应用本地加载，不依赖 CDN。[引擎合同与边界](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-engines.md)。
 
 | 模板 | 可调参数 | 内置预设 |
 | --- | --- | --- |
@@ -123,7 +125,7 @@
 
 ## 为什么值得信任
 
-以下上游正式版的构建证明与更新机制不适用于本 fork 的 S3 包：本次包为本地打包、Ad-hoc 签名且未公证，没有 GitHub Actions 构建证明。请使用 [Release 页](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111)提供的 SHA-256。AI 创作仅在你发起生成、修改或测试连接时向所选模型服务发送请求。
+以下上游正式版的构建证明与更新机制不适用于本 fork 的 S3 包：本次包为本地打包、Ad-hoc 签名且未公证，没有 GitHub Actions 构建证明。请使用 [Release 页](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)提供的 SHA-256。AI 创作仅在你发起生成、修改、模型列表查询或测试连接时向所选模型服务发送请求。
 
 - **全部开源。** 应用、渲染器和场景引擎都在这个仓库中，以 GPL-3.0-only 许可证发布。没有闭源核心，也没有付费功能：每个人用到的应用都一样。
 - **上游公开构建。** 上游正式版本由 [GitHub Actions](docs/release.md#build-buildyml) 从打了标签的提交构建并测试，然后附带 SHA-256 校验和与构建来源证明（build provenance attestation）发布。以下命令仅用于验证上游正式下载来自上游工作流：
@@ -189,7 +191,7 @@ WallpaperMachine 支持场景、视频和网页渲染。兼容性因壁纸而异
 <details>
 <summary><b>如何获取？</b></summary>
 
-本 fork 的 AI 创作版本请从 [macOS 15+ 预发布页](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111)下载，并按[快速开始](#快速开始)核验与安装；它是未公证的 Ad-hoc 验收包。上游的[正式版本](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)、官网与 Homebrew 安装渠道另行维护，不能用来获取本 fork 的 AI 创作功能。
+本 fork 的 AI 创作版本请从 [macOS 15+ 预发布页](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)下载，并按[快速开始](#快速开始)核验与安装；它是未公证的 Ad-hoc 验收包。上游的[正式版本](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)、官网与 Homebrew 安装渠道另行维护，不能用来获取本 fork 的 AI 创作功能。
 
 </details>
 

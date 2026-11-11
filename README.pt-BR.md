@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="Licença: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 ou posterior em Apple silicon">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="Estrelas no GitHub"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Demonstração do projeto original"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111">Notas da versão e checksums</a></sub>
+  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111">Notas da versão e checksums</a></sub>
 </p>
 
 <p align="center">
@@ -59,7 +59,7 @@
 
 ## Início rápido
 
-Baixe a **[prévia S4 para desenvolvedores](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, assinatura Ad-hoc, **sem notarização Apple**. Intel não é suportado. Os pacotes [S3 macOS 15](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) e [S3 original](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) continuam disponíveis para regressão; o original exige macOS 27.2+.
+Baixe a **[prévia S5.1 para desenvolvedores](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, assinatura Ad-hoc, **sem notarização Apple**. Intel não é suportado. Os pacotes [S3 macOS 15](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) e [S3 original](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) continuam disponíveis para regressão; o original exige macOS 27.2+.
 
 1. Confira o SHA-256 do DMG. Prefira uma conta macOS de teste; não sobrescreva a cópia de produção nem execute ambas na mesma conta.
 2. Após verificar a origem e o checksum, siga a [lista de instalação](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) para aplicar `xattr -cr` apenas à cópia de teste, ou use Privacidade e Segurança → Abrir Mesmo Assim. Não desative a segurança do sistema.
@@ -70,6 +70,8 @@ O site original e o Homebrew não distribuem o Criador com IA deste fork. Cenas,
 <a id="ai-creator"></a>
 
 ## Criador com IA: recursos disponíveis
+
+**Galeria S5.1 com vários motores:** novos projetos começam em Shader GLSL; também há Three.js 3D e HTML5/Canvas livre. Nove modelos locais incluem tinta fluida, nuvens volumétricas, lente gravitacional, vidro refrativo, montanhas com aurora, partículas orbitais, micélio, relógio astronômico e geometria Bauhaus. Abra sem chamar um modelo, ajuste controles nativos e valide uma nova revisão. Edições usam o núcleo anterior; criações vazias recebem uma referência do motor escolhido. Three.js é local, via lista fechada `wm-lib://`, sem CDN. [Contratos e limites](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-engines.md).
 
 **Ajuste de modelos visuais** e **Código livre (HTML5 / Canvas / WebGL)** compartilham espaço nativo, conversa, histórico imutável, prévia independente, capa JPEG e publicação. Os modelos continuam sendo o padrão. No modo código, descreva tinta violeta fluida seguindo o ponteiro sobre fundo preto e refine pela conversa.
 
@@ -132,7 +134,7 @@ sem abrir a janela.
 
 ## Por que você pode confiar
 
-Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes S3 deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
+Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes S3 deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
 
 - **Código aberto, por inteiro.** O app, o renderizador e o motor de cenas estão todos
   neste repositório sob GPL-3.0-only. Não há núcleo fechado nem recursos pagos: o app
@@ -240,7 +242,7 @@ os nomes das contas Steam são substituídos antes.
 <details>
 <summary><b>Como eu consigo o app?</b></summary>
 
-Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
+Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
 
 </details>
 

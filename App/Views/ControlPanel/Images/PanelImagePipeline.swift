@@ -13,6 +13,7 @@ enum PanelImageSource: Hashable, Sendable {
   /// The preview file itself, for the inspector and Now Playing artwork. It must lie inside the
   /// library after symlinks resolve, name an image, be a regular file and fit 32 MiB.
   case libraryPreview(file: URL)
+  case creatorMaster(id: String)
   case creatorPoster(bundle: URL, digest: String)
   /// A Workshop preview as a 512 px still. The URL must be https.
   case steamThumbnail(URL)
@@ -25,6 +26,7 @@ enum PanelImageSource: Hashable, Sendable {
     switch self {
     case .libraryCover(let file, let stamp): "cover|\(stamp)|\(file.path)"
     case .libraryPreview(let file): "preview|\(file.path)"
+    case .creatorMaster(let id): "master|\(id)"
     case .creatorPoster(let bundle, let digest): "creator|\(bundle.path)|\(digest)"
     case .steamThumbnail(let url): "steam|\(url.absoluteString)"
     case .pixivThumbnail(let url): "pixiv|\(url.absoluteString)"
@@ -139,7 +141,7 @@ final class PanelImagePipeline {
     case .propertyImage(let url):
       guard PropertyImageCache.allowedURL(url) else { throw Failure.refused }
       data = try await propertyImages.image(for: url).data
-    case .libraryCover, .pixivThumbnail, .creatorPoster:
+    case .libraryCover, .pixivThumbnail, .creatorPoster, .creatorMaster:
       throw Failure.notAnimated
     }
     try Task.checkCancellation()
@@ -154,6 +156,8 @@ final class PanelImagePipeline {
 
   private func stillData(for source: PanelImageSource) async throws -> Data {
     switch source {
+    case .creatorMaster(let id):
+      return try await Task.detached(priority: .utility) { try CreatorMasterCatalog.poster(id) }.value
     case .creatorPoster(let bundle, let digest):
       return try await Task.detached(priority: .utility) {
         let snapshot = try CreatorBundleManifest.read(bundle, scopedRevision: true, expectedDigest: digest)

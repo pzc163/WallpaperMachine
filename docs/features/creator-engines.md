@@ -87,3 +87,23 @@ permissions still require device acceptance; no production app is launched here.
 两类源码可以以 `/* @param <version-1 参数 JSON> */` 开头；未声明时继承已有修订/母版参数。原生将核心源码封装为确定性 HTML，`wm-engine` 记录引擎版本，外壳重建必须逐字节一致，仍封闭为原有四文件 v2 包。未来引擎枚举不代表开放执行权限。
 
 原生验证先通过外部监督的健康检查，再调用有界的引擎首帧探针推进三帧，然后使用 WKWebView 整页快照。黑帧、全透明、非有限颜色或非有限 3D 变换不能获得发布报告。离屏页面的原生 rAF 可被 WebKit 暂停，因此首帧推进不冒充长时间动画/能耗验证。GLSL 使用 `#line 1` 把驱动位置映射到作者源码；持久化仅保留 Image/BufferA、1～16384 行号及 syntax/type/undeclared/link/nonfinite 枚举，最多四条，不保存原始驱动消息。
+
+## 母版画廊与本地编辑
+
+新工程默认选择 shader-glsl；引擎菜单同时保留经典参数模板和自由 HTML。画廊按引擎显示三套作品，其 JPEG 来自真实离屏 WKWebView，而非静态占位绘制。打开母版会本地重建、验证、生成封面并选择不可变修订，不需要 Provider 或模型请求。修改颜色、数值、开关会同步预览；只有“验证修改”生成新的有效修订后才能保存入库，应用显示器仍单独操作。
+
+| 引擎 | 母版 | 核心机制 |
+| --- | --- | --- |
+| shader-glsl | Aurum Ink | 半拉格朗日反馈、邻域平滑与旋度力的流体视觉近似，指针注入颜料；不是精确 CFD 求解器 |
+| shader-glsl | Luminous Cloudsea | 有界体积步进、分层噪声密度与短程光线衰减 |
+| shader-glsl | Event Horizon | 弯曲射线、发光吸积盘、颜色频移近似与透镜星场；不是相对论数值模拟 |
+| three-3d | Prismatic Atelier | 倒角透光玻璃矩阵、色散、摄影棚反射、动态点光 |
+| three-3d | Boreal Terrain | 低多边形起伏地形、色阶与雾、程序化极光帘幕 |
+| three-3d | Orbital Relic | 2,048 容量实例化粒子、轨道圈与金属多面体核心 |
+| html-canvas | Bioluminescent Mycelium | 2,400 容量粒子、低分辨率趋化场、指针引力与尾迹 |
+| html-canvas | Celestial Tourbillon | 几何齿轮、摆轮、当地时间指针与近似月相 |
+| html-canvas | Form in Motion | 包豪斯色块、排版、网格与缓动构成 |
+
+母版源文件和参数目录随 Bundle 固定，源码 SHA-256 校验后才能生成；不按任意路径找资源。母版截图只用于画廊，用户发布封面仍每次真实捕获。未指定历史版本时，在选择的引擎内以中英文关键词匹配母版；无匹配时稳定使用该引擎第一套，不额外调用模型。已有版本以其不可变核心为准，不被参考匹配覆盖。
+
+冷启动编译 PMREM/后期管线会短时阻塞 WebKit。只有通过原生外壳重建验证的两套引擎拥有最多 5 秒启动心跳期限；ready 后恢复 2 秒期限。普通 HTML 仍为 2 秒，验证任务总期限仍为 5 秒；不会因页面自报活动延长期限。此次并行测试实际发现并修复了旧 2 秒冷启动误判，未放宽 CPU、内存、帧率或画布限制。

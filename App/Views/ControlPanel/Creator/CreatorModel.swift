@@ -11,7 +11,11 @@ final class CreatorModel {
     var search = ""
     var prompt = ""
     var composerFocusID = UUID()
-    var mode = CreatorCreationMode.template
+    var mode = CreatorCreationMode.code
+    var engine = CreatorEngine.shaderGLSL
+    var masters: [CreatorMasterCatalog.Master] = []
+    var masterPosters: [String: PanelImageSource] = [:]
+    var showsGallery = true
     var autoRepair = false
     var maxRepairs = 1
     var phase = Phase.idle
@@ -27,7 +31,7 @@ final class CreatorModel {
         if let activeTranscript { return Self.displaySource(activeTranscript.progress.content) }
         if let turn = detail?.conversation.turns.last, turn.state != .completed,
            let text = transcripts[turn.id]?.progress.content, !text.isEmpty { return Self.displaySource(text) }
-        return detail?.source ?? ""
+        return detail?.authorSource ?? detail?.source ?? ""
     }
     var artifactUsage: LLMResponse.Usage? {
         if let activeTranscript { return activeTranscript.progress.usage }
@@ -38,7 +42,7 @@ final class CreatorModel {
     }
     static func displaySource(_ value: String) -> String {
         var text = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        if text.hasPrefix("```html"), let line = text.firstIndex(of: "\n") {
+        if ["```html", "```glsl", "```javascript"].contains(where: text.hasPrefix), let line = text.firstIndex(of: "\n") {
             text = String(text[text.index(after: line)...])
             if text.hasSuffix("\n```") { text.removeLast(4) }
         }

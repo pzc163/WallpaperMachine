@@ -11,6 +11,8 @@ actor CreatorWorkspace {
         let installedRevisionID: UUID?
         var source: String? = nil
         var parameterSchema: CreatorParameterSchema? = nil
+        var engine: CreatorEngine? = nil
+        var authorSource: String? = nil
     }
     let store: CreatorRevisionStore
     let settings: CreatorSettingsStore
@@ -59,9 +61,26 @@ actor CreatorWorkspace {
             parameterSchema = try snapshot.files["index.html"].flatMap { try CreatorParameterSchema.read(String(decoding: $0, as: UTF8.self)) }
             source = snapshot.files["index.html"].map { LLMStreamText.sanitize(String(decoding: $0, as: UTF8.self)) }
         } else { specification = nil }
+        let document = try source.flatMap(CreatorEngineDocument.read)
         let installed = try await registry.bindings().values.first { $0.projectID == id }
         return Detail(project: project, revisions: revisions, reports: reports,
-                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID, source: source, parameterSchema: parameterSchema)
+                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID, source: source, parameterSchema: parameterSchema, engine: specification?.kind == .code ? (document?.engine ?? .htmlCanvas) : nil, authorSource: document?.core)
+    }
+    func masters() throws -> [CreatorMasterCatalog.Master] { try CreatorMasterCatalog.all() }
+    func createMaster(_ id: String) async throws -> UUID {
+        try beforeWrite(); try Task.checkCancellation()
+        guard let master = try CreatorMasterCatalog.all().first(where: { $0.id == id }) else { throw CreatorGenerationFailure.invalidRequest }
+        let project = try await store.createProject(title: master.title)
+        do {
+            let html = Data(try master.source().utf8)
+            let spec = try CreatorCodeOutput.specification(projectID: project.id, html: html)
+            _ = try await rebuild(spec, base: nil, source: html)
+            return project.id
+        } catch {
+            let store = store
+            _ = await Task.detached { try? await store.deleteDraft(project.id) }.value
+            throw error
+        }
     }
     func create(title: String) async throws -> UUID {
         try beforeWrite(); return try await store.createProject(title: title).id
@@ -80,7 +99,12 @@ actor CreatorWorkspace {
             let safe = try await provider.sanitizedContext([request.prompt], profile: profile)[0]
             try await store.nameFirstPrompt(project, sanitizedPrompt: safe)
         }
-        return try await orchestrator.createForPreview(request)
+        var input = request
+        if input.mode == .code, input.baseRevisionID == nil, input.referenceSource == nil, let engine = input.engine,
+           let master = CreatorMasterCatalog.closest(prompt: input.prompt, engine: engine, masters: try CreatorMasterCatalog.all()) {
+            input.referenceSource = try master.source()
+        }
+        return try await orchestrator.createForPreview(input)
     }
     func installedWallpaper(project: UUID, revision: UUID) async throws -> String {
         let publication = try await store.publication(projectID: project, revisionID: revision)

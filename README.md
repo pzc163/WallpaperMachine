@@ -18,20 +18,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="License: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 or later on Apple silicon">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Download AI Creator preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Download AI Creator preview"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Upstream browser demo"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia or later&ensp;·&ensp;Apple silicon (M1 or later)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111">Release notes and checksums</a></sub>
+  <sub>macOS 15 Sequoia or later&ensp;·&ensp;Apple silicon (M1 or later)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111">Release notes and checksums</a></sub>
 </p>
 
 <p align="center">
@@ -63,7 +63,7 @@
 
 ## Quick start
 
-Download the **[S4 developer pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, ad-hoc signed and **not Apple notarized**. Intel is not supported. The earlier [S3 macOS 15 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) and [original S3 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) remain for regression testing; the original requires macOS 27.2+.
+Download the **[S4 developer pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, ad-hoc signed and **not Apple notarized**. Intel is not supported. The earlier [S3 macOS 15 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) and [original S3 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) remain for regression testing; the original requires macOS 27.2+.
 
 1. Download the DMG and verify the release SHA-256. Prefer a separate macOS test account; do not overwrite your production copy or run both versions in the same account.
 2. After checking the source and checksum, follow the [installation checklist](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) for a scoped `xattr -cr` on the test copy, or use Privacy & Security → Open Anyway. Do not disable system security.
@@ -75,7 +75,9 @@ The upstream website and Homebrew distribute the upstream app without this fork�
 
 ## AI Creator: available features
 
-**Template tuning** and **Free code (HTML5 / Canvas / WebGL)** share the native workspace, conversation, immutable history, separate preview, JPEG cover and publication flow. Templates remain the default. Free code accepts requests such as “a black background with violet fluid ink following the pointer” and further conversational edits.
+**Template tuning** and **Free code (HTML5 / Canvas / WebGL)** share the native workspace, conversation, immutable history, separate preview, JPEG cover and publication flow. Legacy parameter templates remain available. Free code accepts requests such as “a black background with violet fluid ink following the pointer” and further conversational edits.
+
+**S5.1 multi-engine gallery:** start with Shader GLSL (the new-project default), Three.js 3D lighting, or free HTML5/Canvas. Nine local masters cover fluid ink, cloudsea, gravitational lensing, refractive glass, aurora terrain, orbital particles, mycelium, an astronomical clock and Bauhaus geometry. Open a master without a model request, tune native sliders/colors, then validate a new revision. Natural-language changes inherit its core; blank prompts use the closest reference in the selected engine. Three.js is bundled through an exact offline `wm-lib://` allowlist, never a CDN. [Engine contracts and limits](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-engines.md).
 
 | Template | Parameters | Built-in presets |
 | --- | --- | --- |
@@ -136,7 +138,7 @@ without opening the window.
 
 ## Why you can trust it
 
-The upstream build attestations and update flow below do not describe this fork’s S3 packages. They were packaged locally, Ad-hoc signed, not notarized, and have no GitHub Actions build attestation. Use the SHA-256 on the [Release page](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111). AI Creator sends requests to your selected model service when you ask it to generate, revise or test a connection.
+The upstream build attestations and update flow below do not describe this fork’s S3 packages. They were packaged locally, Ad-hoc signed, not notarized, and have no GitHub Actions build attestation. Use the SHA-256 on the [Release page](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111). AI Creator sends requests to your selected model service when you ask it to generate, revise or test a connection.
 
 - **Open source, all of it.** The app, its renderer and its scene engine are all in
   this repository under GPL-3.0-only. There is no closed core and no paid features: the app
@@ -244,7 +246,7 @@ Steam account names are replaced first.
 <details>
 <summary><b>How do I get it?</b></summary>
 
-Download this fork’s AI Creator from the [macOS 15+ pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111) and follow [Quick start](#quick-start). It is an Ad-hoc acceptance package without Apple notarization. The upstream [production releases](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), website and Homebrew distribution are maintained separately and do not include this fork’s AI Creator.
+Download this fork’s AI Creator from the [macOS 15+ pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-s51-preview-20261111) and follow [Quick start](#quick-start). It is an Ad-hoc acceptance package without Apple notarization. The upstream [production releases](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), website and Homebrew distribution are maintained separately and do not include this fork’s AI Creator.
 
 </details>
 

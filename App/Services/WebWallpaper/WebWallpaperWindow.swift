@@ -479,7 +479,8 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
                     self.webView.configuration.userContentController.add(rules)
                     if snapshot.specification.kind == .code {
                         guard CreatorCodeProcess.supported else { throw CreatorRuntimeFailure.pageFailed }
-                        let sandbox = CreatorCodeSandbox(view: self.webView)
+                        let engine = try snapshot.files["index.html"].flatMap { try CreatorEngineDocument.read(String(decoding: $0, as: UTF8.self)) }
+                        let sandbox = CreatorCodeSandbox(view: self.webView, startupTimeout: engine == nil ? nil : .seconds(5))
                         self.creatorCode = sandbox
                         sandbox.onReady = { [weak self] in self?.completeLoad() }
                         sandbox.onFailure = { [weak self] issue in

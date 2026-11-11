@@ -14,6 +14,10 @@ extension PanelController {
         }
     }
     func loadCreator() async throws {
+        if creator.masters.isEmpty {
+            creator.masters = try await creatorWorkspace.masters()
+            creator.masterPosters = Dictionary(uniqueKeysWithValues: creator.masters.map { ($0.id, .creatorMaster(id: $0.id)) })
+        }
         let projects = try await creatorWorkspace.projects()
         let configuration = try await creatorWorkspace.configuration()
         let selected = creator.selectedProjectID
@@ -28,6 +32,7 @@ extension PanelController {
         creator.selectedProjectID = detail?.project.id
         creator.parameters = detail?.specification?.parameters ?? [:]
         if let mode = detail?.specification?.creationMode ?? detail?.conversation.turns.last?.creationMode { creator.mode = mode }
+        if let engine = detail?.engine { creator.engine = engine }
         if !creator.isBusy {
             creator.issue = detail?.conversation.turns.last?.failure
             creator.phase = creator.issue == nil ? (creator.selectedRevision == nil ? .idle : .ready) : .failed
@@ -45,6 +50,21 @@ extension PanelController {
         guard creator.mode != mode else { return }
         try await selectCreatorProject(nil)
         creator.mode = mode
+    }
+    func setCreatorEngine(_ engine: CreatorEngine) async throws {
+        guard engine.available, !creator.isBusy else { throw CreatorGenerationFailure.invalidRequest }
+        if creator.mode == .code && creator.engine == engine { return }
+        try await setCreatorMode(.code)
+        try await selectCreatorProject(nil)
+        creator.engine = engine; creator.showsGallery = true
+    }
+    func openCreatorMaster(_ id: String) async throws {
+        guard CreatorCodeProcess.supported, let master = creator.masters.first(where: { $0.id == id }) else { throw CreatorGenerationFailure.invalidRequest }
+        try await creatorOperation(.runtime) {
+            self.creator.selectedProjectID = try await self.creatorWorkspace.createMaster(id)
+            self.creator.mode = .code; self.creator.engine = master.engine
+            self.creator.showsGallery = false; self.creator.artifactTab = .render
+        }
     }
     func newCreatorProject() async throws {
         try await creatorOperation(.editing) {
@@ -79,7 +99,7 @@ extension PanelController {
             self.creator.artifactTab = .source; self.creator.embedded.close()
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
-                maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs, mode: self.creator.mode)
+                maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs, mode: self.creator.mode, engine: self.creator.mode == .code ? self.creator.engine : nil)
             request.streamProgress = { [weak self] value in
                 mailbox.store(value)
                 Task { @MainActor in
@@ -132,6 +152,7 @@ extension PanelController {
     func useCreatorInspiration(_ text: String, mode: CreatorCreationMode) async throws {
         guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
         try await setCreatorMode(mode)
+        if mode == .code { try await setCreatorEngine(.htmlCanvas) }
         creator.prompt = text; creator.composerFocusID = UUID()
     }
     func cancelCreator() { creator.cancel() }

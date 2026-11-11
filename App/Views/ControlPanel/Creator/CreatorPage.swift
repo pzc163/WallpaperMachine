@@ -29,11 +29,14 @@ struct CreatorPage: View {
                     }
                 } else { Text("Your next wallpaper starts here").font(.headline) }
                 Spacer(minLength: 0)
+                Button { model.showsGallery.toggle() } label: { Label("Master gallery", systemImage: "square.grid.2x2") }
+                    .accessibilityIdentifier("creator-gallery-toggle")
             }.disabled(model.isBusy).padding(.horizontal, 20).padding(.vertical, 12)
             ScrollViewReader { scroll in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        if model.detail?.conversation.turns.isEmpty != false { CreatorInspiration() }
+                        if model.showsGallery && model.mode == .code { CreatorMasterGallery() }
+                        else if model.detail?.conversation.turns.isEmpty != false && model.selectedRevision == nil { CreatorInspiration() }
                         ForEach(model.detail?.conversation.turns ?? [], id: \.id) { turn in
                             PanelCard {
                                 VStack(alignment: .leading, spacing: 10) {
@@ -121,6 +124,12 @@ struct CreatorReport: View {
             }
             if let issue = model.issue {
                 Text(verbatim: issue.category.rawValue).font(.caption.monospaced())
+                if let diagnostics = issue.shaderDiagnostics {
+                    ForEach(diagnostics.indices, id: \.self) { index in
+                        let item = diagnostics[index]
+                        Text(verbatim: "\(item.pass.rawValue) · \(item.line) · \(item.code.rawValue)").font(.caption.monospaced())
+                    }
+                }
                 ForEach(issue.fields.indices, id: \.self) { index in
                     Text(verbatim: issue.fields[index].path + ": " + issue.fields[index].rule.rawValue).font(.caption.monospaced())
                 }

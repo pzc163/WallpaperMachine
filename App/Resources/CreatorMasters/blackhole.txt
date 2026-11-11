@@ -1,0 +1,13 @@
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+1.),f.x),f.y);}
+float stars(vec2 p){vec2 grid=p*140.,id=floor(grid),f=fract(grid)-.5;float h=hash(id);return pow(max(0.,1.-length(f)/(.025+h*.05)),4.)*step(.975,h);}
+void mainImage(out vec4 color,in vec2 pixel){vec2 uv=(pixel-.5*iResolution.xy)/iResolution.y/p_zoom;uv+=vec2(iCursor.x-.5,.5-iCursor.y)*p_parallax*.08;
+ float r=length(uv),angle=atan(uv.y,uv.x);vec2 lensed=uv*(1.+.035/(r*r+.012));vec3 c=vec3(stars(lensed)*1.8)+vec3(.001,.002,.005);
+ vec3 ro=vec3(0.,2.6+p_tilt,9.),rd=normalize(vec3(uv.x*1.65,uv.y*1.65-.25,-1.));vec3 p=ro+rd*hash(pixel)*.09;float optical=1.;
+ for(int i=0;i<84;i++){float radius=length(p);if(radius<1.03){optical=0.;break;}float stepSize=clamp(radius*.075,.07,.55);rd=normalize(rd-p/(radius*radius*radius)*stepSize*p_gravity);p+=rd*stepSize;
+ float radial=length(p.xz);float sheet=exp(-abs(p.y)*13.)*smoothstep(1.35,1.8,radial)*(1.-smoothstep(4.3,5.2,radial));
+ if(sheet>.003){float a=atan(p.z,p.x);float filaments=.45+.55*noise(vec2(radial*10.-iTime*p_speed*.6,a*9.+iTime*.12));float doppler=clamp(.55+.5*p.x/max(radial,.1),0.,1.);
+ vec3 heat=mix(p_hot,p_cool,doppler*.65);c+=heat*sheet*filaments*stepSize*p_glow*(.7+doppler*1.4);}
+ if(radius>16.)break;}
+ float ring=exp(-((r-.185)*(r-.185)*11025.));c+=mix(p_hot,p_cool,.22)*ring*p_glow*.15;
+ c*=smoothstep(.125,.148,r)+.0*optical;c*=1.-smoothstep(.45,1.3,r)*.4;color=vec4(c,1.);}

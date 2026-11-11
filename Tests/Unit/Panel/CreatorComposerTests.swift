@@ -39,6 +39,7 @@ import XCTest
         do {
             let controller = panel.controller
             try await controller.recoverCreator(); try await controller.selectCreatorProfile(c.profile.id)
+            try await controller.setCreatorMode(.template)
             try await controller.newCreatorProject()
             controller.creator.prompt = "请帮我生成一个蓝紫色极光"
             c.route.replace([.init(status: 401)])

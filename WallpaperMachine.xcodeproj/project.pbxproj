@@ -156,6 +156,7 @@
 		1B32261D850B986C9DC9B570 /* DownloadQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C30A6037AD89FCD5BCAEE8B /* DownloadQueue.swift */; };
 		1BA320F483791FC8821783B5 /* SystemMediaProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = C117B2683322257A81DB4D40 /* SystemMediaProvider.swift */; };
 		1BD8C528CA5268706F71B257 /* ControlPanelViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A752F8B6946CB646DA5F532D /* ControlPanelViewTests.swift */; };
+		1BEEA41F687F05247C7EEEE4 /* CreatorMasterGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADF8ADD1E1A049FCED983DFE /* CreatorMasterGallery.swift */; };
 		1C563EAA498B5EE7644A516B /* DownloadQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89C649CA7C7B9CC8CBB059D3 /* DownloadQueueTests.swift */; };
 		1C828B4964FB31FA104E8805 /* WallpaperHistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2DC1D45520D686EC13F368A /* WallpaperHistoryStoreTests.swift */; };
 		1D3657F1AB7DE36CC9F120DA /* PlaylistPlannerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ED86E714D3F3DD5D3A33C28 /* PlaylistPlannerTests.swift */; };
@@ -335,6 +336,7 @@
 		440481B3A6C1DC246433E33E /* LockScreenIdleExit.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9DA9D272B5029D637ACECD3 /* LockScreenIdleExit.swift */; };
 		44095855D6B12B5284A64C24 /* CreatorEngineDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = E902D3F0F57202BF4AA3177D /* CreatorEngineDocument.swift */; };
 		441BD9AB7633DDF7CC98AF53 /* WebWallpaperSuspensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7852ABA48B66BA2F88F25C4F /* WebWallpaperSuspensionTests.swift */; };
+		44A8AA2154041CFC7A04DB46 /* CreatorMasters in Resources */ = {isa = PBXBuildFile; fileRef = 5B97F21E5A9C9F3D454FC405 /* CreatorMasters */; };
 		44BC1B8EF54F6730DF27A627 /* GeminiGenerateContentCodec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C098EC42AF85EFC0539BC24 /* GeminiGenerateContentCodec.swift */; };
 		44CE2197C1B738F72E7C57F2 /* LockScreenWallpaperService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01A5E3053335C56D641946A1 /* LockScreenWallpaperService.swift */; };
 		45BF0F69C8C2B65B5AF03966 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F775C752A213C7E4FDC0F6E /* AppKit.framework */; };
@@ -918,6 +920,7 @@
 		B644A2FC6A27D1824049F4F5 /* NativeVideoRecoveryBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68BB66DAE3A091700E655097 /* NativeVideoRecoveryBudget.swift */; };
 		B680E753A90EAE3C0F2741C0 /* ReleaseNotesEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0870DEFC85B78394878DF7C8 /* ReleaseNotesEntryView.swift */; };
 		B6F37F7BBEB5F665F01506B8 /* ProviderCredentialStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85235F27A37DF88EA4D51264 /* ProviderCredentialStoreTests.swift */; };
+		B796B63F3BE0657339A3F86F /* CreatorMasterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38DFA2AC0A878D1F0D7C9C11 /* CreatorMasterTests.swift */; };
 		B7B40E073847902948515B29 /* WallpaperDisplayEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BA6D0CBB663A9FF6980DB73 /* WallpaperDisplayEntity.swift */; };
 		B7CD942F3E5E49BA7B2DDB38 /* InstalledPageRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 985F1D2F4D59B76ECE5FD1DF /* InstalledPageRenderTests.swift */; };
 		B812B08152829848B166C206 /* CreatorIterationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2922639384E3DFF7809D1B76 /* CreatorIterationTests.swift */; };
@@ -1023,6 +1026,7 @@
 		CC5F86F2FB8A2B78129440D2 /* LockScreenReevaluationBurst.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD50D09E2B6C327DDC94E33E /* LockScreenReevaluationBurst.swift */; };
 		CC880E02A5112F2EF63D5043 /* CreatorControlsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DB88B40083521F4841F3183 /* CreatorControlsTests.swift */; };
 		CCE532DA2152E18F6DCE836E /* NativeVideoAdmission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 066789D64DE7EE2B5F647633 /* NativeVideoAdmission.swift */; };
+		CCF14D577EBDD0439CFC3140 /* CreatorGalleryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61AEA80F0D7AD1387335B27D /* CreatorGalleryTests.swift */; };
 		CCFB0C1A623B284417C94A1F /* DownloaderRetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E4B72FE4E56FDD33127110 /* DownloaderRetryTests.swift */; };
 		CD0B2C28C0CC139710DE8A7B /* NativeVideoLayoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8D82F809C60A5C8437C168D /* NativeVideoLayoutTests.swift */; };
 		CD24E9BDC43162BE2CA565FC /* CreatorS14Fixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35890A5D649662CA80F36F4C /* CreatorS14Fixtures.swift */; };
@@ -1097,6 +1101,7 @@
 		DA679AF0A89006998DA4D765 /* LetterboxDetectorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27FF2142675194E545D8BCC4 /* LetterboxDetectorTests.swift */; };
 		DA73965717AB88156B9C96C9 /* TagChip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 046A572F9CB54E0A797EA211 /* TagChip.swift */; };
 		DAA0B17D6E7097AE2741AF16 /* ValidationReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71DF003984E787625127BBC6 /* ValidationReport.swift */; };
+		DADA251610C3A2C1AFEDF045 /* CreatorMasterCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C59B135E8922338F98A8E8A4 /* CreatorMasterCatalog.swift */; };
 		DADCFA9D641519EE51BAB89C /* SearchTranslationSettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2ACE2934210466323D0412D /* SearchTranslationSettingsRow.swift */; };
 		DAFF601601C04C2814B01A5E /* LetterboxZoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5193DA73C84D919E3DBC30CC /* LetterboxZoom.swift */; };
 		DB2664C2364C9D8CC493AE12 /* SystemConditionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041561B748D563C84552139F /* SystemConditionState.swift */; };
@@ -1648,6 +1653,7 @@
 		37D3C3C4AFA603E96958AA9C /* PlaybackPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaybackPreferencesTests.swift; sourceTree = "<group>"; };
 		38025EEC057BDCDFA9B52905 /* SingleInstance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleInstance.swift; sourceTree = "<group>"; };
 		38C5D6AA7C7A97F32DE552C2 /* PropertyImageCacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyImageCacheTests.swift; sourceTree = "<group>"; };
+		38DFA2AC0A878D1F0D7C9C11 /* CreatorMasterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMasterTests.swift; sourceTree = "<group>"; };
 		393EA03733A8DBD7EAFD6A88 /* FakeTranslation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeTranslation.swift; sourceTree = "<group>"; };
 		397B87FC4B770357818B70E9 /* NativeVideoScalingModeNumberingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeVideoScalingModeNumberingTests.swift; sourceTree = "<group>"; };
 		39A681DDCCC1528614F42466 /* StorageSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageSettingsSection.swift; sourceTree = "<group>"; };
@@ -1811,6 +1817,7 @@
 		5B12FF2DD08710881462D90C /* PanelDisplayLayoutActionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelDisplayLayoutActionsTests.swift; sourceTree = "<group>"; };
 		5B226BF18E1CE29789CAC91E /* AppRuleMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRuleMonitor.swift; sourceTree = "<group>"; };
 		5B7778ADC70A997D253AE5C3 /* PanelController+Collections.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PanelController+Collections.swift"; sourceTree = "<group>"; };
+		5B97F21E5A9C9F3D454FC405 /* CreatorMasters */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CreatorMasters; path = App/Resources/CreatorMasters; sourceTree = SOURCE_ROOT; };
 		5BA6D0CBB663A9FF6980DB73 /* WallpaperDisplayEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperDisplayEntity.swift; sourceTree = "<group>"; };
 		5BC249D698C09E0758C02D21 /* WallpaperEnergyRatings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperEnergyRatings.swift; sourceTree = "<group>"; };
 		5C052F88AF9C988C0D9BBC8D /* PanelController+SteamSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PanelController+SteamSetup.swift"; sourceTree = "<group>"; };
@@ -1845,6 +1852,7 @@
 		60F2D57765D3ABCBF9936729 /* LetterboxFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LetterboxFixtures.swift; sourceTree = "<group>"; };
 		6161403D96F0F937E7CEAB72 /* ScreenSaverWebSurfaceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSaverWebSurfaceTests.swift; sourceTree = "<group>"; };
 		61824AC9409403F5B461DA15 /* PropertyLabelDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PropertyLabelDocument.swift; sourceTree = "<group>"; };
+		61AEA80F0D7AD1387335B27D /* CreatorGalleryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorGalleryTests.swift; sourceTree = "<group>"; };
 		628948F097360CFC94AA5978 /* QuickSettingsTileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickSettingsTileTests.swift; sourceTree = "<group>"; };
 		62B0F48B12F2DC7E2E4D4B09 /* PixivBrowserRenderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixivBrowserRenderTests.swift; sourceTree = "<group>"; };
 		62C726B8EFBE98D87C57F488 /* LockScreenRequestShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenRequestShape.swift; sourceTree = "<group>"; };
@@ -2220,6 +2228,7 @@
 		ADB58A30879083DD063CC052 /* WallpaperImportPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperImportPicker.swift; sourceTree = "<group>"; };
 		ADD8A7A09D45A6CB35B0D033 /* DisplaysDesktopRows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaysDesktopRows.swift; sourceTree = "<group>"; };
 		ADF788FE5EE5706BF76DEE6A /* WallpaperPresentationPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperPresentationPolicy.swift; sourceTree = "<group>"; };
+		ADF8ADD1E1A049FCED983DFE /* CreatorMasterGallery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMasterGallery.swift; sourceTree = "<group>"; };
 		AE09959F484237BC54310087 /* GlobalHotKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKeys.swift; sourceTree = "<group>"; };
 		AE4494AFBA1049EC719E7B41 /* PanelController+WallpaperSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PanelController+WallpaperSettings.swift"; sourceTree = "<group>"; };
 		AE49EAAA2B498195EFD582DC /* WallpaperBackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperBackupService.swift; sourceTree = "<group>"; };
@@ -2338,6 +2347,7 @@
 		C517AAC89CCEDE4C14790418 /* LLMProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMProviderTests.swift; sourceTree = "<group>"; };
 		C58622B2F13FAACF24E98D19 /* WallpaperImportStagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperImportStagingTests.swift; sourceTree = "<group>"; };
 		C58AECA841E79F5D889DA715 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper.icon; path = AppIcon.icon; sourceTree = "<group>"; };
+		C59B135E8922338F98A8E8A4 /* CreatorMasterCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMasterCatalog.swift; sourceTree = "<group>"; };
 		C5C6658A86CB853C5DE8C630 /* AppThemeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppThemeTests.swift; sourceTree = "<group>"; };
 		C5FFE72293F57733F78E3797 /* InstalledBrowserModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledBrowserModel.swift; sourceTree = "<group>"; };
 		C653DEE93862AC251B47C370 /* InspectorRenderFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorRenderFixture.swift; sourceTree = "<group>"; };
@@ -3061,6 +3071,7 @@
 				C6C086BFA3E08C26C253C72A /* CreatorInspector.swift */,
 				CE5977EB20D95EF4A5B48CDF /* CreatorInspiration.swift */,
 				78275D4CA08B84598A121BEA /* CreatorLabels.swift */,
+				ADF8ADD1E1A049FCED983DFE /* CreatorMasterGallery.swift */,
 				EAD16EA080870AF83F15ACEC /* CreatorModel.swift */,
 				D7D22B5B900EF057B7F29EAB /* CreatorPage.swift */,
 				70522B8DCA962077E65176E2 /* CreatorPreviewContent.swift */,
@@ -3112,6 +3123,7 @@
 		48D1C7F3EF75BD078A29D3E6 = {
 			isa = PBXGroup;
 			children = (
+				5B97F21E5A9C9F3D454FC405 /* CreatorMasters */,
 				C74567E7A24A8558A010DB65 /* CreatorRuntime */,
 				DD1EDE652E69E06265483667 /* StarterWallpaper */,
 				AB0C4AD40AF6CCFA1128210B /* three */,
@@ -3204,6 +3216,7 @@
 				4A88C3220FCBAAAD50095133 /* CreatorGenerator.swift */,
 				94A141BD9CDC57FC468B8128 /* CreatorJSON.swift */,
 				DDFB0ED4838ABF4FB422F244 /* CreatorLibrary.swift */,
+				C59B135E8922338F98A8E8A4 /* CreatorMasterCatalog.swift */,
 				C11CA297E9D7422B68A4C180 /* CreatorOrchestrator.swift */,
 				12064F806146560442FDE047 /* CreatorOutputSchema.swift */,
 				5DA551656C69FDD278724E6C /* CreatorOutputValidator.swift */,
@@ -3670,6 +3683,7 @@
 				964100DFCCE3BA5EB7569966 /* CreatorHostFoundationTests.swift */,
 				2922639384E3DFF7809D1B76 /* CreatorIterationTests.swift */,
 				5387FB05687A42F91EC3C9D8 /* CreatorLiveSmokeTests.swift */,
+				38DFA2AC0A878D1F0D7C9C11 /* CreatorMasterTests.swift */,
 				276AE5F652AB3AA41C37AC34 /* CreatorOrchestratorTests.swift */,
 				0B5A07F5F65CAE955F7B3BC4 /* CreatorOutputValidatorTests.swift */,
 				69A220A96234F8957F9B2ECF /* CreatorPosterTests.swift */,
@@ -3752,6 +3766,7 @@
 				75F00A74965ABA2A38436336 /* CreatorArtifactTests.swift */,
 				E0FF3434532809ED53EB4E72 /* CreatorComposerTests.swift */,
 				0DB88B40083521F4841F3183 /* CreatorControlsTests.swift */,
+				61AEA80F0D7AD1387335B27D /* CreatorGalleryTests.swift */,
 				A5056AC8CF7E764179127BF9 /* CreatorModelSettingsTests.swift */,
 				166649FD3DB5D98F4FF00C9F /* CreatorPanelTests.swift */,
 				4C5A3E47EC5E105AE33D3E5C /* DisplayOptionsLoaderTests.swift */,
@@ -4825,6 +4840,7 @@
 			files = (
 				19E27811FC9C4C42CE7DB048 /* AppIcon.icon in Resources */,
 				2600CA761EA04A74898D63CD /* Assets.xcassets in Resources */,
+				44A8AA2154041CFC7A04DB46 /* CreatorMasters in Resources */,
 				F6072989CA5FDED7DBBCAA76 /* CreatorRuntime in Resources */,
 				485EAC24A329D7561E6B91FD /* InfoPlist.xcstrings in Resources */,
 				798F7C72D4B903EC62721C12 /* LICENSE in Resources */,
@@ -4990,11 +5006,13 @@
 				B27632A861C12FED041D1DB3 /* CreatorConversationTests.swift in Sources */,
 				237D1C81DE2C083E9269377C /* CreatorDraftTests.swift in Sources */,
 				0787055EE00997B4648444EB /* CreatorEngineTests.swift in Sources */,
+				CCF14D577EBDD0439CFC3140 /* CreatorGalleryTests.swift in Sources */,
 				FB02617F5144C3801B6CA332 /* CreatorGenerationFixtures.swift in Sources */,
 				CDD70970A4967000D42A347E /* CreatorGeneratorTests.swift in Sources */,
 				2BD7C464E396CA8EC89CDB8F /* CreatorHostFoundationTests.swift in Sources */,
 				B812B08152829848B166C206 /* CreatorIterationTests.swift in Sources */,
 				7777D25EF5C744A293F250EC /* CreatorLiveSmokeTests.swift in Sources */,
+				B796B63F3BE0657339A3F86F /* CreatorMasterTests.swift in Sources */,
 				472E7B1ED1F5034AB66B71EC /* CreatorModelSettingsTests.swift in Sources */,
 				C530E3920B95ADC6167F501F /* CreatorOrchestratorTests.swift in Sources */,
 				F61F7975731D08EF111F744E /* CreatorOutputValidatorTests.swift in Sources */,
@@ -5504,6 +5522,8 @@
 				EED789542D9F8E7E3F7EEE9E /* CreatorJSON.swift in Sources */,
 				BBD023D50F84AECF31BB09C6 /* CreatorLabels.swift in Sources */,
 				4BCD0C02BCBE3B6ABD05111D /* CreatorLibrary.swift in Sources */,
+				DADA251610C3A2C1AFEDF045 /* CreatorMasterCatalog.swift in Sources */,
+				1BEEA41F687F05247C7EEEE4 /* CreatorMasterGallery.swift in Sources */,
 				13ACB42EBA7052007B51E3F0 /* CreatorModel.swift in Sources */,
 				86D99C235ED992309400C994 /* CreatorOrchestrator.swift in Sources */,
 				FCFF26C7D6D1A597B6B304FA /* CreatorOutputSchema.swift in Sources */,

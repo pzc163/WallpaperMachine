@@ -10,7 +10,7 @@ import XCTest
         do {
             let controller = panel.controller
             try await controller.recoverCreator(); try await controller.selectCreatorProfile(c.profile.id)
-            try await controller.setCreatorMode(.code); controller.creator.prompt = "Create a violet field"
+            try await controller.setCreatorEngine(.htmlCanvas); controller.creator.prompt = "Create a violet field"
             c.route.replace([.init(chunks: [try LLMTestFixtures.openAI("<think>plan the field</think>" + CreatorCodeWorkflowTests.html)])])
             try await controller.generateCreator()
             let turn = try XCTUnwrap(controller.creator.detail?.conversation.turns.last)

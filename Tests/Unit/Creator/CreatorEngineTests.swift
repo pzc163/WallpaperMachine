@@ -41,7 +41,7 @@ import XCTest
             let draft = try await c.store.commit(c.ticket, validatingStructure: true)
             let capture: CreatorRuntimeCapture
             do { capture = try await CreatorPosterService().capture(projectID: draft.projectID, revisionID: draft.id, store: c.store) }
-            catch { XCTFail("Engine \(engine.rawValue): \(error)"); continue }
+            catch { XCTFail("Engine \(engine.rawValue): \(String(decoding: try CreatorPersistence.encode(CreatorRepairIssue.from(error)), as: UTF8.self))"); continue }
             XCTAssertGreaterThan(capture.metrics["distinctColors"] ?? 0, 8)
             let sealed = try await c.store.seal(capture)
             let report = try await c.store.report(projectID: sealed.projectID, revisionID: sealed.id)
