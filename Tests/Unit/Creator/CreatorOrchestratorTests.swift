@@ -25,7 +25,7 @@ final class CreatorOrchestratorTests: XCTestCase {
                 let requestCount = c.route.requests.count
                 c.route.replace([.init(chunks: [try CreatorGenerationFixtures.response(CreatorGenerationFixtures.output(template.id), kind: kind)])])
                 let result = try await flow.createAndSave(request(c))
-                let installed = try CreatorRuntimeRegistry.readForPlayback(result.installedDirectory, registryURL: c.root.appendingPathComponent("registry.json"))
+                let installed = try CreatorRuntimeRegistry.readForPlayback(result.installedDirectory, registryURL: c.root.appendingPathComponent("registry.json"), publicationRoot: c.root.appendingPathComponent("publication"))
                 let publication = try await c.store.publication(projectID: result.projectID, revisionID: result.sealed.id)
                 XCTAssertEqual(installed.digest, result.sealed.bundleDigest)
                 XCTAssertEqual(installed.files.count, 4)
@@ -104,11 +104,11 @@ final class CreatorOrchestratorTests: XCTestCase {
         let c = try await LLMTestContext(requests: 1, tokens: 4096); defer { c.cleanup() }
         c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(CreatorGenerationFixtures.output())])])
         let result = try await make(c).createAndSave(request(c))
-        let directory = result.installedDirectory, registry = c.root.appendingPathComponent("registry.json")
+        let directory = result.installedDirectory, registry = c.root.appendingPathComponent("registry.json"), journal = c.root.appendingPathComponent("publication")
         let page = WebWallpaperPage(projectURL: directory, entryFile: "index.html")
         defer { page.stop() }
         page.webView.setFrameSize(NSSize(width: 320, height: 180))
-        page.creatorSnapshotLoader = { try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: registry) }
+        page.creatorSnapshotLoader = { try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: registry, publicationRoot: journal) }
         let ready = expectation(description: "Installed page ready")
         page.onLoaded = { ready.fulfill() }
         page.load()

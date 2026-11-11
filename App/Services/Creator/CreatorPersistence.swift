@@ -14,13 +14,13 @@ enum CreatorPersistence {
 
     final class Lease: @unchecked Sendable {
         private let descriptor: Int32
-        init(_ url: URL) throws {
+        init(_ url: URL, shared: Bool = false) throws {
             try directory(url.deletingLastPathComponent())
             descriptor = open(url.path, O_CREAT | O_RDWR | O_CLOEXEC | O_NOFOLLOW, 0o600)
             guard descriptor >= 0 else { throw Failure.invalidPath }
             var info = stat()
             guard fstat(descriptor, &info) == 0, info.st_mode & S_IFMT == S_IFREG, info.st_nlink == 1,
-                  flock(descriptor, LOCK_EX | LOCK_NB) == 0 else {
+                  flock(descriptor, (shared ? LOCK_SH : LOCK_EX) | LOCK_NB) == 0 else {
                 close(descriptor)
                 throw Failure.busy
             }

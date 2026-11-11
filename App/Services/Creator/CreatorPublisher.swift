@@ -16,7 +16,7 @@ actor CreatorPublisher {
         var previousBinding: CreatorRuntimeRegistry.Binding? = nil
     }
 
-    private let root: URL
+    nonisolated let root: URL
     private let library: URL
     private let importer: WallpaperImportService
     private let registry: CreatorRuntimeRegistry
@@ -152,7 +152,8 @@ actor CreatorPublisher {
             try CreatorRuntimeRegistry.validateBinding(binding, snapshot: snapshot)
             try await registry.replace(journal.wallpaperID, expected: journal.previousBinding, with: binding)
             try checkpoint(.afterRegistry)
-            _ = try CreatorRuntimeRegistry.readForPlayback(destination, expectedDigest: journal.digest, registryURL: registry.url)
+            try CreatorRuntimeRegistry.validateBinding(binding,
+                snapshot: CreatorDraftStore.read(destination, expectedDigest: journal.digest))
         }
         try await verifyInstalled(destination)
         try Task.checkCancellation()
@@ -189,7 +190,7 @@ actor CreatorPublisher {
             guard current?.digest == journal.digest else { throw CreatorTemplate.Failure.changedContent }
             if let binding = journal.binding {
                 guard currentBinding == binding else { throw CreatorPersistence.Failure.staleValidation }
-                _ = try CreatorRuntimeRegistry.readForPlayback(destination, registryURL: registry.url)
+                try CreatorRuntimeRegistry.validateBinding(binding, snapshot: CreatorDraftStore.read(destination))
             }
         } else {
             guard current == nil || current?.digest == journal.digest || current?.digest == journal.previousDigest else {
@@ -215,10 +216,21 @@ actor CreatorPublisher {
     func recover(store: CreatorRevisionStore) async throws {
         try await recover()
         for binding in try await registry.bindings().values where binding.bundleVersion == 2 {
-            _ = try CreatorRuntimeRegistry.readForPlayback(library.appendingPathComponent(binding.wallpaperID), registryURL: registry.url)
+            _ = try CreatorRuntimeRegistry.readForPlayback(library.appendingPathComponent(binding.wallpaperID), registryURL: registry.url, publicationRoot: root)
             // A deliberately deleted draft leaves a self-contained installed policy binding.
             if try await store.containsProject(binding.projectID) { try await store.recordPublished(binding) }
         }
+    }
+
+    /// Held through the entire byte snapshot read. The same lock serializes prepare,
+    /// install, confirmation and recovery; a registered candidate is not yet playable.
+    nonisolated static func playbackLease(root: URL) throws -> CreatorPersistence.Lease? {
+        guard CreatorPersistence.exists(root) else { return nil }
+        let lease = try CreatorPersistence.Lease(root.appendingPathComponent(".lock"), shared: true)
+        guard !CreatorPersistence.exists(root.appendingPathComponent("active")) else {
+            throw CreatorPersistence.Failure.busy
+        }
+        return lease
     }
 
     private func ownPublication() throws -> CreatorPersistence.Lease {

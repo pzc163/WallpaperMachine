@@ -72,6 +72,20 @@ class LiveSmokeTests(unittest.TestCase):
         with self.assertRaises(OSError):
             self.request(child)
 
+    def test_four_json_modes_are_accepted_and_unknown_values_fail_before_launch(self):
+        for suite, flag in [("CreatorLiveSmokeTests", "TEST_RUNNER_CREATOR_LIVE_LLM"), ("CreatorBenchmarkLiveTests", "TEST_RUNNER_CREATOR_BENCHMARK")]:
+            for mode in [None, "automatic", "required", "schema", "disabled"]:
+                env = self.environment(); env.pop("TEST_RUNNER_CREATOR_LIVE_LLM"); env[flag] = "1"
+                if mode is not None: env["TEST_RUNNER_CREATOR_LIVE_JSON_MODE"] = mode
+                broker = LiveSmoke(env, only=[suite])
+                self.assertNotIn("CREATOR_LIVE_API_KEY", env)
+                broker.__exit__()
+            env = self.environment(); env.pop("TEST_RUNNER_CREATOR_LIVE_LLM"); env[flag] = "1"
+            env["TEST_RUNNER_CREATOR_LIVE_JSON_MODE"] = "secret-mode"
+            with self.assertRaises(ConfigurationError) as error: LiveSmoke(env, only=[suite])
+            self.assertNotIn("secret-mode", str(error.exception))
+            self.assertNotIn("CREATOR_LIVE_API_KEY", env)
+
     def test_profile_metadata_must_be_explicit(self):
         for name in ["PROTOCOL", "ENDPOINT", "MODEL"]:
             env = self.environment(); env.pop("TEST_RUNNER_CREATOR_LIVE_" + name)

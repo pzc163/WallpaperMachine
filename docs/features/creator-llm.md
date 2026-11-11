@@ -136,7 +136,7 @@ future corrective attempts must reuse the same budget.
 
 | Protocol | Implemented behavior |
 | --- | --- |
-| OpenAI-compatible | Chat Completions SSE, Bearer, system message, `max_tokens`, JSON object mode, optional `include_usage`, choice 0, usage-only tail, `stop` plus `[DONE]` required |
+| OpenAI-compatible | Chat Completions SSE, Bearer, system message, `max_tokens`, JSON object/schema modes, optional `include_usage`, choice 0, usage-only tail, `stop` plus `[DONE]` required |
 | Anthropic Messages | `x-api-key`, fixed `anthropic-version: 2023-06-01`, top-level system, block index/type tracking, cumulative start/delta usage, legal stop reason plus `message_stop` required |
 | Gemini GenerateContent | Header-only `x-goog-api-key`, `/v1beta/models/{model}:streamGenerateContent?alt=sse`, top-level systemInstruction, generationConfig JSON MIME, candidate 0, STOP plus complete EOF and optional tail usage |
 
@@ -145,10 +145,20 @@ Anthropic/Gemini append `/v1` or `/v1beta` unless that is already the last path
 segment. Profiles contain base URLs, not complete operation endpoints. Protocol
 queries are constructed natively; Profile base URLs cannot contain any query.
 
-OpenAI `jsonMode` defaults to automatic: request `json_object`, and permit a single
-budgeted fallback only for a 400 explicitly naming `response_format` with an
-unsupported/unknown parameter code. `required` disables fallback, `disabled`
-omits the field initially. No free-form error-message heuristic is used. Explicit
+OpenAI `jsonMode` defaults to `automatic` (including an absent legacy field): use
+`json_schema` with `strict: true` when the native caller supplies a structured-output
+hint; otherwise retain `json_object`. `required` explicitly requests `json_object`,
+`schema` requires a native schema and requests `json_schema`, and `disabled` omits
+the format. Neither `required` nor `schema` automatically downgrades. Creator
+generation supplies `template_parameter_output_v1`; the one-request connection
+probe supplies its own small `connection_check` schema for forced schema mode.
+
+Only automatic mode permits one budgeted downgrade directly to prompt-only output
+for HTTP 400 explicitly naming `response_format`, `.type`, `.json_schema` or
+`.json_schema.schema`, with an unsupported/unknown parameter code. Invalid schemas,
+unrelated 400s and free-form error messages do not trigger probing. The fallback
+still consumes the same job/conversation request and token budget; a one-request
+probe cannot send a second request. No free-form error-message heuristic is used. Explicit
 `requestsUsage = false` omits stream_options without probing with another request.
 Actual endpoint/model differences, including support for `max_tokens`, remain
 unverified; no Responses API, tool calling or model-specific option negotiation

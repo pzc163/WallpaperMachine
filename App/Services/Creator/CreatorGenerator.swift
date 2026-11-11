@@ -96,6 +96,10 @@ actor CreatorGenerator {
             if let iteration = request.iteration { try await store.recordIterationUsage(iteration, jobID: ticket.id, usage: completed.response.usage) }
             try await checkpoint(.afterResponse); try Task.checkCancellation()
             let output = try turn == nil ? CreatorOutputValidator.parse(completed.response.text) : CreatorOutputValidator.detailed(completed.response.text)
+            // Even schema-valid display metadata must not persist credentials echoed by a provider.
+            let texts = [output.presentation.title, output.presentation.summary]
+            let safe = try await provider.sanitizedContext(texts, profile: profile)
+            guard safe == texts else { throw CreatorRepairIssue.field("$", .text, policy: true) }
             try await checkpoint(.afterValidation); try Task.checkCancellation()
             let compiled = try CreatorTemplateCompiler.compile(output, projectID: request.projectID)
             try await settings.withCurrentProfile(profile) { _ in }

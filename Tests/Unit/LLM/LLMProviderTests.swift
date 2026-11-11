@@ -117,6 +117,33 @@ final class LLMProviderTests: XCTestCase {
         XCTAssertEqual(result, .rateLimited(retryAfter: 3600))
         XCTAssertEqual(c.route.requests.count, 1); XCTAssertTrue(c.diagnostics.delays.isEmpty)
     }
+    func testSchemaUnsupportedFallsBackOnlyInAutomaticModeAndWithinBudget() async throws {
+        let input = try CreatorPromptBuilder.build(prompt: "星空", base: nil, maxOutputTokens: 64)
+        let rejection = Data(#"{"error":{"param":"response_format.json_schema","code":"unsupported_value","message":"synthetic-secret"}}"#.utf8)
+        for (mode, budget) in [(ProviderProfile.Capabilities.JSONMode.automatic, 3), (.automatic, 1), (.schema, 3), (.required, 3)] {
+            let c = try await LLMTestContext(requests: budget, capabilities: .init(jsonMode: mode)); defer { c.cleanup() }
+            c.route.replace([.init(status: 400, chunks: [rejection]), .init(chunks: [try LLMTestFixtures.openAI()])])
+            if mode == .automatic && budget > 1 {
+                let result = try await c.run(input: input)
+                XCTAssertEqual(result.attempts, 2); XCTAssertEqual(result.reservedOutputTokens, 128)
+            } else {
+                let result = await failure { try await c.run(input: input) }
+                XCTAssertEqual(result, .jsonModeUnsupported)
+            }
+            XCTAssertEqual(c.route.requests.count, mode == .automatic && budget > 1 ? 2 : 1)
+            for (index, request) in c.route.requests.enumerated() {
+                let body = try XCTUnwrap(JSONSerialization.jsonObject(with: try XCTUnwrap(request.httpBody)) as? [String: Any])
+                let format = body["response_format"] as? [String: Any]
+                if index == 0 { XCTAssertEqual(format?["type"] as? String, mode == .required ? "json_object" : "json_schema") }
+                else { XCTAssertNil(format) }
+            }
+            XCTAssertFalse(c.diagnostics.lines.joined().contains("synthetic-secret"))
+        }
+        XCTAssertFalse(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"param":"model","code":"unsupported_value","message":"response_format"}}"#.utf8)))
+        XCTAssertFalse(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"param":"response_format","code":"invalid_json_schema"}}"#.utf8)))
+        XCTAssertFalse(LLMHTTPPolicy.unsupportedJSONMode(Data(#"{"error":{"message":"response_format is unsupported"}}"#.utf8)))
+    }
+
     func testJSONModeFallbackIsExplicitNarrowAndBudgeted() async throws {
         let body = try JSONSerialization.data(withJSONObject: ["error": ["param": "response_format", "code": "unsupported_parameter", "message": LLMTestFixtures.key]])
         let c = try await LLMTestContext(); defer { c.cleanup() }

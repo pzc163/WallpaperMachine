@@ -173,8 +173,12 @@ absent. Keys use request headers, including x-goog-api-key for Gemini. Profile
 origin/configuration validation and redirect restrictions are unchanged.
 
 Optional variables are `TEST_RUNNER_CREATOR_LIVE_PROMPT`,
-`TEST_RUNNER_CREATOR_LIVE_JSON_MODE=disabled` for a known OpenAI-compatible endpoint
-without JSON-mode support, and `TEST_RUNNER_CREATOR_LIVE_LOCAL_MODE=1`.
+`TEST_RUNNER_CREATOR_LIVE_JSON_MODE` (`automatic` by default, `required`, `schema`
+or `disabled`), and `TEST_RUNNER_CREATOR_LIVE_LOCAL_MODE=1`. Automatic Creator
+requests prefer a native `json_schema`; required uses `json_object`, schema forces
+`json_schema`, and disabled sends no response format. Unknown values fail without
+echoing input. For this smoke, the one-request budget below still forbids a second
+request even in automatic mode.
 HTTP/empty keys require the explicit local OpenAI mode and exactly localhost,
 127.0.0.1 or ::1. For that case explicitly set `CREATOR_LIVE_API_KEY=''` instead
 of reading a key. Otherwise HTTPS and a nonempty key are required.
@@ -232,3 +236,11 @@ declaring the injected snapshot function MainActor; the final targeted warnings
 are outside the changed source/tests. No claim is made that earlier failed runs
 passed. No visible UI, real provider, personal Keychain, desktop activation,
 Release delivery, long-run energy/load or S4 isolation was exercised.
+
+## S2.3 follow-up
+
+Formal playback now holds a shared publication lock and rejects every active journal,
+including the interval after registry replacement but before confirmation. Recovery precedes
+headless bridge bootstrap. Custom registry reads must also pass the matching publication root.
+See [creator-acceptance.md](creator-acceptance.md) for the AC matrix and separate opt-in
+30-case benchmark/long soak commands. The one-request live smoke contract remains unchanged.

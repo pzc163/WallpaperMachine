@@ -172,8 +172,7 @@ actor CreatorOrchestrator {
 
     func recover() async throws -> CreatorRevisionStore.Recovery {
         guard active.isEmpty else { throw CreatorGenerationFailure.busy }
-        try await publisher.recover(store: store)
-        return try await store.recover()
+        return try await CreatorRecoveryCoordinator.shared.recover(store: store, publisher: publisher)
     }
 
     @MainActor private static func nativeCapture(_ project: UUID, _ revision: UUID, _ store: CreatorRevisionStore) async throws -> CreatorRuntimeCapture {

@@ -23,11 +23,11 @@ final class CreatorRuntimeRegistryTests: XCTestCase {
         let restarted = CreatorRuntimeRegistry(url: url)
         let bindings = try await restarted.bindings()
         XCTAssertEqual(bindings[directory.lastPathComponent]?.bundleDigest, revision.bundleDigest)
-        XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url).digest, revision.bundleDigest)
+        XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url, publicationRoot: root.appendingPathComponent("publication")).digest, revision.bundleDigest)
         // A valid but older/different native template also fails the registry's content binding.
         let changed = try CreatorTemplate.files(for: .init(projectID: revision.projectID, kind: .clock))
         for (name, data) in changed { try data.write(to: directory.appendingPathComponent(name)) }
-        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url))
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url, publicationRoot: root.appendingPathComponent("publication")))
         var document = try CreatorRuntimeRegistry.read(at: url)
         let key = directory.lastPathComponent
         let binding = try XCTUnwrap(document.entries[key])
@@ -35,7 +35,7 @@ final class CreatorRuntimeRegistryTests: XCTestCase {
             revisionID: binding.revisionID, bundleVersion: 1, bundleDigest: binding.bundleDigest,
             runtimePolicy: "generatedOfflineV1", context: binding.context)
         try CreatorPersistence.write(document, to: url)
-        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url))
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url, publicationRoot: root.appendingPathComponent("publication")))
     }
 
     func testRenamedBundlesAndReservedIDsCannotSelectCompatibilityHost() async throws {
@@ -49,7 +49,7 @@ final class CreatorRuntimeRegistryTests: XCTestCase {
             defer { page.stop() }
             XCTAssertFalse(page.webView.configuration.websiteDataStore.isPersistent)
             XCTAssertNotNil(page.webView.configuration.urlSchemeHandler(forURLScheme: CreatorWebResources.scheme))
-            XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(folder, registryURL: root.appendingPathComponent("missing-registry.json")))
+            XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(folder, registryURL: root.appendingPathComponent("missing-registry.json"), publicationRoot: root.appendingPathComponent("publication")))
         }
     }
 
@@ -95,7 +95,7 @@ final class CreatorRuntimeRegistryTests: XCTestCase {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         for (name, data) in snapshot.files { try data.write(to: directory.appendingPathComponent(name)) }
         let url = root.appendingPathComponent("registry.json")
-        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url))
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(directory, registryURL: url, publicationRoot: root.appendingPathComponent("publication")))
         do {
             try await CreatorRuntimeRegistry(url: url).registerLegacy(projectID: project.id, revisionID: revision.id, store: store, installedDirectory: directory)
             XCTFail("Registered draft as a published package")

@@ -41,7 +41,9 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
                 configuration.timeoutIntervalForResource = limits.timeout
                 let queue = OperationQueue(); queue.maxConcurrentOperationCount = 1
                 let session = URLSession(configuration: configuration, delegate: self, delegateQueue: queue)
-                let task = session.dataTask(with: request)
+                var timedRequest = request
+                timedRequest.timeoutInterval = limits.timeout
+                let task = session.dataTask(with: timedRequest)
                 let accepted = lock.withLock { () -> Bool in
                     guard outcome == nil else { return false }
                     self.session = session; self.task = task

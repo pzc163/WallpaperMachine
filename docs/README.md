@@ -56,6 +56,7 @@ live under `testing/`.
 | [testing/runtime-regressions.md](testing/runtime-regressions.md) | Regressions that must stay covered at runtime: native Metal, video, continuous playback, frame pacing, audio, host and display, startup |
 | [testing/manual-smoke.md](testing/manual-smoke.md) | Manual release smoke checklist |
 | [testing/power-benchmark.md](testing/power-benchmark.md) | Configuration manifest, per-process CPU/GPU, whole-machine and package-power measurement, the headless A/B driver (`scripts/perf_bench.py`), runtime counters, condition matrix and comparison rules for power claims |
+| [testing/creator-s23-results.json](testing/creator-s23-results.json) | Redacted S2.3 live benchmark, 30-minute offscreen soak and final routine gate aggregates |
 | [testing/verification-log.md](testing/verification-log.md) | Dated verification history, ten newest entries |
 | [testing/archive/](testing/archive/) | Retired verification-log entries, one file per month, written by `scripts/log_verification.py`; historical only |
 | [testing/wallpaper-corpus.md](testing/wallpaper-corpus.md) | Local regression corpus checklist |
@@ -77,6 +78,7 @@ file; pass `rg -u` to search them deliberately.
 
 | Document | Purpose |
 |---|---|
+| [features/creator-acceptance.md](features/creator-acceptance.md) | S2.3 headless recovery, AC evidence matrix, opt-in model benchmark and offscreen soak |
 | [features/creator-workspace.md](features/creator-workspace.md) | S2.2 native creator page, model settings, explicit preview/save/apply actions and startup/storage boundaries |
 | [features/creator-iteration.md](features/creator-iteration.md) | S2.1 bounded parameter repair, conversation budgets, restart cleanup and explicit revision selection |
 | [features/creator-publication.md](features/creator-publication.md) | S1.4 native runtime capture, sealed revision evidence, recoverable publication and opt-in live smoke |

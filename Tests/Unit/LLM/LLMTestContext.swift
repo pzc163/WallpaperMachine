@@ -42,7 +42,7 @@ final class LLMTestContext {
         if bind { try await credentials.bind(LLMTestFixtures.key, to: profile, settings: settings) }
         let project = try await store.createProject(title: "Network fixture")
         ticket = try await store.beginJob(projectID: project.id, requestBudget: requests, tokenBudget: tokens)
-        url = try LLMRequestDescriptor.make(profile: profile, input: LLMTestFixtures.input, jsonMode: true).url
+        url = try LLMRequestDescriptor.make(profile: profile, input: LLMTestFixtures.input, jsonMode: false).url
         route = LLMMockURLProtocol.Route([.init(chunks: [try LLMTestFixtures.body(for: kind)])])
         LLMMockURLProtocol.register(route, at: url)
         let diagnostics = diagnostics

@@ -25,6 +25,43 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator S2.3 final acceptance closeout
+
+S2.3 final closeout; durable evidence: [acceptance](../features/creator-acceptance.md) and [redacted metrics](creator-s23-results.json).
+
+- Reviewed existing live smoke (1 passed), fixed-model/schema benchmark (30/30 first-pass, 100% final) and three-page 1800-second WebKit soak (540 responsive samples, zero observed external attempts/terminations); no new live requests.
+- `python3 scripts/test.py` once: exit 0; 708 Python and 4,994 native passed, 0 failed, 72 skipped of 5,066 native tests; all opt-in flags cleared.
+- Skips: 62 media/device, 3 Steam network, 1 reference render, 3 S0 known-failing probes, and smoke/benchmark/long-soak one each.
+- Warnings: 6 dependency deployment-target link warnings, 1 AppIntents extraction notice, 3 main-thread warnings in existing tests; all affected tests passed, warnings not fixed here.
+- Final document/link and catalog checks passed; three plan mirrors agree; 3,720 non-document files stayed unchanged across the full gate.
+- No Rust/renderer/FFI changes; no extra kernel gate or Release build. No personal Keychain, UI automation, installation or desktop changes.
+- Archived aggregates only; removed all task test logs/results/reports and confirmed temporary test roots. S3 device/visual acceptance awaits authorization; S4 remains disabled.
+
+## 2026-11-11 — Creator prompt and structured-output compatibility
+
+- Native prompt uses flat scalar output, an empty properties default and a catalog-generated clock example; full validator/export schema unchanged.
+- OpenAI automatic prefers native json_schema; required/json_object, schema/strict and disabled/prompt-only are explicit. Downgrade uses the same request/token budget.
+- `python3 scripts/test.py --only LLMCodecTests --only LLMProviderTests --only LLMStreamTransportTests --only ProviderProfileTests --only ProviderCredentialStoreTests --only CreatorPromptBuilderTests --only CreatorOutputValidatorTests --only CreatorGeneratorTests --only CreatorRepairTests --only CreatorWorkspaceTests --only CreatorBenchmarkTests --serial` — exit 0; 120 passed, 0 failed, 0 skipped. Mock model streams and real offscreen validation only.
+- `python3 -B scripts/tests/test_creator_live_smoke.py` — 9 passed; `python3 -B scripts/tests/test_creator_acceptance.py` — 8 passed; synthetic credentials and loopback IPC only.
+- `python3 -B scripts/tests/test_doc_links.py` — 11 passed; `git diff --check` — clean.
+- Compiler log: 339 warning lines, none attributed to touched files; zero XCTest runtime warnings.
+- Three pre-existing benchmark artifacts cleaned. No live model request, personal Keychain, visible UI, desktop change, full gate, commit or push; requested targeted scope only.
+- Real-model quality/grammar acceptance remains unmeasured after this patch; single live smoke still has requestBudget=1.
+
+## 2026-11-10 — Creator S2.3 headless acceptance and benchmark harnesses
+
+S2.3 — headless recovery, publication playback gate, credential-echo rejection and acceptance harnesses.
+
+- S2.2 baseline committed locally as `35594fb9` on `feat/ai-creator`; no push. S2.3 remains uncommitted.
+- Final targeted: 52 passed, 0 failed, 3 existing S0 probes skipped; broader targeted: 105 passed, 0 failed, 5 skipped.
+- `python3 scripts/test.py` — one full run, exit 0; 701 Python tests; native 4,978 passed, 0 failed, 72 skipped (5,050 total).
+- New tests: 16 native + 6 Python passed; 1,246 source/test/config hashes unchanged across the full gate; 9 frozen sources preserved.
+- Skip groups: 62 media/device, 3 Steam network, 1 reference renderer, 3 S0 unrestricted probes, 3 creator live/benchmark/soak opt-ins.
+- Two main-thread warnings in VideoFormatSupportTests and AppUpdateTests; both tests passed, warnings not claimed fixed.
+- Mock 10×3: first 60%, final 90%, 48 requests, 24 unknown usages; not a live quality result. Real WK short soak 0.825 s, not 30 minutes.
+- AC-01–14 matrix, exact commands and limits: [creator-acceptance.md](../features/creator-acceptance.md). S3 device/UI and S4 isolation remain open.
+- No live API, personal Keychain, visible UI, desktop change, Release build or installation; structured evidence retained before cleaning this task's logs/results.
+
 ## 2026-11-10 — Native creator workspace and model settings (S2.2)
 
 Added the native AI Creator tab and model settings, with explicit generate/save/apply actions, trusted previews and controller-start recovery. [Feature and boundaries](../features/creator-workspace.md).
@@ -115,42 +152,3 @@ S1.1 adds immutable creator revision storage, content-bound structural reports, 
 - Legacy generators and golden digest assertions are unchanged. Tests use temporary stores, synthetic JPEGs and an unattached WKWebView; no visible window or desktop capture.
 - Structural reports explicitly leave runtime/poster capture unchecked; v2 publication, model transport, UI and S4 remain pending. Creator history is not yet in backup/storage-move transactions.
 - Rust/renderer checks and Release build not run: no changes in those domains and no application delivery requested. No install, push or wallpaper activation.
-
-## 2026-11-10 — Creator S1.0 parameterized templates
-
-S1.0 adds native-owned parameterized templates on the existing S0 host; no model API or desktop activation.
-
-- `python3 scripts/test.py --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests` — exit 0; 43 passed, 0 failed, 3 known S0 unrestricted-source probes skipped.
-- `python3 scripts/test.py` — exit 0; run once after final implementation; 687 Python tests passed in 32 modules; native 4,767 passed, 0 failed, 69 skipped of 4,836.
-- Native skips: 3 S0 probes, 62 opt-in media/device checks, 3 live Steam checks, 1 reference-render job; S4 remains blocked by its existing gates.
-- Two runtime main-thread warnings: unchanged `VideoFormatSupportTests.testTheOpenedFilesAreKeyedByTheFileAndForgetAChangedOne()` and `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()`; no source locations reported.
-- `python3 scripts/tests/test_localization_catalogs.py`, `python3 scripts/tests/test_doc_links.py`, `git diff --check` — exit 0; 8 and 11 Python checks respectively.
-- 18 new tests cover all 32 parameter dimensions, six presets, actual offscreen pixels, aggregate resource budgets, cadence/lifecycle, strict reconstruction and legacy recovery.
-- Real-clock offscreen first paint/edits passed; animation/FPS use a controlled clock in WebKit. Visible desktop quality, frame time, energy and arbitrary-code termination remain unverified. No Release build, install, commit or push.
-
-## 2026-11-10 — Creator S0 trusted-template prototype
-
-Creator S0 validates a service-level trusted-template workflow. Arbitrary-source isolation remains blocked by reproducible probes; see [the feature record](../features/creator-s0.md).
-
-- Baseline: `7025ba39f4c92f6c1af221aa3060c62aefb0e2a2`; macOS 27.2 (26B123), arm64; no LLM, creator UI or Release delivery.
-- `PATH=/opt/homebrew/opt/rustup/bin:$PATH python3 scripts/build.py --renderer-only` — exit 0; generated prerequisite renderer/bridge outputs without changing their source.
-- `python3 scripts/test.py --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only WebWallpaperPageTests --only WebWallpaperPreviewSurfaceTests --only WallpaperPlaybackPreflightTests --only ImportTests --only LockScreenWallpaperServiceTests/testCreatorPrototypeCannotDowngradeIntoNativeFileHost` — exit 0; 113 passed, 0 failed, 3 known exploratory skips.
-- `PATH=/opt/homebrew/opt/rustup/bin:$PATH python3 scripts/test.py` — exit 0; 687 Python tests passed; native 4,749 passed, 0 failed, 69 skipped. Run once at the final gate.
-- Skips: 3 known-failing creator probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference-render job. The S0 cases themselves were 26 passed, 3 skipped.
-- `TEST_RUNNER_CREATOR_UNRESTRICTED_PROBES=1 python3 scripts/test.py --only CreatorPreviewTests/testDownloadLinksAreBlockedBeforeConnecting --only CreatorPreviewTests/testEventSourceIsBlockedBeforeConnecting --only CreatorPreviewTests/testMediaIsBlockedBeforeConnecting` — exit 65; all 3 failures reproduced, not counted as passes.
-- Real offscreen WebKit and real importer exercised with temporary bundles: properties, stop, snapshot validation, cancellation and unconfirmed-publication recovery. Actual desktop switching/recovery, devices, arbitrary-code termination, power-loss recovery and performance remain unverified.
-- Full gate runtime warning: existing `AppUpdateTests.testSignatureCheckRefusesAnUnsignedOrAlteredCopy()` reported a main-thread call; no source location supplied.
-- `git diff --check` and new-document relative-link checks passed; Xcode project regenerated by XcodeGen. Durable contract and known gaps are in the feature record; disposable evidence is not committed.
-
-## 2026-11-10 — Library tile menu, drop to import, keyboard and batch favorites; service fixes
-
-Installed gains a right-click menu on tiles (the inspector's More actions list, shared as WallpaperActionItems), files dropped on the page import, Command-Delete and Command-Return on the grid, File › Import… and Refresh Library, and a favorite tool for the ticked selection. The same change fixes six service defects (unreadable saved entries no longer erase their neighbours; an automatic command replacing a queued rule or Focus change no longer marks it handled; a day and night display keeps a manual choice across a relaunch; a shuffle round ends without a wallpaper that keeps failing; a stale Steam request no longer signs out a newer session; equal day and night start times are refused), adds feedback where actions were silent, and gathers the renderer's leftover material constants into one log line per scene.
-
-- `python3 scripts/test.py` — exit 0; 4789 tests: 4723 passed, 0 failed, 66 skipped (the first run failed two tests that asserted the old batch-limit error; both were updated and the gate rerun)
-- `python3 scripts/check_renderer.py` — exit 0; generated scenes pixel-equal pooled and isolated, 0 reload-cycle diagnostics; the local-corpus tests (particle corpus, local projects through the native backend, poster pictures, energy, corpus stamps, a local clip) skipped: no corpus configured
-- New unit tests: PreservedJSONTests; unreadable entries in WallpaperAutomationStoreTests, PlaylistStoreTests, WallpaperCollectionStoreTests and PlaybackPreferencesTests; queue outcomes in UserCommandQueueTests; a Focus change replaced by a reload in WallpaperAutomationSchedulerTests; relaunch and shuffle rounds in PlaylistSchedulerTests; the Steam session in WorkshopSourceTests
-- New panel tests: add-to-playlist and refresh notices, the unreadable-library state, the failed-still mark (offscreen render), drop import, the favorite tool, Command-Delete and Command-Return on the hosted grid, equal start times, preset and batch-limit refusals
-- Renderer: two gtest cases for UnmatchedConstantTally in material_constant_behavior_test; no frame output changed, so no Wallpaper Engine reference comparison was made
-- Not exercised: the tile's context menu, the drop outline and a real Finder drag, and the File menu items with their shortcuts in a real window. They need desktop control, which was not authorized; the menu's item rules are InspectorPolicy's existing tests, and the drop and menu actions are covered through the model
-- Not rebuilt: no Release build was made, so the delivered app does not contain these changes
-- Runtime warnings in the result bundle (2, main-thread call) come from AppUpdateTests and WebMOpeningTests, which this change does not touch

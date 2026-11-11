@@ -81,9 +81,10 @@ supports pause/resume and 16:9, 16:10 and 9:16, and stops on close. Loading has 
 
 The first PanelController.start runs publication recovery then job/conversation
 recovery, loads metadata and exposes the result. Reentrant recovery uses one task.
-It never resolves credentials or sends a model request. This is controller-start
-integration, not a new headless/background launch service. Corrupt registry or
-installed content is reported and refused; no ordinary Web-policy fallback exists.
+It never resolves credentials or sends a model request. S2.2 originally integrated only
+controller startup. S2.3 adds headless bootstrap recovery and coalesces both entry points;
+see [creator-acceptance.md](creator-acceptance.md). Corrupt registry or installed content
+is reported and refused; no ordinary Web-policy fallback exists.
 
 ## Storage boundary
 

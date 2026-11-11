@@ -133,6 +133,50 @@ final class LLMCodecTests: XCTestCase {
             XCTAssertFalse(request.url.absoluteString.contains(LLMTestFixtures.key))
         }
     }
+    func testOpenAIStructuredOutputModesPreserveLegacyJSONAndNativeRequestShape() throws {
+        let input = try CreatorPromptBuilder.build(prompt: "时钟", base: nil, maxOutputTokens: 64)
+        let modes: [ProviderProfile.Capabilities.JSONMode?] = [nil, .automatic, .required, .schema, .disabled]
+        for mode in modes {
+            var profile = LLMTestFixtures.profile(); profile.capabilities.jsonMode = mode
+            let descriptor = try LLMRequestDescriptor.make(profile: profile, input: input, jsonMode: true)
+            let body = try XCTUnwrap(JSONSerialization.jsonObject(with: descriptor.body) as? [String: Any])
+            let format = body["response_format"] as? [String: Any]
+            if mode == .disabled { XCTAssertNil(format) }
+            else if mode == .required { XCTAssertEqual(format?["type"] as? String, "json_object"); XCTAssertNil(format?["json_schema"]) }
+            else {
+                XCTAssertEqual(format?["type"] as? String, "json_schema")
+                let schema = try XCTUnwrap(format?["json_schema"] as? [String: Any])
+                XCTAssertEqual(Set(schema.keys), ["name", "strict", "schema"])
+                XCTAssertEqual(schema["name"] as? String, "template_parameter_output_v1")
+                XCTAssertEqual(schema["strict"] as? Bool, true)
+                XCTAssertEqual(try CreatorOutputSchema.encode(try XCTUnwrap(schema["schema"])), try XCTUnwrap(input.structuredOutput).schema)
+            }
+            XCTAssertEqual((body["stream_options"] as? [String: Bool])?["include_usage"], true)
+            XCTAssertEqual((body["messages"] as? [[String: String]])?.first?["content"], input.systemInstruction)
+        }
+        var profile = LLMTestFixtures.profile(); profile.capabilities.jsonMode = .schema
+        XCTAssertThrowsError(try LLMRequestDescriptor.make(profile: profile, input: LLMTestFixtures.input, jsonMode: true))
+        let disabled = try LLMRequestDescriptor.make(profile: profile, input: input, jsonMode: false)
+        XCTAssertNil((try JSONSerialization.jsonObject(with: disabled.body) as? [String: Any])?["response_format"])
+    }
+
+    func testStructuredOutputMetadataIsBoundedAndNotAddedToOtherProtocols() throws {
+        var input = try CreatorPromptBuilder.build(prompt: "渐变", base: nil, maxOutputTokens: 64)
+        for kind in [ProviderProfile.ProtocolKind.anthropicMessages, .geminiGenerateContent] {
+            let descriptor = try LLMRequestDescriptor.make(profile: LLMTestFixtures.profile(kind), input: input, jsonMode: true)
+            let body = try XCTUnwrap(JSONSerialization.jsonObject(with: descriptor.body) as? [String: Any])
+            XCTAssertNil(body["response_format"]); XCTAssertNil(body["json_schema"])
+        }
+        for schema in [Data("[1]".utf8), Data("bad".utf8), Data(#"{"type":"array"}"#.utf8), Data(repeating: 32, count: 32769)] {
+            input.structuredOutput = .init(name: "safe_name", schema: schema)
+            XCTAssertThrowsError(try input.validate()) { XCTAssertEqual($0 as? LLMFailure, .invalidInput) }
+        }
+        for name in ["", "../path", "key\nvalue", String(repeating: "x", count: 65)] {
+            input.structuredOutput = .init(name: name, schema: Data(#"{"type":"object"}"#.utf8))
+            XCTAssertThrowsError(try input.validate()) { XCTAssertEqual($0 as? LLMFailure, .invalidInput) }
+        }
+    }
+
     func testOpenAICompatibilityOptionsCanBeOmittedWithoutAnotherRequest() throws {
         var profile = LLMTestFixtures.profile(); profile.baseURL += "/v1"; profile.capabilities.requestsUsage = false
         let request = try LLMRequestDescriptor.make(profile: profile, input: LLMTestFixtures.input, jsonMode: false)

@@ -17,7 +17,8 @@ as `e3a61f55` on `feat/ai-creator`, then the tree was checked clean. The verifie
 | Component | Responsibility |
 | --- | --- |
 | `CreatorGenerator` | Per-project cancellation, explicit base context, model request, strict parse, native compile and revision transaction |
-| `CreatorPromptBuilder` / `CreatorOutputSchema` | Catalog-derived instructions, parameter domains/units/defaults/presets/resource caps and JSON Schema |
+| `CreatorPromptBuilder` / `CreatorOutputSchema` | Catalog-derived instructions, flat output example, parameter domains/units/defaults/presets/resource caps and full JSON Schema |
+| `CreatorStructuredOutputSchema` | Portable provider grammar hints; native validation remains mandatory |
 | `CreatorJSON` / `CreatorOutputValidator` | Bounded JSON grammar, duplicate-key rejection, exact contract and native allocation checks |
 | `CreatorTemplateCompiler` | Accepts only a validated output value and creates the native specification and plain presentation metadata |
 | `CreatorGenerationMetadata` | Versioned model/configuration/job/budget/usage provenance, bound into the revision digest |
@@ -42,6 +43,29 @@ The full JSON Schema is separately exportable; the prompt uses a compact catalog
 to fit the existing input limit. Schema domains and native validation have
 boundary/preset consistency tests; cross-field equality of defaults is additionally
 enforced by Swift, not claimed as a general JSON Schema capability.
+
+The prompt now explicitly requests `"properties": {}`, bare scalar parameter values,
+and only the selected template's parameter names. A complete one-line clock example
+is built from the native defaults: `backgroundMotion`, with neither `motionSpeed`
+nor `clockVisible`. It is a shape example, not a default template selection. Legacy
+explicit `properties.<id>.default` values remain accepted only when they exactly
+match their parameter; the original validator and exported full schema are unchanged.
+
+Creator requests also carry a separate, native-generated `StructuredOutput` hint
+(bounded to 32 KiB, with a bounded ASCII schema name). It uses a root object, all
+required fields, closed objects, scalar types/enums and a nested `parameters.anyOf`
+with one complete key set per template. Provider schema mode fixes `properties` to
+an empty object. It omits draft declarations, references, root unions, conditions,
+`allOf`, numeric ranges and text patterns to use the conservative intersection of
+[OpenAI Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs),
+[LM Studio](https://lmstudio.ai/docs/developer/openai-compat/structured-output) and
+[llama.cpp grammar support](https://github.com/ggml-org/llama.cpp/blob/master/grammars/README.md).
+This is a grammar hint, not the full safety contract: native checks still bind the
+chosen parameter branch to `templateID`, enforce all ranges/text/resource limits,
+and reject malformed or tampered output. No real engine compatibility or improved
+model pass rate is established by the local contract tests. The separately reviewed
+S2.3 live run passed all 30 samples for one model/schema configuration; see the
+[acceptance evidence and remaining limits](creator-acceptance.md).
 
 User descriptions are nonempty and at most 2,048 UTF-8 bytes; all request text,
 including catalog and base context, remains within S1.2's 16 KiB input limit.

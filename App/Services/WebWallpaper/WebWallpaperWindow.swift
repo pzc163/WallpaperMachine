@@ -281,6 +281,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     private let creatorResources: CreatorWebResources?
     private let creatorPermissions: CreatorWebPermissions?
     private var creatorLoadTask: Task<Void, Never>?
+    var onContentProcessTermination: (@MainActor () -> Void)?
     var expectedCreatorDigest: String?
     var creatorSnapshotLoader: (@Sendable () async throws -> CreatorDraftStore.Snapshot)?
     /// Raised when the page's audio subscription actually changes, so the host
@@ -476,7 +477,8 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
                 } catch {
                     guard !Task.isCancelled, let self, self.documentGeneration == generation else { return }
                     AppLog.warn("Creator bundle rejected: \(error)")
-                    self.onFailure?(String(localized: "The wallpaper files changed or are missing. Refresh the library before previewing."))
+                    let failure = (error as? CreatorPersistence.Failure) ?? .invalidRecord
+                    self.onFailure?(failure.localizedDescription)
                 }
             }
         } else {
@@ -1244,6 +1246,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
+        onContentProcessTermination?()
         isLoaded = false
         onLoading?()
         // The crashed document's listeners died with it. Restarting inherits

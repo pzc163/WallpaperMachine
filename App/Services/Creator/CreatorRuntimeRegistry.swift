@@ -105,9 +105,17 @@ actor CreatorRuntimeRegistry {
             guard binding.context == context else { throw CreatorPersistence.Failure.staleValidation }
         }
     }
+    nonisolated static func readForPlayback(_ directory: URL, expectedDigest: String? = nil) throws -> CreatorDraftStore.Snapshot {
+        try readForPlayback(directory, expectedDigest: expectedDigest, registryURL: ClientPaths.creatorRuntimeRegistryURL,
+            publicationRoot: ClientPaths.storageURL.appendingPathComponent("Creator/Publication"))
+    }
+
+    /// An injected registry must supply its matching journal root, never the user's default storage.
     nonisolated static func readForPlayback(_ directory: URL, expectedDigest: String? = nil,
-                                           registryURL: URL = ClientPaths.creatorRuntimeRegistryURL,
-                                           context: ValidationReport.Context = .current) throws -> CreatorDraftStore.Snapshot {
+                                           registryURL: URL, context: ValidationReport.Context = .current,
+                                           publicationRoot: URL) throws -> CreatorDraftStore.Snapshot {
+        let lease = try CreatorPublisher.playbackLease(root: publicationRoot)
+        defer { withExtendedLifetime(lease) {} }
         let document = try read(at: registryURL)
         let snapshot = try CreatorBundleManifest.read(directory, expectedDigest: expectedDigest)
         if snapshot.bundleVersion == 2, document.entries[directory.lastPathComponent] == nil {

@@ -12,6 +12,12 @@ final class CreatorLiveSmokeTests: XCTestCase {
         var snapshot: [String] { lock.withLock { values } }
     }
 
+    nonisolated static func jsonMode(_ environment: [String: String]) throws -> ProviderProfile.Capabilities.JSONMode {
+        guard let mode = ProviderProfile.Capabilities.JSONMode(rawValue: environment["CREATOR_LIVE_JSON_MODE"] ?? "automatic")
+        else { throw CreatorGenerationFailure.invalidRequest }
+        return mode
+    }
+
     func testSingleLiveCreationAndSave() async throws {
         let env = ProcessInfo.processInfo.environment
         guard env["CREATOR_LIVE_LLM"] == "1" else {
@@ -30,9 +36,10 @@ final class CreatorLiveSmokeTests: XCTestCase {
             input.localMode = env["CREATOR_LIVE_LOCAL_MODE"] == "1"
             input.limits = .init(requestBudget: 1, tokenBudget: 2048)
             if kind == .openaiCompatible {
-                input.capabilities.jsonMode = env["CREATOR_LIVE_JSON_MODE"] == "disabled" ? .disabled : .required
+                input.capabilities.jsonMode = try Self.jsonMode(env)
             }
             try input.validate()
+            evidence["jsonMode"] = input.capabilities.jsonMode?.rawValue ?? "protocolNative"
             let settings = CreatorSettingsStore(url: root.appendingPathComponent("settings.json"))
             let document = try await settings.saveProfile(input, expectedRevision: 0)
             let profile = try XCTUnwrap(document.profiles.first)
@@ -54,7 +61,7 @@ final class CreatorLiveSmokeTests: XCTestCase {
             let result = try await flow.createAndSave(.init(title: "Live smoke", profileID: profile.id,
                 configurationID: profile.configurationID, prompt: env["CREATOR_LIVE_PROMPT"] ?? "创建深蓝紫色星空，缓慢移动，右下角显示时钟。", maxOutputTokens: 2048))
             let publication = try await store.publication(projectID: result.projectID, revisionID: result.sealed.id)
-            let installed = try CreatorRuntimeRegistry.readForPlayback(result.installedDirectory, registryURL: registry.url)
+            let installed = try CreatorRuntimeRegistry.readForPlayback(result.installedDirectory, registryURL: registry.url, publicationRoot: publisher.root)
             XCTAssertEqual(installed.digest, result.sealed.bundleDigest)
             XCTAssertEqual(result.sealed.generation?.attemptCount, 1)
             evidence["status"] = "passed"
@@ -83,7 +90,7 @@ final class CreatorLiveSmokeTests: XCTestCase {
         }
     }
 
-    private static func temporaryKey(_ env: [String: String]) async throws -> String {
+    static func temporaryKey(_ env: [String: String]) async throws -> String {
         guard env["CREATOR_LIVE_API_KEY"] == nil, env["TEST_RUNNER_CREATOR_LIVE_API_KEY"] == nil,
               let port = env["CREATOR_LIVE_BROKER_PORT"].flatMap(Int.init), (1...65535).contains(port),
               let token = env["CREATOR_LIVE_BROKER_TOKEN"], (32...128).contains(token.utf8.count)

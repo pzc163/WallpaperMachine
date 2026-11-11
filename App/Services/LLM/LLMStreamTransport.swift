@@ -8,7 +8,7 @@ struct LLMStreamTransport: @unchecked Sendable {
         var timeout: TimeInterval = 60
         func validate() throws {
             guard (1...1024 * 1024).contains(maximumBytes), (1...64 * 1024).contains(maximumEventBytes),
-                  timeout.isFinite, timeout > 0, timeout <= 300 else { throw LLMFailure.invalidInput }
+                  timeout.isFinite, timeout > 0, timeout <= 600 else { throw LLMFailure.invalidInput }
         }
     }
     private let configuration: URLSessionConfiguration

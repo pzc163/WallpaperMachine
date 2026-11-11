@@ -6,7 +6,7 @@ struct ProviderProfile: Codable, Equatable, Sendable {
         case openaiCompatible, anthropicMessages, geminiGenerateContent
     }
     struct Capabilities: Codable, Equatable, Sendable {
-        enum JSONMode: String, Codable, Sendable { case automatic, required, disabled }
+        enum JSONMode: String, Codable, Sendable { case automatic, required, schema, disabled }
         // Optional so S1.1 canonical records re-encode byte-for-byte when the field is absent.
         var jsonMode: JSONMode? = nil
         var requestsUsage = true

@@ -40,7 +40,7 @@ final class CreatorWorkspaceTests: XCTestCase {
         let id = try await workspace.installedWallpaper(project: result.projectID, revision: result.sealed.id)
         XCTAssertEqual(id, url.lastPathComponent)
         try await workspace.delete(result.projectID)
-        let snapshot = try CreatorRuntimeRegistry.readForPlayback(url, registryURL: c.root.appendingPathComponent("registry.json"))
+        let snapshot = try CreatorRuntimeRegistry.readForPlayback(url, registryURL: c.root.appendingPathComponent("registry.json"), publicationRoot: c.root.appendingPathComponent("publication"))
         XCTAssertEqual(snapshot.digest, result.sealed.bundleDigest)
         let recovery = try await workspace.recover(); XCTAssertTrue(recovery.invalidJobs.isEmpty)
         XCTAssertFalse(FileManager.default.fileExists(atPath: c.store.projectURL(result.projectID).path))
@@ -117,6 +117,19 @@ final class CreatorWorkspaceTests: XCTestCase {
         let after = try await workspace.projects().map(\.id); XCTAssertEqual(before, after)
         XCTAssertFalse(c.diagnostics.lines.joined().contains(LLMTestFixtures.key))
     }
+    func testSchemaConnectionCheckKeepsOneRequestAndUsesItsOwnSmallSchema() async throws {
+        let c = try await LLMTestContext(tokens: 8192, capabilities: .init(jsonMode: .schema)); defer { c.cleanup() }
+        let workspace = Self.workspace(c)
+        let before = try await workspace.projects().map(\.id)
+        _ = try await workspace.testConnection(c.profile)
+        XCTAssertEqual(c.route.requests.count, 1)
+        let body = try XCTUnwrap(JSONSerialization.jsonObject(with: try XCTUnwrap(c.route.requests.first?.httpBody)) as? [String: Any])
+        let format = try XCTUnwrap(body["response_format"] as? [String: Any])
+        XCTAssertEqual(format["type"] as? String, "json_schema")
+        XCTAssertEqual((format["json_schema"] as? [String: Any])?["name"] as? String, "connection_check")
+        let after = try await workspace.projects().map(\.id); XCTAssertEqual(before, after)
+    }
+
     func testUnpublishedNewRevisionCannotApplyOlderInstalledVersion() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         let workspace = Self.workspace(c)

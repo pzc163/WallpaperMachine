@@ -51,6 +51,13 @@ class FilterLines(unittest.TestCase):
     def filtered(self, text):
         return list(xcode.filter_lines(text.splitlines(keepends=True)))
 
+    def test_only_closed_benchmark_progress_lines_are_echoed(self):
+        lines = [f"Creator benchmark {i}/30 round={(i - 1) // 10 + 1} passed=true attemptCount=1 elapsedSeconds=0.125 failure=none" for i in range(1, 31)]
+        failed = "Creator benchmark 30/30 round=3 passed=false attemptCount=3 elapsedSeconds=90.123 failure=timeout"
+        lines.append(failed)
+        unsafe = [failed + " secret-key", failed.replace("timeout", "https://secret.invalid"), failed.replace("90.123", "nan")]
+        self.assertEqual(self.filtered("\n".join(lines + unsafe)), lines)
+
     def test_passing_run_is_silent(self):
         self.assertEqual(self.filtered(PASSING_RUN), [])
 
@@ -103,6 +110,15 @@ sys.exit(7)
         self.assertIn("final marker\n", output)
         self.assertEqual(len(echoed), xcode.MAX_ECHOED_LINES + 1)
         self.assertEqual(sum(line.startswith("...") for line in echoed), 1)
+
+    def test_benchmark_progress_on_stderr_reaches_quiet_terminal(self):
+        line = "Creator benchmark 1/30 round=1 passed=true attemptCount=1 elapsedSeconds=1.234 failure=none"
+        script = "import sys; print(sys.argv[1], file=sys.stderr, flush=True); print('ordinary noise')"
+        echoed = []
+        with tempfile.TemporaryDirectory() as directory:
+            completed, _ = xcode.run_quiet([sys.executable, "-c", script, line], Path(directory) / "run.log", echo=echoed.append)
+        self.assertEqual(completed.returncode, 0)
+        self.assertEqual(echoed, [line])
 
     def test_logs_everything_and_echoes_only_failures(self):
         script = "import sys; print('noise'); print('/a/B.swift:1:2: error: boom'); print('x warning: y'); sys.exit(3)"

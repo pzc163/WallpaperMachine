@@ -5,7 +5,7 @@ enum CreatorConversationText {
     static func sanitize(_ input: String) -> String {
         var text = input
         let patterns = [
-            #"(?i)(?:bearer\s+|(?:api[_ -]?key|authorization|password|secret|token)\s*[:=]\s*)[^\s,;\"'<>]+"#,
+            #"(?i)(?:bearer\s+|(?:api[_ -]?key|authorization|password|secret|token|steamLoginSecure|steamLogin|steamRememberLogin|sessionid|cookie|set-cookie)\s*[:=]\s*)[^\s,;\"'<>]+"#,
             #"(?i)(?:https?|file)://[^\s\"'<>]+"#,
             #"(?<![\p{L}\p{N}])(?:~?/|[A-Za-z]:\\)[^\s\"'<>]+"#,
             #"\b(?:sk-|sk_|AIza)[A-Za-z0-9_\-]+\b"#,

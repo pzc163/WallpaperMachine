@@ -12,7 +12,16 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
         let url = try LLMRequestDescriptor.endpoint(profile, version: basePath.isEmpty || basePath == "/" ? "v1" : nil, suffix: "chat/completions")
         var body: [String: Any] = ["model": profile.model, "stream": true, "max_tokens": input.maxOutputTokens,
             "messages": [["role": "system", "content": input.systemInstruction]] + input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
-        if jsonMode { body["response_format"] = ["type": "json_object"] }
+        let mode = profile.capabilities.jsonMode ?? .automatic
+        if jsonMode, mode != .disabled {
+            if mode == .schema || (mode == .automatic && input.structuredOutput != nil) {
+                guard let output = input.structuredOutput else { throw LLMFailure.invalidInput }
+                body["response_format"] = ["type": "json_schema", "json_schema": [
+                    "name": output.name, "strict": true, "schema": try output.object()]]
+            } else {
+                body["response_format"] = ["type": "json_object"]
+            }
+        }
         if profile.capabilities.requestsUsage { body["stream_options"] = ["include_usage": true] }
         return .init(url: url, headers: [:], body: try LLMRequestDescriptor.encoded(body), authentication: .bearer)
     }

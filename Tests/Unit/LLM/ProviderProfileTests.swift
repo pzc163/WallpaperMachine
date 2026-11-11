@@ -17,6 +17,23 @@ final class ProviderProfileTests: XCTestCase {
         }
     }
 
+    func testJSONModesRoundTripAndSchemaRemainsOpenAIOnly() throws {
+        for mode in [ProviderProfile.Capabilities.JSONMode.automatic, .required, .schema, .disabled] {
+            var value = profile("https://fixture.invalid")
+            value.capabilities.jsonMode = mode
+            try value.validate()
+            XCTAssertEqual(try CreatorPersistence.decode(ProviderProfile.self, from: CreatorPersistence.record(value)), value)
+            for kind in [ProviderProfile.ProtocolKind.anthropicMessages, .geminiGenerateContent] {
+                value.protocolKind = kind
+                XCTAssertThrowsError(try value.validate())
+            }
+        }
+        let legacy = profile("https://fixture.invalid")
+        let bytes = try CreatorPersistence.record(legacy)
+        XCTAssertFalse(String(decoding: bytes, as: UTF8.self).contains("jsonMode"))
+        XCTAssertEqual(try CreatorPersistence.record(CreatorPersistence.decode(ProviderProfile.self, from: bytes)), bytes)
+    }
+
     func testHTTPRequiresExplicitLocalOpenAIAndExactHost() throws {
         for host in ["127.0.0.1", "localhost", "LOCALHOST", "[::1]"] {
             try profile("http://\(host):8080/v1", local: true).validate()

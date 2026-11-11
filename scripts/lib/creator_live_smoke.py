@@ -19,7 +19,9 @@ class LiveSmoke:
         raw = environ.pop("CREATOR_LIVE_API_KEY", None)
         prefixed = environ.pop("TEST_RUNNER_CREATOR_LIVE_API_KEY", None)
         self.environment = dict(environ)
-        self.enabled = self.environment.get("TEST_RUNNER_CREATOR_LIVE_LLM") == "1"
+        smoke = self.environment.get("TEST_RUNNER_CREATOR_LIVE_LLM") == "1"
+        benchmark = self.environment.get("TEST_RUNNER_CREATOR_BENCHMARK") == "1"
+        self.enabled = smoke or benchmark
         self._secret = None
         self._server = self._thread = None
         self._lock = threading.Lock()
@@ -27,8 +29,11 @@ class LiveSmoke:
         if not self.enabled:
             return
         selected = [value.removeprefix("WallpaperMachineTests/") for value in (only or [])]
-        if ui or python_only or selected not in [["CreatorLiveSmokeTests"], ["CreatorLiveSmokeTests/testSingleLiveCreationAndSave"]]:
-            raise ConfigurationError("Live creator smoke requires --only CreatorLiveSmokeTests; a full/UI gate cannot opt in.")
+        suite, method = ("CreatorBenchmarkLiveTests", "testTenPromptsThreeRounds") if benchmark else ("CreatorLiveSmokeTests", "testSingleLiveCreationAndSave")
+        if smoke and benchmark or self.environment.get("TEST_RUNNER_CREATOR_SOAK") == "1":
+            raise ConfigurationError("Creator live smoke, benchmark and soak must run separately.")
+        if ui or python_only or selected not in [[suite], [suite + "/" + method]]:
+            raise ConfigurationError("Creator live evaluation requires its dedicated --only test; a full/UI gate cannot opt in.")
         if raw is not None and prefixed is not None and raw != prefixed:
             raise ConfigurationError("Conflicting creator smoke credentials.")
         value = raw if raw is not None else prefixed
@@ -39,6 +44,8 @@ class LiveSmoke:
         for field in ["PROTOCOL", "ENDPOINT", "MODEL"]:
             if not self.environment.get("TEST_RUNNER_CREATOR_LIVE_" + field):
                 raise ConfigurationError("Creator smoke protocol, endpoint and model must be explicit.")
+        if self.environment.get("TEST_RUNNER_CREATOR_LIVE_JSON_MODE", "automatic") not in {"automatic", "required", "schema", "disabled"}:
+            raise ConfigurationError("Creator JSON mode must be automatic, required, schema or disabled.")
         self._secret = bytearray(value.encode("utf-8"))
 
     def __enter__(self):

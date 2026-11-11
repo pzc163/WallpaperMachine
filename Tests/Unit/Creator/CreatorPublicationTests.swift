@@ -21,7 +21,7 @@ final class CreatorPublicationTests: XCTestCase {
         try FileManager.default.copyItem(at: store.bundleURL(projectID: draft.projectID, revisionID: sealed.id), to: source)
         let report = try await WallpaperImportService().importItems([source], into: root.appendingPathComponent("Library"), duplicates: .replaceChanged, progress: { _ in })
         XCTAssertEqual(report.failures.count, 1)
-        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(source, registryURL: root.appendingPathComponent("missing")))
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(source, registryURL: root.appendingPathComponent("missing"), publicationRoot: root.appendingPathComponent("publication")))
         try await store.renameProject(draft.projectID, title: "Invalidate evidence")
         do { _ = try await store.publication(projectID: draft.projectID, revisionID: sealed.id); XCTFail("Stale evidence accepted") } catch {}
     }
@@ -45,11 +45,11 @@ final class CreatorPublicationTests: XCTestCase {
         let installed = try await publisher.publish(projectID: sealed.projectID, revisionID: sealed.id, store: store)
         let poster = installed.appendingPathComponent("preview.jpg"), original = try Data(contentsOf: poster)
         var altered = original; altered[altered.count / 2] ^= 1; try altered.write(to: poster)
-        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registryURL))
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registryURL, publicationRoot: root.appendingPathComponent("publication")))
         try original.write(to: poster)
         let document = try CreatorRuntimeRegistry.read(at: registryURL)
         try await registry.replace(installed.lastPathComponent, expected: document.entries[installed.lastPathComponent], with: nil)
-        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registryURL))
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registryURL, publicationRoot: root.appendingPathComponent("publication")))
     }
 
     func testPublicationFailuresOnBothSidesOfConfirmationRestoreOrKeepWholeVersion() async throws {
@@ -66,7 +66,7 @@ final class CreatorPublicationTests: XCTestCase {
             do { _ = try await failing.publish(projectID: next.projectID, revisionID: next.id, store: store); XCTFail("Interruption swallowed") }
             catch Probe.interruption {}
             let expected = phase == .afterConfirmation ? next : old
-            XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url).digest, expected.bundleDigest)
+            XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url, publicationRoot: journal).digest, expected.bundleDigest)
             let bindings = try await registry.bindings()
             XCTAssertEqual(bindings[installed.lastPathComponent]?.revisionID, expected.id)
             try await clean.recover(store: store)
@@ -87,9 +87,9 @@ final class CreatorPublicationTests: XCTestCase {
         let ticket = try await interrupted.prepare(projectID: next.projectID, revisionID: next.id, store: store)
         do { _ = try await interrupted.install(ticket); XCTFail("Import checkpoint not reached") } catch Probe.interruption {}
         XCTAssertEqual(try CreatorDraftStore.read(installed).digest, next.bundleDigest)
-        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url))
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url, publicationRoot: journal))
         try await CreatorPublisher(root: journal, library: library, registry: registry).recover()
-        XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url).digest, old.bundleDigest)
+        XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url, publicationRoot: journal).digest, old.bundleDigest)
     }
 
     func testSealingInterruptionKeepsOriginalDraftAndAtomicReport() async throws {
@@ -126,7 +126,7 @@ final class CreatorPublicationTests: XCTestCase {
         }
         await fulfillment(of: [verifying], timeout: 5)
         let installed = library.appendingPathComponent("ai-" + sealed.projectID.uuidString.lowercased())
-        XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url).digest, sealed.bundleDigest)
+        XCTAssertThrowsError(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url, publicationRoot: journal), "Registration precedes confirmation; a live candidate is not playable")
         do { try await CreatorPublisher(root: journal, library: library, registry: registry).recover(); XCTFail("Recovered a live transaction") }
         catch CreatorPersistence.Failure.busy {}
         task.cancel()
@@ -160,6 +160,6 @@ final class CreatorPublicationTests: XCTestCase {
         // Once the external edit is resolved, the same durable journal can restore the old version.
         try await registry.replace(installed.lastPathComponent, expected: nil, with: original)
         try await publisher.recover()
-        XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url).digest, old.bundleDigest)
+        XCTAssertEqual(try CreatorRuntimeRegistry.readForPlayback(installed, registryURL: registry.url, publicationRoot: journal).digest, old.bundleDigest)
     }
 }

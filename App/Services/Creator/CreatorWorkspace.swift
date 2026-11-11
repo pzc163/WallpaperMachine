@@ -74,7 +74,7 @@ actor CreatorWorkspace {
         let binding = publication.binding
         guard try await registry.bindings()[binding.wallpaperID] == binding else { throw CreatorPersistence.Failure.staleValidation }
         _ = try CreatorRuntimeRegistry.readForPlayback(library.appendingPathComponent(binding.wallpaperID),
-            expectedDigest: binding.bundleDigest, registryURL: registry.url)
+            expectedDigest: binding.bundleDigest, registryURL: registry.url, publicationRoot: publisher.root)
         return binding.wallpaperID
     }
     func publish(project: UUID, revision: UUID) async throws -> URL {
@@ -154,7 +154,8 @@ actor CreatorWorkspace {
         let project = try await temporary.createProject(title: "Connection")
         let ticket = try await temporary.beginJob(projectID: project.id, requestBudget: 1, tokenBudget: min(64, profile.limits.tokenBudget))
         let completion = try await provider.generate(LLMRequest(system: "Connection check.", messages: [.init(role: .user, content: "Return {\"ok\":true}.")],
-            maxOutputTokens: min(64, profile.limits.tokenBudget)), profileID: profile.id, configurationID: profile.configurationID,
+            maxOutputTokens: min(64, profile.limits.tokenBudget), structuredOutput: .init(name: "connection_check",
+                schema: Data(#"{"type":"object","properties":{"ok":{"type":"boolean"}},"required":["ok"],"additionalProperties":false}"#.utf8))), profileID: profile.id, configurationID: profile.configurationID,
             ticket: ticket, store: temporary, retrying: false, disableAutomaticJSONMode: true)
         try await temporary.cancel(ticket)
         return completion.response.usage

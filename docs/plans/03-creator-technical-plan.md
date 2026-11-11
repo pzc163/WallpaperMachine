@@ -13,7 +13,13 @@ S1.4 后续真机补充：用户以 openaiCompatible / kimi-k3 显式运行 `Cre
 
 S2.1 历史记录：已将核对通过的 S1.4 代码、文档及单次 live 补充固化为本地提交 `8c1480b0`（`feat/ai-creator`，未 push），提交后工作树干净。有限参数修复、对话账本和显式回退见 [S2.1 实施与验证](../features/creator-iteration.md)。该轮仅本地 Mock、内存凭据与离屏 WebKit；完成定向、一次完整门禁及文档检查后暂停，不进入 S2.2/S4，不提交该轮实现、安装应用或触碰桌面。
 
-S2.2 当前轮：已将核对通过的 S2.1 代码和同步文档固化为本地安全基线 `29cd3086`（`feat/ai-creator`，未 push），提交后工作树干净。现已接入原生创作页、模型设置、独立预览与启动恢复；详细行为及边界见 [S2.2 实施与验证](../features/creator-workspace.md)。生成、保存入库和应用显示器是三个独立动作。当前备份格式不能原子携带 AI 策略，存在 Creator 数据时明确阻止旧备份/恢复/搬迁；不静默遗漏数据。常规验证只用 Mock、内存凭据及不显示的原生视图；可见外观、真实连接及桌面应用仍须另行授权验收。本轮实现保持未提交，完成门禁与报告后暂停。
+S2.2 历史记录：已将核对通过的 S2.1 代码和同步文档固化为本地安全基线 `29cd3086`（`feat/ai-creator`，未 push），提交后工作树干净。现已接入原生创作页、模型设置、独立预览与启动恢复；详细行为及边界见 [S2.2 实施与验证](../features/creator-workspace.md)。生成、保存入库和应用显示器是三个独立动作。当前备份格式不能原子携带 AI 策略，存在 Creator 数据时明确阻止旧备份/恢复/搬迁；不静默遗漏数据。常规验证只用 Mock、内存凭据及不显示的原生视图；可见外观、真实连接及桌面应用仍须另行授权验收。S2.2 当轮交付时保持未提交；现已在 S2.3 开始前固化为本地基线。
+
+S2.3 最终收口（2026-11-11）：已将通过 4,962 项原生门禁的 S2.2 代码与文档固化为本地提交 `35594fb9`（未 push）。
+本轮补齐无界面恢复、发布事务播放门禁、元数据凭据回显拒绝、AC-01～14 证据矩阵及基准/长稳入口，见
+[S2.3 验收与复现](../features/creator-acceptance.md)。2026-11-11 已核对用户完成的真实测试：单次 smoke 通过；qwen3.8-flash-next / schema 的 30 个样本全部首次通过，首次及最终可运行率均为 100%；
+三个模板完成 1800 秒离屏长稳，540 次采样全部响应正常，外连尝试和 WebContent 终止观察值均为 0。脱敏指标及最终常规门禁见验收记录。
+S2.3 实测与最终常规门禁已完成：708 项 Python、4,994 项原生通过，0 失败、72 跳过；本次关闭全部 opt-in，未重发真实请求。按用户指令本地提交并暂停，不 push。S3 真机/UI/多屏/睡眠等待下一步授权，S4 自由代码保持关闭。
 
 ## 1. 总体结构
 
@@ -259,7 +265,7 @@ P0 / S1.2 已实现 `openaiCompatible`、`anthropicMessages`、`geminiGenerateCo
 
 每个请求维护独立的 Codec 状态，状态作为显式输入/输出，不跨请求共享缓冲、思维块状态或 token 累积。当前使用每请求独立的 ephemeral URLSession，禁用系统凭据库、Cookie 和缓存；TLS 保持系统验证，不接受其他自动鉴权挑战。正文只在合法结束和完整 JSON object 校验后交回原生调用方；S1.3 增加单一完整围栏兼容，并由独立严格校验器拒绝重复键、未知字段及模板参数错误。
 
-共享传输按实际 UTF-8 字节增量处理分片、多行 `data:`、空行分隔、LF/CRLF、注释/心跳及末尾残帧。SSE 分帧与协议 JSON 解码分开；不能把一个网络分片直接当成完整 JSON。正文最终仍受 16 KiB 合同上限约束；原始流上限 1 MiB，单行/单事件上限 64 KiB，默认请求总超时 60 秒（可注入但不超过 300 秒）。被跳过的思维数据、注释和未知 SSE 字段也计入传输限额。取消/结束释放会话，迟到事件不能替换终态。
+共享传输按实际 UTF-8 字节增量处理分片、多行 `data:`、空行分隔、LF/CRLF、注释/心跳及末尾残帧。SSE 分帧与协议 JSON 解码分开；不能把一个网络分片直接当成完整 JSON。正文最终仍受 16 KiB 合同上限约束；原始流上限 1 MiB，单行/单事件上限 64 KiB，默认请求总超时 60 秒（可注入但不超过 600 秒；按需基准默认 90 秒）。被跳过的思维数据、注释和未知 SSE 字段也计入传输限额。取消/结束释放会话，迟到事件不能替换终态。
 
 取消必须终止对应 `URLSessionTask` 和消费流，释放缓冲；复用 S1.1 的 `jobID + cancellationToken` 并绑定 Profile 配置代次，丢弃迟到事件。401、429、超时、HTTP 错误及流内错误走同一分类/预算规则，不在 Codec 内自动重试；未结束、截断、取消、拒绝或 token 上限停止都不能变成成功结果。协议结束标志由 Codec 判定，不能只凭连接 EOF 或已经收到一些正文宣布完成。
 
@@ -273,7 +279,9 @@ P0 / S1.2 已实现 `openaiCompatible`、`anthropicMessages`、`geminiGenerateCo
 - 默认强制 HTTPS 和非空 Key。**仅显式本地模式且规范化 host 严格等于 `127.0.0.1`、`localhost` 或 `::1` 时，允许 HTTP 与空 Key**；IPv6 URL 使用 `[::1]`，比较时去除方括号。空 Key 时省略鉴权头，不发送空 Bearer。HTTPS 本地地址也只有满足该显式模式和白名单才可空 Key。
 - 不将 `127.0.0.0/8`、内网地址、`0.0.0.0`、相似域名、DNS 恰好解析到回环的远程域名或其他 IP 表示法自动视为本地。URL 禁止 userinfo/凭据 query，TLS 验证不得关闭；HTTP 例外不扩散到另外两个 Codec。
 - 请求设置 `stream: true`，支持 `stream_options.include_usage: true`。Profile 可显式声明本地端点不支持该请求字段；此时省略选项，不自动发第二次请求试探。即便请求了用量，也接受本地正常结束但不返回 usage 的流，显示“未知”。不能因为缺少用量放宽结束/完整性检查。
-- `response_format: {"type":"json_object"}` 默认启用；Profile 的可选 `jsonMode` 为 `automatic` / `required` / `disabled`，缺省等于 automatic 并保留旧记录字节。仅服务端 400 明确报告 `response_format` 的 unsupported/unknown 参数码时，automatic 可在预算内降级一次；不根据自由错误文案猜测、不对 401 或无关 400 试探。当前发送 `max_tokens`，不自动猜测其他模型专属请求字段。
+- Profile 的可选 `jsonMode` 为 `automatic` / `required` / `schema` / `disabled`，缺省等于 automatic 并保留旧记录字节。automatic 在原生请求携带结构约束时发送 `response_format: {"type":"json_schema","json_schema":{"name":"template_parameter_output_v1","strict":true,"schema":...}}`，无约束的通用请求保留 json_object；required 明确要求 json_object，schema 要求原生 Schema 并强制 json_schema，disabled 省略 response_format。required/schema 均不降级。
+- 请求用 Schema 由原生目录单独导出：根对象封闭、字段全必填、parameters 内嵌 anyOf 三个完整模板字典、裸标量类型/枚举、properties 固定为空对象；不直接发送含 `$schema`/`$defs`/根 oneOf/const/allOf 的完整合同。范围、文本、跨 templateID 匹配和资源上限继续由原校验器强制检查。完整 `CreatorOutputSchema` 和 `CreatorOutputValidator` 合同不变；Prompt 给出扁平骨架及原生默认值生成的完整时钟例子，明确 backgroundMotion、无 motionSpeed/clockVisible，避免跨模板抄键。
+- 仅服务端 400 的结构化错误明确报告 `response_format`、`.type`、`.json_schema` 或 `.json_schema.schema` 及 unsupported/unknown 参数码时，automatic 可在同一预算内直接降级为纯提示词一次；不根据自由错误文案猜测、不对 401、invalid_json_schema 或无关 400 试探。按需 smoke/benchmark 均支持四种模式且默认 automatic；smoke 的 requestBudget=1 不因此放宽。当前发送 `max_tokens`，不自动猜测其他模型专属请求字段。
 - 只收集选定 choice 的答案正文；接受最后 `choices: []` 的 usage 专用块，忽略中间 `usage: null`，保留请求级用量而不逐块累加。收到 `finish_reason` 后仍需处理末尾用量及 `[DONE]`，不能提前关闭流。详见 [Chat Completions 请求及用量](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create) 与 [流式事件](https://developers.openai.com/api/reference/resources/chat/subresources/completions/streaming-events)。
 - 过滤兼容端点的 `reasoning_content` 和显式思维块；这些是兼容扩展，不是所有 OpenAI 服务都返回的字段。对于 Profile 声明的前置 `<think>…</think>` 等包裹，使用跨分片状态处理，在输出首个 JSON 字符前剔除；不对 JSON 字符串中的普通文字做全局正则删除。思维块不闭合、未知包裹或结构歧义按无效/截断响应拒绝，不猜测正文边界。
 
@@ -422,7 +430,7 @@ S2.1 模型修复只针对 JSON、模板选择和参数合同；运行或封面�
 
 ## 8. 发布与回滚
 
-发布和桌面应用分开；创作失败不触碰正在运行的版本。S1.4 实现了前五步的原生服务，未接线 UI 刷新或后三步桌面应用。发布事务持有跨异步操作的文件租约，旧版字节和登记同时留在日志；confirmed 前恢复旧版，之后保留新版。外部修改导致摘要/登记不匹配时保留日志并报错。`recover(store:)` 还能补齐发布后工程指针；应用启动仍需未来入口调用。
+发布和桌面应用分开；创作失败不触碰正在运行的版本。S1.4 实现了前五步的原生服务，未接线 UI 刷新或后三步桌面应用。发布事务持有跨异步操作的文件租约，旧版字节和登记同时留在日志；confirmed 前恢复旧版，之后保留新版。外部修改导致摘要/登记不匹配时保留日志并报错。`recover(store:)` 还能补齐发布后工程指针；S2.2 接入控制器启动，S2.3 进一步接入无界面 bootstrap 并阻断未确认事务的正式播放。
 
 1. 完成运行检查、原生封面和清单校验，冻结最终候选包，取得绑定最终摘要及当前策略的通过报告。
 2. 重新计算资源包摘要，核对报告和完整资源清单。
@@ -505,7 +513,7 @@ S0 已完成模板路线验证，S1.0 的 10/12/10 参数模板、六套预设�
 
 ## 12. 当前轮阶段边界
 
-S2.1 已固化为本地提交 `29cd3086`。本轮只实施 S2.2 原生创作页、模型设置和恢复/存储保护，服务合同见第 21 节。完成定向、一次完整门禁及文档检查后暂停；不进入 S2.3/S3/S4，不提交 S2.2 或 push，不安装应用，不执行真实 API、个人 Keychain、可见 UI 自动化或桌面切换。真实画面、连接与桌面动作的人工验收需另行授权。
+S2.2 已固化为本地提交 `35594fb9`。本次收口 S2.3，服务合同见第 22 节；核对用户已完成的真实评测和 1800 秒长稳，归档脱敏指标并清理临时附件。运行一次完整常规门禁和文档检查，通过后按用户授权本地提交并暂停；不 push，不进入 S3/S4，不安装应用，不重发真实 API 请求，不读写个人 Keychain，不执行可见 UI 自动化或桌面切换。
 
 ## 13. 首版之后的发布准备
 
@@ -550,7 +558,7 @@ Web 音频是 128 个 0～1 的频谱数值：前 64 个左声道、后 64 个�
 
 ## 16. S0 实施结果与技术决策
 
-实施位置：`/Users/magicyang/.codex/worktrees/creator-s0/WallpaperMachine`。基于同一提交创建独立工作目录；代码尚未提交或合回原 clone。
+S0 当时在基于同一提交创建的独立工作树实施；该阶段交付时尚未提交或合回原 clone。
 
 | 范围 | 本轮结果 |
 |---|---|
@@ -610,7 +618,7 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 
 实现及验证见 [迭代服务](../features/creator-iteration.md)。CreatorOrchestrator 的 `maxRepairs` 默认 0，接受 0～2；完整轮次预算为 `min(1 + maxRepairs, Profile.requestBudget)`，最多 3。`CreatorConversation` 使用既有 checksummed Codable JSON、原子写入、store actor 与文件锁；最多 64 轮、整个记录最多 256 KiB，超限拒绝而不静默裁剪。旧工程没有 conversation 文件时只读为空，不改旧修订字节。
 
-每轮绑定原始 baseRevisionID/digest、Profile ID/configurationID 与取消 token。每次生成使用新 GenerationJob，先持久化整轮 request/token 预留，再增加子 Job 计数，最后发包；两个持久写不是单个跨文件事务，崩溃可能多计而不能少计或退款。Provider 内部重试关闭；429、5xx、超时/断流、格式/参数拒绝、运行检查失败和自动 JSON 模式降级共用同一外层次数。仅 automatic openaiCompatible 允许降级，required 不降级。大于 30 秒的 Retry-After 直接停止。401/403、供应商拒绝、过期配置、存储/封闭/导入失败及取消不修复。
+每轮绑定原始 baseRevisionID/digest、Profile ID/configurationID 与取消 token。每次生成使用新 GenerationJob，先持久化整轮 request/token 预留，再增加子 Job 计数，最后发包；两个持久写不是单个跨文件事务，崩溃可能多计而不能少计或退款。Provider 内部重试关闭；429、5xx、超时/断流、格式/参数拒绝、运行检查失败和自动 JSON 模式降级共用同一外层次数。仅 automatic openaiCompatible 允许降级，required/schema 不降级。大于 30 秒的 Retry-After 直接停止。401/403、供应商拒绝、过期配置、存储/封闭/导入失败及取消不修复。
 
 轮次状态为 generating → runtime → sealing → publishing → completed；前两阶段可进入 repairPending，再派生新尝试；终态另有 failed/cancelled/interrupted。CreatorRepairIssue 只保存原生枚举和目录内字段路径；unknown 键只报已知父对象，运行细分 timeout/pageFailed/invalidCapture。不复制无效回答、页面日志或异常原文。修复提示只传脱敏输入摘要、允许目录、结构错误与可选已验证参数；现用 Key 先精确替换，再过滤凭据赋值、URL、绝对路径及长 token。无任意敏感语义识别保证，且本阶段无外部素材/文件读入入口。对话不保存原始 SSE、模型推理或系统提示词，不进入发布包。
 
@@ -631,3 +639,19 @@ PRD 中自由代码要求仍保持未验收，S0 测试数字和失败结论不�
 9. 六语言文案、原生模板标签、重要控件无障碍标识同步维护。诊断折叠区只含原生分类、允许字段、指标和摘要；无原始 SSE/Key/系统路径。已返回的 token 和未知用量分开，预算不是费用硬上限。
 
 实现、测试命令和未验证范围见 [creator-workspace.md](../features/creator-workspace.md)。S0/S1.0 三文件黄金字节、四文件摘要及自由代码关口均不放宽。
+
+## 22. S2.3 无界面验收、基准与长稳实施合同
+
+1. `CreatorStartupRecovery` 在 BridgeStore 的引擎 bootstrap 前恢复；`CreatorRecoveryCoordinator` 合并并发恢复。
+   不读取凭据。注册表和日志不一致则报错，未知策略不降级；后台菜单栏无需控制器。
+2. 正式播放的快照读取持有 Publisher `.lock` 共享锁；发布/确认/恢复用排他锁。存在 `active` 即拒绝，
+   不把“已登记但未确认”当作成功。自定义注册表必须配对显式日志路径；内存快照读取后保持冻结。
+3. 静态合同校验后，标题/摘要再次检查当前凭据回显与敏感文本；不合格按 policyViolation 拒绝，不把秘密转交修复提示。
+4. 基准固定 10×3，每样本 requestBudget=3、最多两次修复，真实运行/封面/临时入库。记录失败、用量缺失、耗时分布。
+   未完整或 Mock 数据不建立 ≥80% 质量结论。单次 S1.4 smoke 仍为 requestBudget=1。
+5. 长稳默认 1800 秒/10 秒采样，三个离屏页面持续存在；检查宿主外部截止时间、原生进程终止回调、暂停/尺寸/重绘。
+   只报告测试宿主 footprint，不归属 WebContent/GPU，不以离屏调度推断桌面帧率。结束/取消/失败停止页面并保留结构化证据。
+6. 两个入口默认跳过且须独立 --only；测试运行器清除原始 Key 后才启动子进程，真实模型只用一次性内存传递。
+   其余门禁保持本地 Mock。命令、报告字段、AC-01～14 矩阵与待 S3/S4 的边界见 [验收文档](../features/creator-acceptance.md)。
+
+2026-11-11 已核对真实 smoke、30/30 首次通过的固定模型/schema 基准及 1800 秒三模板长稳；该配置可运行率目标已达成。常规门禁继续跳过真实入口，最终计数与脱敏聚合指标以验收文档为准；宿主内存不包含 WebContent/GPU，S3 设备与视觉验收、S4 自由代码关口不变。
