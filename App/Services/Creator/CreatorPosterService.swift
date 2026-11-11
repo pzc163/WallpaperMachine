@@ -39,6 +39,17 @@ final class CreatorPosterService {
         } onCancel: { Task { @MainActor in operation.finish(.failure(CreatorRuntimeFailure.cancelled)) } }
     }
 
+    /// Capture a parameter-only update on the existing supervised page. No reload or model call.
+    func captureHot(surface: WebWallpaperPreviewSurface, report: ValidationReport,
+                    parameters: [String: CreatorTemplateCatalog.Value], paused: Bool) async throws -> CreatorRuntimeCapture {
+        try Task.checkCancellation()
+        let operation = Session(surface: surface, report: report, parameters: parameters, timeout: timeout, snapshotter: snapshotter)
+        operation.hot = true; operation.previousSize = surface.view.frame.size; operation.previousPaused = paused
+        return try await withTaskCancellationHandler {
+            try await withCheckedThrowingContinuation { operation.start($0) }
+        } onCancel: { Task { @MainActor in operation.finish(.failure(CreatorRuntimeFailure.cancelled)) } }
+    }
+
     @MainActor private final class Session {
         let surface: WebWallpaperPreviewSurface
         let report: ValidationReport
@@ -50,6 +61,10 @@ final class CreatorPosterService {
         var polling: Task<Void, Never>?
         var stopped = false
         var initialized = false
+        var hot = false
+        var previousSize: NSSize?
+        var previousPaused = false
+        var previousFailure: ((String) -> Void)?
         init(surface: WebWallpaperPreviewSurface, report: ValidationReport, parameters: [String: CreatorTemplateCatalog.Value],
              timeout: Duration, snapshotter: @escaping Snapshotter) {
             self.surface = surface; self.report = report; self.parameters = parameters; self.timeout = timeout; self.snapshotter = snapshotter
@@ -57,6 +72,7 @@ final class CreatorPosterService {
         func start(_ answer: CheckedContinuation<CreatorRuntimeCapture, Error>) {
             guard !stopped else { answer.resume(throwing: CreatorRuntimeFailure.cancelled); return }
             continuation = answer
+            if hot { previousFailure = surface.onFailure }
             surface.onFailure = { [weak self] _ in
                 guard let self else { return }
                 self.finish(.failure(self.surface.page.creatorCodeFailure ?? .init(category: .runtime, runtimeReason: .pageFailed)))
@@ -67,15 +83,29 @@ final class CreatorPosterService {
             }
             polling = Task { [weak self] in
                 guard let self else { return }
-                do { try await surface.start(); poll() } catch { finish(.failure(CreatorRuntimeFailure.pageFailed)) }
+                do {
+                    if hot {
+                        surface.view.setFrameSize(NSSize(width: report.context.width, height: report.context.height))
+                        surface.view.layoutSubtreeIfNeeded()
+                        try surface.applyProperties(String(decoding: JSONSerialization.data(withJSONObject: parameters.mapValues { ["value": $0.json] }), as: UTF8.self))
+                    } else { try await surface.start() }
+                    poll()
+                } catch { finish(.failure(CreatorRuntimeFailure.pageFailed)) }
             }
         }
         func poll() {
             guard !stopped else { return }
             guard surface.page.isLoaded else { again(); return }
-            guard surface.page.webView.window == nil, surface.page.webView.url == CreatorWebResources.entryURL
+            guard (hot || surface.page.webView.window == nil), surface.page.webView.url == CreatorWebResources.entryURL
             else { finish(.failure(CreatorRuntimeFailure.pageFailed)); return }
             if let code = surface.page.creatorCode { pollCode(code); return }
+            if hot {
+                surface.page.webView.callAsyncJavaScript("wallpaperPropertyListener.setPaused(true); dispatchEvent(new Event('resize')); return true;", arguments: [:], in: nil, in: .page) { [weak self] result in
+                    guard let self, !stopped else { return }
+                    if case .success = result { snapshot() } else { finish(.failure(CreatorRuntimeFailure.pageFailed)) }
+                }
+                return
+            }
             surface.page.webView.callAsyncJavaScript(Self.status, arguments: ["expected": parameters.mapValues(\.json), "freeze": !initialized],
                 in: nil, in: .page) { [weak self] result in
                 guard let self, !stopped else { return }
@@ -91,10 +121,11 @@ final class CreatorPosterService {
             guard code.ready, !code.stopped, code.failure == nil, let frame = code.frame else { again(); return }
             guard code.samples >= 2 else { again(); return }
             code.pause(true)
-            surface.page.webView.callAsyncJavaScript("await document.fonts.ready; if(document.readyState!=='complete') return false; window.__wmValidateFrame?.(); return !document.documentElement.hasAttribute('data-creator-fault');",
-                arguments: [:], in: frame, in: .page) { [weak self] result in
+            surface.page.webView.callAsyncJavaScript("await document.fonts.ready; if(document.readyState!=='complete') return false; if(expected && !Object.entries(expected).every(([k,v])=>WallpaperHost.parameters[k]===v)) return false; window.__wmValidateFrame?.(); return !document.documentElement.hasAttribute('data-creator-fault');",
+                arguments: ["expected": hot ? parameters.mapValues(\.json) : NSNull()], in: frame, in: .page) { [weak self] result in
                 guard let self, !stopped else { return }
                 if case .success(let value) = result, value as? Bool == true { snapshot() }
+                else if hot, case .success = result, code.failure == nil { again() }
                 else { finish(.failure(CreatorRuntimeFailure.invalidCapture)) }
             }
         }
@@ -111,13 +142,14 @@ final class CreatorPosterService {
             configuration.afterScreenUpdates = true
             snapshotter(surface.page.webView, configuration) { [weak self] result in
                 guard let self, !stopped else { return }
-                guard surface.page.isLoaded, surface.page.webView.window == nil else {
+                guard surface.page.isLoaded, hot || surface.page.webView.window == nil else {
                     finish(.failure(CreatorRuntimeFailure.pageFailed)); return
                 }
                 if let code = surface.page.creatorCode {
                     guard code.ready, !code.stopped, code.failure == nil else { finish(.failure(CreatorRuntimeFailure.pageFailed)); return }
                     completeImage(result); return
                 }
+                if hot { completeImage(result); return }
                 surface.page.webView.callAsyncJavaScript(Self.status, arguments: ["expected": parameters.mapValues(\.json), "freeze": false],
                     in: nil, in: .page) { [weak self] status in
                     guard let self, !stopped else { return }
@@ -142,7 +174,11 @@ final class CreatorPosterService {
             guard !stopped else { return }
             stopped = true
             deadline?.cancel(); polling?.cancel()
-            surface.stop()
+            if hot {
+                surface.onFailure = previousFailure
+                if let previousSize { surface.view.setFrameSize(previousSize) }
+                try? surface.setPaused(previousPaused)
+            } else { surface.stop() }
             let answer = continuation; continuation = nil
             answer?.resume(with: result)
         }

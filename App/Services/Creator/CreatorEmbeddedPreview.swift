@@ -9,6 +9,7 @@ final class CreatorEmbeddedPreview {
     private(set) var view: NSView?
     private(set) var revisionID: UUID?
     private(set) var paused = false
+    private(set) var muted = true
     @ObservationIgnored private var surface: WebWallpaperPreviewSurface?
     @ObservationIgnored private var timeout: Task<Void, Never>?
     @ObservationIgnored private var generation = UUID()
@@ -43,9 +44,23 @@ final class CreatorEmbeddedPreview {
         try surface?.applyProperties(String(decoding: data, as: UTF8.self))
     }
     func pause(_ value: Bool) throws { try surface?.setPaused(value); paused = value }
+    func mute(_ value: Bool) throws { try surface?.setMuted(value); muted = value }
+    func captureParameters(project: UUID, base: UUID, target: UUID, store: CreatorRevisionStore,
+                           values: [String: CreatorTemplateCatalog.Value]) async throws -> CreatorRuntimeCapture {
+        guard revisionID == base, state == .ready, let surface else { throw CreatorRuntimeFailure.staleInput }
+        let token = generation
+        let original = try await store.validatedSnapshot(projectID: project, revisionID: base)
+        let updated = try await store.validatedSnapshot(projectID: project, revisionID: target)
+        guard original.report.allowsPublication, original.report.context.sameHost(as: updated.report.context) else { throw CreatorRuntimeFailure.staleInput }
+        try CreatorParameterUpdate.validate(before: original.snapshot, after: updated.snapshot, values: values)
+        guard generation == token else { throw CreatorRuntimeFailure.cancelled }
+        let capture = try await CreatorPosterService().captureHot(surface: surface, report: updated.report, parameters: values, paused: paused)
+        guard generation == token else { throw CreatorRuntimeFailure.cancelled }
+        return capture
+    }
     func close() {
         generation = UUID(); timeout?.cancel(); timeout = nil
-        surface?.stop(); surface = nil; view = nil; revisionID = nil; state = .idle; paused = false
+        surface?.stop(); surface = nil; view = nil; revisionID = nil; state = .idle; paused = false; muted = true
     }
     private func fail() { close(); state = .failed }
 }

@@ -82,6 +82,7 @@ import XCTest
                 for language in AppLanguage.supported {
                     PanelLocale.shared.bind(to: AppLanguageStore(defaults: panel.defaults, systemLanguages: [language.tag]))
                     for page in [AnyView(CreatorSettingsSection()), AnyView(CreatorInspector())] {
+                        controller.creator.providerAdvancedExpanded = false
                         let hosting = NSHostingController(rootView: page.environment(controller).panelTheme(theme: controller.theme, locale: PanelLocale.shared))
                         hosting.sizingOptions = []
                         let window = ControlPanelWindow.make(contentViewController: hosting, delegate: nil)
@@ -90,13 +91,18 @@ import XCTest
                         hosting.view.layoutSubtreeIfNeeded()
                         try await Task.sleep(for: .milliseconds(100))
                         hosting.view.layoutSubtreeIfNeeded()
-                        let elements = AccessibilityElement.everything(in: hosting.view)
+                        var elements = AccessibilityElement.everything(in: hosting.view)
                         if elements.contains(where: { $0.identifier == "creator-model-settings" }) {
                             for identifier in ["creator-profile-name", "creator-profile-protocol", "creator-profile-endpoint", "creator-profile-model", "creator-profile-key"] {
                                 XCTAssertTrue(elements.contains { $0.identifier == identifier }, "\(language.tag): \(identifier)")
                             }
+                            XCTAssertTrue(elements.contains { $0.identifier == "creator-advanced-options" })
+                            XCTAssertFalse(elements.contains { $0.identifier == "creator-json-mode" }, "Advanced controls start collapsed")
+                            controller.creator.providerAdvancedExpanded = true
+                            try await Task.sleep(for: .milliseconds(100)); hosting.view.layoutSubtreeIfNeeded()
+                            elements = AccessibilityElement.everything(in: hosting.view)
                             if kind == .openaiCompatible {
-                                let picker = try XCTUnwrap(elements.first { $0.identifier == "creator-json-mode" }, language.tag)
+                                let picker = try XCTUnwrap(elements.first { $0.identifier == "creator-json-mode" }, "\(language.tag) \(kind) expanded=\(controller.creator.providerAdvancedExpanded) identifiers=\(elements.map(\.identifier).filter { !$0.isEmpty })")
                                 XCTAssertEqual(picker.value, PanelLocale.shared.catalogString("JSON Schema (strict)"))
                             } else {
                                 XCTAssertFalse(elements.contains { $0.identifier == "creator-json-mode" })

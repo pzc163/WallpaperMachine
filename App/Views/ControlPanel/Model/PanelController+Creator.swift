@@ -27,6 +27,7 @@ extension PanelController {
         try Task.checkCancellation()
         if creator.detail?.project.id != detail?.project.id || creator.detail?.project.selectedRevisionID != detail?.project.selectedRevisionID {
             creator.preview?.close(); creator.preview = nil; creator.embedded.close()
+            creator.sourceDraft = nil
         }
         creator.projects = projects; creator.configuration = configuration; creator.detail = detail
         creator.selectedProjectID = detail?.project.id
@@ -96,7 +97,7 @@ extension PanelController {
             let token = self.creator.operationID
             let mailbox = CreatorStreamMailbox()
             self.creator.activeTranscript = CreatorTranscript()
-            self.creator.artifactTab = .source; self.creator.embedded.close()
+            self.creator.artifactTab = .source; self.creator.showsGallery = false; self.creator.embedded.close()
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
                 maxOutputTokens: profile.limits.outputTokensPerRequest, modelID: self.creator.configuration.selectedModel, maxRepairs: repairs, mode: self.creator.mode, engine: self.creator.mode == .code ? self.creator.engine : nil)
@@ -197,14 +198,49 @@ extension PanelController {
     }
     func saveCreatorToLibrary() async throws {
         guard creator.canSave, let project = creator.selectedProjectID, let revision = creator.selectedRevision else { throw CreatorGenerationFailure.invalidRequest }
-        try await creatorOperation(.saving) { _ = try await self.creatorWorkspace.publish(project: project, revision: revision.id) }
+        let changed = creator.hasParameterChanges, values = creator.parameters, preview = creator.embedded
+        let useHot = preview.revisionID == revision.id && preview.state == .ready
+        let hot: CreatorOrchestrator.Capture?
+        if useHot {
+            hot = { project, target, store in
+                try await preview.captureParameters(project: project, base: revision.id, target: target, store: store, values: values)
+            }
+        } else { hot = nil }
+        try await creatorOperation(.saving) {
+            var target = revision.id
+            if changed {
+                let updated = try await self.creatorWorkspace.edit(project: project, revision: revision.id, parameters: values, hotCapture: hot)
+                target = updated.id
+            }
+            _ = try await self.creatorWorkspace.publish(project: project, revision: target)
+        }
         creator.phase = .saved
         try await refresh()
     }
     func applyCreatorToDisplay() async throws {
-        guard creator.canApply, let project = creator.selectedProjectID, let revision = creator.selectedRevision else { throw CreatorGenerationFailure.invalidRequest }
+        guard creator.canApply else { throw CreatorGenerationFailure.invalidRequest }
+        if creator.hasParameterChanges || creator.selectedRevision?.id != creator.detail?.installedRevisionID { try await saveCreatorToLibrary() }
+        guard let project = creator.selectedProjectID, let revision = creator.selectedRevision else { throw CreatorGenerationFailure.invalidRequest }
         let id = try await creatorWorkspace.installedWallpaper(project: project, revision: revision.id)
         try await activate(id)
+    }
+    func resetCreatorParameters() throws {
+        guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
+        if let schema = creator.detail?.parameterSchema {
+            let values = Dictionary(uniqueKeysWithValues: schema.parameters.map { ($0.id, $0.defaultValue) })
+            try schema.validate(values); creator.parameters = values
+            try creator.preview?.properties(values); try creator.embedded.properties(values)
+        } else if let id = creator.detail?.specification?.templateID {
+            try setCreatorParameters(CreatorTemplateCatalog.definition(id).defaults, templateID: id)
+        }
+    }
+    func runCreatorSource() async throws {
+        guard !creator.isBusy, creator.hasSourceChanges, let source = creator.sourceDraft,
+              let project = creator.selectedProjectID, let revision = creator.selectedRevision else { throw CreatorGenerationFailure.invalidRequest }
+        try await creatorOperation(.runtime) {
+            _ = try await self.creatorWorkspace.editSource(project: project, revision: revision.id, source: source)
+            self.creator.sourceDraft = nil; self.creator.artifactTab = .render
+        }
     }
     var creatorSelectedPoster: PanelImageSource? {
         guard let revision = creator.selectedRevision, revision.posterDigest != nil else { return nil }
@@ -277,7 +313,7 @@ extension PanelController {
     }
     private func creatorOperation(_ phase: CreatorModel.Phase, operation: @escaping @MainActor () async throws -> Void) async throws {
         guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
-        creator.isBusy = true; creator.phase = phase; creator.issue = nil; creator.attempt = 0
+        creator.isBusy = true; creator.phase = phase; creator.issue = nil; creator.showsReport = false; creator.attempt = 0
         creator.operationID = UUID()
         let started = ContinuousClock.now
         let task = Task { try await operation() }

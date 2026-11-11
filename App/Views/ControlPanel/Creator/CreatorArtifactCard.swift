@@ -11,23 +11,23 @@ struct CreatorArtifactCard: View {
         PanelCard {
             VStack(alignment: .leading, spacing: 10) {
                 ViewThatFits(in: .horizontal) { HStack { toolbar }; VStack(alignment: .leading, spacing: 8) { toolbar } }
-                if model.artifactTab == .source {
-                    if model.artifactSource.isEmpty {
-                        Text("Source will appear as the model writes.").foregroundStyle(.secondary).frame(maxWidth: .infinity, minHeight: 180)
-                    } else {
-                        CreatorStreamTextView(text: model.artifactSource).frame(height: 340)
+                Group {
+                    if model.artifactTab == .source {
+                        CreatorStreamTextView(text: model.artifactSource, onEdit: !model.isBusy && model.detail?.specification?.kind == .code ? { model.sourceDraft = $0 } : nil)
                             .clipShape(RoundedRectangle(cornerRadius: 6)).accessibilityIdentifier("creator-source")
+                    } else if model.embedded.state == .failed {
+                        VStack { Text("Preview failed. Close the window and try again.").foregroundStyle(.secondary); Button("Retry") { model.embedded.close(); refresh() } }
+                    } else if let view = model.embedded.view {
+                        GeometryReader { geometry in
+                            let width = min(geometry.size.width, geometry.size.height * model.stageAspect.ratio)
+                            CreatorArtifactHost(content: view).id(model.embedded.revisionID)
+                                .frame(width: width, height: width / model.stageAspect.ratio)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity).clipped()
+                        }.accessibilityIdentifier("creator-embedded-preview")
+                    } else {
+                        Text("Rendering starts after static and sandbox checks pass.").foregroundStyle(.secondary)
                     }
-                } else if model.embedded.state == .failed {
-                    Text("Preview failed. Close the window and try again.").foregroundStyle(.secondary)
-                    Button("Retry") { model.embedded.close(); refresh() }
-                } else if let view = model.embedded.view {
-                    CreatorArtifactHost(content: view).id(model.embedded.revisionID).frame(height: 300).clipped()
-                        .accessibilityIdentifier("creator-embedded-preview")
-                } else {
-                    Text("Rendering starts after static and sandbox checks pass.").foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, minHeight: 180)
-                }
+                }.frame(maxWidth: .infinity, minHeight: 100, maxHeight: .infinity)
                 ViewThatFits(in: .horizontal) { HStack { footer }; VStack(alignment: .leading, spacing: 8) { footer } }
             }.padding(14)
         }
@@ -45,10 +45,14 @@ struct CreatorArtifactCard: View {
             Text("Source code").tag(CreatorModel.ArtifactTab.source)
         }.pickerStyle(.segmented).frame(maxWidth: 280).accessibilityIdentifier("creator-artifact-tab")
         Spacer(minLength: 4)
-        Text(verbatim: String(format: L("%lld lines · %lld bytes"), model.artifactSource.isEmpty ? 0 : model.artifactSource.utf8.filter { $0 == 10 }.count + 1, model.artifactSource.utf8.count))
-            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-        Button { controller.copyCreatorSource() } label: { Label("Copy code", systemImage: "doc.on.doc") }
-            .disabled(model.artifactSource.isEmpty).accessibilityIdentifier("creator-copy-source")
+        Picker("Preview aspect ratio", selection: Binding(get: { model.stageAspect }, set: { model.stageAspect = $0 })) {
+            ForEach(CreatorPreviewWindow.Aspect.allCases, id: \.self) { Text(verbatim: $0.rawValue).tag($0) }
+        }.labelsHidden().frame(width: 82).accessibilityLabel(Text("Preview aspect ratio"))
+        Button { controller.launch { try controller.muteCreatorArtifact() } } label: {
+            Image(systemName: model.embedded.muted ? "speaker.slash" : "speaker.wave.2")
+        }.help(L("Mute preview")).accessibilityLabel(Text("Mute preview")).disabled(model.embedded.view == nil)
+        Button("Open separate preview") { controller.launch { try await controller.openCreatorPreview() } }
+            .disabled(model.isBusy || model.selectedRevision == nil).accessibilityIdentifier("creator-artifact-window")
     }
     @ViewBuilder private var footer: some View {
         let model = controller.creator
@@ -56,15 +60,25 @@ struct CreatorArtifactCard: View {
             Button { controller.launch { try controller.pauseCreatorArtifact() } } label: {
                 Text(verbatim: model.embedded.paused ? L("Resume preview") : L("Pause preview"))
             }.accessibilityIdentifier("creator-artifact-pause")
-            Label("Muted", systemImage: "speaker.slash").font(.caption).foregroundStyle(.secondary)
         }
-        let usage = model.artifactUsage
-        Text(verbatim: L("Tokens") + ": " + ((usage?.totalTokens ?? usage?.inputTokens.flatMap { input in usage?.outputTokens.map { input + $0 } }).map(String.init) ?? L("Unknown")))
-            .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+        if model.artifactTab == .source {
+            Text(verbatim: String(format: L("%lld lines · %lld bytes"), model.artifactSource.isEmpty ? 0 : model.artifactSource.utf8.filter { $0 == 10 }.count + 1, model.artifactSource.utf8.count))
+                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            Button { controller.copyCreatorSource() } label: { Label("Copy code", systemImage: "doc.on.doc") }
+                .disabled(model.artifactSource.isEmpty).accessibilityIdentifier("creator-copy-source")
+            Button("Run changes") { controller.launch { try await controller.runCreatorSource() } }
+                .keyboardShortcut("r", modifiers: .command).disabled(model.isBusy || !model.hasSourceChanges)
+                .accessibilityIdentifier("creator-run-source")
+        }
         Spacer(minLength: 4)
-        Button("Open separate preview") { controller.launch { try await controller.openCreatorPreview() } }
-            .disabled(model.isBusy || model.selectedRevision == nil).accessibilityIdentifier("creator-artifact-window")
+        if model.isMasterOutput { Text("Master output · 0 tokens").font(.caption).foregroundStyle(.secondary) }
+        else {
+            let usage = model.artifactUsage
+            Text(verbatim: L("Tokens") + ": " + ((usage?.totalTokens ?? usage?.inputTokens.flatMap { input in usage?.outputTokens.map { input + $0 } }).map(String.init) ?? L("Unknown")))
+                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+        }
     }
+
     private func refresh() {
         controller.launch(PanelActionCoordinator.key("creator.artifact"), policy: .latestWins) { try await controller.refreshCreatorArtifact() }
     }

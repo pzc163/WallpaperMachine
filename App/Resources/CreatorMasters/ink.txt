@@ -15,11 +15,11 @@ void mainImage(out vec4 color,in vec2 pixel){vec2 uv=pixel/iResolution.xy,aspect
  float density=state.b*exp(-dt*p_dissipation)+brush*iActive*dt*1.8+seed*dt*.045;
  float pigment=mix(state.a,.5+.45*sin(iTime*.23+q.x),brush*iActive*dt*1.4);
  if(iFrame==0){density=seed*.65;pigment=fbm(q*.7+22.);v=curl*.014;}
- color=vec4(.5+v*2.,clamp(density,0.,1.),clamp(pigment,0.,1.));}
+ color=vec4(.5+v*2.,max(density,0.),clamp(pigment,0.,1.));}
 
 // @pass Image
 void mainImage(out vec4 color,in vec2 pixel){vec2 uv=pixel/iResolution.xy,px=1./iResolution.xy;vec4 s=texture(iChannel0,uv);
  float d=s.b,edge=abs(texture(iChannel0,uv+vec2(px.x*2.,0)).b-d)+abs(texture(iChannel0,uv+vec2(0,px.y*2.)).b-d);
- float ribbon=pow(max(d,0.),1.7);vec3 pigment=mix(p_violet,p_gold,smoothstep(.26,.8,s.a+edge*3.));
- vec3 c=pigment*(ribbon*1.35+edge*9.)*p_glow;float vignette=pow(max(0.,16.*uv.x*uv.y*(1.-uv.x)*(1.-uv.y)),.35);
+ float ribbon=pow(1.-exp(-max(d,0.)*1.2),1.4);vec3 pigment=mix(p_violet,p_gold,smoothstep(.26,.8,s.a+edge*3.));
+ vec3 c=pigment*(ribbon*1.35+edge*3.)*p_glow;float vignette=pow(max(0.,16.*uv.x*uv.y*(1.-uv.x)*(1.-uv.y)),.35);
  c*=vignette;c+=vec3(.002,.001,.004);color=vec4(c,1.);}

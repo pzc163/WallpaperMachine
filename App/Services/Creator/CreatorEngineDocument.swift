@@ -14,6 +14,7 @@ struct CreatorEngineDocument: Sendable, Equatable {
         var engine: CreatorEngine
         var title: String
         var masterID: String? = nil
+        var runtimeVersion: Int? = nil
     }
     var metadata: Metadata
     var parameters: CreatorParameterSchema
@@ -29,14 +30,14 @@ struct CreatorEngineDocument: Sendable, Equatable {
         if engine == .shaderGLSL {
             program = "<script id=\"wm-image\" type=\"x-shader/x-fragment\">" + image + "</script>" +
                 (bufferA.map { "<script id=\"wm-buffer\" type=\"x-shader/x-fragment\">" + $0 + "</script>" } ?? "") +
-                "<script src=\"wm-lib://engines/shader-v1.js\"></script>"
+                "<script src=\"wm-lib://engines/shader-v" + String(metadata.runtimeVersion ?? 1) + ".js\"></script>"
         } else {
             program = "<script src=\"wm-lib://three/bundle.js\"></script><script id=\"wm-source\">" + image + "</script><script src=\"wm-lib://engines/three-v1.js\"></script>"
         }
         return "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + title + "</title><style>" + Self.style + "</style></head><body><canvas id=\"wm-canvas\"></canvas><script id=\"wm-engine\" type=\"application/json\">" + meta + "</script><script id=\"wm-params\" type=\"application/json\">" + (try parameters.json()) + "</script>" + program + "</body></html>"
     }
     func validate() throws {
-        guard metadata.version == 1, [.shaderGLSL, .three3D].contains(engine),
+        guard metadata.version == 1, metadata.runtimeVersion.map({ engine == .shaderGLSL && $0 == 2 }) ?? true, [.shaderGLSL, .three3D].contains(engine),
               !image.isEmpty, image.utf8.count <= 240 * 1024,
               metadata.masterID.map({ $0.range(of: #"^[a-z0-9-]{1,48}$"#, options: .regularExpression) != nil }) ?? true
         else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
@@ -66,7 +67,7 @@ struct CreatorEngineDocument: Sendable, Equatable {
     }
     static func read(_ html: String) throws -> Self? {
         guard let text = try block("wm-engine", in: html, type: "application/json") else { return nil }
-        guard case .object(let object) = try CreatorJSON.parse(text), Set(object.keys).isSubset(of: ["version", "engine", "title", "masterID"]) else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
+        guard case .object(let object) = try CreatorJSON.parse(text), Set(object.keys).isSubset(of: ["version", "engine", "title", "masterID", "runtimeVersion"]) else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
         let metadata = try JSONDecoder().decode(Metadata.self, from: Data(text.utf8))
         guard let parameters = try CreatorParameterSchema.read(html),
               let image = try block(metadata.engine == .shaderGLSL ? "wm-image" : "wm-source", in: html, type: metadata.engine == .shaderGLSL ? "x-shader/x-fragment" : nil) else { throw CreatorRepairIssue.field("$", .missing) }
@@ -96,7 +97,7 @@ struct CreatorEngineDocument: Sendable, Equatable {
             buffer = String(source[..<range.lowerBound].dropFirst("// @pass BufferA\n".count))
             source = String(source[range.upperBound...])
         } else if source.hasPrefix("// @pass Image\n") { source = String(source.dropFirst("// @pass Image\n".count)) }
-        let result = Self(metadata: .init(engine: engine, title: reference?.metadata.title ?? (engine == .shaderGLSL ? "Shader wallpaper" : "3D wallpaper"), masterID: reference?.metadata.masterID), parameters: parameters, image: source, bufferA: buffer)
+        let result = Self(metadata: .init(engine: engine, title: reference?.metadata.title ?? (engine == .shaderGLSL ? "Shader wallpaper" : "3D wallpaper"), masterID: reference?.metadata.masterID, runtimeVersion: reference == nil && engine == .shaderGLSL ? 2 : reference?.metadata.runtimeVersion), parameters: parameters, image: source, bufferA: buffer)
         try result.validate(); return result
     }
     var core: String { (bufferA.map { "// @pass BufferA\n" + $0 + "\n// @pass Image\n" } ?? "") + image }

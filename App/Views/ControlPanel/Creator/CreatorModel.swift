@@ -26,9 +26,13 @@ final class CreatorModel {
     enum ArtifactTab: String { case render, source }
     var artifactTab = ArtifactTab.render
     var artifactVisible = false
+    var sourceDraft: String? = nil
+    var stageAspect = CreatorPreviewWindow.Aspect.wide
+    var conversationExpanded = false
     let embedded = CreatorEmbeddedPreview()
     var artifactSource: String {
         if let activeTranscript { return Self.displaySource(activeTranscript.progress.content) }
+        if let sourceDraft { return sourceDraft }
         if let turn = detail?.conversation.turns.last, turn.state != .completed,
            let text = transcripts[turn.id]?.progress.content, !text.isEmpty { return Self.displaySource(text) }
         return detail?.authorSource ?? detail?.source ?? ""
@@ -69,6 +73,7 @@ final class CreatorModel {
     var recovery: CreatorRevisionStore.Recovery?
     var connectionStatus: String?
     var connectionNotice: CreatorWorkspace.ConnectionResult?
+    var providerAdvancedExpanded = false
     var isTestingConnection = false
     var isBusy = false
     @ObservationIgnored var recoveryTask: Task<CreatorRevisionStore.Recovery, Error>?
@@ -83,11 +88,15 @@ final class CreatorModel {
         detail?.revisions.first { $0.id == detail?.project.selectedRevisionID }
     }
     var hasParameterChanges: Bool { parameters != (detail?.specification?.parameters ?? [:]) }
+    var hasSourceChanges: Bool { sourceDraft.map { $0 != (detail?.authorSource ?? detail?.source ?? "") } ?? false }
+    var isMasterOutput: Bool { selectedRevision?.generation == nil && detail?.engine != nil && detail?.conversation.turns.isEmpty == true }
     var canSave: Bool {
-        guard !isBusy, !hasParameterChanges, let revision = selectedRevision else { return false }
+        guard !isBusy, !hasSourceChanges, let revision = selectedRevision else { return false }
+        if let schema = detail?.parameterSchema, (try? schema.validate(parameters)) == nil { return false }
+        if let id = detail?.specification?.templateID, let definition = try? CreatorTemplateCatalog.definition(id), (try? definition.validate(parameters)) == nil { return false }
         return detail?.reports[revision.id]?.allowsPublication == true
     }
-    var canApply: Bool { canSave && selectedRevision?.id == detail?.installedRevisionID }
+    var canApply: Bool { canSave }
     var profile: ProviderProfile? { configuration.profiles.first { $0.id == configuration.selectedProfileID } }
     var canGenerate: Bool { (mode != .code || CreatorCodeProcess.supported) && recovered && !isBusy && profile != nil && !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && prompt.utf8.count <= 2048 }
     func cancel() { operation?.cancel(); connection?.cancel() }

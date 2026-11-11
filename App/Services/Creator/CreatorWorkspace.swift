@@ -122,20 +122,31 @@ actor CreatorWorkspace {
         return installed
     }
     /// Parameters form a new immutable revision and receive real runtime evidence, without an LLM.
-    func edit(project: UUID, revision: UUID, parameters: [String: CreatorTemplateCatalog.Value]) async throws -> CreatorRevision {
+    func edit(project: UUID, revision: UUID, parameters: [String: CreatorTemplateCatalog.Value],
+              hotCapture: CreatorOrchestrator.Capture? = nil) async throws -> CreatorRevision {
         try beforeWrite()
         let snapshot = try await store.snapshot(projectID: project, revisionID: revision)
         var spec = snapshot.specification
         if spec.kind == .code, let bytes = snapshot.files["index.html"], let schema = try CreatorParameterSchema.read(String(decoding: bytes, as: UTF8.self)) {
             let html = Data(try schema.replacing(in: String(decoding: bytes, as: UTF8.self), with: parameters).utf8)
             spec = try CreatorCodeOutput.specification(projectID: project, html: html)
-            return try await rebuild(spec, base: revision, source: html)
+            return try await rebuild(spec, base: revision, source: html, hotCapture: hotCapture)
         }
         guard let templateID = spec.templateID else { throw CreatorGenerationFailure.policyViolation }
         try CreatorTemplateCatalog.definition(templateID).validate(parameters)
         spec.parameters = parameters
         spec.rendererRevision = 3
-        return try await rebuild(spec, base: revision)
+        return try await rebuild(spec, base: revision, hotCapture: hotCapture)
+    }
+    func editSource(project: UUID, revision: UUID, source: String) async throws -> CreatorRevision {
+        try beforeWrite(); try Task.checkCancellation()
+        let snapshot = try await store.snapshot(projectID: project, revisionID: revision)
+        guard snapshot.specification.kind == .code, let bytes = snapshot.files["index.html"],
+              source.utf8.count <= CreatorCodeOutput.maximumSourceBytes else { throw CreatorGenerationFailure.invalidRequest }
+        let reference = try CreatorEngineDocument.read(String(decoding: bytes, as: UTF8.self))
+        let output = try CreatorEnginePrompt.output(source, engine: reference?.engine ?? .htmlCanvas, reference: reference)
+        let spec = try CreatorCodeOutput.specification(projectID: project, html: output.html)
+        return try await rebuild(spec, base: revision, source: output.html)
     }
     func duplicate(_ id: UUID, title: String) async throws -> UUID {
         try beforeWrite()
@@ -156,12 +167,13 @@ actor CreatorWorkspace {
             throw error
         }
     }
-    private func rebuild(_ specification: CreatorTemplate.Specification, base: UUID?, source: Data? = nil) async throws -> CreatorRevision {
+    private func rebuild(_ specification: CreatorTemplate.Specification, base: UUID?, source: Data? = nil,
+                         hotCapture: CreatorOrchestrator.Capture? = nil) async throws -> CreatorRevision {
         let ticket = try await store.beginJob(projectID: specification.projectID, baseRevisionID: base)
         do {
             _ = try await store.stage(specification, for: ticket, source: source)
             let draft = try await store.commit(ticket, validatingStructure: true, selecting: false)
-            let evidence = try await capture(specification.projectID, draft.id, store)
+            let evidence = try await (hotCapture ?? capture)(specification.projectID, draft.id, store)
             try Task.checkCancellation()
             return try await store.seal(evidence)
         } catch {

@@ -25,6 +25,16 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — S5.2 single stage, source editor and hot parameter publication
+
+- Added a single aspect-controlled stage, editable source with Command-R, a conversation drawer and fixed inspector save/apply actions; localized all added controls in six languages.
+- CreatorHotEditingTests: 4 passed, including same-page parameter capture, immutable history, invalid shader rollback and real RGBA16F / forced RGBA8 fallback.
+- CreatorEngineTests, CreatorMasterTests, CreatorEngineAcceptanceTests, CreatorArtifactTests, CreatorGalleryTests, CreatorControlsTests and CreatorPanelTests passed in targeted batches.
+- CreatorModelSettingsTests: both domain tests passed; final six-language expanded/collapsed and narrow-layout case passed 1/1 after fixing inherited accessibility identifiers.
+- Old shader-v1 bytes retained. Nine masters rendered and animated offscreen; no visible UI, desktop or model API calls.
+- Catalog and panel localization checks passed (8 and 9); documentation links passed (11). Static/Rust license inventory passed 178 entries; dynamic libraries explicitly deferred to package verification.
+- Full routine gate and Release remain pending the S5.2 media-engine stage.
+
 ## 2026-11-11 — S5.2 provider center and shared model selection
 
 - Added 11 cloud presets, local/custom groups, enabled models per credential-owning Profile, offline LobeHub 1.102.0 SVG assets and complete MIT notices.
@@ -96,12 +106,3 @@ Native Shader/Three shells, an offline pinned library, declarative parameters an
 - Full python3 scripts/test.py: 720 script tests and 5034 native passed, 0 failed, 69 skipped; two runtime warnings retained.
 - Documentation 11, catalog localization 8 and panel localization 9 checks passed. No live model, personal Keychain or physical S3 operation.
 - WebKit SPI availability checked at runtime; GPU hard quotas, macOS 15 hardware, visible quality, sleep and whole-system energy remain separate public acceptance items.
-
-## 2026-11-11 — Versioned WebGL Creator templates
-
-- New template specifications use rendererRevision 3; existing S0 and revision 2 bytes are frozen and checked with golden digests.
-- The native catalog retains 10/12/10 parameters, six presets, a 30 FPS paint ceiling and 2073600 pixels. New kernels use simplex flow fields, a dark parallax starfield and measured DOM clock typography.
-- Real offscreen WebGL snapshots cover all parameter effects, 144 Hz callback pacing, extreme canvas sizes, heterogeneous clock anchors, actual context loss/restoration and forced no-GPU fallback.
-- Native poster and short-soak instrumentation now checks WebGL draws and pixels; capture remains a whole-page WKWebView snapshot.
-- Focused suites: 26 passed, 0 failed. Full python3 scripts/test.py: 720 script tests, 5012 native tests passed, 0 failed, 72 native skips.
-- No live model, visible application or desktop changes. Physical display quality, macOS 15 hardware, energy and a new 30-minute soak remain unverified; prior soak evidence does not certify the new renderer.

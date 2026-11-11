@@ -26,8 +26,10 @@ uses PageSearchBar, FilterSidebar, InspectorColumn, PanelCard and the same nativ
 button and settings components. The 960-point compact rule prevents the leading
 sidebar and trailing inspector from consuming the narrow window together.
 Recent projects remain reachable after selecting a project. The first version
-has conversation, bounded repair controls and expandable native diagnostics;
-there is no source editor.
+has a single central stage, a compact composer and a collapsible conversation/thinking drawer.
+The stage owns render/source tabs, aspect ratio, mute and the independent-preview action.
+The inspector has Parameters and assets / Revision history tabs and a fixed save/apply footer.
+S5.2 adds bounded native source editing with Run changes (Command-R); editing alone never executes code.
 
 ## Three explicit actions
 
@@ -36,26 +38,30 @@ there is no source editor.
    only with matching publication-grade evidence. It does not import anything.
 2. Save to wallpaper library: the explicit action uses CreatorPublisher and the
    existing importer, records the runtime policy and refreshes the library.
-3. Apply to display: requires the selected revision to match the installed registry
-   binding, checks the installed bytes again and uses the existing target-display
-   action. Saving or selecting a history entry never calls this action.
+3. Apply to display: explicitly saves pending bounded parameter changes or an uninstalled
+   selected revision first, then checks its installed registry binding and bytes before
+   using the existing target-display action. Saving or selecting a history entry never calls this action.
 
 The original createAndSave API still serves its existing tests and opt-in smoke.
 Completing from sealing is permitted only with full runtime evidence and matching
 iteration/source identities. Reports are not manufactured by changing status.
 
 Parameter controls use the catalog's native types, ranges and localized labels.
-Edits update only an open temporary preview. Validate changes creates an immutable
-child revision and runs native runtime capture again; save/apply stay disabled
-while values differ. A failed runtime check retains the previous valid selection.
+Edits update the temporary preview immediately. Save is available after native parameter-domain
+checks; an unchanged-source proof allows the existing supervised page to capture its current
+parameters into a new immutable revision without reloading. When no ready embedded page exists,
+the save transaction prepares an offscreen page automatically. Neither path calls a model,
+reuses an old digest for new bytes or requires a separate manual validation action.
+Source edits always undergo full static/sandbox/capture validation. A failed operation retains
+the previous usable revision and never activates a desktop wallpaper.
 
 The Presets menu takes its entries and complete values from the selected
 revision's native template definition. Selecting one replaces the whole parameter
 dictionary in one validated controller action and updates an open preview, including
 a paused preview. Unknown presets, a different template, busy operations and cancelled
 edits are refused before changing values. Neither revisions nor installed bytes change.
-Validate changes still creates and fully checks a new revision before publication;
-selecting values identical to the current revision does not invent a dirty state.
+Saving seals new parameter bytes and a fresh native cover before publication; resetting
+defaults or selecting values identical to the revision does not invent a dirty state.
 
 ## Composer and project navigation
 
@@ -143,13 +149,12 @@ Thinking has an active timer and collapses when generation finishes; it can be e
 retained turns. A synchronous mailbox preserves final text before async phase transitions.
 
 The artifact switches from streamed source to rendered output only after static/runtime/poster
-validation. Source is selectable/copyable and reports line/byte counts; missing token usage remains
-Unknown. Embedded preview uses the same offline host, publication-validated immutable snapshot,
+validation. Source is editable/copyable and reports line/byte counts; missing model usage remains
+Unknown, while a direct master is explicitly labeled as zero-token output. Embedded preview uses the same offline host, publication-validated immutable snapshot,
 digest recheck on every reload, mute and external watchdog as independent preview. Code is never
 executed from the streaming buffer. Source tab, navigation, window hiding, generation, revision
 change and close destroy the embedded surface; there is no hidden preview polling. Preset/property
-changes update the existing verified template preview but still require a new validated revision
-before save/apply. Independent multi-ratio preview remains available.
+changes update the existing verified preview; save/apply automatically seal the parameter-only revision. Independent multi-ratio preview remains available.
 
 ## Preview and lifecycle
 

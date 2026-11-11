@@ -64,11 +64,12 @@ The inspector renders sliders/toggles/color pickers. Native validation precedes
 property delivery, the page uses `WallpaperHost.parameters`, and the installed
 project.json carries matching standard Wallpaper Engine property defaults.
 
-Changing a control updates previews only. Validate changes rebuilds the same
-source with new metadata, derives an immutable child revision, reruns real WebKit
-and captures a new cover. Save/apply remain disabled while parameter values differ
-from the selected validated revision; no model call is needed. History, offline
-playback digest validation and explicit desktop application remain unchanged.
+S5.2 controls update the existing preview and can be saved directly. The native parameter-only
+proof compares the rebuilt HTML with the prior source after replacing only the validated metadata.
+A ready, supervised embedded page supplies a fresh whole-page JPEG and nonempty-pixel check
+without reloading; absent a ready page, save prepares an offscreen page. All newly sealed bytes
+receive their own digest/report. Source edits use full runtime validation, never this shortcut.
+History and explicit desktop application remain separate from preview.
 
 ## Verification boundary
 
@@ -90,7 +91,7 @@ permissions still require device acceptance; no production app is launched here.
 
 ## 母版画廊与本地编辑
 
-新工程默认选择 shader-glsl；引擎菜单同时保留经典参数模板和自由 HTML。画廊按引擎显示三套作品，其 JPEG 来自真实离屏 WKWebView，而非静态占位绘制。打开母版会本地重建、验证、生成封面并选择不可变修订，不需要 Provider 或模型请求。修改颜色、数值、开关会同步预览；只有“验证修改”生成新的有效修订后才能保存入库，应用显示器仍单独操作。
+新工程默认选择 shader-glsl；引擎菜单同时保留经典参数模板和自由 HTML。画廊按引擎显示三套作品，其 JPEG 来自真实离屏 WKWebView，而非静态占位绘制。打开母版会本地重建、验证、生成封面并选择不可变修订，不需要 Provider 或模型请求。修改颜色、数值、开关会同步预览；可直接保存为新修订，参数派生和封面/摘要封闭由原生事务完成，应用显示器仍单独操作。
 
 | 引擎 | 母版 | 核心机制 |
 | --- | --- | --- |
@@ -107,3 +108,17 @@ permissions still require device acceptance; no production app is launched here.
 母版源文件和参数目录随 Bundle 固定，源码 SHA-256 校验后才能生成；不按任意路径找资源。母版截图只用于画廊，用户发布封面仍每次真实捕获。未指定历史版本时，在选择的引擎内以中英文关键词匹配母版；无匹配时稳定使用该引擎第一套，不额外调用模型。已有版本以其不可变核心为准，不被参考匹配覆盖。
 
 冷启动编译 PMREM/后期管线会短时阻塞 WebKit。只有通过原生外壳重建验证的两套引擎拥有最多 5 秒启动心跳期限；ready 后恢复 2 秒期限。普通 HTML 仍为 2 秒，验证任务总期限仍为 5 秒；不会因页面自报活动延长期限。此次并行测试实际发现并修复了旧 2 秒冷启动误判，未放宽 CPU、内存、帧率或画布限制。
+
+## S5.2 shader precision and editing
+
+New Shader documents select `wm-lib://engines/shader-v2.js` through optional
+`runtimeVersion: 2` metadata. Old documents keep v1 byte-for-byte. V2 allocates
+linearly filtered RGBA16F feedback and verifies both allocation errors and framebuffer
+completeness; unsupported/incomplete attachments retry RGBA8. The pixel budget,
+number of buffers, pause and context-loss cleanup remain bounded. The frame probe
+reports actual feedback precision. Aurum Ink retains HDR density instead of an
+explicit unit clamp and uses a smooth optical-density response to reduce contouring.
+
+`CreatorHotEditingTests` exercises real half-float and forced fallback rendering,
+parameter capture on the same WK surface, immutable history and failed source edits.
+Physical display quality/energy still needs visible device acceptance.

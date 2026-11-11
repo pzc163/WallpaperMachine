@@ -5,7 +5,7 @@ import XCTest
 @testable import WallpaperMachine
 
 @MainActor final class CreatorControlsTests: PanelTestCase {
-    func testEveryPresetUpdatesOpenPreviewAndRequiresRevalidationWithoutChangingPublishedBytes() async throws {
+    func testEveryPresetUpdatesPreviewAndExplicitSaveSealsWithoutManualRevalidation() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         let workspace = CreatorWorkspaceTests.workspace(c)
         let registryURL = await workspace.registry.url
@@ -36,9 +36,7 @@ import XCTest
                     try controller.applyCreatorPreset(preset.id, templateID: definition.id)
                     XCTAssertEqual(controller.creator.parameters, preset.parameters)
                     XCTAssertTrue(controller.creator.hasParameterChanges)
-                    XCTAssertFalse(controller.creator.canSave); XCTAssertFalse(controller.creator.canApply)
-                    do { try await controller.saveCreatorToLibrary(); XCTFail("Saved unvalidated preset") } catch {}
-                    do { try await controller.applyCreatorToDisplay(); XCTFail("Applied unvalidated preset") } catch {}
+                    XCTAssertTrue(controller.creator.canSave); XCTAssertTrue(controller.creator.canApply)
                     let end = ContinuousClock.now + .seconds(3)
                     var changed = try await canvas(surface)
                     while changed == pixels && ContinuousClock.now < end {
@@ -50,11 +48,11 @@ import XCTest
                         publicationRoot: c.root.appendingPathComponent("publication"))
                     XCTAssertEqual(published.digest, original.bundleDigest)
                 }
-                try await controller.validateCreatorParameters()
+                try await controller.saveCreatorToLibrary()
                 XCTAssertNil(controller.creator.preview)
                 XCTAssertNotEqual(controller.creator.selectedRevision?.id, original.id)
                 XCTAssertFalse(controller.creator.hasParameterChanges)
-                XCTAssertTrue(controller.creator.canSave); XCTAssertFalse(controller.creator.canApply)
+                XCTAssertTrue(controller.creator.canSave); XCTAssertTrue(controller.creator.canApply)
                 let after = try await c.store.snapshot(projectID: original.projectID, revisionID: original.id)
                 XCTAssertEqual(before.digest, after.digest)
                 try await controller.saveCreatorToLibrary()
@@ -102,7 +100,7 @@ import XCTest
             try controller.applyCreatorPreset(preset.id, templateID: "stars-v2")
             XCTAssertFalse(controller.creator.hasParameterChanges); XCTAssertTrue(controller.creator.canSave)
             try controller.setCreatorParameter("starDensity", value: .number(0.9))
-            XCTAssertTrue(controller.creator.hasParameterChanges); XCTAssertFalse(controller.creator.canSave)
+            XCTAssertTrue(controller.creator.hasParameterChanges); XCTAssertTrue(controller.creator.canSave)
             try controller.applyCreatorPreset(preset.id, templateID: "stars-v2")
             XCTAssertFalse(controller.creator.hasParameterChanges)
             XCTAssertEqual(controller.creator.selectedRevision?.id, revision.id)

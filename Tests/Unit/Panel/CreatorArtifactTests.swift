@@ -61,6 +61,7 @@ import XCTest
         defer { PanelLocale.shared.bind(to: .testHost) }
         try await withPanel { panel in
             let controller = panel.controller
+            controller.creator.showsGallery = false; controller.creator.conversationExpanded = true
             controller.creator.activeTranscript = CreatorTranscript()
             controller.creator.receiveStream(.init(phase: .content, characters: 60, content: "```html\n<html>\n<body>test</body></html>", reasoning: "Model plan"))
             controller.creator.artifactTab = .source

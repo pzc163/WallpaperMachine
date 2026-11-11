@@ -200,7 +200,7 @@ struct CreatorSettingsSection: View {
             } else {
                 Text("Automatic · model context and output maximum").font(.caption).foregroundStyle(.secondary)
             }
-            DisclosureGroup("Advanced options") {
+            DisclosureGroup(isExpanded: Binding(get: { controller.creator.providerAdvancedExpanded }, set: { controller.creator.providerAdvancedExpanded = $0 })) {
             field("JSON output mode") {
                 if draft.protocolKind == .openaiCompatible {
                     Picker("JSON output mode", selection: Binding(get: { draft.capabilities.jsonMode ?? .automatic }, set: { draft.capabilities.jsonMode = $0 })) {
@@ -214,7 +214,7 @@ struct CreatorSettingsSection: View {
                         .font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("creator-json-mode-native")
                 }
             }
-            }.accessibilityIdentifier("creator-advanced-options")
+            } label: { Text("Advanced options").accessibilityIdentifier("creator-advanced-options") }
         }.textFieldStyle(.roundedBorder)
     }
     private func field<Content: View>(_ label: String, @ViewBuilder content: () -> Content) -> some View {

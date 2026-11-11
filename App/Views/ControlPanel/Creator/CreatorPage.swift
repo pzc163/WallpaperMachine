@@ -32,11 +32,15 @@ struct CreatorPage: View {
                 Button { model.showsGallery.toggle() } label: { Label("Master gallery", systemImage: "square.grid.2x2") }
                     .accessibilityIdentifier("creator-gallery-toggle")
             }.disabled(model.isBusy).padding(.horizontal, 20).padding(.vertical, 12)
-            ScrollViewReader { scroll in
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 16) {
-                        if model.showsGallery && model.mode == .code { CreatorMasterGallery() }
-                        else if model.detail?.conversation.turns.isEmpty != false && model.selectedRevision == nil { CreatorInspiration() }
+            Group {
+                if model.showsGallery && model.mode == .code { ScrollView { CreatorMasterGallery().padding(20) } }
+                else if model.activeTranscript != nil || model.selectedRevision != nil || !model.artifactSource.isEmpty { CreatorArtifactCard().padding(.horizontal, 16) }
+                else { ScrollView { CreatorInspiration().padding(20) } }
+            }.frame(maxWidth: .infinity, maxHeight: .infinity).layoutPriority(1)
+            DisclosureGroup("Conversation and thinking", isExpanded: Binding(get: { model.conversationExpanded }, set: { model.conversationExpanded = $0 })) {
+                ScrollViewReader { scroll in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 12) {
                         ForEach(model.detail?.conversation.turns ?? [], id: \.id) { turn in
                             PanelCard {
                                 VStack(alignment: .leading, spacing: 10) {
@@ -60,23 +64,16 @@ struct CreatorPage: View {
                         if let transcript = model.activeTranscript {
                             PanelCard { CreatorThoughtPanel(transcript: transcript).id(transcript.id).padding(14) }
                         }
-                        if model.activeTranscript != nil || model.selectedRevision != nil || !model.artifactSource.isEmpty { CreatorArtifactCard() }
-                        if model.isBusy {
-                            HStack(spacing: 10) { ProgressView().controlSize(.small); Text(verbatim: CreatorLabels.status(model)) }
-                                .accessibilityIdentifier("creator-stream-progress")
+                            Color.clear.frame(height: 1).id("creator-bottom")
                         }
-                        CreatorFailureActions()
-                        if model.selectedRevision != nil || model.issue != nil {
-                            DisclosureGroup("Validation report", isExpanded: Binding(get: { model.showsReport }, set: { model.showsReport = $0 })) { CreatorReport() }
-                                .accessibilityIdentifier("creator-report")
-                        }
-                        Color.clear.frame(height: 1).id("creator-bottom")
-                    }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
+                    }.frame(minHeight: 70, maxHeight: 180)
+                    .onChange(of: model.detail?.conversation.turns.last?.id) { _, _ in scroll.scrollTo("creator-bottom", anchor: .bottom) }
                 }
-                .onChange(of: model.activeTranscript?.id) { _, id in
-                    if id != nil { scroll.scrollTo("creator-bottom", anchor: .bottom) }
-                }
-                .onChange(of: model.detail?.conversation.turns.last?.id) { _, _ in scroll.scrollTo("creator-bottom", anchor: .bottom) }
+            }.padding(.horizontal, 16).padding(.top, 8)
+            CreatorFailureActions().padding(.horizontal, 16)
+            if model.issue != nil || model.showsReport {
+                DisclosureGroup("Validation diagnostics", isExpanded: Binding(get: { model.showsReport }, set: { model.showsReport = $0 })) { ScrollView { CreatorReport() }.frame(maxHeight: 120) }
+                    .padding(.horizontal, 16).accessibilityIdentifier("creator-report")
             }
             CreatorComposer()
         }.frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)

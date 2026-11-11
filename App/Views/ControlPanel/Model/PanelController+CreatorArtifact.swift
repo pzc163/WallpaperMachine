@@ -2,6 +2,7 @@ import AppKit
 
 extension PanelController {
     func refreshCreatorArtifact() async throws {
+        if creator.isBusy && creator.phase == .saving && creator.artifactVisible { return }
         guard creator.artifactVisible, presentation.isVisible, !creator.isBusy, creator.artifactTab == .render,
               let project = creator.selectedProjectID, let revision = creator.selectedRevision,
               creator.detail?.reports[revision.id]?.allowsPublication == true else { creator.embedded.close(); return }
@@ -21,6 +22,7 @@ extension PanelController {
     }
     func hideCreatorArtifact() { creator.artifactVisible = false; creator.embedded.close() }
     func pauseCreatorArtifact() throws { try creator.embedded.pause(!creator.embedded.paused) }
+    func muteCreatorArtifact() throws { try creator.embedded.mute(!creator.embedded.muted) }
     func copyCreatorSource(to pasteboard: NSPasteboard = .general) {
         let source = creator.artifactSource
         guard !source.isEmpty else { return }

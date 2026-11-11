@@ -21,7 +21,7 @@ struct CreatorDynamicParameters: View {
                     case .boolean:
                         Toggle(isOn: Binding(get: { controller.creator.parameters[p.id] == .bool(true) }, set: { set(p.id, .bool($0)) })) {
                             Text(verbatim: PanelLocale.shared.catalogString(p.label))
-                        }.toggleStyle(.switch)
+                        }.labelsHidden().toggleStyle(.switch)
                     case .color:
                         ColorPicker(selection: Binding(get: {
                             guard case .choice(let hex) = controller.creator.parameters[p.id] else { return .white }
@@ -30,13 +30,11 @@ struct CreatorDynamicParameters: View {
                             guard let rgb = NSColor(value).usingColorSpace(.sRGB) else { return }
                             let hex = String(format: "#%02x%02x%02x", Int((rgb.redComponent*255).rounded()), Int((rgb.greenComponent*255).rounded()), Int((rgb.blueComponent*255).rounded()))
                             set(p.id, .choice(hex))
-                        }), supportsOpacity: false) { Text(verbatim: PanelLocale.shared.catalogString(p.label)) }
+                        }), supportsOpacity: false) { Text(verbatim: PanelLocale.shared.catalogString(p.label)) }.labelsHidden()
                     }
                 }.accessibilityElement(children: .contain).accessibilityIdentifier("creator-dynamic-" + p.id)
             }
-            Text("Adjust locally, then validate to save a new version.").font(.caption).foregroundStyle(.secondary)
-            Button("Validate changes") { controller.launch { try await controller.validateCreatorParameters() } }
-                .disabled(!controller.creator.hasParameterChanges || controller.creator.isBusy).accessibilityIdentifier("creator-validate-dynamic")
+
         }.disabled(controller.creator.isBusy)
     }
     private func set(_ id: String, _ value: CreatorTemplateCatalog.Value) {

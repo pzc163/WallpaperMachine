@@ -10,6 +10,7 @@ import WebKit
         "wm-lib://three/bundle.js": .init(folder: "three", file: "wm-three-r180", sha256: "63f73063f78d79844ff47b189ff8649b6142bfc28dbd4f75c6f6485255d21597"),
         hostURL: .init(folder: "CreatorRuntime", file: "wm-host-v1", sha256: "75b3a42468c875d3aa56293f6437c3bf98be43664ad8be57fc2d55d34463d001"),
         "wm-lib://engines/shader-v1.js": .init(folder: "CreatorRuntime", file: "wm-shader-v1", sha256: "a3fb953e485aecd353986946d510f19e313ac5938e823920875176fe1e628702"),
+        "wm-lib://engines/shader-v2.js": .init(folder: "CreatorRuntime", file: "wm-shader-v2", sha256: "1e7e764f507e710ccaee258dcb4519b438ab7411fa2a4ada0375fae4968180ab"),
         "wm-lib://engines/three-v1.js": .init(folder: "CreatorRuntime", file: "wm-three-v1", sha256: "9aa3b065787da643c5af7c0ee3d7d8c3f3ec5a1b5a4d9378cc351f3503fa6ade"),
     ]
     nonisolated private static let cache: Result<[String: Data], Error> = Result {
