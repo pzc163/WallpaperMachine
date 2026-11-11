@@ -3,11 +3,13 @@
      The Supporter list between the markers is written by scripts/update_sponsors.py, as in README.md. -->
 <p align="center"><sub><a href="README.md">English</a>&ensp;·&ensp;<a href="README.zh-CN.md">简体中文</a>&ensp;·&ensp;<a href="README.ko.md">한국어</a>&ensp;·&ensp;<b>Português</b></sub></p>
 
+**Prévia do Criador com IA · aceitação em hardware S3.** Este fork parte do [WallpaperMachine original](https://github.com/MMFoundation/WallpaperMachine). O código novo está em [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator); `main` recebe apenas estes READMEs, sem a implementação do Criador. As capturas e a demonstração do site abaixo são do projeto original; use o pré-lançamento deste fork para experimentar a criação com IA.
+
 <a href="https://www.wallpapermachine.app">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="A mesa de um Mac alternando entre seis papéis de parede animados reproduzidos pelo WallpaperMachine: Chisaki sobre a água ondulante, Lucy na Lua, um carro de F1 da Red Bull na neve, Firefly ao entardecer, Ellen num ponto de ônibus na chuva e Into The Abyss, sob a barra de menus e o Dock do macOS.">
 </a>
 
-<h3 align="center">Papéis de parede do Wallpaper Engine, agora no macOS.</h3>
+<h3 align="center">Wallpaper Engine e criação de papéis de parede com IA no macOS.</h3>
 
 <p align="center">
   Um app gratuito e de código aberto para Mac que reproduz papéis de parede de cena, de vídeo e web do Wallpaper Engine<br>
@@ -15,24 +17,24 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest"><img src="https://img.shields.io/github/v/release/WallpaperMachine/WallpaperMachine?label=version&color=0a84ff" alt="Versão mais recente"></a>
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/actions/workflows/version.yml"><img src="https://img.shields.io/github/actions/workflow/status/WallpaperMachine/WallpaperMachine/version.yml?branch=main&label=build" alt="Status da compilação e do lançamento"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="Licença: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 ou posterior em Apple silicon">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/WallpaperMachine/WallpaperMachine" alt="Estrelas no GitHub"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="Estrelas no GitHub"></a>
 </p>
 
 <p align="center">
-  <a href="https://www.wallpapermachine.app/download"><img src="https://img.shields.io/badge/Download_for_Mac-free-0a84ff?style=for-the-badge&logo=apple&logoColor=white" height="36" alt="Baixar para Mac, grátis"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
   &ensp;
-  <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Try_it_in_your_browser-live_demo-34c759?style=for-the-badge&logo=safari&logoColor=white" height="36" alt="Experimente a demonstração ao vivo no seu navegador"></a>
+  <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Demonstração do projeto original"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest">Notas da versão e checksums</a></sub>
+  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5">Notas da versão e checksums</a></sub>
 </p>
 
 <p align="center">
+  <a href="#ai-creator">AI Creator</a>&ensp;·&ensp;
   <a href="#início-rápido">Início rápido</a>&ensp;·&ensp;
   <a href="#o-app">O app</a>&ensp;·&ensp;
   <a href="#por-que-você-pode-confiar">Por que confiar</a>&ensp;·&ensp;
@@ -57,34 +59,53 @@
 
 ## Início rápido
 
-1. **Baixe** a [imagem de disco gratuita](https://www.wallpapermachine.app/download) da versão mais recente.
-2. **Instale**: abra-a e arraste o WallpaperMachine para Aplicativos.
-3. **Abra o app.** As versões posteriores à 1.8.2 são notarizadas pela Apple e abrem direto.
-   A 1.8.2 e as anteriores não são, então o macOS bloqueia a primeira abertura: clique em
-   **Abrir Mesmo Assim** em Ajustes do Sistema → Privacidade e Segurança, uma única vez.
+Prefira o **pacote compatível com macOS 15+**. Os dois pacotes usam o código do app `93eb2aa5` (versão 1.9.4) e têm os mesmos recursos de IA; a diferença está nos requisitos mínimos das bibliotecas incluídas.
 
-Usa o [Homebrew](https://brew.sh)? Um só comando faz os dois primeiros passos:
+| Pacote | Sistema e chip | Uso |
+| --- | --- | --- |
+| [Compatível com macOS 15+ — recomendado](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) | macOS 15.0+ · Apple Silicon / arm64 | Novas instalações e aceitação S3 |
+| [Pacote S3 original](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) | macOS 27.2+ · Apple Silicon / arm64 | Pacote anterior mantido; não funciona no macOS 15/26 |
 
-```bash
-brew install --cask wallpapermachine
-```
+1. Baixe o `.dmg` na página do Release e confira o **SHA-256** com o comando indicado. Nenhum pacote suporta Macs Intel.
+2. Prefira uma conta de teste separada no macOS, abra a imagem e copie o app. Não substitua uma instalação de uso diário nem execute as duas versões na mesma conta: elas usam o mesmo identificador de aplicativo.
+3. Ambos têm **assinatura Ad-hoc, sem notarização da Apple**. Se a primeira abertura for bloqueada, confira a origem e siga as [instruções da Apple](https://support.apple.com/102445): **Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim**. Não desative a segurança do sistema.
+4. Desative as atualizações automáticas durante os testes: o atualizador ainda usa a configuração do projeto original. Baixe os próximos pacotes manualmente nos [Releases deste fork](https://github.com/pzc163/WallpaperMachine/releases).
 
-A partir daí, um guia de boas-vindas assume, e o app passa a se atualizar sozinho.
-O [guia de instalação](https://www.wallpapermachine.app/guides/install/) (em inglês) mostra
-cada passo com imagens.
+O site original e `brew install --cask wallpapermachine` distribuem o app original, sem o Criador com IA deste fork. A reprodução de cenas, vídeos, páginas web e imagens e a navegação pelo Workshop continuam disponíveis; os requisitos de compra do Wallpaper Engine para downloads e recursos compartilhados de cenas permanecem iguais.
 
-- **Funciona de cara:** o papel de parede de vídeo incluído, Aurora Drift, ilustrações do pixiv,
-  seus próprios vídeos e imagens, e navegar por todo o Workshop sem iniciar sessão.
-- **Com uma conta Steam que tenha o Wallpaper Engine:** downloads do Workshop e papéis de parede
-  de cena, que usam recursos compartilhados do Wallpaper Engine que você comprou.
+<a id="ai-creator"></a>
 
-Prefere compilar você mesmo? São só dois comandos: veja
-[Código aberto. Livre para compilar.](#código-aberto-livre-para-compilar)
+## Criador com IA: recursos disponíveis
+
+O fluxo local S0–S2.3 e os controles de modo JSON e predefinições para S3 estão implementados. Descreva um papel de parede, refine pela conversa e ajuste as propriedades nativas. O modelo escolhe um modelo visual confiável e devolve parâmetros limitados; o código nativo valida os valores e reconstrói os recursos.
+
+| Modelo visual | Parâmetros | Predefinições |
+| --- | --- | --- |
+| Gradiente fluido `gradient-v2` | 10: dois matizes, ângulo, contraste, velocidade, escala/força das ondas, granulação, pulsação, vinheta | `aurora` / `ember` |
+| Campo de estrelas `stars-v2` | 12: densidade, variação de tamanho, rastros, camadas, cintilação, meteoros, dois matizes, velocidade, visibilidade/posição/escala do relógio | `quiet` / `voyage` |
+| Relógio ambiente `clock-v2` | 10: dois matizes, movimento de fundo, nove posições, escala, formato 12/24 h, segundos, data, fonte, brilho | `dawn` / `terminal` |
+
+- **Área nativa:** projetos recentes, criação/renomeação/duplicação/exclusão de rascunhos, conversa e inspetor. Excluir um rascunho preserva por padrão os papéis de parede já publicados na biblioteca.
+- **Várias conexões:** Provider Profiles para OpenAI-compatible, Anthropic Messages e Gemini GenerateContent, endereço/modelo, limites de solicitações/tokens e teste de conexão cancelável. OpenAI-compatible oferece os modos JSON `automatic` (padrão), `schema`, `required` e `disabled`.
+- **Predefinições e prévia ao vivo:** aplique todos os valores de uma predefinição ou ajuste controles deslizantes, cores e chaves na prévia aberta. A janela separada permite pausar/retomar, começa sem som e simula 16:9, 16:10 e 9:16.
+- **Validação e reparos limitados:** verificação estática, execução real em WebKit fora da tela e capa JPEG. Até dois reparos, no máximo três chamadas ao modelo por tarefa; cancelamento, tempo, tokens (Desconhecido quando ausentes) e relatórios sem dados sensíveis.
+- **Histórico imutável:** continue a partir de qualquer revisão validada ou volte explicitamente a ela. Versões anteriores são preservadas; cancelamento, falhas e reinicialização mantêm a última revisão válida.
+- **Salvar e aplicar separados:** após editar parâmetros, valide as alterações para criar uma revisão, depois salve na biblioteca. Só Aplicar ao monitor muda a mesa. Os papéis de parede publicados desses modelos visuais funcionam offline, sem o serviço de IA.
+
+**Comece com LM Studio local:** baixe e carregue um modelo à parte e inicie o servidor local. Nos Ajustes, adicione um Profile OpenAI-compatible com endereço `http://127.0.0.1:1234/v1`, o ID real do modelo, modo local explícito e `schema`. A Key só pode ficar vazia em um serviço de loopback sem autenticação; conexões remotas exigem HTTPS e credenciais por padrão. O app não inclui modelos.
+
+Abra o Criador com IA → crie um projeto → descreva o papel de parede (por exemplo, “poucas estrelas em tons frios, relógio no canto inferior direito”) → confira e visualize → continue a conversa ou escolha uma predefinição → valide → salve na biblioteca → aplique explicitamente se desejar. Serviços remotos podem cobrar. As chaves ficam no Keychain, vinculadas a cada Profile; mudanças de destino ou geração da configuração exigem novo vínculo, sem reutilizar silenciosamente a credencial antiga.
+
+**Limites atuais:** apenas esses três modelos visuais parametrizados. A execução de código livre S4 está desativada; não há geração de HTML/JS arbitrário, imagens ou vídeos por texto. Após criar dados do Criador, a exportação/restauração de backup no formato antigo e a mudança de armazenamento são bloqueadas; excluir rascunhos não remove esse bloqueio. A migração completa ainda não está disponível. Reprodução offline não significa que o app inteiro deixa de acessar a rede: Workshop e atualizações têm comportamento separado.
+
+**Verificação:** no teste local fixo com `qwen3.8-flash-next + schema`, dez prompts em três rodadas passaram 30/30 na primeira tentativa. O teste prolongado real de WebKit fora da tela passou 1.800 segundos. Isso não garante o resultado com outros modelos ou prompts. O pacote macOS 15 passou na verificação dos oito Mach-O, suas versões mínimas e dependências, assinatura e download; macOS 15 em hardware real, vários monitores/altas taxas de atualização, repouso/retomada e energia ainda aguardam S3.
+
+Detalhes: [área de criação](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-workspace.md) · [matriz e testes](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md) · [evidências do pacote macOS 15](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-macos15-results.json).
 
 ## O app
 
 Uma janela com abas no topo: sua biblioteca (todos os papéis de parede, favoritos e suas
-coleções), o Workshop da Steam e o pixiv para navegar, e os Ajustes, com o que está tocando numa barra
+coleções), o Criador com IA, o Workshop da Steam e o pixiv para navegar, e os Ajustes, com o que está tocando numa barra
 na parte de baixo. O site tem uma demonstração dele com uma
 biblioteca de exemplo, para você
 [experimentar no navegador](https://www.wallpapermachine.app/#app). Feche a
@@ -94,6 +115,7 @@ sem abrir a janela.
 
 | Recurso | O que faz |
 | --- | --- |
+| [**Criador com IA**](#ai-creator) | Papéis de parede com modelos visuais confiáveis, prompts, conversa, predefinições, prévias validadas e retorno de revisões. Salvar na biblioteca e aplicar na mesa são ações separadas. |
 | [**Aplicar**](docs/features/control-panel.md#selection-versus-apply) | Cena, vídeo ou [web](docs/features/web-wallpapers.md): clique em Aplicar papel de parede e ele vira a sua mesa. Escolher um papel de parede apenas o seleciona. |
 | [**Pré-visualizar**](docs/features/wallpaper-properties.md#live-preview) | Experimente um papel de parede de cena, de vídeo ou web instalado numa janela própria, com as opções atuais e controles de reprodução separados, antes de mudar a mesa. Controles deslizantes, cores e chaves aparecem nela enquanto você os altera. |
 | [**Workshop**](docs/features/workshop-downloads.md) | O Workshop da Steam ao vivo, sem iniciar sessão para navegar, com [coleções e os papéis de parede de cada autor e, depois de iniciar sessão na Steam, suas inscrições e seus favoritos](docs/features/workshop-downloads.md#collections-authors-and-subscriptions); com sessão iniciada, inscreva-se ou cancele a inscrição pelo app e leia os [comentários](docs/features/workshop-downloads.md#comments) mais recentes de um item. Os downloads acontecem no app, vários ao mesmo tempo, com uma conta Steam que tenha o Wallpaper Engine. [Atualizações](docs/features/workshop-downloads.md#updates) dos papéis de parede que você tem são buscadas uma vez por dia e instaladas com um clique. |
@@ -116,13 +138,15 @@ sem abrir a janela.
 
 ## Por que você pode confiar
 
+Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes S3 deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
+
 - **Código aberto, por inteiro.** O app, o renderizador e o motor de cenas estão todos
   neste repositório sob GPL-3.0-only. Não há núcleo fechado nem recursos pagos: o app
   é o mesmo para todo mundo.
-- **Feito às claras.** Cada versão é compilada e testada pelo
+- **Compilações públicas do projeto original.** Suas versões de produção são compiladas e testadas pelo
   [GitHub Actions](docs/release.md#build-buildyml) a partir de um commit com tag, e então
   publicada com um checksum SHA-256 e um atestado de procedência da compilação (build provenance
-  attestation). Confira se um download veio do workflow deste repositório:
+  attestation). Confira se um download original veio do workflow do projeto original:
   ```sh
   gh attestation verify WallpaperMachine-*-arm64.dmg --repo WallpaperMachine/WallpaperMachine
   ```
@@ -222,19 +246,7 @@ os nomes das contas Steam são substituídos antes.
 <details>
 <summary><b>Como eu consigo o app?</b></summary>
 
-Baixe a versão assinada de graça na
-[versão mais recente](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest),
-instale a mesma imagem de disco assinada com o
-[Homebrew](https://formulae.brew.sh/cask/wallpapermachine)
-(`brew install --cask wallpapermachine`) ou
-[compile a partir do código-fonte](#código-aberto-livre-para-compilar). As versões
-posteriores à 1.8.2 são assinadas com um Developer ID e notarizadas pela Apple, então abrem
-direto; a 1.8.2 e as anteriores não são notarizadas, então o macOS bloqueia a primeira abertura
-até você clicar em Abrir Mesmo Assim em Ajustes do Sistema → Privacidade e Segurança. O
-[guia de instalação](https://www.wallpapermachine.app/guides/install/) (em inglês) acompanha
-tudo, do download até o guia de boas-vindas. A partir daí o app procura
-novas versões sozinho e, quando consegue substituir a própria cópia, oferece
-**Reiniciar para Atualizar**. Uma cópia instalada pelo Homebrew se atualiza do mesmo jeito.
+Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
 
 </details>
 
@@ -274,6 +286,13 @@ detalhes dele. Problemas de segurança são relatados em particular: veja o [SEC
 </details>
 
 ## Código aberto. Livre para compilar.
+
+Para compilar o Criador com IA, clone primeiro a branch deste fork; `main` ainda não contém o recurso. O suporte a sistemas anteriores depende também da versão mínima de cada biblioteca incluída; veja o [registro de empacotamento macOS 15](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/plans/2026-11-11-creator-macos15.md).
+
+```sh
+git clone --branch feat/ai-creator https://github.com/pzc163/WallpaperMachine.git
+cd WallpaperMachine
+```
 
 O código-fonte completo está aqui. Ele compila num Mac com Apple silicon, Xcode 26 (macOS 15.6 ou posterior), um
 Xcode completo selecionado com `xcode-select` e os pacotes do Homebrew listados em

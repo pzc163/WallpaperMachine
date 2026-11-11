@@ -4,11 +4,13 @@
      wallpaper credits at the end. -->
 <p align="center"><sub><b>English</b>&ensp;·&ensp;<a href="README.zh-CN.md">简体中文</a>&ensp;·&ensp;<a href="README.ko.md">한국어</a>&ensp;·&ensp;<a href="README.pt-BR.md">Português</a></sub></p>
 
+**AI Creator preview · S3 hardware acceptance.** This fork builds on [upstream WallpaperMachine](https://github.com/MMFoundation/WallpaperMachine). New code lives on [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator); `main` currently carries these README updates only, without the Creator implementation. Screenshots and the website demo below are from upstream; download this fork’s pre-release to try AI Creator.
+
 <a href="https://www.wallpapermachine.app">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="A Mac desktop cycling through six live wallpapers played by WallpaperMachine: Chisaki over rippling water, Lucy on the Moon, a Red Bull F1 car in the snow, Firefly at dusk, Ellen at a rainy bus stop and Into The Abyss, under the macOS menu bar and Dock.">
 </a>
 
-<h3 align="center">Wallpaper Engine wallpapers, now on macOS.</h3>
+<h3 align="center">Wallpaper Engine playback and AI wallpaper creation on macOS.</h3>
 
 <p align="center">
   A free, open-source Mac app that plays Wallpaper Engine scene, video and web wallpapers<br>
@@ -16,24 +18,24 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest"><img src="https://img.shields.io/github/v/release/WallpaperMachine/WallpaperMachine?label=version&color=0a84ff" alt="Latest version"></a>
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/actions/workflows/version.yml"><img src="https://img.shields.io/github/actions/workflow/status/WallpaperMachine/WallpaperMachine/version.yml?branch=main&label=build" alt="Build and release status"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="License: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 or later on Apple silicon">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/WallpaperMachine/WallpaperMachine" alt="GitHub stars"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
-  <a href="https://www.wallpapermachine.app/download"><img src="https://img.shields.io/badge/Download_for_Mac-free-0a84ff?style=for-the-badge&logo=apple&logoColor=white" height="36" alt="Download for Mac, free"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Download AI Creator preview"></a>
   &ensp;
-  <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Try_it_in_your_browser-live_demo-34c759?style=for-the-badge&logo=safari&logoColor=white" height="36" alt="Try the live demo in your browser"></a>
+  <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Upstream browser demo"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia or later&ensp;·&ensp;Apple silicon (M1 or later)&ensp;·&ensp;<a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest">Release notes and checksums</a></sub>
+  <sub>macOS 15 Sequoia or later&ensp;·&ensp;Apple silicon (M1 or later)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5">Release notes and checksums</a></sub>
 </p>
 
 <p align="center">
+  <a href="#ai-creator">AI Creator</a>&ensp;·&ensp;
   <a href="#quick-start">Quick start</a>&ensp;·&ensp;
   <a href="#the-app">The app</a>&ensp;·&ensp;
   <a href="#why-you-can-trust-it">Why trust it</a>&ensp;·&ensp;
@@ -61,34 +63,53 @@
 
 ## Quick start
 
-1. **Download** the [free disk image](https://www.wallpapermachine.app/download) for the latest version.
-2. **Install**: open it and drag WallpaperMachine to Applications.
-3. **Open it.** Releases after 1.8.2 are notarized by Apple and open right away.
-   1.8.2 and older aren't, so macOS holds their first launch: click **Open Anyway**
-   in System Settings → Privacy & Security, once.
+Choose the **macOS 15+ compatibility package**. Both packages contain application source `93eb2aa5` (app version 1.9.4) and the same AI Creator features; their bundled libraries have different minimum OS requirements.
 
-Using [Homebrew](https://brew.sh)? One command does the first two steps:
+| Package | System and chip | Intended use |
+| --- | --- | --- |
+| [macOS 15+ compatibility package — recommended](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) | macOS 15.0+ · Apple Silicon / arm64 | New installs and S3 hardware acceptance |
+| [Original S3 acceptance package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) | macOS 27.2+ · Apple Silicon / arm64 | Retained earlier package; cannot run on macOS 15/26 |
 
-```bash
-brew install --cask wallpapermachine
-```
+1. Download the `.dmg` from its Release page and verify **SHA-256** using the command there. Neither package supports Intel Macs.
+2. Prefer a separate macOS test account, mount the image and copy the app. Do not overwrite an existing production copy or run both versions in the same account: they retain the same application identifier.
+3. Both packages are **Ad-hoc signed and NOT Apple notarized**. If first launch is blocked, verify the source and follow [Apple’s instructions](https://support.apple.com/102445) for **System Settings → Privacy & Security → Open Anyway**. Do not disable system security.
+4. Disable automatic updates during acceptance testing: the updater still uses upstream configuration. Get subsequent test packages manually from this fork’s [Releases](https://github.com/pzc163/WallpaperMachine/releases).
 
-A first-run guide takes it from there, and the app updates itself from then on.
-The [install guide](https://www.wallpapermachine.app/guides/install/) walks through
-every step with pictures.
+The upstream website and `brew install --cask wallpapermachine` distribute the upstream app, without this fork’s AI Creator. Existing scene, video, web and still wallpaper playback and Workshop browsing remain available; Wallpaper Engine ownership requirements for Workshop downloads and shared scene resources are unchanged.
 
-- **Works right away:** the bundled video wallpaper Aurora Drift, pixiv illustrations,
-  your own videos and pictures, and browsing the whole Workshop without signing in.
-- **With a Steam account that owns Wallpaper Engine:** Workshop downloads, and scene
-  wallpapers, which use shared resources from the Wallpaper Engine you own.
+<a id="ai-creator"></a>
 
-Rather build it yourself? It takes two commands: see
-[Open source. Free to build.](#open-source-free-to-build)
+## AI Creator: available features
+
+The S0–S2.3 local creation workflow and S3 JSON-mode and preset controls are implemented. Describe a wallpaper, refine it through conversation, then adjust native properties. The model selects a trusted template and returns bounded parameters; native code validates them and rebuilds the resource bundle.
+
+| Template | Parameters | Built-in presets |
+| --- | --- | --- |
+| Flowing gradient `gradient-v2` | 10: two hues, angle, contrast, speed, wave scale/strength, grain, breathing, vignette | `aurora` / `ember` |
+| Layered starfield `stars-v2` | 12: density, size spread, trails, layers, twinkle, meteors, two hues, speed, clock visibility/anchor/scale | `quiet` / `voyage` |
+| Ambient clock `clock-v2` | 10: two hues, background motion, nine-position anchor, scale, 12/24-hour format, seconds, date, font, glow | `dawn` / `terminal` |
+
+- **Native workspace:** recent projects, create/rename/duplicate/delete drafts, conversation history and an inspector. Deleting a draft keeps published library wallpapers by default.
+- **Multiple model connections:** Provider Profiles for OpenAI-compatible, Anthropic Messages and Gemini GenerateContent, endpoint/model and request/token budgets, and a cancellable connection test. OpenAI-compatible offers `automatic` (default), `schema`, `required` and `disabled` JSON output modes.
+- **Presets and live preview:** apply a complete preset or adjust sliders, colors and toggles in an open preview. The separate window supports pause/resume, starts muted, and simulates 16:9, 16:10 and 9:16.
+- **Validation and bounded repair:** static parameter checks, real offscreen WebKit execution and a JPEG cover. Up to two repairs mean at most three model calls per job; stop at any time and inspect elapsed time, token usage (Unknown when absent) and redacted reports.
+- **Immutable history:** refine any validated historical revision or explicitly roll back. Previous versions remain intact; cancellation, failure and restart recovery retain the last valid revision.
+- **Save and apply separately:** after parameter edits, Validate changes creates a new revision; then Save to wallpaper library. Only an explicit Apply to display changes the desktop. Published trusted-template wallpapers play offline without a model service.
+
+**Start with local LM Studio:** download and load a model separately, then start its local server. Add an OpenAI-compatible Profile in Settings, set the endpoint to `http://127.0.0.1:1234/v1`, enter the server’s actual model ID, enable explicit local mode and select `schema`. A blank Key is allowed only for a loopback service without authentication; remote profiles require HTTPS and credentials by default. Models are not bundled.
+
+Open AI Creator → create a project → describe a wallpaper (for example, “a sparse cool-colored starfield with a clock at bottom right”) → inspect and preview → continue the conversation or select a preset → validate edits → save to the library → explicitly apply if wanted. Remote providers may charge. Keys use a separate Keychain binding per Profile; a changed target or configuration generation requires rebinding instead of silently reusing old credentials.
+
+**Current limits:** only these three parameterized templates are available. S4 arbitrary-code execution is disabled; there is no arbitrary HTML/JS, text-to-image or text-to-video generation. Once Creator data has been created, legacy backup export/restore and storage relocation are refused; deleting drafts does not automatically lift this restriction. Full migration support is pending. Offline wallpaper playback does not make the entire app network-free: Workshop and update checks have separate network behavior.
+
+**Verification:** the archived fixed local benchmark used `qwen3.8-flash-next + schema`, ten prompts over three rounds: 30/30 passed on the first attempt. A real offscreen WebKit soak passed 1,800 seconds. These results do not predict arbitrary prompts or other models. The macOS 15 package passed all eight Mach-O deployment-minimum and dependency checks, signature verification and download verification; physical macOS 15, multiple/high-refresh displays, sleep/wake and whole-app energy acceptance remain S3 work.
+
+Details: [Creator workspace](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-workspace.md) · [acceptance matrix and benchmarks](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md) · [macOS 15 packaging evidence](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-macos15-results.json).
 
 ## The app
 
 One window with tabs across the top: your library (all wallpapers, favorites and your
-collections), Steam Workshop and pixiv to browse, and Settings, with what is playing in a bar
+collections), AI Creator, Steam Workshop and pixiv to browse, and Settings, with what is playing in a bar
 along the bottom. The website has a demo of it on a
 sample library, so you can
 [try it in your browser](https://www.wallpapermachine.app/#app). Close the
@@ -98,6 +119,7 @@ without opening the window.
 
 | Feature | What it does |
 | --- | --- |
+| [**AI Creator**](#ai-creator) | Prompt-based trusted-template wallpapers, conversation, presets, validated previews and revision rollback. Saving to the library and applying to the desktop are separate actions. |
 | [**Apply**](docs/features/control-panel.md#selection-versus-apply) | Scene, video or [web](docs/features/web-wallpapers.md): Apply wallpaper and it becomes your desktop. Choosing a wallpaper only selects it. |
 | [**Preview**](docs/features/wallpaper-properties.md#live-preview) | Try an installed scene, video or web wallpaper in its own window, with the current options and separate playback controls, before changing the desktop. Sliders, colours and switches show in it as you change them. |
 | [**Workshop**](docs/features/workshop-downloads.md) | The live Steam Workshop, no sign-in to browse, with [collections and each author's wallpapers, plus your subscriptions and favorites once you sign in to Steam](docs/features/workshop-downloads.md#collections-authors-and-subscriptions); signed in, subscribe or unsubscribe from the app, and read an item's newest [comments](docs/features/workshop-downloads.md#comments). Downloads run in the app, several at once, with a Steam account that owns Wallpaper Engine. [Updates](docs/features/workshop-downloads.md#updates) to the wallpapers you have are found once a day and installed in one click. |
@@ -120,13 +142,15 @@ without opening the window.
 
 ## Why you can trust it
 
+The upstream build attestations and update flow below do not describe this fork’s S3 packages. They were packaged locally, Ad-hoc signed, not notarized, and have no GitHub Actions build attestation. Use the SHA-256 on the [Release page](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5). AI Creator sends requests to your selected model service when you ask it to generate, revise or test a connection.
+
 - **Open source, all of it.** The app, its renderer and its scene engine are all in
   this repository under GPL-3.0-only. There is no closed core and no paid features: the app
   is the same for everyone.
-- **Built in public.** Every release is built and tested by
+- **Upstream builds in public.** Upstream production releases are built and tested by
   [GitHub Actions](docs/release.md#build-buildyml) from a tagged commit, then
   published with a SHA-256 checksum and a build provenance attestation. Check a
-  download came from this repository's workflow:
+  upstream download came from upstream's workflow:
   ```sh
   gh attestation verify WallpaperMachine-*-arm64.dmg --repo WallpaperMachine/WallpaperMachine
   ```
@@ -226,19 +250,7 @@ Steam account names are replaced first.
 <details>
 <summary><b>How do I get it?</b></summary>
 
-Download the signed build free from the
-[latest release](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest),
-install the same signed disk image with
-[Homebrew](https://formulae.brew.sh/cask/wallpapermachine)
-(`brew install --cask wallpapermachine`), or
-[build it from the source](#open-source-free-to-build). Releases after 1.8.2
-are signed with a Developer ID and notarized by Apple, so they open right away;
-1.8.2 and older are not notarized, so macOS holds their first launch until you
-click Open Anyway in System Settings → Privacy & Security. The
-[install guide](https://www.wallpapermachine.app/guides/install/) walks through
-it, from the download to the first-run guide. From then on the app checks for
-new versions itself and, where it can replace its own copy, offers
-**Restart to Update**. A copy installed with Homebrew updates itself the same way.
+Download this fork’s AI Creator from the [macOS 15+ pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) and follow [Quick start](#quick-start). It is an Ad-hoc acceptance package without Apple notarization. The upstream [production releases](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), website and Homebrew distribution are maintained separately and do not include this fork’s AI Creator.
 
 </details>
 
@@ -278,6 +290,13 @@ details. Security problems are reported privately: see [SECURITY.md](SECURITY.md
 </details>
 
 ## Open source. Free to build.
+
+To build AI Creator, first clone this fork’s feature branch; `main` does not contain the feature yet. Support for older runtime systems also depends on every bundled library’s deployment minimum; see the [macOS 15 packaging record](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/plans/2026-11-11-creator-macos15.md).
+
+```sh
+git clone --branch feat/ai-creator https://github.com/pzc163/WallpaperMachine.git
+cd WallpaperMachine
+```
 
 The complete source is here. It builds on a Mac with Apple silicon, Xcode 26 (macOS 15.6 or later), a
 full Xcode selected with `xcode-select` and the Homebrew packages listed under
