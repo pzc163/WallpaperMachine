@@ -14,6 +14,7 @@ final class CreatorModel {
     var autoRepair = false
     var maxRepairs = 1
     var phase = Phase.idle
+    var streamProgress = LLMStreamProgress()
     var attempt = 0
     var attemptLimit = 1
     var elapsed: TimeInterval?

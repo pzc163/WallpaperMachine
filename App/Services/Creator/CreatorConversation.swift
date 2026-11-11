@@ -36,6 +36,8 @@ struct CreatorConversation: Codable, Equatable, Sendable {
         // Absent in historical conversations; those retain their original one-call-per-repair rule.
         var creationMode: CreatorCreationMode? = nil
         var negotiatesJSON: Bool? = nil
+        var allowsStreamFallback: Bool? = nil
+        var usesNonStream: Bool? = nil
         var negotiationCount: Int? = nil
         var effectiveJSONMode: ProviderProfile.Capabilities.JSONMode? {
             guard negotiatesJSON == true else { return nil }
@@ -54,8 +56,9 @@ struct CreatorConversation: Codable, Equatable, Sendable {
               turns.dropLast().allSatisfy({ $0.state.terminal }) else { throw CreatorPersistence.Failure.invalidRecord }
         for turn in turns {
             guard turn.createdAt >= 0, (0...2).contains(turn.maxRepairs), (0...turn.maxRepairs).contains(turn.repairCount),
-                  (1...(turn.negotiatesJSON == true ? 3 : min(3, 1 + turn.maxRepairs))).contains(turn.requestBudget),
+                  (1...(turn.negotiatesJSON == true || turn.allowsStreamFallback == true ? 3 : min(3, 1 + turn.maxRepairs))).contains(turn.requestBudget),
                   (0...2).contains(turn.negotiationCount ?? 0),
+                  turn.usesNonStream != true || (turn.allowsStreamFallback == true && turn.requestCount > 0),
                   turn.negotiatesJSON == true || turn.negotiationCount == nil,
                   (turn.negotiationCount ?? 0) <= turn.requestCount, (1...100_000).contains(turn.tokenBudget),
                   turn.attempts.count <= turn.requestBudget, Set(turn.attempts.map(\.jobID)).count == turn.attempts.count,

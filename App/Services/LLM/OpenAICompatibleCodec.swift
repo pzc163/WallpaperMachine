@@ -7,10 +7,10 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
     private var done = false
 
     init(allowsLeadingThought: Bool, requiresJSON: Bool = true) { answer = LLMAnswerBuffer(allowsLeadingThought: allowsLeadingThought, requiresJSON: requiresJSON) }
-    static func request(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool) throws -> LLMRequestDescriptor {
+    static func request(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool, streaming: Bool = true) throws -> LLMRequestDescriptor {
         let basePath = URLComponents(string: profile.baseURL)?.path ?? ""
         let url = try LLMRequestDescriptor.endpoint(profile, version: basePath.isEmpty || basePath == "/" ? "v1" : nil, suffix: "chat/completions")
-        var body: [String: Any] = ["model": profile.model, "stream": true, "max_tokens": input.maxOutputTokens,
+        var body: [String: Any] = ["model": profile.model, "stream": streaming, "max_tokens": input.maxOutputTokens,
             "messages": [["role": "system", "content": input.systemInstruction]] + input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
         let mode = profile.capabilities.jsonMode ?? .automatic
         if jsonMode, mode != .disabled {
@@ -22,7 +22,7 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
                 body["response_format"] = ["type": "json_object"]
             }
         }
-        if profile.capabilities.requestsUsage { body["stream_options"] = ["include_usage": true] }
+        if streaming && profile.capabilities.requestsUsage { body["stream_options"] = ["include_usage": true] }
         return .init(url: url, headers: [:], body: try LLMRequestDescriptor.encoded(body), authentication: .bearer)
     }
     mutating func consume(_ event: SSEParser.Event) throws {
@@ -72,6 +72,21 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
                 stopped = true
             }
         }
+    }
+    var acceptsJSON: Bool { true }
+    mutating func consumeJSON(_ data: Data) throws {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              object["error"] == nil, let choices = object["choices"] as? [[String: Any]], choices.count == 1,
+              let message = choices[0]["message"] as? [String: Any], message["role"] as? String == "assistant",
+              let reason = choices[0]["finish_reason"] as? String else { throw LLMFailure.protocolViolation }
+        var adapted = choices[0]; adapted["delta"] = message; adapted["message"] = nil
+        adapted["index"] = 0; adapted["finish_reason"] = reason
+        var frame = object; frame["choices"] = [adapted]
+        try consume(.init(name: "message", data: String(decoding: try LLMRequestDescriptor.encoded(frame), as: UTF8.self)))
+        try consume(.init(name: "message", data: "[DONE]"))
+    }
+    var progress: LLMStreamProgress {
+        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage)
     }
     func finish() throws -> LLMResponse {
         guard done, stopped else { throw LLMFailure.truncated }

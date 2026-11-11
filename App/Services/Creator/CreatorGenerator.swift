@@ -12,6 +12,7 @@ actor CreatorGenerator {
         var mode: CreatorCreationMode = .template
         var iteration: CreatorConversation.Ticket? = nil
         var repair: CreatorRepairIssue? = nil
+        var streamProgress: @Sendable (LLMStreamProgress) -> Void = { _ in }
     }
     enum Checkpoint: Equatable, Sendable { case beforeRequest, afterResponse, afterValidation, beforeCommit }
     private let store: CreatorRevisionStore
@@ -100,6 +101,7 @@ actor CreatorGenerator {
             try await checkpoint(.beforeRequest); try Task.checkCancellation()
             let completed = try await provider.generate(input, profileID: profile.id, configurationID: profile.configurationID,
                 ticket: ticket, store: store, retrying: turn == nil, outputMode: turn?.effectiveJSONMode,
+                streaming: turn?.usesNonStream != true, progress: request.streamProgress,
                 validate: { text in
                     if request.mode == .code { _ = try CreatorCodeOutput.parse(text) }
                     else { _ = try CreatorOutputValidator.detailed(text) }

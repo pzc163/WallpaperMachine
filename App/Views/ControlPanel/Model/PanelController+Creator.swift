@@ -77,12 +77,18 @@ extension PanelController {
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
                 maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs, mode: self.creator.mode)
+            request.streamProgress = { [weak self] value in
+                Task { @MainActor in
+                    guard let self, self.creator.operationID == token, self.creator.isBusy, self.creator.phase == .generating else { return }
+                    self.creator.streamProgress = value
+                }
+            }
             request.progress = { [self] stage, attempt, limit in
                 await MainActor.run {
                     guard self.creator.operationID == token else { return }
                     self.creator.attempt = attempt; self.creator.attemptLimit = limit
                     switch stage {
-                    case .generating: self.creator.phase = .generating
+                    case .generating: self.creator.phase = .generating; self.creator.streamProgress = .init()
                     case .repairPending: self.creator.phase = .repairPending
                     case .runtime: self.creator.phase = .runtime
                     case .sealing: self.creator.phase = .sealing

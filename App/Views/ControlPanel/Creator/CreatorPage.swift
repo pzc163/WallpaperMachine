@@ -123,7 +123,7 @@ private struct CreatorComposer: View {
                 HStack { options; Spacer(minLength: 4); actions }
                 VStack(alignment: .leading, spacing: 8) { options; actions }
             }
-            Text(verbatim: CreatorLabels.phase(model.phase)).font(.system(size: 12)).foregroundStyle(.secondary)
+            Text(verbatim: CreatorLabels.status(model)).font(.system(size: 12)).foregroundStyle(.secondary)
                 .accessibilityIdentifier("creator-status")
             if model.profile == nil {
                 Button("Configure a model connection") { controller.launch { try await controller.openSettings(.models) } }

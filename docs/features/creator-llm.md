@@ -123,7 +123,9 @@ or invalid UTF-8 are rejected. Parsing `[DONE]` does not ignore a malformed tail
 | Error body inspected for JSON-mode fallback | 4 KiB; never logged |
 | Input text | 16 KiB total; 1–32 messages, ending in a user message |
 | Request body | 128 KiB after native JSON encoding |
-| Request deadline | 60 seconds by default; injected limit must be positive and at most 600 seconds |
+| First response | 25 seconds until response headers; unreachable endpoints fail promptly |
+| Stream idle | 90 seconds since response headers or last received bytes, including reasoning/heartbeat data |
+| Request total | 300 seconds by default (including code generation); injected deadlines must be positive and at most 600 seconds |
 | Concurrency | 4 jobs per provider, 32 coordinator registrations; one in-process request owner per job |
 
 Swift task cancellation immediately cancels/invalidate the session and completes
@@ -152,6 +154,27 @@ token charges are not covered by this output reservation. Usage is optional and
 describes only the last successful request, not all failed attempts or a task's
 total bill. S1.3 persists these counters without adding parameter-repair calls;
 future corrective attempts must reuse the same budget.
+
+## Stream negotiation and progress
+
+All three protocols request streaming first. Explicit HTTP 400/422 rejection of
+`stream`/`stream_options` permits one non-stream fallback. OpenAI/Anthropic use
+`stream:false`; Gemini uses `generateContent` without an SSE query. JSON responses
+are size-bounded, require an explicit successful finish reason, retain usage and
+omit thought blocks. A server that directly returns its valid non-stream response
+can be decoded without another request. Arbitrary 400s, authentication failures,
+truncated streams and bad content types do not trigger this downgrade.
+
+Negotiation consumes the same whole-turn request and token reservations as JSON
+negotiation/repair (maximum three wire calls). It does not enable content repair
+when the repair switch is off. Historical conversation records retain their original
+budgets. Cancellation aborts transport and negotiation without refunding sent calls.
+
+Progress contains only connecting/thinking/content phase, accepted character count
+and numeric usage. Content updates are coalesced to at most five per second, with
+phase changes/final usage delivered promptly; raw reasoning never reaches UI or disk.
+A response header completes the connection deadline, allowing local model prefill
+to use the idle interval. Receiving tokens resets idle, never the total deadline.
 
 ## Protocol-specific behavior
 

@@ -9,13 +9,13 @@ struct LLMRequestDescriptor: Sendable {
     let authentication: Authentication
     var method = "POST"
 
-    static func make(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool) throws -> Self {
+    static func make(profile: ProviderProfile, input: LLMRequest, jsonMode: Bool, streaming: Bool = true) throws -> Self {
         do { try profile.validate(); try input.validate() } catch { throw LLMFailure.invalidInput }
         guard input.maxOutputTokens <= profile.limits.tokenBudget else { throw LLMFailure.budgetExhausted }
         switch profile.protocolKind {
-        case .openaiCompatible: return try OpenAICompatibleCodec.request(profile: profile, input: input, jsonMode: jsonMode)
-        case .anthropicMessages: return try AnthropicMessagesCodec.request(profile: profile, input: input)
-        case .geminiGenerateContent: return try GeminiGenerateContentCodec.request(profile: profile, input: input)
+        case .openaiCompatible: return try OpenAICompatibleCodec.request(profile: profile, input: input, jsonMode: jsonMode, streaming: streaming)
+        case .anthropicMessages: return try AnthropicMessagesCodec.request(profile: profile, input: input, streaming: streaming)
+        case .geminiGenerateContent: return try GeminiGenerateContentCodec.request(profile: profile, input: input, streaming: streaming)
         }
     }
     static func decoder(for profile: ProviderProfile, requiresJSON: Bool = true) -> any LLMProtocolCodec {

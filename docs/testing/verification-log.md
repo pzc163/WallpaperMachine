@@ -25,6 +25,12 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator streaming deadlines and progress
+
+- Three-protocol codec, transport, bounded repair and code workflow checks: 53 passed, 0 failed. Final response-header/idle boundary rerun: 12 passed, 0 failed.
+- Added independent first-response/idle/total deadlines, redacted phase/count updates, and bounded non-stream negotiation using the existing ledger. Documentation (11), localization catalog (8) and panel localization (9) checks passed.
+- Only deterministic Mock flows and offscreen WebKit; no real APIs, personal Keychain, visible windows or desktop changes. Full routine gate remains scheduled after workspace UX.
+
 ## 2026-11-11 — Creator connection form and local credential sessions
 
 - Targeted LLMConnectionUXTests, ProviderCredentialStoreTests, CreatorModelSettingsTests and LLMStreamTransportTests: 21 passed, 0 failed, 0 skipped.
@@ -119,18 +125,3 @@ S2.3 — headless recovery, publication playback gate, credential-echo rejection
 - Mock 10×3: first 60%, final 90%, 48 requests, 24 unknown usages; not a live quality result. Real WK short soak 0.825 s, not 30 minutes.
 - AC-01–14 matrix, exact commands and limits: [creator-acceptance.md](../features/creator-acceptance.md). S3 device/UI and S4 isolation remain open.
 - No live API, personal Keychain, visible UI, desktop change, Release build or installation; structured evidence retained before cleaning this task's logs/results.
-
-## 2026-11-10 — Native creator workspace and model settings (S2.2)
-
-Added the native AI Creator tab and model settings, with explicit generate/save/apply actions, trusted previews and controller-start recovery. [Feature and boundaries](../features/creator-workspace.md).
-
-- S2.1 baseline committed locally as `29cd3086` on `feat/ai-creator`; S2.2 remains uncommitted, no push or install.
-- Targeted Creator/shell/settings/image/backup run: 211 passed, zero failed, three S0 skips. Storage/move/backup: 71 passed; deletion/recovery: 38 passed; final controller suite: 11 passed.
-- Final `python3 scripts/test.py`: 695 Python tests and 4,962 native tests passed, zero failures, 70 skips. All 27 new tests passed; source/test/generated-project hashes were unchanged during the gate.
-- Gate attempts: first interrupted for a preview-session lifecycle correction (exit 73, not accepted as passed); second failed in an unchanged WebKit navigation replacement test; isolated recheck passed, then the final full recheck passed without source/assertion/threshold changes.
-- The WebKit failure reported `Cannot open file`; cause unresolved. Final build had seven existing linker/metadata warning lines and two main-thread runtime warnings recorded in passing existing tests.
-- Skips: three S0 unrestricted probes, 62 opt-in media/device checks, three Steam network checks, one reference job, one creator live smoke. No real provider requests, personal Keychain or desktop actions.
-- Legacy v1 golden bytes and v2 validation stay intact. Draft display names are separate workspace metadata; draft deletion preserves installed bytes and runtime policy.
-- Existing backup/restore/storage moves explicitly refuse Creator data, with a shared lease and durable first-write marker. Full Creator migration/backup is not implemented.
-- Six-language keys and offscreen narrow layouts checked; visible appearance, VoiceOver, actual preview-window interaction, real providers/Keychain and desktop activation remain unverified. S4 remains closed; no Release/long-run power test.
-- Final documentation/link/scope checks and cleanup retain structured test results; disposable test logs and result bundles are removed after collection.

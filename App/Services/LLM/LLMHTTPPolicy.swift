@@ -23,6 +23,15 @@ enum LLMHTTPPolicy {
         guard let date = formatter.date(from: trimmed) else { return nil }
         return max(0, date.timeIntervalSince(now))
     }
+    static func unsupportedStream(_ data: Data) -> Bool {
+        guard data.count <= 4096, let text = String(data: data, encoding: .utf8),
+              let object = try? LLMJSON.object(text), let error = object["error"] as? [String: Any] else { return false }
+        let parameter = (error["param"] as? String ?? "").lowercased()
+        let message = (error["message"] as? String ?? "").lowercased()
+        return ["stream", "stream_options"].contains(parameter)
+            || (parameter.isEmpty && (message.contains("streaming") || message.contains("stream"))
+                && ["unsupported", "not supported", "does not support"].contains(where: message.contains))
+    }
     static func unsupportedJSONMode(_ data: Data) -> Bool {
         guard data.count <= 4096, let text = String(data: data, encoding: .utf8),
               let object = try? LLMJSON.object(text), let error = object["error"] as? [String: Any]

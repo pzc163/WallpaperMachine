@@ -15,6 +15,15 @@ import Foundation
         }
         return String(format: L("Connection verified: %@ · %@ · %@ s"), result.model, mode, result.elapsed.formatted(.number.precision(.fractionLength(1))))
     }
+    static func status(_ model: CreatorModel) -> String {
+        guard model.phase == .generating else { return phase(model.phase) }
+        switch model.streamProgress.phase {
+        case .connecting: return L("Connecting to model…")
+        case .thinking: return L("Thinking…")
+        case .content:
+            return String(format: model.mode == .code ? L("Generating code · %lld characters received") : L("Generating parameters · %lld characters received"), model.streamProgress.characters)
+        }
+    }
     static func phase(_ phase: CreatorModel.Phase) -> String {
         switch phase {
         case .idle: L("Ready to create")
@@ -34,6 +43,8 @@ import Foundation
         switch category {
         case .unauthorized: L("Authentication failed. Check the saved key.")
         case .rateLimited: L("The provider is rate limited. Try again later.")
+        case .connection: L("Cannot connect to the model server.")
+        case .streamUnsupported: L("This endpoint does not support streaming.")
         case .timeout: L("The request timed out.")
         case .network, .server: L("The model connection was interrupted.")
         case .cancelled: L("Cancelled. A sent request may still be billed.")

@@ -11,6 +11,19 @@ import XCTest
         .init(projectID: c.ticket.projectID, baseRevisionID: base, profileID: c.profile.id, configurationID: c.profile.configurationID,
               prompt: "纯黑背景，随指针变化的紫色水墨", maxOutputTokens: 2048, maxRepairs: repairs, mode: .code)
     }
+    func testCodeStreamNegotiationWithoutRepairPermissionStillConsumesWholeTurnBudget() async throws {
+        let c = try await LLMTestContext(tokens: 24_576); defer { c.cleanup() }
+        c.route.replace([.init(status: 422, chunks: [Data(#"{"error":{"param":"stream","message":"unsupported"}}"#.utf8)]),
+            .init(headers: ["Content-Type": "application/json"], chunks: [try LLMStreamingUXTests.nonstream(Self.output())])])
+        let workspace = CreatorWorkspaceTests.workspace(c)
+        let result = try await workspace.generate(Self.request(c))
+        let conversation = try await c.store.conversation(projectID: result.projectID)
+        let turn = try XCTUnwrap(conversation.turns.last)
+        XCTAssertEqual(turn.requestCount, 2); XCTAssertEqual(turn.repairCount, 0)
+        XCTAssertEqual(turn.usesNonStream, true); XCTAssertEqual(turn.state, .completed)
+        XCTAssertEqual(turn.attempts.last?.usage?.totalTokens, 19)
+        XCTAssertEqual(c.route.requests.count, 2)
+    }
     func testThreeProtocolsCreateCapturePublishAndReloadDigestBoundCodeOffline() async throws {
         for kind in ProviderProfile.ProtocolKind.allCases {
             let c = try await LLMTestContext(kind: kind, tokens: 8192); defer { c.cleanup() }

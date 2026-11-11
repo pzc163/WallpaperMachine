@@ -26,6 +26,8 @@ actor LLMProvider {
     func generate(_ input: LLMRequest, profileID: UUID, configurationID: UUID,
                   ticket: GenerationJob.Ticket, store: CreatorRevisionStore, retrying: Bool = true,
                   outputMode: ProviderProfile.Capabilities.JSONMode? = nil,
+                  streaming: Bool = true,
+                  progress: @escaping @Sendable (LLMStreamProgress) -> Void = { _ in },
                   validate: @escaping @Sendable (String) throws -> Void = { _ in },
                   received: @escaping @Sendable (LLMResponse) async throws -> Void = { _ in }) async throws -> Completion {
         guard active[ticket.id] == nil, active.count < 4 else { throw LLMFailure.busy }
@@ -36,7 +38,7 @@ actor LLMProvider {
         let operation = Task {
             try await Self.run(input, profileID: profileID, configurationID: configurationID, ticket: ticket, store: store,
                 settings: settings, credentials: credentials, transport: transport, cancellation: cancellation, log: log, wait: wait,
-                retrying: retrying, outputMode: outputMode, validate: validate, received: received)
+                retrying: retrying, outputMode: outputMode, streaming: streaming, progress: progress, validate: validate, received: received)
         }
         cancellation.install { operation.cancel() }
         do {
@@ -80,7 +82,8 @@ actor LLMProvider {
                             transport: LLMStreamTransport, cancellation: LLMCancellation,
                             log: @Sendable (LLMLogEvent) -> Void,
                             wait: @Sendable (TimeInterval) async throws -> Void, retrying: Bool,
-                            outputMode: ProviderProfile.Capabilities.JSONMode?,
+                            outputMode: ProviderProfile.Capabilities.JSONMode?, streaming: Bool,
+                            progress: @escaping @Sendable (LLMStreamProgress) -> Void,
                             validate: @Sendable (String) throws -> Void,
                             received: @Sendable (LLMResponse) async throws -> Void) async throws -> Completion {
         try input.validate(); try cancellation.check()
@@ -109,13 +112,14 @@ actor LLMProvider {
         }
         defer { monitor.cancel() }
         let started = ContinuousClock.now
+        var usesStream = streaming
         var mode = LLMOutputNegotiation.initial(profile, input: input, override: outputMode)
         while true {
             try cancellation.check()
             let grant = try await credentials.resolve(for: profile, settings: settings)
             var wireProfile = profile
             if profile.protocolKind == .openaiCompatible { wireProfile.capabilities.jsonMode = mode }
-            let descriptor = try LLMRequestDescriptor.make(profile: wireProfile, input: input, jsonMode: mode != .disabled)
+            let descriptor = try LLMRequestDescriptor.make(profile: wireProfile, input: input, jsonMode: mode != .disabled, streaming: usesStream)
             let request = try grant.request(descriptor)
             let job: GenerationJob
             do { job = try await store.reserveLLMAttempt(ticket, profile: profile, outputTokens: input.maxOutputTokens) }
@@ -123,7 +127,7 @@ actor LLMProvider {
             catch { throw LLMFailure.invalidJob }
             log(.started(attempt: job.attemptCount))
             do {
-                var response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile, requiresJSON: input.requiresJSON)) { task in
+                var response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile, requiresJSON: input.requiresJSON), progress: progress) { task in
                     try cancellation.check()
                     do { _ = try await store.generatingJob(ticket) } catch { throw LLMFailure.invalidJob }
                     try await settings.withCurrentProfile(profile) { _ in
@@ -160,6 +164,7 @@ actor LLMProvider {
                 }
                 let delay: TimeInterval
                 if let nextMode { mode = nextMode; delay = 0 }
+                else if failure == .streamUnsupported && usesStream { usesStream = false; delay = 0 }
                 else { switch failure {
                 case .rateLimited(let retryAfter):
                     delay = retryAfter ?? 1

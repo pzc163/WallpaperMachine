@@ -5,10 +5,12 @@ struct LLMStreamTransport: @unchecked Sendable {
     struct Limits: Sendable {
         var maximumBytes = 1024 * 1024
         var maximumEventBytes = 64 * 1024
-        var timeout: TimeInterval = 60
+        var timeout: TimeInterval = 300
+        var firstResponseTimeout: TimeInterval = 25
+        var idleTimeout: TimeInterval = 90
         func validate() throws {
             guard (1...1024 * 1024).contains(maximumBytes), (1...64 * 1024).contains(maximumEventBytes),
-                  timeout.isFinite, timeout > 0, timeout <= 600 else { throw LLMFailure.invalidInput }
+                  [timeout, firstResponseTimeout, idleTimeout].allSatisfy({ $0.isFinite && $0 > 0 && $0 <= 600 }) else { throw LLMFailure.invalidInput }
         }
     }
     private let configuration: URLSessionConfiguration
@@ -18,8 +20,9 @@ struct LLMStreamTransport: @unchecked Sendable {
         self.limits = limits
     }
     func perform(_ request: URLRequest, decoder: any LLMProtocolCodec,
+                 progress: @escaping @Sendable (LLMStreamProgress) -> Void = { _ in },
                  start: @escaping @Sendable (URLSessionDataTask) async throws -> Void) async throws -> LLMResponse {
         try limits.validate()
-        return try await LLMStreamOperation(request: request, decoder: decoder, configuration: configuration, limits: limits).run(start: start)
+        return try await LLMStreamOperation(request: request, decoder: decoder, configuration: configuration, limits: limits, progress: progress).run(start: start)
     }
 }

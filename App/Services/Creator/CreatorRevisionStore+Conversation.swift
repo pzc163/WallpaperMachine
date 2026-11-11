@@ -34,12 +34,13 @@ extension CreatorRevisionStore {
             }
             try cancelActiveIteration(projectID)
             var document = try readConversation(projectID)
+            let canFallback = true
             let automatic = mode == .template && LLMOutputNegotiation.automatic(profile)
             let turn = CreatorConversation.Turn(id: UUID(), token: UUID(), createdAt: CreatorPersistence.timestamp(),
                 baseRevisionID: base?.revisionID, baseRevisionDigest: base?.revisionDigest,
                 profileID: profile.id, configurationID: profile.configurationID, userMessage: message,
-                maxRepairs: maxRepairs, requestBudget: min(automatic ? 3 : 1 + maxRepairs, profile.limits.requestBudget), tokenBudget: profile.limits.tokenBudget,
-                creationMode: mode == .code ? .code : nil, negotiatesJSON: automatic ? true : nil, negotiationCount: automatic ? 0 : nil)
+                maxRepairs: maxRepairs, requestBudget: min(automatic ? 3 : min(3, 1 + maxRepairs + (canFallback ? 1 : 0)), profile.limits.requestBudget), tokenBudget: profile.limits.tokenBudget,
+                creationMode: mode == .code ? .code : nil, negotiatesJSON: automatic ? true : nil, allowsStreamFallback: canFallback ? true : nil, negotiationCount: automatic ? 0 : nil)
             document.turns.append(turn)
             try document.validate()
             let ticket = CreatorConversation.Ticket(id: turn.id, projectID: projectID, token: turn.token)
@@ -92,9 +93,10 @@ extension CreatorRevisionStore {
                 guard [.generating, .runtime].contains(turn.state) else { throw CreatorPersistence.Failure.staleJob }
                 turn.failure = issue
                 if !turn.attempts.isEmpty { turn.attempts[turn.attempts.count - 1].issue = issue }
+                let fallback = issue.category == .streamUnsupported && turn.allowsStreamFallback == true && turn.usesNonStream != true
                 let negotiation = issue.category == .jsonModeUnsupported && turn.negotiatesJSON == true && (turn.negotiationCount ?? 0) < 2
                 allowed = issue.repairable && turn.requestCount > 0 && turn.requestCount < turn.requestBudget
-                    && (negotiation || turn.repairCount < turn.maxRepairs) && outputTokens > 0
+                    && (fallback || negotiation || turn.repairCount < turn.maxRepairs) && outputTokens > 0
                     && outputTokens <= turn.tokenBudget - turn.reservedOutputTokens
                 if allowed { turn.state = .repairPending }
             }
@@ -105,10 +107,12 @@ extension CreatorRevisionStore {
         try locked {
             try Task.checkCancellation()
             try updateIteration(ticket) { turn in
+                let fallback = turn.failure?.category == .streamUnsupported && turn.allowsStreamFallback == true && turn.usesNonStream != true
                 let negotiation = turn.failure?.category == .jsonModeUnsupported && turn.negotiatesJSON == true && (turn.negotiationCount ?? 0) < 2
-                guard turn.state == .repairPending, negotiation || turn.repairCount < turn.maxRepairs,
+                guard turn.state == .repairPending, fallback || negotiation || turn.repairCount < turn.maxRepairs,
                       turn.requestCount < turn.requestBudget else { throw LLMFailure.budgetExhausted }
-                if negotiation { turn.negotiationCount = (turn.negotiationCount ?? 0) + 1 }
+                if fallback { turn.usesNonStream = true }
+                else if negotiation { turn.negotiationCount = (turn.negotiationCount ?? 0) + 1 }
                 else { turn.repairCount += 1 }
                 turn.state = .generating; turn.currentJobID = nil
             }

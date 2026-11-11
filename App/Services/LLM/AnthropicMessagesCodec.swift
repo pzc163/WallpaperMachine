@@ -12,8 +12,8 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
 
     init(requiresJSON: Bool = true) { answer.requiresJSON = requiresJSON }
 
-    static func request(profile: ProviderProfile, input: LLMRequest) throws -> LLMRequestDescriptor {
-        let body: [String: Any] = ["model": profile.model, "stream": true, "max_tokens": input.maxOutputTokens,
+    static func request(profile: ProviderProfile, input: LLMRequest, streaming: Bool = true) throws -> LLMRequestDescriptor {
+        let body: [String: Any] = ["model": profile.model, "stream": streaming, "max_tokens": input.maxOutputTokens,
             "system": input.systemInstruction, "messages": input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
         return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1", suffix: "messages"),
                      headers: ["anthropic-version": "2023-06-01"], body: try LLMRequestDescriptor.encoded(body), authentication: .anthropic)
@@ -78,6 +78,27 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
             try usage.merge(stats, keys: ["input_tokens": \.inputTokens, "output_tokens": \.outputTokens,
                 "cache_read_input_tokens": \.cacheReadTokens, "cache_creation_input_tokens": \.cacheWriteTokens])
         }
+    }
+    var acceptsJSON: Bool { true }
+    mutating func consumeJSON(_ data: Data) throws {
+        guard let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              object["type"] as? String == "message", object["role"] as? String == "assistant",
+              let content = object["content"] as? [[String: Any]], let reason = object["stop_reason"] as? String else { throw LLMFailure.protocolViolation }
+        var header = object; header["content"] = [Any]()
+        try frame("message_start", ["message": header])
+        for (index, block) in content.enumerated() {
+            try frame("content_block_start", ["index": index, "content_block": block])
+            try frame("content_block_stop", ["index": index])
+        }
+        try frame("message_delta", ["delta": ["stop_reason": reason], "usage": object["usage"] ?? [:]])
+        try frame("message_stop", [:])
+    }
+    private mutating func frame(_ name: String, _ body: [String: Any]) throws {
+        var body = body; body["type"] = name
+        try consume(.init(name: name, data: String(decoding: try LLMRequestDescriptor.encoded(body), as: UTF8.self)))
+    }
+    var progress: LLMStreamProgress {
+        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage)
     }
     func finish() throws -> LLMResponse {
         guard done else { throw LLMFailure.truncated }

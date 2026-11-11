@@ -9,6 +9,8 @@ final class LLMMockURLProtocol: URLProtocol, @unchecked Sendable {
         var hold = false
         var failure: URLError?
         var redirect: URL?
+        var responseDelay: TimeInterval = 0
+        var chunkInterval: TimeInterval = 0
     }
     final class Route: @unchecked Sendable {
         private let lock = NSLock()
@@ -50,6 +52,7 @@ final class LLMMockURLProtocol: URLProtocol, @unchecked Sendable {
     private let lock = NSLock()
     private var route: Route?
     private var stopped = false
+    private var delivery: Task<Void, Never>?
 
     static func register(_ route: Route, at url: URL) { registry.lock.withLock { registry.routes[url.absoluteString] = route } }
     static func remove(_ url: URL) { _ = registry.lock.withLock { registry.routes.removeValue(forKey: url.absoluteString) } }
@@ -73,16 +76,27 @@ final class LLMMockURLProtocol: URLProtocol, @unchecked Sendable {
             client?.urlProtocol(self, wasRedirectedTo: redirected, redirectResponse: response)
             return
         }
-        let response = HTTPURLResponse(url: url, statusCode: reply.status, httpVersion: "HTTP/1.1", headerFields: reply.headers)!
-        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
-        for chunk in reply.chunks {
-            if lock.withLock({ stopped }) { return }
-            client?.urlProtocol(self, didLoad: chunk)
+        let task = Task { [weak self] in
+            guard let self else { return }
+            do {
+                if reply.responseDelay > 0 { try await Task.sleep(for: .seconds(reply.responseDelay)) }
+                try Task.checkCancellation()
+                let response = HTTPURLResponse(url: url, statusCode: reply.status, httpVersion: "HTTP/1.1", headerFields: reply.headers)!
+                self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+                for chunk in reply.chunks {
+                    if reply.chunkInterval > 0 { try await Task.sleep(for: .seconds(reply.chunkInterval)) }
+                    try Task.checkCancellation()
+                    if self.lock.withLock({ self.stopped }) { return }
+                    self.client?.urlProtocol(self, didLoad: chunk)
+                }
+                if !reply.hold { self.client?.urlProtocolDidFinishLoading(self) }
+            } catch {}
         }
-        if !reply.hold { client?.urlProtocolDidFinishLoading(self) }
+        lock.withLock { if stopped { task.cancel() } else { delivery = task } }
     }
+
     override func stopLoading() {
-        let route = lock.withLock { stopped = true; return route }
+        let route = lock.withLock { stopped = true; delivery?.cancel(); delivery = nil; return route }
         route?.stopped()
     }
 }

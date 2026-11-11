@@ -8,11 +8,11 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
 
     init(requiresJSON: Bool = true) { answer.requiresJSON = requiresJSON }
 
-    static func request(profile: ProviderProfile, input: LLMRequest) throws -> LLMRequestDescriptor {
+    static func request(profile: ProviderProfile, input: LLMRequest, streaming: Bool = true) throws -> LLMRequestDescriptor {
         let body: [String: Any] = ["systemInstruction": ["parts": [["text": input.systemInstruction]]],
             "generationConfig": ["responseMimeType": input.requiresJSON ? "application/json" : "text/plain", "maxOutputTokens": input.maxOutputTokens],
             "contents": input.messages.map { ["role": $0.role == .assistant ? "model" : "user", "parts": [["text": $0.content]]] }]
-        return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1beta", suffix: "models/\(profile.model):streamGenerateContent", query: [.init(name: "alt", value: "sse")]),
+        return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1beta", suffix: "models/\(profile.model):" + (streaming ? "streamGenerateContent" : "generateContent"), query: streaming ? [.init(name: "alt", value: "sse")] : []),
                      headers: [:], body: try LLMRequestDescriptor.encoded(body), authentication: .google)
     }
     mutating func consume(_ event: SSEParser.Event) throws {
@@ -52,6 +52,14 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
                 stopped = true
             }
         }
+    }
+    var acceptsJSON: Bool { true }
+    mutating func consumeJSON(_ data: Data) throws {
+        guard let text = String(data: data, encoding: .utf8) else { throw LLMFailure.protocolViolation }
+        try consume(.init(name: "message", data: text))
+    }
+    var progress: LLMStreamProgress {
+        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage)
     }
     func finish() throws -> LLMResponse {
         guard stopped else { throw LLMFailure.truncated }

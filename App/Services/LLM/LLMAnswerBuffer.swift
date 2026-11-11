@@ -10,6 +10,9 @@ struct LLMAnswerBuffer: Sendable {
     var requiresJSON = true
     private var maximumBytes: Int { requiresJSON ? LLMJSONEnvelope.maximumBytes : 34 * 1024 }
 
+    var receivedCharacters: Int { text.count }
+    var receivingContent: Bool { phase == .answer }
+
     mutating func append(_ fragment: String) throws {
         for character in fragment {
             switch phase {

@@ -28,7 +28,7 @@ actor ProviderCredentialStore {
             guard var components = URLComponents(url: descriptor.url, resolvingAgainstBaseURL: false),
                   components.fragment == nil, components.user == nil, components.password == nil
             else { throw LLMFailure.invalidInput }
-            let expectedQuery = profile.protocolKind == .geminiGenerateContent ? "alt=sse" : nil
+            let expectedQuery = profile.protocolKind == .geminiGenerateContent && components.path.hasSuffix(":streamGenerateContent") ? "alt=sse" : nil
             guard components.percentEncodedQuery == expectedQuery else { throw LLMFailure.invalidInput }
             components.query = nil
             var target = profile; target.baseURL = components.string ?? ""
