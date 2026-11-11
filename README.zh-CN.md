@@ -2,35 +2,37 @@
      (App/Resources/Localizable.xcstrings) and the website's /zh/ pages. The Supporter list between the markers is written by scripts/update_sponsors.py, as in README.md. -->
 <p align="center"><sub><a href="README.md">English</a>&ensp;·&ensp;<b>简体中文</b>&ensp;·&ensp;<a href="README.ko.md">한국어</a>&ensp;·&ensp;<a href="README.pt-BR.md">Português</a></sub></p>
 
+**AI 创作预览版 · S3 实机验收阶段。** 本仓库基于 [WallpaperMachine 上游项目](https://github.com/MMFoundation/WallpaperMachine) 开发。新增代码位于 [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator)；`main` 目前仅同步这份说明，尚未合入创作功能。下方截图与网站演示来自上游，AI 创作功能以本仓库的预发布包为准。
+
 <a href="https://www.wallpapermachine.app/zh/">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="一台 Mac 的桌面轮流播放 WallpaperMachine 的六张动态壁纸：水波中的千咲、月球上的 Lucy、雪地里的红牛 F1 赛车、黄昏中的流萤、雨中公交站的艾莲，以及 Into The Abyss，上方是 macOS 菜单栏，下方是程序坞。">
 </a>
 
-<h3 align="center">Wallpaper Engine 壁纸，现已来到 macOS。</h3>
+<h3 align="center">Wallpaper Engine 播放与 AI 壁纸创作，尽在 macOS。</h3>
 
 <p align="center">
   一款免费、开源的 Mac 应用，直接从 Steam 创意工坊获取 Wallpaper Engine 的<br>场景、视频和网页壁纸，在你的桌面上播放。献给每一位想在 Mac 上用 Wallpaper Engine 的人。
 </p>
 
 <p align="center">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest"><img src="https://img.shields.io/github/v/release/WallpaperMachine/WallpaperMachine?label=version&color=0a84ff" alt="最新版本"></a>
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/actions/workflows/version.yml"><img src="https://img.shields.io/github/actions/workflow/status/WallpaperMachine/WallpaperMachine/version.yml?branch=main&label=build" alt="构建与发布状态"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="许可证：GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 或更高版本，Apple 芯片">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/WallpaperMachine/WallpaperMachine" alt="GitHub 星标"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 星标"></a>
 </p>
 
 <p align="center">
-  <a href="https://www.wallpapermachine.app/download"><img src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD_Mac_%E7%89%88-%E5%85%8D%E8%B4%B9-0a84ff?style=for-the-badge&logo=apple&logoColor=white" height="36" alt="免费下载 Mac 版"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="下载 AI 创作预览版"></a>
   &ensp;
-  <a href="https://www.wallpapermachine.app/zh/#app"><img src="https://img.shields.io/badge/%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E8%AF%95%E7%94%A8-%E5%9C%A8%E7%BA%BF%E6%BC%94%E7%A4%BA-34c759?style=for-the-badge&logo=safari&logoColor=white" height="36" alt="在浏览器中试用在线演示"></a>
+  <a href="https://www.wallpapermachine.app/zh/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="上游在线演示"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest">发布说明与校验和</a></sub>
+  <sub>macOS 15 Sequoia 或更高版本&ensp;·&ensp;Apple 芯片（M1 或更新机型）&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5">发布说明与校验和</a></sub>
 </p>
 
 <p align="center">
+  <a href="#ai-creator">AI Creator</a>&ensp;·&ensp;
   <a href="#快速开始">快速开始</a>&ensp;·&ensp;
   <a href="#应用一览">应用一览</a>&ensp;·&ensp;
   <a href="#为什么值得信任">为什么值得信任</a>&ensp;·&ensp;
@@ -55,29 +57,56 @@
 
 ## 快速开始
 
-1. **下载**最新版本的[免费磁盘映像](https://www.wallpapermachine.app/download)。
-2. **安装**：打开它，把 WallpaperMachine 拖到“应用程序”文件夹。
-3. **打开它。** 1.8.2 之后的版本已通过 Apple 公证，可以直接打开；1.8.2 及更早的版本未经公证，macOS 会拦下首次启动：在“系统设置 → 隐私与安全性”中点按一次**仍要打开**即可。
+推荐下载 **macOS 15+ 兼容包**。两个包的应用源码均为 `93eb2aa5`（应用版本 1.9.4），AI 创作功能相同，区别是内置动态库的最低系统要求。
 
-在用 [Homebrew](https://brew.sh)？一条命令就能完成前两步：
+| 安装包 | 系统与芯片 | 用途 |
+| --- | --- | --- |
+| [macOS 15+ 兼容包（推荐）](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) | macOS 15.0+ · Apple Silicon / arm64 | 新安装与 S3 实机验收 |
+| [原始 S3 验收包](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) | macOS 27.2+ · Apple Silicon / arm64 | 保留的早期验收包；不适用于 macOS 15/26 |
 
-```bash
-brew install --cask wallpapermachine
-```
+1. 从对应 Release 页下载 `.dmg`，按页内命令核对 **SHA-256**。两个包均不支持 Intel Mac。
+2. 推荐使用独立的 macOS 测试账户，打开磁盘映像并复制应用。已有正式版时不要覆盖它，也不要在同一账户同时运行两个版本；它们仍使用相同应用标识。
+3. 两个包均为 **Ad-hoc 签名，未经过 Apple 公证**。首次启动若被拦截，核验来源后按 [Apple 的说明](https://support.apple.com/102445)，在“系统设置 → 隐私与安全性”中选择“仍要打开”。无需关闭系统安全功能。
+4. 验收期间关闭自动更新；内置更新器仍沿用上游配置。后续测试包从本仓库 [Releases](https://github.com/pzc163/WallpaperMachine/releases) 手动获取。
 
-接下来由首次使用引导带你完成设置，此后应用会自行更新。[安装指南](https://www.wallpapermachine.app/zh/guides/install/)配有图片，逐步介绍每一个步骤。
+上游网站与 `brew install --cask wallpapermachine` 提供的是上游正式版，不包含本 fork 的 AI 创作功能。已有的场景、视频、网页、静态图片播放与创意工坊浏览仍保留；创意工坊下载及场景共享资源的 Wallpaper Engine 购买要求不变。
 
-- **开箱即用：** 内置视频壁纸 Aurora Drift、pixiv 插画、你自己的视频和图片，以及无需登录即可浏览整个创意工坊。
-- **使用拥有 Wallpaper Engine 的 Steam 账户：** 从创意工坊下载，以及播放场景壁纸；场景壁纸需要用到你所拥有的 Wallpaper Engine 中的共享资源。
+<a id="ai-creator"></a>
 
-更想自己构建？只需两条命令，见[开源与自行构建](#开源与自行构建)。
+## AI 创作：当前已实现的功能
+
+S0～S2.3 的本地创作流程和 S3 所需的 JSON 模式、预设控件已实现。你可以用自然语言创建壁纸、继续对话调整，再手动微调原生属性。模型只选择可信模板并返回受限参数，原生代码负责校验和重建资源包。
+
+| 模板 | 可调参数 | 内置预设 |
+| --- | --- | --- |
+| 流动渐变 `gradient-v2` | 10 项：双色相、角度、对比度、速度、波纹尺度/强度、颗粒、呼吸、暗角 | `aurora` / `ember` |
+| 分层星空 `stars-v2` | 12 项：密度、大小分布、拖尾、层数、闪烁、流星、双色相、速度、时钟开关与位置/缩放 | `quiet` / `voyage` |
+| 氛围时钟 `clock-v2` | 10 项：双色相、背景运动、九宫格位置、缩放、12/24 小时制、秒数、日期、字体、辉光 | `dawn` / `terminal` |
+
+- **原生创作页：** 最近工程、新建/重命名/复制/删除草稿、对话记录与右侧检查器；删除草稿默认保留已入库壁纸。
+- **多模型连接：** 多个 Provider Profile，支持 OpenAI-compatible、Anthropic Messages、Gemini GenerateContent；配置端点、模型与请求/token 预算，测试连接可以取消。OpenAI-compatible 提供 `automatic`（默认）、`schema`、`required`、`disabled` 四种 JSON 输出模式。
+- **预设与实时预览：** 一键套用完整预设参数，滑块、颜色和开关联动已打开的预览；独立窗口支持暂停/继续，默认静音，可模拟 16:9、16:10、9:16。
+- **验证与有限修复：** 静态参数检查、真实离屏 WebKit 运行检查与 JPEG 封面生成；自动修复最多 2 次，单任务最多 3 次模型调用，支持随时停止，并显示耗时、token 用量（缺失时为“未知”）和脱敏报告。
+- **不可变版本：** 基于任意历史已验证修订继续修改或显式回退；保留旧版本，取消、失败或重启后恢复最后有效版本。
+- **保存与应用分开：** 修改参数后先点“验证修改”生成新修订，再“保存到壁纸库”；只有显式“应用到显示器”才更换桌面。已发布的可信模板壁纸不需要模型服务即可离线播放。
+
+**用本机 LM Studio 开始：** 先自行下载并加载模型，启动本地服务。在设置中新增 OpenAI-compatible Profile，端点填 `http://127.0.0.1:1234/v1`，模型填写服务实际提供的 ID，启用显式本地模式，并选择 `schema`。仅当回环服务未启用鉴权时才可留空 Key；远端连接默认要求 HTTPS 和凭据。应用不附带模型。
+
+打开“AI 创作” → 新建工程 → 输入提示词（如“冷色低密度星空，右下角显示时钟”）→ 查看生成结果并预览 → 继续对话或套用预设 → 验证修改 → 保存到壁纸库 → 按需显式应用。远端服务可能计费；Key 保存在按 Profile 隔离的 Keychain 中，目标地址或配置代次变化后需要重新绑定，不会自动携带旧凭据。
+
+**当前边界：** 仅支持上述三种参数化模板，S4 自由代码执行仍关闭，不提供任意 HTML/JS、文生图或文生视频生成。创建过 Creator 数据后，旧格式的备份导出/恢复和存储位置搬迁会被明确阻止，清空草稿不会自动解除；完整迁移支持尚未实现。壁纸离线播放也不等于整个应用完全不联网，创意工坊、更新检查等仍有独立网络行为。
+
+**验证进度：** 已归档的固定本地模型基准为 `qwen3.8-flash-next + schema`、10 条提示词 × 3 轮，30/30 首次通过；真实离屏 WebKit 长稳运行 1800 秒通过。这不代表其他模型或任意提示词的成功率。macOS 15 包已通过全部 8 个 Mach-O 最低系统版本与依赖闭合、签名和下载校验；macOS 15 真机、多屏/高刷新率、睡眠唤醒和整机能耗仍待 S3 验收。
+
+实现与限制：[创作工作区](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-workspace.md) · [验收矩阵与基准](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md) · [macOS 15 打包证据](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-macos15-results.json)。
 
 ## 应用一览
 
-一个顶部带标签页的窗口：你的壁纸库（全部壁纸、收藏和你的合集）、浏览 Steam 创意工坊和 pixiv，以及设置；正在播放的壁纸显示在窗口底部的栏中。网站提供了它在一个示例壁纸库上的演示，你可以[在浏览器中试用](https://www.wallpapermachine.app/zh/#app)。关闭窗口后，应用会继续在菜单栏中运行，你可以在那里暂停、恢复、静音，或切换到上一张、下一张或随机一张壁纸；有多台显示器时，每台显示器都可以单独操作。
+一个顶部带标签页的窗口：你的壁纸库（全部壁纸、收藏和你的合集）、AI 创作、Steam 创意工坊、pixiv，以及设置；正在播放的壁纸显示在窗口底部的栏中。上游网站提供了示例壁纸库的演示，你可以[在浏览器中试用](https://www.wallpapermachine.app/zh/#app)。关闭窗口后，应用会继续在菜单栏中运行，你可以在那里暂停、恢复、静音，或切换到上一张、下一张或随机一张壁纸；有多台显示器时，每台显示器都可以单独操作。
 
 | 功能 | 作用 |
 | --- | --- |
+| [**AI 创作**](#ai-creator) | 用提示词生成可信模板壁纸，多轮修改、预设微调、验证预览与版本回退；保存入库和应用桌面分别操作。 |
 | [**应用壁纸**](docs/features/control-panel.md#selection-versus-apply) | 场景、视频或[网页](docs/features/web-wallpapers.md)壁纸：点按“应用壁纸”，它就成为你的桌面。单击壁纸只是选中它。 |
 | [**预览**](docs/features/wallpaper-properties.md#live-preview) | 在单独的窗口中试看已安装的场景、视频或网页壁纸，使用当前选项和独立的播放控制，再决定是否更换桌面。滑块、颜色和开关会随你的调整即时显示。 |
 | [**创意工坊**](docs/features/workshop-downloads.md) | 实时的 Steam 创意工坊，浏览无需登录，还有[合集和每位作者的壁纸，登录 Steam 后还有你的订阅和收藏](docs/features/workshop-downloads.md#collections-authors-and-subscriptions)；登录后可在应用内订阅或取消订阅，也能查看作品最新的[评论](docs/features/workshop-downloads.md#comments)。下载在应用内进行，可同时下载多个，需要拥有 Wallpaper Engine 的 Steam 账户。已有壁纸的[更新](docs/features/workshop-downloads.md#updates)每天检查一次，一键安装。 |
@@ -100,8 +129,10 @@ brew install --cask wallpapermachine
 
 ## 为什么值得信任
 
+以下上游正式版的构建证明与更新机制不适用于本 fork 的 S3 包：本次包为本地打包、Ad-hoc 签名且未公证，没有 GitHub Actions 构建证明。请使用 [Release 页](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)提供的 SHA-256。AI 创作仅在你发起生成、修改或测试连接时向所选模型服务发送请求。
+
 - **全部开源。** 应用、渲染器和场景引擎都在这个仓库中，以 GPL-3.0-only 许可证发布。没有闭源核心，也没有付费功能：每个人用到的应用都一样。
-- **公开构建。** 每个版本都由 [GitHub Actions](docs/release.md#build-buildyml) 从打了标签的提交构建并测试，然后附带 SHA-256 校验和与构建来源证明（build provenance attestation）发布。验证下载的文件确实来自本仓库的工作流：
+- **上游公开构建。** 上游正式版本由 [GitHub Actions](docs/release.md#build-buildyml) 从打了标签的提交构建并测试，然后附带 SHA-256 校验和与构建来源证明（build provenance attestation）发布。以下命令仅用于验证上游正式下载来自上游工作流：
   ```sh
   gh attestation verify WallpaperMachine-*-arm64.dmg --repo WallpaperMachine/WallpaperMachine
   ```
@@ -164,7 +195,7 @@ WallpaperMachine 支持场景、视频和网页渲染。兼容性因壁纸而异
 <details>
 <summary><b>如何获取？</b></summary>
 
-签名版可以从 [GitHub 最新发布](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)免费下载，也可以用 [Homebrew](https://formulae.brew.sh/cask/wallpapermachine) 安装同一个签名磁盘映像（`brew install --cask wallpapermachine`），你还可以[用源代码自行构建](#开源与自行构建)。1.8.2 之后的版本使用 Developer ID 签名并经过 Apple 公证，可以直接打开；1.8.2 及更早的版本未经公证，macOS 会拦下首次启动，直到你在“系统设置 → 隐私与安全性”中点按“仍要打开”。[安装指南](https://www.wallpapermachine.app/zh/guides/install/)会带你从下载一直走到首次使用引导。此后应用会自行检查新版本；在能替换自身副本的情况下，它会提供**重启并更新**。用 Homebrew 安装的副本也会这样自行更新。
+本 fork 的 AI 创作版本请从 [macOS 15+ 预发布页](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)下载，并按[快速开始](#快速开始)核验与安装；它是未公证的 Ad-hoc 验收包。上游的[正式版本](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)、官网与 Homebrew 安装渠道另行维护，不能用来获取本 fork 的 AI 创作功能。
 
 </details>
 
@@ -197,6 +228,13 @@ WallpaperMachine 支持场景、视频和网页渲染。兼容性因壁纸而异
 </details>
 
 ## 开源与自行构建
+
+要构建 AI 创作版本，先获取本 fork 的功能分支；`main` 尚不包含该功能。旧版运行系统是否可用还取决于所有内置依赖的最低系统版本，参见 [macOS 15 兼容打包记录](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/plans/2026-11-11-creator-macos15.md)。
+
+```sh
+git clone --branch feat/ai-creator https://github.com/pzc163/WallpaperMachine.git
+cd WallpaperMachine
+```
 
 完整源代码就在这里。构建需要搭载 Apple 芯片的 Mac、Xcode 26（macOS 15.6 或更高版本）、用 `xcode-select` 选定的完整 Xcode，以及[先决条件](docs/build.md#prerequisites)中列出的 Homebrew 软件包；渲染器和场景引擎位于 [`Renderer/`](Renderer)，第三方代码内置在 [`ThirdParty/`](ThirdParty) 中，而不是以子模块引入。
 

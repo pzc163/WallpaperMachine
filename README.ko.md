@@ -3,11 +3,13 @@
      The Supporter list between the markers is written by scripts/update_sponsors.py, as in README.md. -->
 <p align="center"><sub><a href="README.md">English</a>&ensp;·&ensp;<a href="README.zh-CN.md">简体中文</a>&ensp;·&ensp;<b>한국어</b>&ensp;·&ensp;<a href="README.pt-BR.md">Português</a></sub></p>
 
+**AI 제작 미리보기 · S3 실제 기기 검증 단계.** 이 포크는 [원본 WallpaperMachine](https://github.com/MMFoundation/WallpaperMachine)을 기반으로 합니다. 새 코드는 [`feat/ai-creator`](https://github.com/pzc163/WallpaperMachine/tree/feat/ai-creator)에 있으며, `main`에는 README만 동기화되고 제작 기능 코드는 아직 병합되지 않았습니다. 아래 스크린샷과 웹 데모는 원본 프로젝트의 화면입니다. AI 제작 기능은 이 포크의 사전 릴리스에서 사용할 수 있습니다.
+
 <a href="https://www.wallpapermachine.app">
   <img src="https://github.com/user-attachments/assets/df92d34d-b718-4d58-b8e9-b002c4915516" width="100%" alt="WallpaperMachine이 재생하는 여섯 가지 라이브 배경화면이 차례로 바뀌는 Mac 데스크탑: 물결 위의 치사키, 달 위의 루시, 눈 속의 레드불 F1 머신, 해 질 녘의 반디, 비 내리는 버스 정류장의 엘렌, Into The Abyss. 위에는 macOS 메뉴 막대, 아래에는 Dock이 있습니다.">
 </a>
 
-<h3 align="center">Wallpaper Engine 배경화면, 이제 macOS에서.</h3>
+<h3 align="center">macOS에서 Wallpaper Engine 재생과 AI 배경화면 제작을.</h3>
 
 <p align="center">
   Wallpaper Engine의 장면, 동영상, 웹 배경화면을 Steam 창작마당에서 받아<br>
@@ -15,24 +17,24 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest"><img src="https://img.shields.io/github/v/release/WallpaperMachine/WallpaperMachine?label=version&color=0a84ff" alt="최신 버전"></a>
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/actions/workflows/version.yml"><img src="https://img.shields.io/github/actions/workflow/status/WallpaperMachine/WallpaperMachine/version.yml?branch=main&label=build" alt="빌드 및 릴리스 상태"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/AI_Creator-S3_preview-0a84ff" alt="AI Creator S3 preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="라이선스: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="Apple 실리콘 탑재 macOS 15 이상">
-  <a href="https://github.com/WallpaperMachine/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/WallpaperMachine/WallpaperMachine" alt="GitHub 스타"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub 스타"></a>
 </p>
 
 <p align="center">
-  <a href="https://www.wallpapermachine.app/download"><img src="https://img.shields.io/badge/Mac%EC%9A%A9-%EB%AC%B4%EB%A3%8C_%EB%8B%A4%EC%9A%B4%EB%A1%9C%EB%93%9C-0a84ff?style=for-the-badge&logo=apple&logoColor=white" height="36" alt="Mac용 무료 다운로드"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="AI 제작 미리보기 다운로드"></a>
   &ensp;
-  <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/%EB%B8%8C%EB%9D%BC%EC%9A%B0%EC%A0%80%EC%97%90%EC%84%9C-%EC%B2%B4%ED%97%98%ED%95%98%EA%B8%B0-34c759?style=for-the-badge&logo=safari&logoColor=white" height="36" alt="브라우저에서 라이브 데모 체험하기"></a>
+  <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="원본 프로젝트 웹 데모"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/WallpaperMachine/WallpaperMachine/releases/latest">릴리스 노트 및 체크섬</a></sub>
+  <sub>macOS 15 Sequoia 이상&ensp;·&ensp;Apple 실리콘(M1 이상)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5">릴리스 노트 및 체크섬</a></sub>
 </p>
 
 <p align="center">
+  <a href="#ai-creator">AI Creator</a>&ensp;·&ensp;
   <a href="#빠른-시작">빠른 시작</a>&ensp;·&ensp;
   <a href="#앱-소개">앱 소개</a>&ensp;·&ensp;
   <a href="#보안과-투명성">보안과 투명성</a>&ensp;·&ensp;
@@ -57,32 +59,52 @@
 
 ## 빠른 시작
 
-1. **다운로드**: 최신 버전의 [무료 디스크 이미지](https://www.wallpapermachine.app/download)를 받습니다.
-2. **설치**: 디스크 이미지를 열고 WallpaperMachine을 응용 프로그램 폴더로 드래그합니다.
-3. **실행**: 1.8.2 이후 버전은 Apple의 공증을 받아 바로 열립니다. 1.8.2 이하 버전은
-   공증을 받지 않은 빌드라서 macOS가 첫 실행을 막습니다. 시스템 설정 → 개인정보 보호 및 보안에서
-   **그래도 열기**를 클릭하세요(처음 한 번만 필요합니다).
+**macOS 15+ 호환 패키지**를 권장합니다. 두 패키지는 동일한 앱 소스 `93eb2aa5`(앱 버전 1.9.4)와 AI 제작 기능을 포함하며, 내장 라이브러리의 최소 운영체제 요구 사항만 다릅니다.
 
-[Homebrew](https://brew.sh)를 쓴다면 명령 하나로 다운로드와 설치를 한 번에 끝낼 수 있습니다.
+| 패키지 | 시스템 및 칩 | 용도 |
+| --- | --- | --- |
+| [macOS 15+ 호환 패키지 — 권장](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) | macOS 15.0+ · Apple Silicon / arm64 | 새 설치 및 S3 기기 검증 |
+| [기존 S3 검증 패키지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) | macOS 27.2+ · Apple Silicon / arm64 | 보관된 초기 패키지; macOS 15/26에서 실행 불가 |
 
-```bash
-brew install --cask wallpapermachine
-```
+1. 해당 Release 페이지에서 `.dmg`를 받고 안내된 명령으로 **SHA-256**을 확인하세요. 두 패키지 모두 Intel Mac을 지원하지 않습니다.
+2. 별도의 macOS 테스트 계정을 권장합니다. 이미지를 열고 앱을 복사하세요. 기존 정식 앱을 덮어쓰거나 같은 계정에서 두 버전을 동시에 실행하지 마세요. 앱 식별자가 동일합니다.
+3. 두 패키지 모두 **Ad-hoc 서명이며 Apple 공증을 받지 않았습니다**. 첫 실행이 차단되면 출처를 확인한 후 [Apple 안내](https://support.apple.com/102445)에 따라 **시스템 설정 → 개인정보 보호 및 보안 → 그래도 열기**를 사용하세요. 시스템 보안 기능을 끌 필요는 없습니다.
+4. 검증 중에는 자동 업데이트를 끄세요. 내장 업데이트 설정은 아직 원본 프로젝트를 가리킵니다. 후속 테스트 패키지는 [이 포크의 Releases](https://github.com/pzc163/WallpaperMachine/releases)에서 직접 받으세요.
 
-이후 과정은 시작 가이드에서 안내하고, 그다음부터는 앱이 스스로 업데이트합니다.
-[설치 가이드](https://www.wallpapermachine.app/guides/install/)(영문)에서 모든 단계를
-그림과 함께 볼 수 있습니다.
+원본 웹사이트와 `brew install --cask wallpapermachine`은 이 포크의 AI 제작 기능이 없는 원본 앱을 제공합니다. 기존 장면·동영상·웹·정지 이미지 재생과 창작마당 탐색은 유지됩니다. 창작마당 다운로드 및 장면 공유 리소스에 필요한 Wallpaper Engine 구매 조건도 같습니다.
 
-- **계정 없이 쓸 수 있는 것:** 기본 제공되는 동영상 배경화면 Aurora Drift, pixiv 일러스트,
-  내 동영상과 사진, 그리고 창작마당 전체 둘러보기.
-- **Wallpaper Engine을 보유한 Steam 계정이 있으면 쓸 수 있는 것:** 창작마당 다운로드와 장면
-  배경화면. 장면 배경화면은 내 Wallpaper Engine의 공유 리소스를 사용합니다.
+<a id="ai-creator"></a>
 
-직접 빌드하는 방법은 [오픈 소스와 직접 빌드](#오픈-소스와-직접-빌드)를 참고하세요.
+## AI 제작: 현재 제공하는 기능
+
+S0–S2.3 로컬 제작 흐름과 S3용 JSON 모드 및 프리셋 컨트롤이 구현되었습니다. 원하는 배경화면을 설명하고 대화로 수정한 뒤 네이티브 속성을 조정할 수 있습니다. 모델은 신뢰할 수 있는 템플릿과 제한된 매개변수만 반환하며, 네이티브 코드가 이를 검증하고 리소스를 재구성합니다.
+
+| 템플릿 | 매개변수 | 기본 프리셋 |
+| --- | --- | --- |
+| 흐르는 그라데이션 `gradient-v2` | 10개: 두 색조, 각도, 대비, 속도, 파동 크기/강도, 입자, 맥동, 비네트 | `aurora` / `ember` |
+| 다층 별빛 `stars-v2` | 12개: 밀도, 크기 분포, 잔상, 레이어, 반짝임, 유성, 두 색조, 속도, 시계 표시/위치/크기 | `quiet` / `voyage` |
+| 분위기 시계 `clock-v2` | 10개: 두 색조, 배경 움직임, 9개 위치, 크기, 12/24시간 형식, 초, 날짜, 글꼴, 빛 효과 | `dawn` / `terminal` |
+
+- **네이티브 작업 공간:** 최근 프로젝트, 생성/이름 변경/복제/초안 삭제, 대화 기록과 인스펙터. 초안 삭제 시 보관함에 저장된 배경화면은 기본적으로 유지됩니다.
+- **여러 모델 연결:** OpenAI-compatible, Anthropic Messages, Gemini GenerateContent용 Provider Profile, 주소/모델 및 요청/token 예산, 취소 가능한 연결 테스트. OpenAI-compatible은 `automatic`(기본값), `schema`, `required`, `disabled` JSON 모드를 제공합니다.
+- **프리셋과 실시간 미리보기:** 전체 프리셋을 적용하거나 슬라이더·색상·스위치를 조정하면 열린 미리보기에 반영됩니다. 독립 창은 일시 정지/재개, 기본 음소거, 16:9·16:10·9:16 비율을 지원합니다.
+- **검증과 제한된 자동 수정:** 정적 매개변수 검사, 실제 오프스크린 WebKit 실행 검사 및 JPEG 표지 생성. 자동 수정은 최대 2회, 작업당 모델 호출은 최대 3회이며 언제든 중지할 수 있습니다. 소요 시간, token 사용량(미제공 시 알 수 없음), 민감 정보가 제거된 보고서를 표시합니다.
+- **변경 불가능한 기록:** 검증된 과거 리비전에서 수정을 이어 가거나 명시적으로 되돌릴 수 있습니다. 이전 버전을 보존하고 취소·실패·재시작 시 마지막 유효 리비전을 복구합니다.
+- **저장과 적용 분리:** 매개변수 수정 후 변경 사항을 검증해 새 리비전을 만들고 보관함에 저장하세요. 디스플레이에 적용을 명시적으로 눌러야 데스크탑이 바뀝니다. 게시된 신뢰 템플릿 배경화면은 모델 서비스 없이 오프라인으로 재생됩니다.
+
+**로컬 LM Studio로 시작하기:** 모델을 별도로 내려받아 로드하고 로컬 서버를 시작하세요. 설정에서 OpenAI-compatible Profile을 추가하고 주소를 `http://127.0.0.1:1234/v1`, 모델을 서버의 실제 ID로 입력한 뒤 명시적 로컬 모드와 `schema`를 선택하세요. 인증 없는 루프백 서비스에만 빈 Key를 허용하며 원격 연결에는 기본적으로 HTTPS와 자격 증명이 필요합니다. 앱에 모델은 포함되어 있지 않습니다.
+
+AI 제작 열기 → 프로젝트 생성 → 프롬프트 입력(예: “차가운 색의 성긴 별빛, 오른쪽 아래에 시계”) → 결과 확인 및 미리보기 → 대화로 수정하거나 프리셋 선택 → 변경 검증 → 보관함 저장 → 필요할 때 명시적으로 적용하세요. 원격 서비스는 비용이 발생할 수 있습니다. Key는 Profile별 Keychain에 바인딩되며 대상 주소나 설정 세대가 바뀌면 이전 자격 증명을 자동 재사용하지 않고 다시 바인딩해야 합니다.
+
+**현재 제한:** 위 세 가지 매개변수 템플릿만 지원합니다. S4 자유 코드 실행은 꺼져 있으며 임의 HTML/JS, 텍스트 기반 이미지·동영상 생성은 제공하지 않습니다. Creator 데이터가 생성되면 기존 형식의 백업 내보내기/복원 및 저장 위치 이동을 차단합니다. 초안을 삭제해도 자동 해제되지 않으며 완전한 마이그레이션은 아직 지원하지 않습니다. 배경화면의 오프라인 재생이 앱 전체의 네트워크 차단을 뜻하지는 않습니다. 창작마당과 업데이트 확인 등은 별도로 동작합니다.
+
+**검증 현황:** `qwen3.8-flash-next + schema`의 고정 로컬 벤치마크에서 프롬프트 10개 × 3회, 30/30이 첫 시도에 통과했습니다. 실제 오프스크린 WebKit 1,800초 연속 실행도 통과했습니다. 다른 모델이나 임의 프롬프트의 성공률을 보장하지 않습니다. macOS 15 패키지는 8개 Mach-O의 최소 버전·내장 의존성, 서명, 다운로드 검증을 통과했습니다. macOS 15 실기기, 다중/고주사율 디스플레이, 잠자기/깨우기 및 전체 에너지 검증은 S3에 남아 있습니다.
+
+상세 문서: [제작 작업 공간](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-workspace.md) · [검증 항목과 벤치마크](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/features/creator-acceptance.md) · [macOS 15 패키징 근거](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-macos15-results.json).
 
 ## 앱 소개
 
-앱은 창 하나로 되어 있습니다. 위쪽에 보관함(모든 배경화면, 즐겨찾기, 내 컬렉션), Steam 창작마당, pixiv, 설정 탭이 있고, 아래쪽 막대에 지금 재생 중인 항목이 표시됩니다.
+앱은 창 하나로 되어 있습니다. 위쪽에 보관함(모든 배경화면, 즐겨찾기, 내 컬렉션), AI 제작, Steam 창작마당, pixiv, 설정 탭이 있고, 아래쪽 막대에 지금 재생 중인 항목이 표시됩니다.
 웹사이트의 [브라우저 데모](https://www.wallpapermachine.app/#app)에서 샘플 보관함으로 직접 써 볼 수 있습니다.
 창을 닫아도 앱은 메뉴 막대에서 계속 실행되며, 여기서 일시 정지, 재개, 음소거를 하거나
 이전·다음·무작위 배경화면으로 전환합니다. 디스플레이가 여러 대라면 각각 따로 조작합니다.
@@ -90,6 +112,7 @@ brew install --cask wallpapermachine
 
 | 기능 | 설명 |
 | --- | --- |
+| [**AI 제작**](#ai-creator) | 프롬프트로 신뢰 템플릿 배경화면을 만들고 대화, 프리셋, 검증된 미리보기와 리비전 복귀를 사용합니다. 보관함 저장과 데스크탑 적용은 별도 작업입니다. |
 | [**적용**](docs/features/control-panel.md#selection-versus-apply) | 장면, 동영상, [웹](docs/features/web-wallpapers.md) 배경화면: **배경화면 적용**을 눌러야 데스크탑이 바뀝니다. 목록에서 선택하는 것만으로는 적용되지 않습니다. |
 | [**미리보기**](docs/features/wallpaper-properties.md#live-preview) | 데스크탑을 바꾸기 전에 설치된 장면, 동영상, 웹 배경화면을 별도 창에서 미리 확인합니다. 현재 옵션이 그대로 적용되고, 재생 컨트롤은 따로 있습니다. 슬라이더, 색상, 스위치를 바꾸면 바로 반영됩니다. |
 | [**창작마당**](docs/features/workshop-downloads.md) | 실시간 Steam 창작마당을 로그인 없이 둘러볼 수 있고, [Steam에 로그인하면 컬렉션과 작성자별 배경화면, 내 구독과 즐겨찾기](docs/features/workshop-downloads.md#collections-authors-and-subscriptions)도 표시됩니다. 로그인 상태에서는 앱 안에서 구독하거나 구독 취소하고, 항목의 최신 [댓글](docs/features/workshop-downloads.md#comments)을 읽을 수 있습니다. 다운로드는 Wallpaper Engine을 보유한 Steam 계정으로 앱 안에서 여러 개를 동시에 진행합니다. 구독 중인 배경화면의 [업데이트](docs/features/workshop-downloads.md#updates)는 하루에 한 번 확인하며, 버튼을 눌러 설치합니다. |
@@ -112,12 +135,14 @@ brew install --cask wallpapermachine
 
 ## 보안과 투명성
 
+아래 원본 프로젝트의 빌드 증명과 업데이트 흐름은 이 포크의 S3 패키지에 적용되지 않습니다. 로컬에서 패키징한 Ad-hoc 빌드이며 Apple 공증과 GitHub Actions 빌드 증명이 없습니다. [Release 페이지](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)의 SHA-256을 확인하세요. AI 제작은 생성·수정·연결 테스트를 요청할 때 선택한 모델 서비스에 요청을 보냅니다.
+
 - **오픈 소스.** 앱, 렌더러, 장면 엔진 모두 이 저장소에 GPL-3.0-only로
   공개되어 있습니다. 비공개 코어도, 유료 기능도 없습니다. 앱은 누구에게나 똑같습니다.
-- **빌드 검증.** 모든 릴리스는 태그된 커밋에서
+- **원본 프로젝트 빌드 검증.** 원본 정식 릴리스는 태그된 커밋에서
   [GitHub Actions](docs/release.md#build-buildyml)로 빌드하고 테스트한 뒤,
   SHA-256 체크섬, 빌드 출처 증명(build provenance attestation)과 함께 게시합니다.
-  다운로드한 파일이 이 저장소의 워크플로에서 나온 것인지 확인할 수 있습니다.
+  원본 다운로드가 원본 프로젝트의 워크플로에서 나온 것인지 확인할 수 있습니다.
   ```sh
   gh attestation verify WallpaperMachine-*-arm64.dmg --repo WallpaperMachine/WallpaperMachine
   ```
@@ -217,17 +242,7 @@ Mac 사용자 이름, Steam 계정 이름은 자동으로 가려집니다.
 <details>
 <summary><b>어떻게 설치하나요?</b></summary>
 
-[최신 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest)에서
-서명된 빌드를 무료로 받거나, [Homebrew](https://formulae.brew.sh/cask/wallpapermachine)로
-같은 서명된 디스크 이미지를 설치하거나(`brew install --cask wallpapermachine`),
-[소스에서 직접 빌드](#오픈-소스와-직접-빌드)하세요.
-1.8.2 이후 버전은 Developer ID로 서명되고 Apple의 공증을 받아 바로 열립니다.
-1.8.2 이하 버전은 공증을 받지 않은 빌드라서 macOS는 시스템 설정 → 개인정보 보호 및 보안에서
-**그래도 열기**를 클릭할 때까지 첫 실행을 막습니다.
-[설치 가이드](https://www.wallpapermachine.app/guides/install/)(영문)가 다운로드부터
-시작 가이드까지 안내합니다. 그 후로는 앱이 새 버전을 직접 확인합니다. 앱이 응용 프로그램
-폴더에 있고 현재 계정에 수정 권한이 있으면, 메뉴에 **재시작하여 업데이트**가 나타납니다.
-Homebrew로 설치한 앱도 같은 방식으로 업데이트됩니다.
+이 포크의 AI 제작 기능은 [macOS 15+ 사전 릴리스](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5)에서 받고 [빠른 시작](#빠른-시작)을 따라 설치하세요. Apple 공증이 없는 Ad-hoc 검증 패키지입니다. 원본 프로젝트의 [정식 릴리스](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), 웹사이트와 Homebrew는 별도로 유지되며 이 포크의 AI 제작 기능을 포함하지 않습니다.
 
 </details>
 
@@ -267,6 +282,13 @@ MMFoundation의 [Discord](https://mmfoundation.dev/discord)에,
 </details>
 
 ## 오픈 소스와 직접 빌드
+
+AI 제작 버전을 빌드하려면 먼저 이 포크의 기능 브랜치를 받으세요. `main`에는 아직 기능 코드가 없습니다. 이전 운영체제 지원 여부는 모든 내장 라이브러리의 최소 버전에도 달려 있습니다. [macOS 15 패키징 기록](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/plans/2026-11-11-creator-macos15.md)을 참고하세요.
+
+```sh
+git clone --branch feat/ai-creator https://github.com/pzc163/WallpaperMachine.git
+cd WallpaperMachine
+```
 
 소스 코드 전체가 이 저장소에 있습니다. 빌드하려면 Apple 실리콘 Mac, Xcode 26(macOS 15.6 이상),
 `xcode-select`로 선택한 전체 Xcode, [사전 준비](docs/build.md#prerequisites)에 나열된
