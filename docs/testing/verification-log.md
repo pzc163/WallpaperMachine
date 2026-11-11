@@ -25,6 +25,16 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator macOS 15 ad-hoc packaging
+
+- Added explicit ad-hoc Rehearsal mode; production publishing remains gated and notarized by default.
+- Package audit now covers all embedded Mach-O files, arm64 architecture, minimum deployment versions and linker-version parsing.
+- Final python3 scripts/test.py: 720 script tests and 5000 native tests passed; 0 failed, 72 opt-in skipped, 2 runtime warnings.
+- Initial existing WebKit Cannot open file failure passed in isolation and two subsequent complete native gates; runtime source unchanged.
+- Local package uses verified identical-version official macOS 15 bottles; all 567 original exports retained and all 8 Mach-O minimums are 15.0.
+- DMG mount, deep strict signatures, dependency closure and source-app preservation verified; details in docs/testing/creator-macos15-results.json.
+- No Apple notarization, hosted macOS 15 CI run, physical display test, live model request, desktop change or S4 enablement.
+
 ## 2026-11-11 — S3 creator JSON mode and native preset controls
 
 - Scope: OpenAI-compatible JSON mode selection, native template presets, six-language strings, typed controller validation and offscreen tests; S4 remains closed.
@@ -137,16 +147,3 @@ S1.2 adds profile-bound native model connections after local rollback commit `37
 - `python3 scripts/tests/test_doc_links.py` and `git diff --check` — exit 0. Plans and implementation docs updated; frozen generators and golden digest assertions unchanged.
 - Model traffic is intercepted for every URL by Mock URLProtocol; credentials use injected MemoryKeychain. No paid/real provider calls, personal Keychain access, desktop/UI operations, installation or Release build.
 - Real endpoint/TLS/proxy/Keychain-permission interoperability is unverified. Output reservations are not billing limits; S1.3 strict schema and S1.4 UI/cover/publication remain pending. S1.2 changes remain uncommitted; no push.
-
-## 2026-11-10 — Creator settings and provider profiles
-
-S1.1 settings/profile metadata supplement; details and limits are in [creator revisions](../features/creator-revisions.md). Provider transport, Keychain and UI remain deferred.
-
-- Saved the previously verified tree as local baseline `f7d6168f` on `feat/ai-creator`; no push. The supplement remains uncommitted.
-- Added versioned nonsecret `CreatorSettings`/`ProviderProfile` records, actor/file-lock atomic updates, revision conflict checks and configuration fencing.
-- `python3 scripts/test.py --only CreatorSettingsStoreTests --only ProviderProfileTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests`: final 231 passed, 0 failed, 3 skipped; initial run 230 passed, 3 skipped.
-- First `python3 scripts/test.py`: Python 687 passed; native 4,809 passed, 1 failed, 69 skipped. Preset pixel reproducibility raced native state replay; a controlled 200 ms delay reproduced it before the test-only acknowledgement fix. No kernel or golden digest changes.
-- Full-gate retry after the fix: Python 687 passed (32 modules); native 4,811 passed, 0 failed, 69 skipped (4,880 total). All 16 metadata additions and the delayed-replay regression passed. No further full-gate run.
-- Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference rendering job. Runtime main-thread warnings: AppUpdate unsigned-copy check, VideoFormatSupport changed-file cache check, WebMOpening VP9 opening check; all passed, production code untouched.
-- `python3 scripts/tests/test_doc_links.py`: 11 passed. Documentation/mirror/frozen-source checks: 36 passed. `git diff --check`: passed. 02/03/05 and their output copies are synchronized.
-- No external model/Keychain access, desktop/UI run, Release build or install. S1.1 recovery is a service API; Creator settings/history backup/move integration, v2 poster generation/publication and S4 isolation remain future work.

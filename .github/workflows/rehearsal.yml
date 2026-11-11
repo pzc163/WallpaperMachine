@@ -27,6 +27,11 @@ on:
         required: true
         default: patch
         type: string
+      ad_hoc:
+        description: "Build a macOS 15 acceptance image without certificates or notarization; publish nothing."
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -62,6 +67,7 @@ jobs:
       tag: ${{ needs.plan.outputs.tag }}
       ref: ${{ github.sha }}
       rehearsal: true
+      ad_hoc: ${{ inputs.ad_hoc }}
     # The Developer ID certificate and the notary key, as a release uses them.
     secrets: inherit
     # Build declares what its publish job needs even when, as here, that job is skipped;

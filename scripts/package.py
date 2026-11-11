@@ -222,12 +222,54 @@ def resolve_libraries(roots, seeds, prefix):
 
 
 def minimum_system_version(file):
-    """The `minos` a Mach-O file records in its LC_BUILD_VERSION load command."""
+    """The highest minimum of all macOS slices; refuse missing or foreign platforms."""
+    versions = []
+    platform = None
+    legacy = False
     for line in output(["vtool", "-show-build", file]).splitlines():
         fields = line.split()
+        if fields[:1] == ["cmd"]:
+            legacy = fields[1:] == ["LC_VERSION_MIN_MACOSX"]
+            platform = "MACOS" if legacy else None
+        if fields[:1] == ["platform"]:
+            platform = fields[1] if len(fields) == 2 else None
         if fields[:1] == ["minos"]:
-            return fields[1]
+            if platform != "MACOS" or len(fields) != 2:
+                raise PackagingError(f"Non-macOS or invalid deployment record in {file}")
+            versions.append(fields[1])
+        if fields[:1] == ["version"] and legacy and len(fields) == 2:
+            versions.append(fields[1])
+    if versions:
+        return max(versions, key=version_key)
     raise PackagingError(f"No minimum macOS version recorded in {file}")
+
+
+def bundle_mach_o_files(app):
+    """Find nested executable code without treating Metal blobs or symlink aliases as code."""
+    magic = {bytes.fromhex(value) for value in (
+        "feedface", "cefaedfe", "feedfacf", "cffaedfe", "cafebabe", "bebafeca", "cafebabf", "bfbafeca")}
+    files = []
+    for path in sorted(Path(app).rglob("*")):
+        if path.is_symlink() or not path.is_file():
+            continue
+        with path.open("rb") as source:
+            if source.read(4) in magic:
+                files.append(path)
+    return files
+
+
+def deployment_minimums(app, libraries):
+    """Audit host, extensions, frameworks and dependency closure, before changing any bytes."""
+    files = {str(path.relative_to(app)): path for path in bundle_mach_o_files(app)}
+    files.update({f"dependency/{name}": path for name, path in libraries.items()})
+    if not files:
+        raise PackagingError("No Mach-O code found in the bundle")
+    minimums = {}
+    for name, path in sorted(files.items()):
+        if "arm64" not in output(["lipo", "-archs", path]).split():
+            raise PackagingError(f"Missing arm64 code: {name}")
+        minimums[name] = minimum_system_version(path)
+    return minimums
 
 
 def strong_dependencies(file):
@@ -254,7 +296,10 @@ def unavailable_system_libraries(compiled, libraries, prefix):
 
 
 def version_key(version):
-    return tuple(int(part) for part in version.split("."))
+    if not re.fullmatch(r"\d+(?:\.\d+){0,2}", version):
+        raise PackagingError(f"Invalid macOS deployment version: {version!r}")
+    parts = tuple(int(part) for part in version.split("."))
+    return parts + (0,) * (3 - len(parts))
 
 
 def raised_minimum(target, minimums):
@@ -392,17 +437,20 @@ def package(args):
     third_party = third_party_notices(app, args.require_notices)
     info = app / "Contents/Info.plist"
     target = output(["/usr/libexec/PlistBuddy", "-c", "Print :LSMinimumSystemVersion", info]).strip()
+    if args.require_deployment_target and version_key(target) != version_key(bundle_contract.deployment_target()):
+        raise PackagingError("The app's minimum macOS differs from project.yml's deployment target")
     unavailable = unavailable_system_libraries([binary, *extension_binaries], libraries.values(), prefix)
     if unavailable:
         raise PackagingError(f"The bundle loads system libraries macOS {target} may not have, so it would stop at launch "
                              "there; rebuild without them, or list one in SYSTEM_LIBRARIES once it is known to ship with "
                              "that release:\n  " + "\n  ".join(unavailable))
-    floor, newer = raised_minimum(target, {name: minimum_system_version(source) for name, source in libraries.items()})
+    minimums = deployment_minimums(app, libraries)
+    floor, newer = raised_minimum(target, minimums)
     if newer:
         detail = ", ".join(f"{name} ({version})" for name, version in sorted(newer.items()))
         if args.require_deployment_target:
-            raise PackagingError(f"Bundled libraries need a newer macOS than the deployment target {target}; build them on macOS {target}: {detail}")
-        print(f"{MARK.missing} Bundled libraries need macOS {floor}, above the deployment target {target}; the app will require macOS {floor}: {detail}")
+            raise PackagingError(f"Bundled code needs a newer macOS than the deployment target {target}; rebuild the incompatible code: {detail}")
+        print(f"{MARK.missing} Bundled code needs macOS {floor}, above the deployment target {target}; the app will require macOS {floor}: {detail}")
     # The image's art and volume icon are inputs too: a missing or mismatched one must
     # stop packaging while the bundle is untouched, not after it is relocated and signed.
     dmg.check_inputs(icon=resources / "AppIcon.icns")
@@ -464,6 +512,8 @@ def package(args):
     report(dmg.verify(image, version, contract=image_contract(credentials is not None), metadata=metadata), reported)
     digest = sha256(image)
     metadata.update(image=image.name, size=image.stat().st_size, sha256=digest)
+    metadata["deployment_minimums"] = minimums
+    metadata["notarized"] = credentials is not None
     image.with_name(image.name + ".metadata.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
     checksum = image.with_name(image.name + ".sha256")
     checksum.write_text(f"{digest}  {image.name}\n")

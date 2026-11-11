@@ -40,6 +40,11 @@ on:
         required: false
         default: ""
         type: string
+      ad_hoc:
+        description: "Ad-hoc signing without credentials; valid only when rehearsal is true."
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -74,7 +79,7 @@ jobs:
           retention-days: 7
 
   build:
-    name: Build, sign and notarize (macOS 15)
+    name: Build and verify (macOS 15)
     # Not `needs: app-icon`: the icon is only needed once the app is compiled.
     # The oldest runner that carries Xcode 26. Homebrew pours bottles built for the
     # runner's own release, and the app bundles those dylibs, so the runner's macOS
@@ -91,6 +96,19 @@ jobs:
           ref: ${{ inputs.rehearsal && inputs.ref || inputs.tag }}
           # Release notes read the commits between this tag and the previous one.
           fetch-depth: 0
+
+      - name: Validate the acceptance build boundary
+        env:
+          AD_HOC: ${{ inputs.ad_hoc }}
+          REHEARSAL: ${{ inputs.rehearsal }}
+        run: |
+          set -euo pipefail
+          test "$(uname -m)" = arm64
+          test "$(sw_vers -productVersion | cut -d. -f1)" = 15
+          if [ "$AD_HOC" = true ] && [ "$REHEARSAL" != true ]; then
+            echo "::error::Ad-hoc builds are acceptance artifacts, never production releases."
+            exit 1
+          fi
 
       - name: Build as the rehearsed version
         if: inputs.rehearsal
@@ -121,6 +139,7 @@ jobs:
           cat "${RUNNER_TEMP}/release/notes.md" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Import the Developer ID certificate and the notary credentials
+        if: ${{ !inputs.ad_hoc }}
         # Before the long build, so a missing secret or a key Apple refuses fails in a
         # minute rather than after it, as 1.9.0's did. Xcode signs ad hoc
         # (CODE_SIGN_IDENTITY "-"), so the identity in the keychain changes nothing there.
@@ -242,10 +261,15 @@ jobs:
         # drag-to-install disk image, signs, notarizes and staples the image, mounts it to
         # check the app's identifier, version, signature, ticket and the Applications link,
         # and only then writes the .sha256 sidecar (docs/build.md).
+        env:
+          AD_HOC: ${{ inputs.ad_hoc }}
+          REHEARSAL: ${{ inputs.rehearsal }}
         run: |
-          python3 scripts/package.py --configuration Release --require-deployment-target \
-            --sign-identity "Developer ID Application" \
-            --notarize "WallpaperMachine Notary" --notary-keychain "${RUNNER_TEMP}/signing.keychain-db"
+          set -euo pipefail
+          args=()
+          if [ "$REHEARSAL" = true ]; then args+=(--rehearsal); fi
+          if [ "$AD_HOC" = true ]; then args+=(--ad-hoc); fi
+          python3 scripts/ci_package.py "${args[@]}" --keychain "${RUNNER_TEMP}/signing.keychain-db"
 
       - name: Match the disk image to the tag
         env:
@@ -298,7 +322,7 @@ jobs:
   publish:
     name: Publish the release
     needs: build
-    if: ${{ !inputs.rehearsal }}
+    if: ${{ !inputs.rehearsal && !inputs.ad_hoc }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Builds remain per-tag and parallel; publication is repository-wide so the

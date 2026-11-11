@@ -887,6 +887,29 @@ Rehearse before landing a change to the release path (the workflows, `prepare-bu
 `scripts/build.py`, `scripts/package.py` and `scripts/lib/`, `project.yml`'s bundle or
 signing settings, the Homebrew libraries), and before a release that must not slip.
 
+An explicit ad-hoc acceptance mode is available without Developer ID/notary secrets:
+
+```sh
+gh workflow run rehearsal.yml --ref feat/ai-creator -f spec=patch -f ad_hoc=true
+```
+
+This still builds the renderer and app on macOS 15 arm64 and compiles the icon on
+macOS 26. `scripts/ci_package.py` selects ad-hoc signing, requires the deployment
+target and complete notices, and never invokes `notarytool` or `stapler`. Missing
+secrets do not silently downgrade ordinary releases. Ad-hoc mode is rejected
+outside a rehearsal; the production publish job also excludes it. A rehearsal's
+version bump exists only in its disposable CI checkout, not on the source branch.
+
+Download `rehearsal-<tag>` from the completed run. Verify the DMG checksum and its
+`.metadata.json`: `minimum_system_version` must be `15.0`, architectures include
+`arm64`, every `deployment_minimums` entry is at most 15.0, and `notarized` is false.
+The deployment audit includes nested frameworks/extensions, not only Homebrew
+libraries. Source SHA and the CI run must be recorded with any acceptance release.
+Publish separately with a non-version tag (for example `s3-macos15-<commit>`),
+`--prerelease --latest=false`, without an update manifest, and never overwrite an
+existing public test release. A real macOS 15 device must still exercise Creator,
+playback, sleep/wake and displays; binary load-command checks do not prove those.
+
 ### Release (`release.yml`)
 
 Triggered by pushing a `v*.*.*` tag by hand. It only calls Build with

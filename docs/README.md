@@ -39,6 +39,7 @@ live under `testing/`.
 | [plans/2026-11-10-creator-s1-s4.md](plans/2026-11-10-creator-s1-s4.md) | Creator template parameters, native covers, staged model contracts and gates for unrestricted source |
 | [conventions.md](conventions.md) | Code, test, documentation, commit and pull-request rules |
 | [release.md](release.md) | Versioning, release specs, notes generation, CI pipeline, in-app updater contract |
+| [plans/2026-11-11-creator-macos15.md](plans/2026-11-11-creator-macos15.md) | macOS 15 arm64 ad-hoc acceptance build, dependency audit and isolated pre-release delivery |
 | [../CHANGELOG.md](../CHANGELOG.md) | Published versions, newest first; written by `scripts/release_notes.py` |
 | [development-tools.md](development-tools.md) | Optional diagnostic tools (Peekaboo, Instruments, `xctrace`), the safe setup check, and when a desktop run needs authorization |
 | [../AGENTS.md](../AGENTS.md) / [../CLAUDE.md](../CLAUDE.md) | Agent rules; CLAUDE.md is a symlink, not a separate policy |
@@ -57,6 +58,7 @@ live under `testing/`.
 | [testing/manual-smoke.md](testing/manual-smoke.md) | Manual release smoke checklist |
 | [testing/power-benchmark.md](testing/power-benchmark.md) | Configuration manifest, per-process CPU/GPU, whole-machine and package-power measurement, the headless A/B driver (`scripts/perf_bench.py`), runtime counters, condition matrix and comparison rules for power claims |
 | [testing/creator-s23-results.json](testing/creator-s23-results.json) | Redacted S2.3 live benchmark, 30-minute offscreen soak and final routine gate aggregates |
+| [testing/creator-macos15-results.json](testing/creator-macos15-results.json) | macOS 15 ad-hoc package checksum, dependency provenance, binary minimums and verification limits |
 | [testing/verification-log.md](testing/verification-log.md) | Dated verification history, ten newest entries |
 | [testing/archive/](testing/archive/) | Retired verification-log entries, one file per month, written by `scripts/log_verification.py`; historical only |
 | [testing/wallpaper-corpus.md](testing/wallpaper-corpus.md) | Local regression corpus checklist |

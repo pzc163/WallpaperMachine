@@ -9,6 +9,19 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-10 — Creator settings and provider profiles
+
+S1.1 settings/profile metadata supplement; details and limits are in [creator revisions](../../features/creator-revisions.md). Provider transport, Keychain and UI remain deferred.
+
+- Saved the previously verified tree as local baseline `f7d6168f` on `feat/ai-creator`; no push. The supplement remains uncommitted.
+- Added versioned nonsecret `CreatorSettings`/`ProviderProfile` records, actor/file-lock atomic updates, revision conflict checks and configuration fencing.
+- `python3 scripts/test.py --only CreatorSettingsStoreTests --only ProviderProfileTests --only CreatorRevisionStoreTests --only CreatorStorageFormatTests --only CreatorRuntimeRegistryTests --only CreatorDraftTests --only CreatorPublisherTests --only CreatorPreviewTests --only CreatorTemplateCatalogTests --only CreatorTemplateRenderingTests --only ImportTests --only WallpaperPlaybackPreflightTests --only LockScreenWallpaperServiceTests`: final 231 passed, 0 failed, 3 skipped; initial run 230 passed, 3 skipped.
+- First `python3 scripts/test.py`: Python 687 passed; native 4,809 passed, 1 failed, 69 skipped. Preset pixel reproducibility raced native state replay; a controlled 200 ms delay reproduced it before the test-only acknowledgement fix. No kernel or golden digest changes.
+- Full-gate retry after the fix: Python 687 passed (32 modules); native 4,811 passed, 0 failed, 69 skipped (4,880 total). All 16 metadata additions and the delayed-replay regression passed. No further full-gate run.
+- Skips: 3 known S0 unrestricted-code probes, 62 opt-in media/device tests, 3 live Steam tests, 1 reference rendering job. Runtime main-thread warnings: AppUpdate unsigned-copy check, VideoFormatSupport changed-file cache check, WebMOpening VP9 opening check; all passed, production code untouched.
+- `python3 scripts/tests/test_doc_links.py`: 11 passed. Documentation/mirror/frozen-source checks: 36 passed. `git diff --check`: passed. 02/03/05 and their output copies are synchronized.
+- No external model/Keychain access, desktop/UI run, Release build or install. S1.1 recovery is a service API; Creator settings/history backup/move integration, v2 poster generation/publication and S4 isolation remain future work.
+
 ## 2026-11-10 — Creator S1.1 immutable revision storage
 
 S1.1 adds immutable creator revision storage, content-bound structural reports, job cancellation/recovery and strict package routing. No UI, model API, cover capture or desktop changes.
