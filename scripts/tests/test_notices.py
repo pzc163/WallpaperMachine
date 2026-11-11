@@ -199,6 +199,15 @@ class NoticeTests(unittest.TestCase):
             notice = self.find(self.build([component]), "miniaudio")
         self.assertTrue(notice.found)
 
+    def test_creator_three_bundle_carries_its_complete_upstream_notice(self):
+        component = check_licenses.Component("three", "vendored", "inventory", "0.180.0", "MIT", "map")
+        notice = self.find(self.build([component]), "three")
+        self.assertTrue(notice.found)
+        license_text = notices.read(notices.ROOT / "ThirdParty/three/LICENSE")
+        self.assertEqual([text for _, text in notice.texts], [license_text])
+        self.assertIn(license_text, notices.entry_text(notice))
+        self.assertNotIn(notices.NOT_FOUND, notices.entry_text(notice))
+
     def test_the_statically_linked_text_libraries_carry_their_repository_license(self):
         # FreeType, HarfBuzz and msdfgen are vendored under ThirdParty/ and linked into the
         # renderer; their notices come from the LICENSE files there.

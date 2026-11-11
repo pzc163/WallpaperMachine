@@ -44,4 +44,6 @@ python3 scripts/build.py --swift-only --configuration Release
 
 预发布的 DMG 附带 SHA-256 与脱敏 metadata：记录实际源码提交、Ad-hoc 签名、每个 Mach-O 的最低系统版本和替换依赖的导出符号核对。目标是 macOS 15+ arm64；静态兼容性检查与实际 macOS 15 设备运行是两个验收层。
 
+首次打包的强制许可证门禁发现 Three.js 已随资源携带 MIT 原文，但汇总器缺少登记；新增回归先复现缺失，再补齐登记，要求最终 THIRD-PARTY-NOTICES 包含完整上游原文。没有关闭 `--require-notices`。补丁后的完整 Python 门禁 724 项通过；真实 Release 依赖闭包 160 个组件均找到许可证原文，无缺失。此补丁只改发布脚本与其测试，不改变已通过原生门禁的应用代码。
+
 尚未执行真实付费模型、30 分钟新引擎长稳、可见桌面、多屏睡眠或 macOS 15 实机验收。内置 WebGL2 引擎需要 WebGL2 实现（可为系统软件后端）；不可用时明确失败，不使用低质量静态替代。WebKit 监督仍依赖现有能力检测和 SPI，不能外推为任意恶意代码的安全审计。
