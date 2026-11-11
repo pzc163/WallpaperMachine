@@ -6,7 +6,7 @@ struct CreatorDynamicParameters: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Wallpaper parameters").font(.system(size: 13, weight: .semibold))
-            ForEach(schema.parameters) { p in
+            ForEach(schema.parameters.filter { controller.creator.detail?.media == nil || !["mediaFill", "mediaExposure", "mediaSpeed"].contains($0.id) }) { p in
                 VStack(alignment: .leading, spacing: 6) {
                     Text(verbatim: PanelLocale.shared.catalogString(p.label)).font(.system(size: 12))
                     switch p.type {

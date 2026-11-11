@@ -1,7 +1,7 @@
 import AppKit
 import WebKit
 
-/// Bounded validation in an unattached real WebKit page; no windows or desktop capture.
+/// Bounded real WebKit validation. Video uses a never-ordered media host; no desktop capture.
 @MainActor
 final class CreatorPosterService {
     typealias Snapshotter = @MainActor (WKWebView, WKSnapshotConfiguration, @escaping (Result<NSImage, Error>) -> Void) -> Void
@@ -24,7 +24,7 @@ final class CreatorPosterService {
         let report = try await store.report(projectID: projectID, revisionID: revisionID)
         try report.context.runtime.validate()
         let preview = try await CreatorPreview.make(projectID: projectID, revisionID: revisionID, store: store)
-        guard preview.snapshot.bundleVersion == 2, preview.snapshot.manifest?.packaging == .renderDraft,
+        guard [2, 3].contains(preview.snapshot.bundleVersion), preview.snapshot.manifest?.packaging == .renderDraft,
               preview.snapshot.digest == report.bundleDigest else { preview.surface.stop(); throw CreatorRuntimeFailure.staleInput }
         let surface = preview.surface
         surface.view.setFrameSize(NSSize(width: report.context.width, height: report.context.height))
@@ -33,6 +33,9 @@ final class CreatorPosterService {
         configure(surface)
         let operation = Session(surface: surface, report: report, parameters: CreatorBundleManifest.parameters(preview.snapshot.specification),
                                 timeout: timeout, snapshotter: snapshotter)
+        if preview.snapshot.manifest?.media?.kind == .video {
+            operation.mediaHost = CreatorOffscreenMediaWindow(hosting: surface.view)
+        }
         return try await withTaskCancellationHandler {
             try Task.checkCancellation()
             return try await withCheckedThrowingContinuation { operation.start($0) }
@@ -65,6 +68,8 @@ final class CreatorPosterService {
         var previousSize: NSSize?
         var previousPaused = false
         var previousFailure: ((String) -> Void)?
+        var mediaHost: CreatorOffscreenMediaWindow?
+        var ownedSurface: Bool { surface.page.webView.window == nil || surface.page.webView.window === mediaHost }
         init(surface: WebWallpaperPreviewSurface, report: ValidationReport, parameters: [String: CreatorTemplateCatalog.Value],
              timeout: Duration, snapshotter: @escaping Snapshotter) {
             self.surface = surface; self.report = report; self.parameters = parameters; self.timeout = timeout; self.snapshotter = snapshotter
@@ -96,7 +101,7 @@ final class CreatorPosterService {
         func poll() {
             guard !stopped else { return }
             guard surface.page.isLoaded else { again(); return }
-            guard (hot || surface.page.webView.window == nil), surface.page.webView.url == CreatorWebResources.entryURL
+            guard (hot || ownedSurface), surface.page.webView.url == CreatorWebResources.entryURL
             else { finish(.failure(CreatorRuntimeFailure.pageFailed)); return }
             if let code = surface.page.creatorCode { pollCode(code); return }
             if hot {
@@ -142,7 +147,7 @@ final class CreatorPosterService {
             configuration.afterScreenUpdates = true
             snapshotter(surface.page.webView, configuration) { [weak self] result in
                 guard let self, !stopped else { return }
-                guard surface.page.isLoaded, hot || surface.page.webView.window == nil else {
+                guard surface.page.isLoaded, hot || ownedSurface else {
                     finish(.failure(CreatorRuntimeFailure.pageFailed)); return
                 }
                 if let code = surface.page.creatorCode {
@@ -179,6 +184,7 @@ final class CreatorPosterService {
                 if let previousSize { surface.view.setFrameSize(previousSize) }
                 try? surface.setPaused(previousPaused)
             } else { surface.stop() }
+            mediaHost?.contentView = nil; mediaHost?.close(); mediaHost = nil
             let answer = continuation; continuation = nil
             answer?.resume(with: result)
         }
@@ -219,4 +225,17 @@ final class CreatorPosterService {
         for(const type of ['error','unhandledrejection','securitypolicyviolation']) addEventListener(type,()=>{s.errors++;});
       })();
       """
+}
+
+/// Supplies WebKit's page media consent without ordering, focusing or capturing a desktop window.
+/// A temporary validation host only; visible previews and desktop players use their real windows.
+@MainActor final class CreatorOffscreenMediaWindow: NSWindow {
+    init(hosting view: NSView) {
+        super.init(contentRect: view.frame, styleMask: .borderless, backing: .buffered, defer: false)
+        isReleasedWhenClosed = false; contentView = view
+    }
+    override var isVisible: Bool { true }
+    override var occlusionState: NSWindow.OcclusionState { .visible }
+    override var canBecomeKey: Bool { false }
+    override var canBecomeMain: Bool { false }
 }

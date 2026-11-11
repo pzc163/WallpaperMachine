@@ -5,7 +5,7 @@ enum CreatorParameterUpdate {
     static func validate(before: CreatorDraftStore.Snapshot, after: CreatorDraftStore.Snapshot,
                          values: [String: CreatorTemplateCatalog.Value]) throws {
         guard before.specification.projectID == after.specification.projectID,
-              before.specification.kind == after.specification.kind,
+              before.specification.kind == after.specification.kind, before.assets == after.assets,
               before.specification.runtimePolicy == after.specification.runtimePolicy,
               let previous = before.files["index.html"], let next = after.files["index.html"]
         else { throw CreatorRuntimeFailure.staleInput }

@@ -13,7 +13,11 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
         if !input.nativeOutputLimit { configuration["maxOutputTokens"] = input.maxOutputTokens }
         let body: [String: Any] = ["systemInstruction": ["parts": [["text": input.systemInstruction]]],
             "generationConfig": configuration,
-            "contents": input.messages.map { ["role": $0.role == .assistant ? "model" : "user", "parts": [["text": $0.content]]] }]
+            "contents": input.messages.enumerated().map { index, message -> [String: Any] in
+                var parts: [[String: Any]] = [["text": message.content]]
+                if index == input.messages.count-1, let image = input.thumbnailJPEG { parts.append(["inlineData": ["mimeType": "image/jpeg", "data": image.base64EncodedString()]]) }
+                return ["role": message.role == .assistant ? "model" : "user", "parts": parts]
+            }]
         return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1beta", suffix: "models/\(try input.model(for: profile)):" + (streaming ? "streamGenerateContent" : "generateContent"), query: streaming ? [.init(name: "alt", value: "sse")] : []),
                      headers: [:], body: try LLMRequestDescriptor.encoded(body), authentication: .google)
     }

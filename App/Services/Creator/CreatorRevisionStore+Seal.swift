@@ -23,23 +23,20 @@ extension CreatorRevisionStore {
                 var job = try activeJob(ticket)
                 let checked = try validatedSnapshot(projectID: source.projectID, revisionID: source.revisionID)
                 let original = try readRevision(projectID: source.projectID, revisionID: source.revisionID).revision
-                guard checked.report == source, checked.snapshot.bundleVersion == 2,
+                guard checked.report == source, [2, 3].contains(checked.snapshot.bundleVersion),
                       checked.snapshot.manifest?.packaging == .renderDraft else { throw CreatorPersistence.Failure.staleValidation }
                 let files = try CreatorBundleManifest.files(for: checked.snapshot.specification, poster: capture.jpeg,
                                                             presentation: checked.snapshot.manifest?.presentation,
-                                                            source: checked.snapshot.specification.kind == .code ? checked.snapshot.files["index.html"] : nil)
+                                                            source: checked.snapshot.specification.kind == .code ? checked.snapshot.files["index.html"] : nil, assets: checked.snapshot.assets)
                 let candidate = jobURL(job.id).appendingPathComponent("candidate", isDirectory: true)
                 let bundle = candidate.appendingPathComponent("bundle", isDirectory: true)
                 try CreatorPersistence.directory(bundle, create: true)
-                for (name, data) in files {
-                    try Task.checkCancellation()
-                    try CreatorPersistence.atomicWrite(data, to: bundle.appendingPathComponent(name))
-                }
+                try CreatorBundleManifest.write(files, to: bundle)
                 let snapshot = try CreatorBundleManifest.read(bundle, scopedRevision: true)
                 guard try snapshot.renderDigest == source.renderDigest else { throw CreatorPersistence.Failure.staleValidation }
                 let sealed = CreatorRevision(schemaVersion: 1, id: UUID(), projectID: source.projectID, parentID: source.revisionID,
                     promptSummary: original.promptSummary, providerID: original.providerID, modelID: original.modelID,
-                    outputSchemaVersion: original.outputSchemaVersion, bundleVersion: 2, sdkVersion: original.sdkVersion,
+                    outputSchemaVersion: original.outputSchemaVersion, bundleVersion: snapshot.bundleVersion, sdkVersion: original.sdkVersion,
                     policyVersion: original.policyVersion, templateID: original.templateID, templateRevision: original.templateRevision,
                     normalizedParameters: original.normalizedParameters, renderDigest: source.renderDigest,
                     posterDigest: CreatorPersistence.hash(capture.jpeg), bundleDigest: snapshot.digest,
@@ -66,7 +63,7 @@ extension CreatorRevisionStore {
             let pair = try validatedSnapshot(projectID: projectID, revisionID: revisionID)
             guard pair.report.allowsPublication, pair.snapshot.manifest?.packaging == .sealed else { throw CreatorPersistence.Failure.incompleteBundle }
             let binding = CreatorRuntimeRegistry.Binding(schemaVersion: 1, wallpaperID: pair.snapshot.wallpaperID,
-                projectID: projectID, revisionID: revisionID, bundleVersion: 2, bundleDigest: pair.snapshot.digest,
+                projectID: projectID, revisionID: revisionID, bundleVersion: pair.snapshot.bundleVersion, bundleDigest: pair.snapshot.digest,
                 runtimePolicy: pair.snapshot.specification.runtimePolicy, context: pair.report.context, report: pair.report)
             try CreatorRuntimeRegistry.validateBinding(binding, snapshot: pair.snapshot, context: context)
             return (pair.snapshot, binding)

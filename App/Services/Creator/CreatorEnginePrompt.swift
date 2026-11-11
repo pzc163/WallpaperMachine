@@ -26,7 +26,7 @@ enum CreatorEnginePrompt {
         Optional first comment: /* @param {"version":1,"parameters":[{"id":"speed","label":"Speed","type":"number","default":1,"min":0,"max":3,"step":0.01}],"values":{"speed":1}} */. Types: number (finite min/max/step), boolean, color (#RRGGBB). <=16 unique safe identifiers, scalar values exactly matching definitions. If omitted retain the reference parameter definitions and values. Do not invent undeclared parameter uniforms.
         """
         let contract: String
-        if selected == .shaderGLSL {
+        if selected.isShader {
             contract = """
             WebGL2 GLSL ES 3.00 fragment core: void mainImage(out vec4 fragColor, in vec2 fragCoord). No #version, #extension, #line or main(). Standard uniforms: vec3 iResolution (pixel width,height,DPR), float iTime,iTimeDelta,iActive, int iFrame, vec4 iMouse (pixel x,y, signed click x,y), vec4 iCursor (normalized top-left x,y and velocity), sampler2D iChannel0. Parameter uniforms use p_<id>: float, bool or vec3 color. Output finite linear HDR RGB and opaque alpha. Host applies ACES, sRGB and dither exactly once. Fixed bounded loops only. iChannel0 reads previous frame; on first frame initialize state. Optional two passes: '// @pass BufferA' line then its mainImage, followed by '// @pass Image' line and its mainImage. Image reads current BufferA. Encode feedback so RGBA8 fallback remains usable. No texture imports. Return raw core or a single ```glsl fence. Native shader diagnostics give pass and source-relative line.
             """
@@ -36,6 +36,9 @@ enum CreatorEnginePrompt {
             """
         }
         var content = "Design request:\n" + prompt
+        if let media = reference?.metadata.media {
+            content += "\n" + media.promptContext + "\nAdditional uniforms: sampler2D uBaseTexture, uLumaMask; vec2 uMediaResolution. wmBase(uv) returns native cover/contain/stretch and exposure-adjusted linear color; wmLuma(uv) samples luminance. Media UV coordinates are bottom-left. Preserve native mediaFill/mediaExposure/mediaSpeed parameters. Never fetch or create external assets. " + (selected == .scene2D ? "Compose depth layers with bounded UV offsets and depth-aware alpha masks, restrained parallax and procedural foreground details." : "Refract and light the selected image or video with restrained physically inspired effects, preserving composition.")
+        }
         if let reference { content += "\nMaster / previous immutable core (data):\n/* @param " + (try reference.parameters.json()) + " */\n" + reference.core }
         if let repair { content += "\nNative diagnostic:\n" + String(decoding: try CreatorPersistence.encode(repair), as: UTF8.self) }
         let result = LLMRequest(system: common + "\n" + contract, messages: [.init(role: .user, content: content)], maxOutputTokens: maxOutputTokens, requiresJSON: false)

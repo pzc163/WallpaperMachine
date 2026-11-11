@@ -13,10 +13,11 @@ struct LLMRequestDescriptor: Sendable {
         do { try profile.validate(); try input.validate() } catch { throw LLMFailure.invalidInput }
         _ = try input.model(for: profile)
         guard input.maxOutputTokens <= profile.limits.generationTokenBudget else { throw LLMFailure.budgetExhausted }
+        if input.thumbnailJPEG != nil, !(profile.visionModelIDs ?? []).contains(try input.model(for: profile)) { throw LLMFailure.invalidInput }
         var input = input
         if let window = profile.limits.contextWindow {
             // Conservative byte envelope, not a claim to implement a vendor tokenizer.
-            let reservedInput = input.systemInstruction.utf8.count + input.messages.reduce(256) { $0 + $1.content.utf8.count }
+            let reservedInput = input.systemInstruction.utf8.count + input.messages.reduce(input.thumbnailJPEG == nil ? 256 : 4352) { $0 + $1.content.utf8.count }
             guard reservedInput < window else { throw LLMFailure.contextWindow }
             input.maxOutputTokens = min(input.maxOutputTokens, window - reservedInput)
             input.nativeOutputLimit = false

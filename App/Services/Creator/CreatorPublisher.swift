@@ -215,7 +215,7 @@ actor CreatorPublisher {
 
     func recover(store: CreatorRevisionStore) async throws {
         try await recover()
-        for binding in try await registry.bindings().values where binding.bundleVersion == 2 {
+        for binding in try await registry.bindings().values where [2, 3].contains(binding.bundleVersion) {
             _ = try CreatorRuntimeRegistry.readForPlayback(library.appendingPathComponent(binding.wallpaperID), registryURL: registry.url, publicationRoot: root)
             // A deliberately deleted draft leaves a self-contained installed policy binding.
             if try await store.containsProject(binding.projectID) { try await store.recordPublished(binding) }
@@ -245,14 +245,10 @@ actor CreatorPublisher {
     private func writeBundle(_ snapshot: CreatorDraftStore.Snapshot, to directory: URL) throws {
         if snapshot.bundleVersion == 1 { try CreatorDraftStore.write(snapshot.files, to: directory); return }
         guard snapshot.manifest?.packaging == .sealed,
-              Set(snapshot.files.keys) == ["creator.json", "project.json", "index.html", "preview.jpg"]
+              Set(snapshot.files.keys) == Set(["creator.json", "project.json", "index.html", "preview.jpg"]).union(snapshot.manifest?.media?.files.map(\.path) ?? [])
         else { throw CreatorPersistence.Failure.incompleteBundle }
         try CreatorPersistence.directory(directory, create: true)
-        for (name, data) in snapshot.files {
-            try Task.checkCancellation()
-            try CreatorPersistence.atomicWrite(data, to: directory.appendingPathComponent(name))
-        }
-        _ = try CreatorBundleManifest.read(directory, expectedDigest: snapshot.digest)
+        try CreatorBundleManifest.write(snapshot.files, to: directory)
     }
 
     private func write(_ journal: Journal) throws {
@@ -272,7 +268,7 @@ actor CreatorPublisher {
         else { throw CreatorTemplate.Failure.invalidTransaction }
         if let binding = journal.binding {
             try CreatorRuntimeRegistry.validate(.init(entries: [journal.wallpaperID: binding]))
-            guard binding.bundleVersion == 2, binding.wallpaperID == journal.wallpaperID, binding.bundleDigest == journal.digest,
+            guard [2, 3].contains(binding.bundleVersion), binding.wallpaperID == journal.wallpaperID, binding.bundleDigest == journal.digest,
                   (journal.previousDigest == nil) == (journal.previousBinding == nil)
             else { throw CreatorTemplate.Failure.invalidTransaction }
             if let previous = journal.previousBinding {

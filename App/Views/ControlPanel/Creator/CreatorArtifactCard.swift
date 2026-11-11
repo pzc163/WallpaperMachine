@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct CreatorArtifactCard: View {
     @Environment(PanelController.self) private var controller
@@ -31,6 +32,7 @@ struct CreatorArtifactCard: View {
                 ViewThatFits(in: .horizontal) { HStack { footer }; VStack(alignment: .leading, spacing: 8) { footer } }
             }.padding(14)
         }
+        .onDrop(of: [UTType.fileURL.identifier], isTargeted: nil, perform: controller.dropCreatorMedia)
         .onAppear { model.artifactVisible = true; refresh() }
         .onChange(of: identity) { _, _ in refresh() }
         .onDisappear { controller.hideCreatorArtifact() }

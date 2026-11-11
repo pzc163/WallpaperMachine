@@ -150,7 +150,7 @@ actor WallpaperImportService {
         let creator: CreatorDraftStore.Snapshot?
         if isDirectory, CreatorRuntimeRegistry.isCandidate(candidate) {
             creator = try CreatorDraftStore.read(candidate)
-            if let creator, creator.bundleVersion == 2 {
+            if let creator, [2, 3].contains(creator.bundleVersion) {
                 guard let creatorPermit else { throw CreatorPersistence.Failure.incompleteBundle }
                 try CreatorRuntimeRegistry.validateBinding(creatorPermit, snapshot: creator)
             }

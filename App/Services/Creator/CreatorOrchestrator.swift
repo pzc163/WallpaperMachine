@@ -15,6 +15,7 @@ actor CreatorOrchestrator {
         var mode: CreatorCreationMode = .template
         var engine: CreatorEngine? = nil
         var referenceSource: String? = nil
+        var sendsThumbnail = false
         var streamProgress: @Sendable (LLMStreamProgress) -> Void = { _ in }
         var progress: @Sendable (Stage, Int, Int) async -> Void = { _, _, _ in }
     }
@@ -89,7 +90,7 @@ actor CreatorOrchestrator {
                 try await checkpoint(stage); try Task.checkCancellation()
                 var input = CreatorGenerator.Request(projectID: projectID, baseRevisionID: request.baseRevisionID,
                     profileID: request.profileID, configurationID: request.configurationID, prompt: request.prompt,
-                    maxOutputTokens: request.maxOutputTokens, modelID: request.modelID, mode: request.mode, engine: request.engine, referenceSource: request.referenceSource, streamProgress: request.streamProgress)
+                    maxOutputTokens: request.maxOutputTokens, modelID: request.modelID, mode: request.mode, engine: request.engine, referenceSource: request.referenceSource, sendsThumbnail: request.sendsThumbnail, streamProgress: request.streamProgress)
                 let iteration = try await generator.beginIteration(input, maxRepairs: request.maxRepairs)
                 ticket = iteration; input.iteration = iteration
                 while true {

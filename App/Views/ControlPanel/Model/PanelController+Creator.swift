@@ -42,6 +42,7 @@ extension PanelController {
     func selectCreatorProject(_ id: UUID?) async throws {
         guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
         creator.preview?.close(); creator.preview = nil; creator.embedded.close()
+        creator.sendsThumbnail = false
         creator.selectedProjectID = id
         try await run(.immediate) { try await loadCreator() }
     }
@@ -101,6 +102,8 @@ extension PanelController {
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
                 maxOutputTokens: profile.limits.outputTokensPerRequest, modelID: self.creator.configuration.selectedModel, maxRepairs: repairs, mode: self.creator.mode, engine: self.creator.mode == .code ? self.creator.engine : nil)
+            request.sendsThumbnail = self.creator.sendsThumbnail && self.creator.canSendThumbnail
+            self.creator.sendsThumbnail = false
             request.streamProgress = { [weak self] value in
                 mailbox.store(value)
                 Task { @MainActor in
@@ -273,7 +276,7 @@ extension PanelController {
     }
     func selectCreatorProfile(_ id: UUID, modelID: String? = nil) async throws {
         guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
-        creator.connectionNotice = nil
+        creator.connectionNotice = nil; creator.sendsThumbnail = false
         creator.configuration = try await creatorWorkspace.selectProfile(id, modelID: modelID, expectedRevision: creator.configuration.revision)
     }
     func deleteCreatorProfile(_ id: UUID) async throws {
@@ -311,7 +314,7 @@ extension PanelController {
             throw CreatorPanelFailure(message: CreatorLabels.issue(issue.category))
         }
     }
-    private func creatorOperation(_ phase: CreatorModel.Phase, operation: @escaping @MainActor () async throws -> Void) async throws {
+    func creatorOperation(_ phase: CreatorModel.Phase, operation: @escaping @MainActor () async throws -> Void) async throws {
         guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
         creator.isBusy = true; creator.phase = phase; creator.issue = nil; creator.showsReport = false; creator.attempt = 0
         creator.operationID = UUID()

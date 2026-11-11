@@ -6,6 +6,7 @@ struct CreatorPromptEditor: NSViewRepresentable {
     @Binding var text: String
     let focusID: UUID
     let submit: () -> Void
+    var pasteImage: (() -> Bool)? = nil
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
     func makeNSView(context: Context) -> NSScrollView {
@@ -36,6 +37,7 @@ struct CreatorPromptEditor: NSViewRepresentable {
         if editor.string != text { editor.string = text }
         editor.isEditable = context.environment.isEnabled
         editor.submit = submit
+        editor.pasteImage = pasteImage
         editor.setAccessibilityLabel(L("Describe your wallpaper or the changes you want"))
         if context.coordinator.lastFocus != focusID, let window = editor.window, window.isKeyWindow {
             context.coordinator.lastFocus = focusID
@@ -62,6 +64,11 @@ struct CreatorPromptEditor: NSViewRepresentable {
     }
     final class Editor: NSTextView {
         var submit: () -> Void = {}
+        var pasteImage: (() -> Bool)?
+        override func paste(_ sender: Any?) {
+            if pasteImage?() == true { return }
+            else { super.paste(sender) }
+        }
         static func sends(keyCode: UInt16, modifiers: NSEvent.ModifierFlags, marked: Bool) -> Bool {
             [36, 76].contains(keyCode) && modifiers.intersection([.shift, .option, .control, .command]).isEmpty && !marked
         }

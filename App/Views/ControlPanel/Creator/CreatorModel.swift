@@ -16,6 +16,10 @@ final class CreatorModel {
     var masters: [CreatorMasterCatalog.Master] = []
     var masterPosters: [String: PanelImageSource] = [:]
     var showsGallery = true
+    var libraryMedia: [CreatorWorkspace.LibraryMedia] = []
+    var showsMediaLibrary = false
+    var sendsThumbnail = false
+    var canSendThumbnail: Bool { detail?.media != nil && (profile?.visionModelIDs ?? []).contains(configuration.selectedModel ?? "") }
     var autoRepair = false
     var maxRepairs = 1
     var phase = Phase.idle

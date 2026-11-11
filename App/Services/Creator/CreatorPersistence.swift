@@ -102,11 +102,11 @@ enum CreatorPersistence {
         return data
     }
 
-    static func atomicWrite(_ data: Data, to url: URL, beforeRename: () throws -> Void = {}) throws {
-        guard data.count <= 1024 * 1024 else { throw Failure.tooLarge }
+    static func atomicWrite(_ data: Data, to url: URL, limit: Int = 1024 * 1024, beforeRename: () throws -> Void = {}) throws {
+        guard limit > 0, limit <= CreatorMediaFile.maximumBundleBytes + 1024 * 1024, data.count <= limit else { throw Failure.tooLarge }
         let parent = url.deletingLastPathComponent()
         try directory(parent)
-        if exists(url) { _ = try bytes(url, limit: 1024 * 1024) }
+        if exists(url) { _ = try bytes(url, limit: limit) }
         let temporary = parent.appendingPathComponent(".pending-" + UUID().uuidString.lowercased())
         defer { try? FileManager.default.removeItem(at: temporary) }
         let fd = open(temporary.path, O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC | O_NOFOLLOW, 0o600)

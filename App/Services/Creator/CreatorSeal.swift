@@ -13,7 +13,7 @@ struct CreatorSeal: Codable, Equatable, Sendable {
         try context.validate()
         guard schemaVersion == 1, context.testProfile == (snapshot.specification.kind == .code ? "code-runtime-v1" : "template-runtime-v1"),
               CreatorPersistence.validDigest(sourceRevisionDigest), renderDigest == (try snapshot.renderDigest),
-              snapshot.bundleVersion == 2, snapshot.manifest?.packaging == .sealed,
+              [2, 3].contains(snapshot.bundleVersion), snapshot.manifest?.packaging == .sealed,
               let jpeg = snapshot.files["preview.jpg"] else { throw CreatorPersistence.Failure.invalidRecord }
         try CreatorPosterMetadata.validate(jpeg: jpeg, metrics: metrics, context: context)
     }

@@ -1,4 +1,5 @@
 import Foundation
+import ImageIO
 
 /// Bounded text-only input; the caller owns the system instruction, never the provider response.
 struct LLMRequest: Sendable {
@@ -28,6 +29,8 @@ struct LLMRequest: Sendable {
     var requiresJSON = true
     var nativeOutputLimit = false
     var modelID: String? = nil
+    /// Explicit opt-in only; a normalized thumbnail, never original media or a file URL.
+    var thumbnailJPEG: Data? = nil
 
     func model(for profile: ProviderProfile) throws -> String {
         let value = modelID ?? profile.model
@@ -42,6 +45,13 @@ struct LLMRequest: Sendable {
               system.utf8.count <= 16 * 1024,
               messages.reduce(system.utf8.count, { $0 + $1.content.utf8.count }) <= (requiresJSON ? 16 : 280) * 1024,
               (1...ProviderProfile.Limits.maximumOutputTokens).contains(maxOutputTokens) else { throw LLMFailure.invalidInput }
+        if let data = thumbnailJPEG {
+            guard !data.isEmpty, data.count <= 256 * 1024, let source = CGImageSourceCreateWithData(data as CFData, nil),
+                  CGImageSourceGetType(source) as String? == "public.jpeg", CGImageSourceGetCount(source) == 1,
+                  let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+                  let w = properties[kCGImagePropertyPixelWidth] as? Int, let h = properties[kCGImagePropertyPixelHeight] as? Int,
+                  (1...512).contains(w), (1...512).contains(h) else { throw LLMFailure.invalidInput }
+        }
         _ = try structuredOutput?.object()
     }
 }

@@ -11,7 +11,7 @@ import XCTest
             let controller = panel.controller
             try await controller.recoverCreator()
             XCTAssertEqual(controller.creator.mode, .code); XCTAssertEqual(controller.creator.engine, .shaderGLSL)
-            XCTAssertEqual(controller.creator.masters.count, 9)
+            XCTAssertEqual(controller.creator.masters.count, 15)
             try await controller.openCreatorMaster("ink")
             let first = try XCTUnwrap(controller.creator.selectedRevision)
             XCTAssertTrue(controller.creator.canSave); XCTAssertTrue(controller.creator.canApply)

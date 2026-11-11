@@ -13,6 +13,7 @@ actor CreatorGenerator {
         var mode: CreatorCreationMode = .template
         var engine: CreatorEngine? = nil
         var referenceSource: String? = nil
+        var sendsThumbnail = false
         var iteration: CreatorConversation.Ticket? = nil
         var repair: CreatorRepairIssue? = nil
         var streamProgress: @Sendable (LLMStreamProgress) -> Void = { _ in }
@@ -96,6 +97,11 @@ actor CreatorGenerator {
         var input = try Self.input(engine: request.engine, referenceSource: request.referenceSource, mode: request.mode, prompt: prompt, base: contextBase, maxOutputTokens: request.maxOutputTokens, repair: request.repair)
         input.modelID = request.modelID
         _ = try input.model(for: profile)
+        if request.sendsThumbnail, let base = contextBase {
+            guard (profile.visionModelIDs ?? []).contains(try input.model(for: profile)) else { throw CreatorGenerationFailure.invalidRequest }
+            let snapshot = try await store.snapshot(projectID: request.projectID, revisionID: base.revisionID)
+            if let media = snapshot.manifest?.media { input.thumbnailJPEG = snapshot.files[media.thumbnail.path] }
+        }
         let engineReference = try CreatorEnginePrompt.reference(base: contextBase, source: request.referenceSource)
         if let source = contextBase?.source ?? request.referenceSource { try await provider.checkSourceContainsNoCredential(source, profile: profile) }
         guard input.maxOutputTokens <= profile.limits.generationTokenBudget else { throw CreatorGenerationFailure.invalidRequest }
@@ -139,8 +145,10 @@ actor CreatorGenerator {
                 protocolKind: profile.protocolKind, attemptCount: completed.attempts,
                 reservedOutputTokens: completed.reservedOutputTokens, usage: completed.response.usage,
                 elapsed: completed.elapsed, baseRevisionDigest: base?.revisionDigest, iterationID: request.iteration?.id, repairIndex: turn?.repairCount)
+            let assets: [String: Data]?
+            if let base = contextBase { assets = try await store.snapshot(projectID: request.projectID, revisionID: base.revisionID).assets } else { assets = nil }
             _ = try await store.stage(specification, for: ticket, summary: CreatorPromptBuilder.promptSummary(prompt),
-                presentation: presentation, generation: metadata, source: source, providerID: profile.id.uuidString.lowercased(), modelID: try input.model(for: profile))
+                presentation: presentation, generation: metadata, source: source, assets: assets, providerID: profile.id.uuidString.lowercased(), modelID: try input.model(for: profile))
             try await checkpoint(.beforeCommit); try Task.checkCancellation()
             try await settings.withCurrentProfile(profile) { _ in }
             let draft = try await store.commit(ticket, validatingStructure: true)

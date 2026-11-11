@@ -10,10 +10,11 @@ actor CreatorDraftStore {
         var manifest: CreatorBundleManifest? = nil
         var bundleVersion: Int { manifest?.bundleVersion ?? 1 }
         var wallpaperID: String { manifest == nil ? specification.wallpaperID : "ai-" + specification.projectID.uuidString.lowercased() }
+        var assets: [String: Data] { files.filter { $0.key.hasPrefix("assets/") } }
         var renderDigest: String {
             get throws {
                 if manifest == nil { return digest }
-                return CreatorTemplate.digest(try CreatorBundleManifest.files(for: specification, presentation: manifest?.presentation, source: specification.kind == .code ? files["index.html"] : nil))
+                return CreatorTemplate.digest(try CreatorBundleManifest.files(for: specification, presentation: manifest?.presentation, source: specification.kind == .code ? files["index.html"] : nil, assets: assets))
             }
         }
     }

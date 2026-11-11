@@ -5,9 +5,9 @@ import WebKit
 /// Used identically for validation, preview and registered desktop playback.
 @MainActor final class CreatorCodeSandbox: NSObject, WKScriptMessageHandler, WKDownloadDelegate {
     static let handler = "creatorCodeHealth"
-    static let policy = "default-src 'none'; script-src 'unsafe-inline' wm-lib:; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    static let policy = "default-src 'none'; script-src 'unsafe-inline' wm-lib:; style-src 'unsafe-inline'; connect-src 'none'; img-src wm-media:; font-src 'none'; media-src wm-media:; frame-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
     static let container = """
-    <!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' wm-lib:; style-src 'unsafe-inline'; frame-src about:; child-src about:; connect-src 'none'; base-uri 'none'; form-action 'none'"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}iframe{border:0;width:100%;height:100%;display:block}</style><iframe id="creator-code" sandbox="allow-scripts" allow="camera 'none'; microphone 'none'; geolocation 'none'; display-capture 'none'; clipboard-read 'none'; clipboard-write 'none'; fullscreen 'none'; payment 'none'" referrerpolicy="no-referrer"></iframe>
+    <!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' wm-lib:; style-src 'unsafe-inline'; frame-src about:; child-src about:; img-src wm-media:; media-src wm-media:; connect-src 'none'; base-uri 'none'; form-action 'none'"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}iframe{border:0;width:100%;height:100%;display:block}</style><iframe id="creator-code" sandbox="allow-scripts" allow="autoplay *; camera 'none'; microphone 'none'; geolocation 'none'; display-capture 'none'; clipboard-read 'none'; clipboard-write 'none'; fullscreen 'none'; payment 'none'" referrerpolicy="no-referrer"></iframe>
     """
     let view: WKWebView
     private(set) var frame: WKFrameInfo?
@@ -87,7 +87,7 @@ import WebKit
         checking = true
         if pendingSince == nil { pendingSince = .now }
         let epoch = epoch
-        view.evaluateJavaScript("({ready:document.readyState!=='loading',errors:window.__creatorCodeErrors||0,reason:window.__creatorCodeReason||'script',diagnostics:document.documentElement.getAttribute('data-wm-diagnostics')||''})", in: frame, in: .defaultClient) { [weak self] result in
+        view.evaluateJavaScript("({ready:document.readyState!=='loading'&&document.documentElement.getAttribute('data-wm-media')!=='loading',errors:window.__creatorCodeErrors||0,reason:window.__creatorCodeReason||'script',diagnostics:document.documentElement.getAttribute('data-wm-diagnostics')||''})", in: frame, in: .defaultClient) { [weak self] result in
             guard let self, !self.stopped, self.epoch == epoch else { return }
             guard case .success(let value) = result, let result = value as? [String: Any] else {
                 self.fail(.init(category: .runtime, runtimeReason: .pageFailed)); return

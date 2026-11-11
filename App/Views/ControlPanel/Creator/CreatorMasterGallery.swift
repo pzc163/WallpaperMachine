@@ -6,8 +6,9 @@ import SwiftUI
         case .shaderGLSL: L("Pure Shader · GLSL")
         case .three3D: L("Three.js · 3D light")
         case .htmlCanvas: L("HTML5 · Canvas")
+        case .hybridMedia: L("Hybrid media")
         case .hybridImage: L("Hybrid image animation")
-        case .scene25D: L("2.5D scene")
+        case .scene2D, .scene25D: L("2.5D scene")
         case .audioReactive: L("Audio reactive")
         }
     }

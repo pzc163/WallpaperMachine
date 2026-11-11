@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "masters": [
     {
       "id": "ink",
@@ -866,6 +866,645 @@
       },
       "file": "bauhaus.html",
       "sha256": "9deae37c73cad85ad580dfe769940aa7e5df6093bcb9ee76a395e6697be0776e"
+    },
+    {
+      "id": "rain",
+      "title": "Nocturne Glass",
+      "engine": "hybrid-media",
+      "keywords": [
+        "雨",
+        "玻璃",
+        "rain",
+        "glass"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "mediaFill",
+            "label": "Media fill",
+            "type": "number",
+            "default": 0,
+            "min": 0,
+            "max": 2,
+            "step": 1
+          },
+          {
+            "id": "mediaExposure",
+            "label": "Media exposure",
+            "type": "number",
+            "default": 0,
+            "min": -2,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "mediaSpeed",
+            "label": "Video speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.25,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "refraction",
+            "label": "Refraction",
+            "type": "number",
+            "default": 1.1,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "fog",
+            "label": "Glass mist",
+            "type": "number",
+            "default": 0.35,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "wipe",
+            "label": "Pointer clearing",
+            "type": "number",
+            "default": 0.8,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "highlight",
+            "label": "Rain highlights",
+            "type": "number",
+            "default": 0.5,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "vignette",
+            "label": "Vignette",
+            "type": "number",
+            "default": 0.25,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          }
+        ],
+        "values": {
+          "mediaFill": 0,
+          "mediaExposure": 0,
+          "mediaSpeed": 1,
+          "speed": 1,
+          "refraction": 1.1,
+          "fog": 0.35,
+          "wipe": 0.8,
+          "highlight": 0.5,
+          "vignette": 0.25
+        }
+      },
+      "file": "rain.txt",
+      "sha256": "11476a44d07346f4a4b6bbfce1a132cc9ec4e46fdfe67ac582b269674777e46c",
+      "mediaName": "night"
+    },
+    {
+      "id": "parallax",
+      "title": "Painted Horizons",
+      "engine": "scene-2d",
+      "keywords": [
+        "插画",
+        "景深",
+        "视差",
+        "parallax"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "mediaFill",
+            "label": "Media fill",
+            "type": "number",
+            "default": 0,
+            "min": 0,
+            "max": 2,
+            "step": 1
+          },
+          {
+            "id": "mediaExposure",
+            "label": "Media exposure",
+            "type": "number",
+            "default": 0,
+            "min": -2,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "mediaSpeed",
+            "label": "Video speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.25,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "parallax",
+            "label": "Depth parallax",
+            "type": "number",
+            "default": 0.025,
+            "min": 0,
+            "max": 0.08,
+            "step": 0.001
+          },
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "haze",
+            "label": "Atmospheric haze",
+            "type": "number",
+            "default": 0.35,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "warmth",
+            "label": "Sun warmth",
+            "type": "number",
+            "default": 0.45,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "vignette",
+            "label": "Vignette",
+            "type": "number",
+            "default": 0.3,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          }
+        ],
+        "values": {
+          "mediaFill": 0,
+          "mediaExposure": 0,
+          "mediaSpeed": 1,
+          "parallax": 0.025,
+          "speed": 1,
+          "haze": 0.35,
+          "warmth": 0.45,
+          "vignette": 0.3
+        }
+      },
+      "file": "parallax.txt",
+      "sha256": "03e05e5c30fc166f2130769912d486452478e9179ef8483b20e313b064b3f786",
+      "mediaName": "lake"
+    },
+    {
+      "id": "rays",
+      "title": "Crepuscular Light",
+      "engine": "hybrid-media",
+      "keywords": [
+        "丁达尔",
+        "晨昏",
+        "光束",
+        "rays"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "mediaFill",
+            "label": "Media fill",
+            "type": "number",
+            "default": 0,
+            "min": 0,
+            "max": 2,
+            "step": 1
+          },
+          {
+            "id": "mediaExposure",
+            "label": "Media exposure",
+            "type": "number",
+            "default": 0,
+            "min": -2,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "mediaSpeed",
+            "label": "Video speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.25,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "lightX",
+            "label": "Light position",
+            "type": "number",
+            "default": 0.68,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "intensity",
+            "label": "Ray intensity",
+            "type": "number",
+            "default": 0.55,
+            "min": 0,
+            "max": 1.5,
+            "step": 0.01
+          },
+          {
+            "id": "dust",
+            "label": "Floating dust",
+            "type": "number",
+            "default": 0.6,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "vignette",
+            "label": "Vignette",
+            "type": "number",
+            "default": 0.2,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          }
+        ],
+        "values": {
+          "mediaFill": 0,
+          "mediaExposure": 0,
+          "mediaSpeed": 1,
+          "speed": 1,
+          "lightX": 0.68,
+          "intensity": 0.55,
+          "dust": 0.6,
+          "vignette": 0.2
+        }
+      },
+      "file": "rays.txt",
+      "sha256": "602ffabc5e10f6c571ccb006cfea04dbc3dcff7f46b65ab357aafa032696839e",
+      "mediaName": "lake"
+    },
+    {
+      "id": "reflection",
+      "title": "Stillwater",
+      "engine": "hybrid-media",
+      "keywords": [
+        "湖",
+        "水波",
+        "倒影",
+        "lake",
+        "reflection"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "mediaFill",
+            "label": "Media fill",
+            "type": "number",
+            "default": 0,
+            "min": 0,
+            "max": 2,
+            "step": 1
+          },
+          {
+            "id": "mediaExposure",
+            "label": "Media exposure",
+            "type": "number",
+            "default": 0,
+            "min": -2,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "mediaSpeed",
+            "label": "Video speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.25,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 0.7,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "horizon",
+            "label": "Waterline",
+            "type": "number",
+            "default": 0.42,
+            "min": 0.05,
+            "max": 0.8,
+            "step": 0.01
+          },
+          {
+            "id": "ripple",
+            "label": "Ripple amplitude",
+            "type": "number",
+            "default": 0.8,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "interaction",
+            "label": "Pointer ripples",
+            "type": "number",
+            "default": 0.7,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "reflection",
+            "label": "Reflection blend",
+            "type": "number",
+            "default": 0.35,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "sheen",
+            "label": "Water highlights",
+            "type": "number",
+            "default": 0.6,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          }
+        ],
+        "values": {
+          "mediaFill": 0,
+          "mediaExposure": 0,
+          "mediaSpeed": 1,
+          "speed": 0.7,
+          "horizon": 0.42,
+          "ripple": 0.8,
+          "interaction": 0.7,
+          "reflection": 0.35,
+          "sheen": 0.6
+        }
+      },
+      "file": "reflection.txt",
+      "sha256": "5bc3182f9e13c0d447d967a7aba24fec3562f29b6fb06cd6e8ccef04e3de3a31",
+      "mediaName": "lake"
+    },
+    {
+      "id": "fireflies",
+      "title": "Lucent Grove",
+      "engine": "scene-2d",
+      "keywords": [
+        "萤火",
+        "森林",
+        "粒子",
+        "fireflies",
+        "forest"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "mediaFill",
+            "label": "Media fill",
+            "type": "number",
+            "default": 0,
+            "min": 0,
+            "max": 2,
+            "step": 1
+          },
+          {
+            "id": "mediaExposure",
+            "label": "Media exposure",
+            "type": "number",
+            "default": 0,
+            "min": -2,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "mediaSpeed",
+            "label": "Video speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.25,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "density",
+            "label": "Firefly count",
+            "type": "number",
+            "default": 42,
+            "min": 8,
+            "max": 64,
+            "step": 1
+          },
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.1,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "parallax",
+            "label": "Depth parallax",
+            "type": "number",
+            "default": 0.025,
+            "min": 0,
+            "max": 0.07,
+            "step": 0.001
+          },
+          {
+            "id": "glow",
+            "label": "Light intensity",
+            "type": "number",
+            "default": 1.5,
+            "min": 0.1,
+            "max": 3,
+            "step": 0.01
+          },
+          {
+            "id": "mist",
+            "label": "Atmospheric haze",
+            "type": "number",
+            "default": 0.4,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "fireflyColor",
+            "label": "Firefly color",
+            "type": "color",
+            "default": "#9ed980"
+          }
+        ],
+        "values": {
+          "mediaFill": 0,
+          "mediaExposure": 0,
+          "mediaSpeed": 1,
+          "density": 42,
+          "speed": 1,
+          "parallax": 0.025,
+          "glow": 1.5,
+          "mist": 0.4,
+          "fireflyColor": "#9ed980"
+        }
+      },
+      "file": "fireflies.txt",
+      "sha256": "e0af111604821251bd2a51e2d18340a29a7d0fc763ba5bf82ffd9ee5b8dc2393",
+      "mediaName": "forest"
+    },
+    {
+      "id": "cinema",
+      "title": "Ambient Cinema",
+      "engine": "scene-2d",
+      "keywords": [
+        "视频",
+        "时钟",
+        "video",
+        "clock"
+      ],
+      "parameters": {
+        "version": 1,
+        "parameters": [
+          {
+            "id": "mediaFill",
+            "label": "Media fill",
+            "type": "number",
+            "default": 0,
+            "min": 0,
+            "max": 2,
+            "step": 1
+          },
+          {
+            "id": "mediaExposure",
+            "label": "Media exposure",
+            "type": "number",
+            "default": 0,
+            "min": -2,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "mediaSpeed",
+            "label": "Video speed",
+            "type": "number",
+            "default": 1,
+            "min": 0.25,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "speed",
+            "label": "Motion speed",
+            "type": "number",
+            "default": 0.6,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "ambience",
+            "label": "Ambient light",
+            "type": "number",
+            "default": 0.7,
+            "min": 0,
+            "max": 2,
+            "step": 0.01
+          },
+          {
+            "id": "vignette",
+            "label": "Vignette",
+            "type": "number",
+            "default": 0.6,
+            "min": 0,
+            "max": 1,
+            "step": 0.01
+          },
+          {
+            "id": "tint",
+            "label": "Ambient tint",
+            "type": "color",
+            "default": "#5f8eba"
+          },
+          {
+            "id": "clockVisible",
+            "label": "Show clock",
+            "type": "boolean",
+            "default": true
+          },
+          {
+            "id": "clockScale",
+            "label": "Clock scale",
+            "type": "number",
+            "default": 1,
+            "min": 0.6,
+            "max": 1.5,
+            "step": 0.01
+          }
+        ],
+        "values": {
+          "mediaFill": 0,
+          "mediaExposure": 0,
+          "mediaSpeed": 1,
+          "speed": 0.6,
+          "ambience": 0.7,
+          "vignette": 0.6,
+          "tint": "#5f8eba",
+          "clockVisible": true,
+          "clockScale": 1
+        }
+      },
+      "file": "cinema.txt",
+      "sha256": "a8cd11a939b9c78fea9082b85711d503b104155a214a2f51929d79f04c1d8a46",
+      "mediaName": "night"
     }
   ]
 }

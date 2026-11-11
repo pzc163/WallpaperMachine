@@ -14,7 +14,10 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
 
     static func request(profile: ProviderProfile, input: LLMRequest, streaming: Bool = true) throws -> LLMRequestDescriptor {
         let body: [String: Any] = ["model": try input.model(for: profile), "stream": streaming, "max_tokens": input.maxOutputTokens,
-            "system": input.systemInstruction, "messages": input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
+            "system": input.systemInstruction, "messages": input.messages.enumerated().map { index, message -> [String: Any] in
+                if index == input.messages.count-1, let image = input.thumbnailJPEG { return ["role": message.role.rawValue, "content": [["type": "image", "source": ["type": "base64", "media_type": "image/jpeg", "data": image.base64EncodedString()]], ["type": "text", "text": message.content]]] }
+                return ["role": message.role.rawValue, "content": message.content]
+            }]
         return .init(url: try LLMRequestDescriptor.endpoint(profile, version: "v1", suffix: "messages"),
                      headers: ["anthropic-version": "2023-06-01"], body: try LLMRequestDescriptor.encoded(body), authentication: .anthropic)
     }

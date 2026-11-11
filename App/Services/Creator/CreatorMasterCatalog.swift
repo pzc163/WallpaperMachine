@@ -10,13 +10,14 @@ enum CreatorMasterCatalog {
         let parameters: CreatorParameterSchema
         let file: String
         let sha256: String
+        var mediaName: String? = nil
         func source() throws -> String {
             guard let url = Bundle.main.url(forResource: file, withExtension: nil, subdirectory: "CreatorMasters") else { throw CreatorPersistence.Failure.invalidRecord }
             let bytes = try Data(contentsOf: url)
             guard bytes.count <= CreatorCodeOutput.maximumSourceBytes, CreatorPersistence.hash(bytes) == sha256,
                   let source = String(data: bytes, encoding: .utf8) else { throw CreatorPersistence.Failure.invalidRecord }
             if engine == .htmlCanvas { try CreatorCodeOutput.validateHTML(bytes); return source }
-            var document = try CreatorEngineDocument.parseCore(source, engine: engine)
+            var document = try CreatorEngineDocument.parseCore(source, engine: engine, media: try mediaName.map(CreatorMediaDefaults.binding))
             document.metadata.title = title; document.metadata.masterID = id; document.parameters = parameters
             return try document.html()
         }
@@ -25,7 +26,7 @@ enum CreatorMasterCatalog {
     static func all() throws -> [Master] {
         guard let url = Bundle.main.url(forResource: "catalog", withExtension: "json", subdirectory: "CreatorMasters") else { throw CreatorPersistence.Failure.invalidRecord }
         let catalog = try JSONDecoder().decode(Catalog.self, from: Data(contentsOf: url))
-        guard catalog.version == 1, catalog.masters.count == 9, Set(catalog.masters.map(\.id)).count == 9 else { throw CreatorPersistence.Failure.invalidRecord }
+        guard catalog.version == 2, catalog.masters.count == 15, Set(catalog.masters.map(\.id)).count == 15 else { throw CreatorPersistence.Failure.invalidRecord }
         for master in catalog.masters {
             guard master.engine.available, master.id.range(of: #"^[a-z]{1,24}$"#, options: .regularExpression) != nil,
                   master.file == master.id + (master.engine == .htmlCanvas ? ".html" : ".txt") else { throw CreatorPersistence.Failure.invalidRecord }

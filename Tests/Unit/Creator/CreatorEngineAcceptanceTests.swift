@@ -16,8 +16,9 @@ import XCTest
             try surface.setPaused(true); try await Task.sleep(for: .milliseconds(40))
             let still = try await CreatorCodeTestFixture.js(surface, "const before=WallpaperHost.frame;for(let i=0;i<10;i++)__wmStep(34);return WallpaperHost.frame===before") as? Bool
             XCTAssertEqual(still, true, master.id)
-            let parameter = try XCTUnwrap(master.parameters.parameters.first { $0.type == .color })
-            let json = try JSONSerialization.data(withJSONObject: [parameter.id: ["value": "#ff2600"]])
+            let parameter = try XCTUnwrap(master.parameters.parameters.first { master.engine.usesMedia ? $0.id == "mediaExposure" : $0.type == .color })
+            let value: Any = master.engine.usesMedia ? -1.0 : "#ff2600"
+            let json = try JSONSerialization.data(withJSONObject: [parameter.id: ["value": value]])
             try surface.applyProperties(String(decoding: json, as: UTF8.self)); try await Task.sleep(for: .milliseconds(60))
             let adjusted = try await CreatorCodeTestFixture.js(surface, Self.hash) as? Double
             XCTAssertNotEqual(animated, adjusted, master.id)

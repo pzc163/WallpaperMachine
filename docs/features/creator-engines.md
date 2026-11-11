@@ -17,8 +17,9 @@ entry point and reproducible build record live in `ThirdParty/three/`.
 
 Only native-owned Creator WebViews register the scheme. Queries, fragments,
 encoded aliases, path traversal, non-GET methods and unknown paths are refused.
-CSP adds only `wm-lib:` to script-src in both parent and opaque child; connect,
-images, fonts, frames, downloads and all other capabilities remain closed. Content
+CSP adds only `wm-lib:` to script-src in both parent and opaque child. S5.2 permits
+only digest-bound `wm-media:` images/video; connect, remote resources, fonts, frames
+and downloads remain closed. See [media contracts](creator-media.md). Content
 rules use one anchored, escaped URL per resource; WebKit's restricted rule regex
 grammar must not be replaced with general-purpose alternation syntax.
 
@@ -122,3 +123,7 @@ explicit unit clamp and uses a smooth optical-density response to reduce contour
 `CreatorHotEditingTests` exercises real half-float and forced fallback rendering,
 parameter capture on the same WK surface, immutable history and failed source edits.
 Physical display quality/energy still needs visible device acceptance.
+
+## S5.2 图影扩展
+
+画廊现有五种引擎、十五套母版；新增 hybrid-media 和 scene-2d 的六套图影作品。媒体包使用 v3，旧无素材运行库与 v1/v2 重建保持兼容。[完整素材、分享和离屏视频边界](creator-media.md)。

@@ -279,6 +279,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// capture) are kept here and installed again after it.
     private var extraUserScripts: [WKUserScript] = []
     private let creatorResources: CreatorWebResources?
+    var creatorMediaResponses: [Int: Int] { creatorResources?.mediaResponses ?? [:] }
     private let creatorPermissions: CreatorWebPermissions?
     private(set) var creatorCode: CreatorCodeSandbox?
     private(set) var creatorCodeFailure: CreatorRepairIssue?
@@ -377,10 +378,11 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         // Persistent: web wallpapers keep their own state (tasks, favourites) in
         // localStorage exactly as they do under Wallpaper Engine.
         configuration.websiteDataStore = persistentData && !isCreator ? .default() : .nonPersistent()
-        configuration.mediaTypesRequiringUserActionForPlayback = isCreator ? .all : []
+        configuration.mediaTypesRequiringUserActionForPlayback = isCreator ? .audio : []
         if let creatorResources {
             configuration.setURLSchemeHandler(creatorResources, forURLScheme: CreatorWebResources.scheme)
             configuration.setURLSchemeHandler(CreatorLibrary(), forURLScheme: CreatorLibrary.scheme)
+            configuration.setURLSchemeHandler(CreatorMediaResources(resources: creatorResources), forURLScheme: CreatorMediaResources.scheme)
         }
         // Wallpaper Engine loads projects from file:// with sibling-file access;
         // ES modules and fetch() against project assets need the same origin
@@ -796,7 +798,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     private func applyHostSuspension(_ suspended: Bool) {
         guard suspended != hostSuspended else { return }
         hostSuspended = suspended
-        creatorCode?.setHostSuspended(suspended)
+        if suspended { creatorCode?.setHostSuspended(true) }
         suspensionGeneration += 1
         let generation = suspensionGeneration
         if suspended {
@@ -809,6 +811,8 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         } else {
             reattachWebView()
             webView.setAllMediaPlaybackSuspended(false)
+            // Resume the native media pipeline before author/host callbacks call play().
+            creatorCode?.setHostSuspended(false)
             counters.record(.webMediaResumed, for: surface)
         }
         // After the view tree has settled, so a resume flushes into a page that

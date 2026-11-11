@@ -176,7 +176,7 @@ actor CreatorRevisionStore {
 
     func stage(_ specification: CreatorTemplate.Specification, for ticket: GenerationJob.Ticket,
                summary: String = "", legacy: Bool = false, presentation: CreatorBundlePresentation? = nil,
-               generation: CreatorGenerationMetadata? = nil, source: Data? = nil, providerID: String? = nil, modelID: String? = nil) throws -> CreatorRevision {
+               generation: CreatorGenerationMetadata? = nil, source: Data? = nil, assets: [String: Data]? = nil, providerID: String? = nil, modelID: String? = nil) throws -> CreatorRevision {
         try locked {
             try Task.checkCancellation()
             var job = try activeJob(ticket)
@@ -193,15 +193,12 @@ actor CreatorRevisionStore {
             } else if providerID != nil || modelID != nil || (legacy && presentation != nil) {
                 throw CreatorPersistence.Failure.invalidRecord
             }
-            let files = try legacy ? CreatorTemplate.files(for: specification) : CreatorBundleManifest.files(for: specification, presentation: presentation, source: source)
+            let files = try legacy ? CreatorTemplate.files(for: specification) : CreatorBundleManifest.files(for: specification, presentation: presentation, source: source, assets: assets)
             let candidate = jobURL(job.id).appendingPathComponent("candidate", isDirectory: true)
             guard !CreatorPersistence.exists(candidate) else { throw CreatorPersistence.Failure.busy }
             let bundle = candidate.appendingPathComponent("bundle", isDirectory: true)
             try CreatorPersistence.directory(bundle, create: true)
-            for (name, data) in files {
-                try Task.checkCancellation()
-                try CreatorPersistence.atomicWrite(data, to: bundle.appendingPathComponent(name))
-            }
+            try CreatorBundleManifest.write(files, to: bundle)
             let snapshot = try CreatorBundleManifest.read(bundle, scopedRevision: true)
             let identity = CreatorBundleManifest.templateIdentity(specification)
             let revision = CreatorRevision(schemaVersion: 1, id: UUID(), projectID: job.projectID, parentID: job.baseRevisionID,

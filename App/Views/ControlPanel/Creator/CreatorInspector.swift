@@ -27,6 +27,7 @@ struct CreatorInspector: View {
                                 }.disabled(model.isBusy).accessibilityIdentifier("creator-presets")
                                 ForEach(definition.parameters, id: \.id) { parameter in CreatorParameterControl(parameter: parameter) }
                             }
+                            if detail.media != nil { CreatorMediaControls() }
                             if let schema = detail.parameterSchema { CreatorDynamicParameters(schema: schema) }
                             if detail.parameterSchema != nil || detail.specification?.templateID != nil {
                                 Button("Reset default parameters") { controller.launch { try controller.resetCreatorParameters() } }

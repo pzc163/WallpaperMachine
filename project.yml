@@ -50,10 +50,14 @@ targets:
         excludes:
           - Resources/Info.plist
           - Resources/CreatorRuntime
+          - Resources/CreatorMedia
           - Resources/CreatorMasters
           - Resources/AppIcon.icon
           - Bridge/Generated/WallpaperBridgeFFI.h
           - Bridge/Generated/WallpaperBridgeFFI.modulemap
+      - path: App/Resources/CreatorMedia
+        type: folder
+        buildPhase: resources
       - path: App/Resources/CreatorMasters
         type: folder
         buildPhase: resources

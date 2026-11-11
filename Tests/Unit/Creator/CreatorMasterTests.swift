@@ -5,7 +5,7 @@ import XCTest
 @MainActor final class CreatorMasterTests: XCTestCase {
     func testCatalogHasThreePerEngineAndDeterministicReferenceSelection() throws {
         let masters = try CreatorMasterCatalog.all()
-        for engine in [CreatorEngine.shaderGLSL, .three3D, .htmlCanvas] {
+        for engine in [CreatorEngine.shaderGLSL, .three3D, .htmlCanvas, .hybridMedia, .scene2D] {
             XCTAssertEqual(masters.filter { $0.engine == engine }.count, 3)
             XCTAssertNotNil(CreatorMasterCatalog.closest(prompt: "unclassified visual", engine: engine, masters: masters))
         }
@@ -15,7 +15,7 @@ import XCTest
         XCTAssertNil(CreatorMasterCatalog.closest(prompt: "future", engine: .scene25D, masters: masters))
         for master in masters { XCTAssertGreaterThan(master.parameters.parameters.count, 5); XCTAssertEqual(try master.source(), try master.source()) }
     }
-    func testNineMastersRenderRealNativePostersWithoutModelOrDesktop() async throws {
+    func testFifteenMastersRenderRealNativePostersWithoutModelOrDesktop() async throws {
         let c = try await LLMTestContext(); defer { c.cleanup() }
         let workspace = CreatorWorkspaceTests.workspace(c)
         for master in try CreatorMasterCatalog.all() {
@@ -29,7 +29,7 @@ import XCTest
                 let jpeg = try XCTUnwrap(snapshot.files["preview.jpg"])
                 let attachment = XCTAttachment(data: jpeg, uniformTypeIdentifier: "public.jpeg")
                 attachment.name = "creator-master-" + master.id; attachment.lifetime = .keepAlways; add(attachment)
-            } catch { XCTFail(master.id + ": " + String(describing: error)) }
+            } catch { XCTFail(master.id + ": " + String(decoding: try CreatorPersistence.encode(CreatorRepairIssue.from(error)), as: UTF8.self)) }
         }
         XCTAssertTrue(c.route.requests.isEmpty)
     }

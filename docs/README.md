@@ -122,6 +122,7 @@ file; pass `rg -u` to search them deliberately.
 
 - [Creator LAN, native output limits and streaming artifacts](plans/2026-11-11-creator-stream-artifacts.md)
 - [Creator engine foundation](features/creator-engines.md)
+- [Creator offline media, sharing and hybrid engines](features/creator-media.md)
 - [Creator S5.2 provider center, single stage and offline media](plans/2026-11-11-creator-s52.md)
 - [S5.1 engine acceptance](testing/creator-s51-acceptance.md)
 - [S5.1 engines and master gallery](plans/2026-11-11-creator-s51-engines.md)

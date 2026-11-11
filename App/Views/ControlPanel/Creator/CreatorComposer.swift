@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct CreatorComposer: View {
     @Environment(PanelController.self) private var controller
@@ -8,7 +9,7 @@ struct CreatorComposer: View {
             PanelCard {
                 VStack(alignment: .leading, spacing: 10) {
                     ZStack(alignment: .topLeading) {
-                        CreatorPromptEditor(text: $model.prompt, focusID: model.composerFocusID, submit: send)
+                        CreatorPromptEditor(text: $model.prompt, focusID: model.composerFocusID, submit: send, pasteImage: { controller.pasteCreatorMediaIfAvailable() })
                             .disabled(model.isBusy)
                         if model.prompt.isEmpty {
                             Text("Describe your wallpaper or the changes you want").font(.system(size: 14)).foregroundStyle(.tertiary)
@@ -21,6 +22,7 @@ struct CreatorComposer: View {
                         VStack(alignment: .leading, spacing: 8) { profiles; modes }
                     }.disabled(model.isBusy)
                     HStack(spacing: 6) {
+                        CreatorMediaMenu()
                         Toggle("Auto repair", isOn: $model.autoRepair).toggleStyle(.checkbox).disabled(model.isBusy).accessibilityIdentifier("creator-auto-repair")
                         if model.autoRepair {
                             Picker("Repair limit", selection: $model.maxRepairs) { Text(verbatim: "1").tag(1); Text(verbatim: "2").tag(2) }
@@ -43,9 +45,11 @@ struct CreatorComposer: View {
                 HStack { shortcut; Spacer(minLength: 8); status }
                 VStack(alignment: .leading, spacing: 4) { shortcut; status }
             }
+            if model.canSendThumbnail { Toggle("Send thumbnail to the selected vision model", isOn: $model.sendsThumbnail).font(.caption).disabled(model.isBusy) }
             if model.prompt.utf8.count > 2048 { Text("Shorten the prompt to continue.").font(.caption).foregroundStyle(.secondary) }
             if model.profile == nil { Button("Configure a model connection") { controller.launch { try await controller.openSettings(.models) } } }
-        }.padding(.horizontal, 16).padding(.bottom, 16).padding(.top, 8)
+        }.onDrop(of: [UTType.fileURL.identifier], isTargeted: nil, perform: controller.dropCreatorMedia)
+         .padding(.horizontal, 16).padding(.bottom, 16).padding(.top, 8)
     }
     private var shortcut: some View { Text("Enter to send · Shift + Enter for a new line").font(.caption).foregroundStyle(.secondary) }
     private var status: some View {

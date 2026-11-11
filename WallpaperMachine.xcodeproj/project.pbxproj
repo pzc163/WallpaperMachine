@@ -171,6 +171,7 @@
 		1F0A57175B4C08866869B13C /* WebSignInCookies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A37AF44750CDB836A288420 /* WebSignInCookies.swift */; };
 		1F75CC6F42DDAC8F3486EB00 /* CreatorWebResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 958F2028498AC504E3F170A1 /* CreatorWebResources.swift */; };
 		1F7F0340CCCCF2F4D1B07D58 /* SettingsEntryControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2FAA9ADA990EA627755082 /* SettingsEntryControls.swift */; };
+		1F95DE4BD6EF5C5DF43FD914 /* CreatorWorkspace+Media.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93AE8E8BBAD28BC61BF5C16C /* CreatorWorkspace+Media.swift */; };
 		1F9AEBDF94FC8AAD54B208DD /* StorageSettingsModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8B7FD7C97A32558F677F05 /* StorageSettingsModelTests.swift */; };
 		1FBCA148272E0D47BB5FBB7F /* EnergyUsageMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D9753908B8059E4B43D87AD /* EnergyUsageMonitorTests.swift */; };
 		1FFA2F9A8EE499DF1382F048 /* CreatorCodeOutput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2266F9F558E557C7898E483E /* CreatorCodeOutput.swift */; };
@@ -183,6 +184,7 @@
 		21AF33794B9910002B9D9780 /* DragStepPump.swift in Sources */ = {isa = PBXBuildFile; fileRef = 747CB01170DA0B81D67AF2DA /* DragStepPump.swift */; };
 		21D2B4348A9E30906834E9E5 /* PresetsBarStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4EAF5792F31756B234CD8D0 /* PresetsBarStateTests.swift */; };
 		224430163C437773C0B5449A /* DesktopPosterFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B065FB82AB0276E98D5A0C /* DesktopPosterFrame.swift */; };
+		22B30872B0D34488AB0A0B14 /* CreatorMediaPanelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D224B115A4B192505C525729 /* CreatorMediaPanelTests.swift */; };
 		22D355CB93BCD3556C99C3E9 /* PanelImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69F495AD09D83C7D5152F84E /* PanelImage.swift */; };
 		22E8CF494516BF289109A500 /* PanelPresentation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AC0C7C2F3037BB927A1C8A1 /* PanelPresentation.swift */; };
 		22F13CA57648E8292DBEA0E6 /* SystemSolarLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56C3DA02342C64AC2B6011E8 /* SystemSolarLocationManager.swift */; };
@@ -647,6 +649,7 @@
 		7C2D14BA44B265745F2AEC8F /* ShellRenderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C132FEEBF74D9EA7DDB92D89 /* ShellRenderTests.swift */; };
 		7C539C7DF3FCAC3E25A915AD /* ImportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D34FAA8AC6F5BBBA6AFE59EA /* ImportTests.swift */; };
 		7C5C45D0BE1522CAC2EA3A6E /* CreatorInspiration.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5977EB20D95EF4A5B48CDF /* CreatorInspiration.swift */; };
+		7CB2FD595DBF8CCDB8954982 /* CreatorMediaResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE1F1819A9A8460304A5A97A /* CreatorMediaResources.swift */; };
 		7CCE11A069DA241596D93FA7 /* PanelLibraryStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C38495FF87085536B7BFEAF /* PanelLibraryStateTests.swift */; };
 		7D234F720E2B24E1E2D2C987 /* LibraryFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EF07F285FF4DC70AA4A1584 /* LibraryFilterTests.swift */; };
 		7D2A075790F175E693B9DDBC /* SteamCMDReportedFailureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1FF65B759D5CED7C121A290 /* SteamCMDReportedFailureTests.swift */; };
@@ -695,6 +698,7 @@
 		8662E6923DAC81A51E078272 /* MemoryPressureMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 709733CDF8CF0B7174EDCAD4 /* MemoryPressureMonitor.swift */; };
 		869C1DD208EA21C3044242AF /* NativeVideoHealthSupervisor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2F9465E08288548025FDC92 /* NativeVideoHealthSupervisor.swift */; };
 		86D99C235ED992309400C994 /* CreatorOrchestrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = C11CA297E9D7422B68A4C180 /* CreatorOrchestrator.swift */; };
+		8711A64E3E8E6C4371AE6467 /* CreatorMediaDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 036BE0AABC7B33BA47B3ED42 /* CreatorMediaDefaults.swift */; };
 		8730738C65F9459D627D0869 /* PixivInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650BD2B2ABC5BF33B3E354F5 /* PixivInspector.swift */; };
 		87930F4075AD81F5BF4E3B3D /* SettingsDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD251BE755A90EE9B529A68 /* SettingsDetail.swift */; };
 		87F457DAA8841A2B12DF404A /* LowBatteryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE1DA82DB06D835546E308EA /* LowBatteryTests.swift */; };
@@ -728,6 +732,7 @@
 		8C0FD1D9138C9378877BD82E /* PowerSourceResampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07B725B421F1A97C2D4D91AB /* PowerSourceResampler.swift */; };
 		8C3D72E3605B97446C0ABCAC /* StatusMenuModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FB152B7CAD3019706CCC2F4 /* StatusMenuModel.swift */; };
 		8C4D152390562DA35CB2502A /* CreatorArtifactTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75F00A74965ABA2A38436336 /* CreatorArtifactTests.swift */; };
+		8C7B5169C3D6A98DA7349253 /* PanelController+CreatorMedia.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF33140215CC600659E85FB /* PanelController+CreatorMedia.swift */; };
 		8C96FD99318EBBA41565C1C1 /* BridgeStoreDisplayLayouts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E71B8530A8F0F68D7437E9C /* BridgeStoreDisplayLayouts.swift */; };
 		8CA179812986CD14B970D964 /* UserCommandQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD323FA35344BDFB8F88B9FB /* UserCommandQueueTests.swift */; };
 		8CF3705785A563E1ABB938A7 /* CreatorTemplateCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = DADB8C2D43400C6AD3DB9CB5 /* CreatorTemplateCatalog.swift */; };
@@ -761,6 +766,7 @@
 		9294147363361BB572026CFB /* CreatorThoughtPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3105DCAE5902B7207ADBB80 /* CreatorThoughtPanel.swift */; };
 		92E9DF28E16CDFB196D5C52F /* PanelPropertyPreviewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C76EA99CF6394A663A78E092 /* PanelPropertyPreviewTests.swift */; };
 		9328F15FF35F900D00D2B721 /* VideoWallpaperPreviewSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5AA9BD77D3E0F4FE1A3A861D /* VideoWallpaperPreviewSurface.swift */; };
+		932DB108AA496DD38437EDCA /* CreatorMedia in Resources */ = {isa = PBXBuildFile; fileRef = 93C40FF76D8068710566476A /* CreatorMedia */; };
 		934078B9B0174A087FD94FF2 /* WelcomeGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = C171CF0C43C780F728734072 /* WelcomeGuide.swift */; };
 		93504C73E66672C58F266860 /* NativeVideoPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8526BD3CA32500C06E5B584C /* NativeVideoPlayer.swift */; };
 		935CFE11B4F677787CE2639B /* DownloaderTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 788091412E13A9DD343F4899 /* DownloaderTestCase.swift */; };
@@ -943,6 +949,7 @@
 		BBD023D50F84AECF31BB09C6 /* CreatorLabels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78275D4CA08B84598A121BEA /* CreatorLabels.swift */; };
 		BBDE33BBE5745D91980B2A6B /* LibraryHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C084452E45580A61FCB675 /* LibraryHistory.swift */; };
 		BC475695D204FFF9447E1BB6 /* WallpaperPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D5ECA1DC1057D28BB011999 /* WallpaperPlaylist.swift */; };
+		BCFF0CD871FFECDC55BB1D26 /* CreatorMediaAnalysis.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A56B6C4DAC9ED0D686B5B3 /* CreatorMediaAnalysis.swift */; };
 		BD05658AE21B714CD6E1CCE5 /* LibrarySort.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77C6B1008AE4791F00C7443D /* LibrarySort.swift */; };
 		BDADDB497B067424D862AB3B /* DesktopActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 014984F199338E123F3F66F1 /* DesktopActionsTests.swift */; };
 		BDC2B49F1048DBC05ADA3F6B /* TelemetryActiveCount.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCCB2A74EA7A00F632D3B2C1 /* TelemetryActiveCount.swift */; };
@@ -1051,6 +1058,7 @@
 		D02B1C10566AD8FA60AD9CF6 /* PanelBanners.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D68D423C0DD775093AFA1B4 /* PanelBanners.swift */; };
 		D04ACD28C0EE61C7660EC43A /* WorkshopSearchLanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F8467B18BC75716D760915E /* WorkshopSearchLanguage.swift */; };
 		D10CDB227E1D9B4CF5EB81D0 /* PanelWorkshopSubscriptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD9240C537230C52B035EA78 /* PanelWorkshopSubscriptionsTests.swift */; };
+		D15FC2A15ADE4614F68DCE6E /* CreatorProjectArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 554A11952BA96486ECAD91C0 /* CreatorProjectArchive.swift */; };
 		D1EC5641370A4C61073B9F2F /* WebWallpaperIdleCallbacks.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA1ED2C1AD4C3A1D516338FC /* WebWallpaperIdleCallbacks.swift */; };
 		D205D125B93DAA16FF5C78FA /* WorkshopThumbnailCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43A63B42C998EB2C4433B286 /* WorkshopThumbnailCache.swift */; };
 		D22AA44B72A689850E2F4DA2 /* LockScreenXPCDriftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F49D69EDB58DDC9EF4FC0F6D /* LockScreenXPCDriftTests.swift */; };
@@ -1116,6 +1124,7 @@
 		DC000AA8C69989BE8FC8FEE7 /* WebWallpaperUserScripts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B44A330893EA116EEFD20D1 /* WebWallpaperUserScripts.swift */; };
 		DC49B2D61EBF5701A557166E /* FinderDesktopIconsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B6CE382348494345151B640 /* FinderDesktopIconsTests.swift */; };
 		DC5A18EF6383B2B7FF7A5DBC /* SettingsMiniWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471267FE1E893288498CF1C2 /* SettingsMiniWindow.swift */; };
+		DCB61887CBEE61B76D2B8C37 /* CreatorMediaTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1B3DCD6050E2FC7FDE50646 /* CreatorMediaTests.swift */; };
 		DCD42DF74BDD613D76589B8F /* WorkshopListStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F576B1FA5FA623392F22C76E /* WorkshopListStateTests.swift */; };
 		DD4467E011CDB4D331080205 /* AppUpdateModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 631CDAA9941C531C5D8A0074 /* AppUpdateModels.swift */; };
 		DD6846BC5D48469C0CC79394 /* CreatorProviderIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09AAB627A57D355864F289B /* CreatorProviderIcon.swift */; };
@@ -1146,6 +1155,7 @@
 		E203F8AF99E008A9772BDEF6 /* SteamCMDPackages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76F6F4E0822F9B7DA7F0C36C /* SteamCMDPackages.swift */; };
 		E22DDF4A9C946E75B99DA909 /* PanelController+Properties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7177E21F75086DFB7A46E553 /* PanelController+Properties.swift */; };
 		E30ACF41ABB6894ED536733C /* MediaArtwork.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6456F9E1DCC5FE0E969C504C /* MediaArtwork.swift */; };
+		E31358A6A74F9F0DB056D566 /* CreatorMediaControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56F892934114F364EC955B5F /* CreatorMediaControls.swift */; };
 		E333AF905E1149BFC1E4F11D /* LivePropertyEditing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7623A9A2D5CBB869E8A06E7B /* LivePropertyEditing.swift */; };
 		E350360F2308593466054D6A /* DisplayOptionsLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C5A3E47EC5E105AE33D3E5C /* DisplayOptionsLoaderTests.swift */; };
 		E3681FB893B066FA38536F73 /* PanelController+Automation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CC9CBA0E4EFAED2CF3738B6 /* PanelController+Automation.swift */; };
@@ -1227,6 +1237,7 @@
 		F2BF4D35987C693AFFCC02E4 /* PropertyTopLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59ED91AD7FC5D3EE80F9C933 /* PropertyTopLine.swift */; };
 		F319EF18E27C7D42AF96E156 /* LockScreenRequestShapeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55EA635BF32D31F2F1B60FF3 /* LockScreenRequestShapeTests.swift */; };
 		F33A2F1578AB78915C15B6A8 /* AutomationCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41E36FEDEF89E7C6F7119E5F /* AutomationCommand.swift */; };
+		F34F93440AF90CE85151A9B4 /* CreatorMediaAsset.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE809473CA750594BBADDEFB /* CreatorMediaAsset.swift */; };
 		F35961AFB52DB9574A4DFA32 /* ActivationPolicyRule.swift in Sources */ = {isa = PBXBuildFile; fileRef = EAD33231E51D3F3A7DD62A15 /* ActivationPolicyRule.swift */; };
 		F35DFB7E2C42C14F01B0875B /* DisplaysOrderEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C07895AFC9350BDA25D11D2 /* DisplaysOrderEditor.swift */; };
 		F386DD53E6238CF360D14A37 /* VideoLetterboxProbeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B070CDFC5561092A2CB2331 /* VideoLetterboxProbeTests.swift */; };
@@ -1379,6 +1390,7 @@
 		0204167A4A829000ACE25482 /* PixivActivityPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixivActivityPill.swift; sourceTree = "<group>"; };
 		0249ABA446AA96C92B314BC6 /* StorageLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageLocation.swift; sourceTree = "<group>"; };
 		0316B4FC6110C8C80F69B6F6 /* SceneReports.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneReports.swift; sourceTree = "<group>"; };
+		036BE0AABC7B33BA47B3ED42 /* CreatorMediaDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMediaDefaults.swift; sourceTree = "<group>"; };
 		0382494242C7036444B58818 /* PanelColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelColor.swift; sourceTree = "<group>"; };
 		0383041921B0FEB3E1F8FB63 /* WorkshopInspectorActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopInspectorActions.swift; sourceTree = "<group>"; };
 		0387C0FFD431890B30059AF5 /* QualityReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QualityReport.swift; sourceTree = "<group>"; };
@@ -1809,11 +1821,13 @@
 		5512489A9E0DA9B91D250833 /* LockScreenExtensionProcessesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenExtensionProcessesTests.swift; sourceTree = "<group>"; };
 		551253F86B1FA54273A2D696 /* FallbackSystemMediaProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FallbackSystemMediaProviderTests.swift; sourceTree = "<group>"; };
 		55248D80C15F6D1C64FBBC96 /* InstalledBrowserModel+Sweep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "InstalledBrowserModel+Sweep.swift"; sourceTree = "<group>"; };
+		554A11952BA96486ECAD91C0 /* CreatorProjectArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorProjectArchive.swift; sourceTree = "<group>"; };
 		55EA635BF32D31F2F1B60FF3 /* LockScreenRequestShapeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenRequestShapeTests.swift; sourceTree = "<group>"; };
 		5628F105B5CCD9AC835802B1 /* DisplaysSettingsDraftsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplaysSettingsDraftsTests.swift; sourceTree = "<group>"; };
 		56534C81E185DAA1A7932E25 /* LockScreenIdleExitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenIdleExitTests.swift; sourceTree = "<group>"; };
 		56B19AAE6B48655599C51EA9 /* WallpaperAutomationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperAutomationController.swift; sourceTree = "<group>"; };
 		56C3DA02342C64AC2B6011E8 /* SystemSolarLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemSolarLocationManager.swift; sourceTree = "<group>"; };
+		56F892934114F364EC955B5F /* CreatorMediaControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMediaControls.swift; sourceTree = "<group>"; };
 		572535E66182ECA27C6C83E7 /* WallpaperProjectRevision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperProjectRevision.swift; sourceTree = "<group>"; };
 		5725B2D6F879C724B2CA5845 /* InstalledPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledPage.swift; sourceTree = "<group>"; };
 		574C2D1F3A3E5DBA8703E261 /* PanelController+DisplayLayouts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PanelController+DisplayLayouts.swift"; sourceTree = "<group>"; };
@@ -2024,6 +2038,7 @@
 		814C095F5C6167C0ED45896A /* WallpaperExtensionBridge.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = WallpaperExtensionBridge.h; sourceTree = "<group>"; };
 		817816E4A8FC51C844C3BB9C /* ImportPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportPopover.swift; sourceTree = "<group>"; };
 		81813BC733149DBDA11A4673 /* AnimatedPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedPreview.swift; sourceTree = "<group>"; };
+		81A56B6C4DAC9ED0D686B5B3 /* CreatorMediaAnalysis.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMediaAnalysis.swift; sourceTree = "<group>"; };
 		81B9B4FF0208C2CFC07603A8 /* LockScreenConnectionTraceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenConnectionTraceTests.swift; sourceTree = "<group>"; };
 		81E8900808C3FBFCA975A433 /* NativeVideoAdmissionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeVideoAdmissionTests.swift; sourceTree = "<group>"; };
 		82FC231C33B7AD232F150439 /* CreatorProjectNaming.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorProjectNaming.swift; sourceTree = "<group>"; };
@@ -2110,6 +2125,8 @@
 		92FB089F72B9FA58DEA0B79F /* AppearanceAccent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceAccent.swift; sourceTree = "<group>"; };
 		92FED378E8CD2FC16118EEAD /* WebWallpaperErrorStackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebWallpaperErrorStackTests.swift; sourceTree = "<group>"; };
 		93648BF95C8F60E51A4B4822 /* PanelToolbarContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelToolbarContent.swift; sourceTree = "<group>"; };
+		93AE8E8BBAD28BC61BF5C16C /* CreatorWorkspace+Media.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CreatorWorkspace+Media.swift"; sourceTree = "<group>"; };
+		93C40FF76D8068710566476A /* CreatorMedia */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CreatorMedia; path = App/Resources/CreatorMedia; sourceTree = SOURCE_ROOT; };
 		93CD781A700C6C15D88FEF6B /* WorkshopService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkshopService.swift; sourceTree = "<group>"; };
 		93FD3C95C18D430D508ADA33 /* DeletionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeletionTests.swift; sourceTree = "<group>"; };
 		940C42AD041D7AC5D814E800 /* AnthropicMessagesCodec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicMessagesCodec.swift; sourceTree = "<group>"; };
@@ -2243,6 +2260,7 @@
 		AE09959F484237BC54310087 /* GlobalHotKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotKeys.swift; sourceTree = "<group>"; };
 		AE4494AFBA1049EC719E7B41 /* PanelController+WallpaperSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PanelController+WallpaperSettings.swift"; sourceTree = "<group>"; };
 		AE49EAAA2B498195EFD582DC /* WallpaperBackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WallpaperBackupService.swift; sourceTree = "<group>"; };
+		AE809473CA750594BBADDEFB /* CreatorMediaAsset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMediaAsset.swift; sourceTree = "<group>"; };
 		AE8B42C125E2BEB6A97903EF /* SteamCMDLiveInstallTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteamCMDLiveInstallTests.swift; sourceTree = "<group>"; };
 		AE9CD80098F00D61923D0BD5 /* TileDownloadStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileDownloadStateTests.swift; sourceTree = "<group>"; };
 		AEAEDA5F5903EE9C3BCBFAD6 /* LibrarySelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySelection.swift; sourceTree = "<group>"; };
@@ -2336,6 +2354,7 @@
 		C17363C6C4F4CFBC1E2A1295 /* WebMPlayerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebMPlayerTests.swift; sourceTree = "<group>"; };
 		C18A559D6C078ABB531CDD9F /* PanelPresentationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelPresentationTests.swift; sourceTree = "<group>"; };
 		C1AB7FBD0CA716BCDF6B748F /* CreatorRevisionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorRevisionStore.swift; sourceTree = "<group>"; };
+		C1B3DCD6050E2FC7FDE50646 /* CreatorMediaTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMediaTests.swift; sourceTree = "<group>"; };
 		C1E142F074CCD18756A4B4DA /* SettingsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsModel.swift; sourceTree = "<group>"; };
 		C1F27C606169E4C7857D00CC /* WelcomeRenderHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeRenderHarness.swift; sourceTree = "<group>"; };
 		C1FF65B759D5CED7C121A290 /* SteamCMDReportedFailureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SteamCMDReportedFailureTests.swift; sourceTree = "<group>"; };
@@ -2424,6 +2443,7 @@
 		D1CB217212F15B65F813BB92 /* TelemetryEnvironmentTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TelemetryEnvironmentTests.swift; sourceTree = "<group>"; };
 		D1DD02ED4B5F6F505759DFB9 /* TileGridLayoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TileGridLayoutTests.swift; sourceTree = "<group>"; };
 		D216171FA55EA066AAD73C3E /* VideoFormatSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFormatSupport.swift; sourceTree = "<group>"; };
+		D224B115A4B192505C525729 /* CreatorMediaPanelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMediaPanelTests.swift; sourceTree = "<group>"; };
 		D238C36169AB5523AE3383B1 /* SetupActivityPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupActivityPill.swift; sourceTree = "<group>"; };
 		D248D1DBB6D77C3F7448565C /* PanelImagePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PanelImagePipeline.swift; sourceTree = "<group>"; };
 		D2AB36AD0C0BE576B66A4DCB /* QuitSupervisor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuitSupervisor.swift; sourceTree = "<group>"; };
@@ -2488,6 +2508,7 @@
 		DDBAF9AC106953436AE41DB4 /* WallpaperMachine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WallpaperMachine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDDE43E1EDFE9A9949A28525 /* InstalledEmptyState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstalledEmptyState.swift; sourceTree = "<group>"; };
 		DDFB0ED4838ABF4FB422F244 /* CreatorLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorLibrary.swift; sourceTree = "<group>"; };
+		DE1F1819A9A8460304A5A97A /* CreatorMediaResources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorMediaResources.swift; sourceTree = "<group>"; };
 		DE278CC455DE02B2D8722625 /* PixivBrowseState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixivBrowseState.swift; sourceTree = "<group>"; };
 		DE336CD385C6F948887271E7 /* DesktopSettledPosterStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopSettledPosterStoreTests.swift; sourceTree = "<group>"; };
 		DE3C0D175EA9979383652025 /* FirstRunDraftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstRunDraftTests.swift; sourceTree = "<group>"; };
@@ -2616,6 +2637,7 @@
 		FA18F7A3B83912871DE8EB9C /* LibraryRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryRow.swift; sourceTree = "<group>"; };
 		FA8704E8F2DC99C56E448967 /* LockScreenSurfaceRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenSurfaceRegistry.swift; sourceTree = "<group>"; };
 		FAB8885D6FEEE07971FAD877 /* CreatorCodeTestFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorCodeTestFixture.swift; sourceTree = "<group>"; };
+		FAF33140215CC600659E85FB /* PanelController+CreatorMedia.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PanelController+CreatorMedia.swift"; sourceTree = "<group>"; };
 		FB21FA7F73D0415DD8387CA1 /* LockScreenExtensionDiagnosticsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenExtensionDiagnosticsTests.swift; sourceTree = "<group>"; };
 		FB971B62174C5F9F826731BB /* WebWallpaperPageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebWallpaperPageTests.swift; sourceTree = "<group>"; };
 		FBE0535D058A2942F417279F /* CreatorCodeProcess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreatorCodeProcess.swift; sourceTree = "<group>"; };
@@ -3084,6 +3106,7 @@
 				CE5977EB20D95EF4A5B48CDF /* CreatorInspiration.swift */,
 				78275D4CA08B84598A121BEA /* CreatorLabels.swift */,
 				ADF8ADD1E1A049FCED983DFE /* CreatorMasterGallery.swift */,
+				56F892934114F364EC955B5F /* CreatorMediaControls.swift */,
 				EAD16EA080870AF83F15ACEC /* CreatorModel.swift */,
 				D7D22B5B900EF057B7F29EAB /* CreatorPage.swift */,
 				70522B8DCA962077E65176E2 /* CreatorPreviewContent.swift */,
@@ -3137,6 +3160,7 @@
 			isa = PBXGroup;
 			children = (
 				5B97F21E5A9C9F3D454FC405 /* CreatorMasters */,
+				93C40FF76D8068710566476A /* CreatorMedia */,
 				C74567E7A24A8558A010DB65 /* CreatorRuntime */,
 				DD1EDE652E69E06265483667 /* StarterWallpaper */,
 				AB0C4AD40AF6CCFA1128210B /* three */,
@@ -3230,6 +3254,10 @@
 				94A141BD9CDC57FC468B8128 /* CreatorJSON.swift */,
 				DDFB0ED4838ABF4FB422F244 /* CreatorLibrary.swift */,
 				C59B135E8922338F98A8E8A4 /* CreatorMasterCatalog.swift */,
+				81A56B6C4DAC9ED0D686B5B3 /* CreatorMediaAnalysis.swift */,
+				AE809473CA750594BBADDEFB /* CreatorMediaAsset.swift */,
+				036BE0AABC7B33BA47B3ED42 /* CreatorMediaDefaults.swift */,
+				DE1F1819A9A8460304A5A97A /* CreatorMediaResources.swift */,
 				C11CA297E9D7422B68A4C180 /* CreatorOrchestrator.swift */,
 				12064F806146560442FDE047 /* CreatorOutputSchema.swift */,
 				5DA551656C69FDD278724E6C /* CreatorOutputValidator.swift */,
@@ -3243,6 +3271,7 @@
 				21B1B6FF05957A9E80094FC2 /* CreatorPreview.swift */,
 				48DBAB8B9042586C7326F30C /* CreatorPreviewWindow.swift */,
 				3F19520E01742642E2E7FED7 /* CreatorProject.swift */,
+				554A11952BA96486ECAD91C0 /* CreatorProjectArchive.swift */,
 				82FC231C33B7AD232F150439 /* CreatorProjectNaming.swift */,
 				8CCDDBF7D93F57C16C31CFE7 /* CreatorPromptBuilder.swift */,
 				072499699BF0AAB9ED1F8375 /* CreatorPublisher.swift */,
@@ -3273,6 +3302,7 @@
 				9E6944FC3CC2F968CA200F09 /* CreatorTemplateWebGLKernel.swift */,
 				958F2028498AC504E3F170A1 /* CreatorWebResources.swift */,
 				811BF1676D9FE206F49DA9E6 /* CreatorWorkspace.swift */,
+				93AE8E8BBAD28BC61BF5C16C /* CreatorWorkspace+Media.swift */,
 				91FAC0AD2D58C13D5EB1D8EF /* GenerationJob.swift */,
 				71DF003984E787625127BBC6 /* ValidationReport.swift */,
 			);
@@ -3700,6 +3730,7 @@
 				2922639384E3DFF7809D1B76 /* CreatorIterationTests.swift */,
 				5387FB05687A42F91EC3C9D8 /* CreatorLiveSmokeTests.swift */,
 				38DFA2AC0A878D1F0D7C9C11 /* CreatorMasterTests.swift */,
+				C1B3DCD6050E2FC7FDE50646 /* CreatorMediaTests.swift */,
 				276AE5F652AB3AA41C37AC34 /* CreatorOrchestratorTests.swift */,
 				0B5A07F5F65CAE955F7B3BC4 /* CreatorOutputValidatorTests.swift */,
 				69A220A96234F8957F9B2ECF /* CreatorPosterTests.swift */,
@@ -3783,6 +3814,7 @@
 				E0FF3434532809ED53EB4E72 /* CreatorComposerTests.swift */,
 				0DB88B40083521F4841F3183 /* CreatorControlsTests.swift */,
 				61AEA80F0D7AD1387335B27D /* CreatorGalleryTests.swift */,
+				D224B115A4B192505C525729 /* CreatorMediaPanelTests.swift */,
 				A5056AC8CF7E764179127BF9 /* CreatorModelSettingsTests.swift */,
 				166649FD3DB5D98F4FF00C9F /* CreatorPanelTests.swift */,
 				4C5A3E47EC5E105AE33D3E5C /* DisplayOptionsLoaderTests.swift */,
@@ -4098,6 +4130,7 @@
 				F77580F645FC149E97CB44B6 /* PanelController+Compatibility.swift */,
 				C4CDBEBE73426FA19769A17D /* PanelController+Creator.swift */,
 				0474CF7D038D84B2CDB8FC71 /* PanelController+CreatorArtifact.swift */,
+				FAF33140215CC600659E85FB /* PanelController+CreatorMedia.swift */,
 				FFCBF320BEF2011C7264C27C /* PanelController+DiscoverUI.swift */,
 				574C2D1F3A3E5DBA8703E261 /* PanelController+DisplayLayouts.swift */,
 				1AA9BD84A740CEDD5F6E8C4A /* PanelController+DisplayPosition.swift */,
@@ -4859,6 +4892,7 @@
 				19E27811FC9C4C42CE7DB048 /* AppIcon.icon in Resources */,
 				2600CA761EA04A74898D63CD /* Assets.xcassets in Resources */,
 				44A8AA2154041CFC7A04DB46 /* CreatorMasters in Resources */,
+				932DB108AA496DD38437EDCA /* CreatorMedia in Resources */,
 				F6072989CA5FDED7DBBCAA76 /* CreatorRuntime in Resources */,
 				485EAC24A329D7561E6B91FD /* InfoPlist.xcstrings in Resources */,
 				798F7C72D4B903EC62721C12 /* LICENSE in Resources */,
@@ -5033,6 +5067,8 @@
 				B812B08152829848B166C206 /* CreatorIterationTests.swift in Sources */,
 				7777D25EF5C744A293F250EC /* CreatorLiveSmokeTests.swift in Sources */,
 				B796B63F3BE0657339A3F86F /* CreatorMasterTests.swift in Sources */,
+				22B30872B0D34488AB0A0B14 /* CreatorMediaPanelTests.swift in Sources */,
+				DCB61887CBEE61B76D2B8C37 /* CreatorMediaTests.swift in Sources */,
 				472E7B1ED1F5034AB66B71EC /* CreatorModelSettingsTests.swift in Sources */,
 				C530E3920B95ADC6167F501F /* CreatorOrchestratorTests.swift in Sources */,
 				F61F7975731D08EF111F744E /* CreatorOutputValidatorTests.swift in Sources */,
@@ -5545,6 +5581,11 @@
 				4BCD0C02BCBE3B6ABD05111D /* CreatorLibrary.swift in Sources */,
 				DADA251610C3A2C1AFEDF045 /* CreatorMasterCatalog.swift in Sources */,
 				1BEEA41F687F05247C7EEEE4 /* CreatorMasterGallery.swift in Sources */,
+				BCFF0CD871FFECDC55BB1D26 /* CreatorMediaAnalysis.swift in Sources */,
+				F34F93440AF90CE85151A9B4 /* CreatorMediaAsset.swift in Sources */,
+				E31358A6A74F9F0DB056D566 /* CreatorMediaControls.swift in Sources */,
+				8711A64E3E8E6C4371AE6467 /* CreatorMediaDefaults.swift in Sources */,
+				7CB2FD595DBF8CCDB8954982 /* CreatorMediaResources.swift in Sources */,
 				13ACB42EBA7052007B51E3F0 /* CreatorModel.swift in Sources */,
 				86D99C235ED992309400C994 /* CreatorOrchestrator.swift in Sources */,
 				FCFF26C7D6D1A597B6B304FA /* CreatorOutputSchema.swift in Sources */,
@@ -5561,6 +5602,7 @@
 				81D79C8051C5BE2E84EF1A5E /* CreatorPreviewContent.swift in Sources */,
 				2FD596EDF8F57042653EF5CD /* CreatorPreviewWindow.swift in Sources */,
 				47BE67DA8BAC99A34E3E2407 /* CreatorProject.swift in Sources */,
+				D15FC2A15ADE4614F68DCE6E /* CreatorProjectArchive.swift in Sources */,
 				50D21854C6A0B41C846FA529 /* CreatorProjectNaming.swift in Sources */,
 				CA7A304EE7B009AB6FCE98E4 /* CreatorProjectsList.swift in Sources */,
 				64C81C24F594965F91936C5E /* CreatorPromptBuilder.swift in Sources */,
@@ -5598,6 +5640,7 @@
 				9294147363361BB572026CFB /* CreatorThoughtPanel.swift in Sources */,
 				F9560B4870CBB2A4E5797016 /* CreatorTranscript.swift in Sources */,
 				1F75CC6F42DDAC8F3486EB00 /* CreatorWebResources.swift in Sources */,
+				1F95DE4BD6EF5C5DF43FD914 /* CreatorWorkspace+Media.swift in Sources */,
 				007DE3FE3B549E2D5BCC88EE /* CreatorWorkspace.swift in Sources */,
 				0005FEA1E5F87076BD85A0CE /* DerivedVideoCache.swift in Sources */,
 				22F40335E6A13D52BCBF3446 /* DesktopActions.swift in Sources */,
@@ -5823,6 +5866,7 @@
 				B8D411E6C474137D0188684C /* PanelController+Compatibility.swift in Sources */,
 				E0AB1B0CED4D6AC709777498 /* PanelController+Creator.swift in Sources */,
 				5F3A50B06A435029FE388EE0 /* PanelController+CreatorArtifact.swift in Sources */,
+				8C7B5169C3D6A98DA7349253 /* PanelController+CreatorMedia.swift in Sources */,
 				FFBC18031E6DB0361343230E /* PanelController+DiscoverUI.swift in Sources */,
 				C8F4FEDC95E6F0C456D2285D /* PanelController+DisplayLayouts.swift in Sources */,
 				0CD8CD4049A66806162C1FD5 /* PanelController+DisplayPosition.swift in Sources */,

@@ -1,0 +1,31 @@
+{
+  "base" : {
+    "bytes" : 337693,
+    "digest" : "b3dffe97cfbc8d8d1506bed27f1478486eae1f1d6cf41a2bb89efa8e6f0da2cf",
+    "mime" : "image/jpeg",
+    "path" : "assets/b3dffe97cfbc8d8d1506bed27f1478486eae1f1d6cf41a2bb89efa8e6f0da2cf.jpg"
+  },
+  "height" : 941,
+  "kind" : "image",
+  "mask" : {
+    "bytes" : 114354,
+    "digest" : "b54fbb2e2967c4b9b754572d902bf307e48ec774285386a9612ed3765a8c7e78",
+    "mime" : "image/png",
+    "path" : "assets/b54fbb2e2967c4b9b754572d902bf307e48ec774285386a9612ed3765a8c7e78.png"
+  },
+  "palette" : [
+    "#142732",
+    "#0a1114",
+    "#0c1d27",
+    "#2f4653",
+    "#1b3445"
+  ],
+  "thumbnail" : {
+    "bytes" : 30910,
+    "digest" : "eb297615cea87ee80b4cd73c7d4d563fcafb0358e1526a9b6a4c555cde2bd007",
+    "mime" : "image/jpeg",
+    "path" : "assets/eb297615cea87ee80b4cd73c7d4d563fcafb0358e1526a9b6a4c555cde2bd007.jpg"
+  },
+  "version" : 1,
+  "width" : 1672
+}

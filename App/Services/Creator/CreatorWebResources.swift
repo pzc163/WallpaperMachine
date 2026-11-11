@@ -7,6 +7,7 @@ final class CreatorWebResources: NSObject, WKURLSchemeHandler {
     static let scheme = "wm-creator"
     static let entryURL = URL(string: "wm-creator://bundle/index.html")!
     var snapshot: CreatorDraftStore.Snapshot?
+    var mediaResponses: [Int: Int] = [:]
 
     // Compile once per process, using the app's test-overridable cache directory.
     // A compilation failure prevents loading. This adds resource filtering, but it
@@ -22,8 +23,11 @@ final class CreatorWebResources: NSObject, WKURLSchemeHandler {
         for url in CreatorLibrary.assets.keys.sorted() {
             rulesJSON.append(["trigger": ["url-filter": "^" + NSRegularExpression.escapedPattern(for: url) + "$"], "action": ["type": "ignore-previous-rules"]])
         }
+        for ext in CreatorMediaFile.types.keys.sorted() {
+            rulesJSON.append(["trigger": ["url-filter": "^wm-media://bundle/assets/[a-f0-9]+\\." + ext + "$"], "action": ["type": "ignore-previous-rules"]])
+        }
         json = String(decoding: try JSONSerialization.data(withJSONObject: rulesJSON), as: UTF8.self)
-        guard let rules = try await store.compileContentRuleList(forIdentifier: "creator-offline-s51-v1", encodedContentRuleList: json)
+        guard let rules = try await store.compileContentRuleList(forIdentifier: "creator-offline-s52-v1", encodedContentRuleList: json)
         else { throw CreatorTemplate.Failure.invalidBundle }
         return rules
     }

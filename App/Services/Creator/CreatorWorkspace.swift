@@ -13,6 +13,7 @@ actor CreatorWorkspace {
         var parameterSchema: CreatorParameterSchema? = nil
         var engine: CreatorEngine? = nil
         var authorSource: String? = nil
+        var media: CreatorMediaBinding? = nil
     }
     let store: CreatorRevisionStore
     let settings: CreatorSettingsStore
@@ -21,7 +22,7 @@ actor CreatorWorkspace {
     let publisher: CreatorPublisher
     let registry: CreatorRuntimeRegistry
     let orchestrator: CreatorOrchestrator
-    private let library: URL
+    let library: URL
     private let capture: CreatorOrchestrator.Capture
     private let beforeWrite: @Sendable () throws -> Void
 
@@ -40,6 +41,7 @@ actor CreatorWorkspace {
         orchestrator = CreatorOrchestrator(store: store,
             generator: CreatorGenerator(store: store, settings: settings, provider: provider), publisher: publisher, capture: capture)
     }
+    func beginMediaWrite() throws { try beforeWrite() }
     func recover() async throws -> CreatorRevisionStore.Recovery { try await orchestrator.recover() }
     func projects() async throws -> [CreatorRevisionStore.WorkspaceProject] { try await store.workspaceProjects() }
     func configuration() async throws -> CreatorSettings { try await settings.settings() }
@@ -64,7 +66,7 @@ actor CreatorWorkspace {
         let document = try source.flatMap(CreatorEngineDocument.read)
         let installed = try await registry.bindings().values.first { $0.projectID == id }
         return Detail(project: project, revisions: revisions, reports: reports,
-                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID, source: source, parameterSchema: parameterSchema, engine: specification?.kind == .code ? (document?.engine ?? .htmlCanvas) : nil, authorSource: document?.core)
+                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID, source: source, parameterSchema: parameterSchema, engine: specification?.kind == .code ? (document?.engine ?? .htmlCanvas) : nil, authorSource: document?.core, media: document?.metadata.media)
     }
     func masters() throws -> [CreatorMasterCatalog.Master] { try CreatorMasterCatalog.all() }
     func createMaster(_ id: String) async throws -> UUID {
@@ -130,7 +132,7 @@ actor CreatorWorkspace {
         if spec.kind == .code, let bytes = snapshot.files["index.html"], let schema = try CreatorParameterSchema.read(String(decoding: bytes, as: UTF8.self)) {
             let html = Data(try schema.replacing(in: String(decoding: bytes, as: UTF8.self), with: parameters).utf8)
             spec = try CreatorCodeOutput.specification(projectID: project, html: html)
-            return try await rebuild(spec, base: revision, source: html, hotCapture: hotCapture)
+            return try await rebuild(spec, base: revision, source: html, assets: snapshot.assets, hotCapture: hotCapture)
         }
         guard let templateID = spec.templateID else { throw CreatorGenerationFailure.policyViolation }
         try CreatorTemplateCatalog.definition(templateID).validate(parameters)
@@ -146,7 +148,7 @@ actor CreatorWorkspace {
         let reference = try CreatorEngineDocument.read(String(decoding: bytes, as: UTF8.self))
         let output = try CreatorEnginePrompt.output(source, engine: reference?.engine ?? .htmlCanvas, reference: reference)
         let spec = try CreatorCodeOutput.specification(projectID: project, html: output.html)
-        return try await rebuild(spec, base: revision, source: output.html)
+        return try await rebuild(spec, base: revision, source: output.html, assets: snapshot.assets)
     }
     func duplicate(_ id: UUID, title: String) async throws -> UUID {
         try beforeWrite()
@@ -157,7 +159,7 @@ actor CreatorWorkspace {
                 let original = try await store.snapshot(projectID: id, revisionID: revision)
                 var spec = original.specification
                 spec.projectID = next.id
-                _ = try await rebuild(spec, base: nil, source: spec.kind == .code ? original.files["index.html"] : nil)
+                _ = try await rebuild(spec, base: nil, source: spec.kind == .code ? original.files["index.html"] : nil, assets: original.assets)
             }
             return next.id
         } catch {
@@ -167,11 +169,11 @@ actor CreatorWorkspace {
             throw error
         }
     }
-    private func rebuild(_ specification: CreatorTemplate.Specification, base: UUID?, source: Data? = nil,
+    func rebuild(_ specification: CreatorTemplate.Specification, base: UUID?, source: Data? = nil, assets: [String: Data]? = nil,
                          hotCapture: CreatorOrchestrator.Capture? = nil) async throws -> CreatorRevision {
         let ticket = try await store.beginJob(projectID: specification.projectID, baseRevisionID: base)
         do {
-            _ = try await store.stage(specification, for: ticket, source: source)
+            _ = try await store.stage(specification, for: ticket, source: source, assets: assets)
             let draft = try await store.commit(ticket, validatingStructure: true, selecting: false)
             let evidence = try await (hotCapture ?? capture)(specification.projectID, draft.id, store)
             try Task.checkCancellation()

@@ -1,0 +1,4 @@
+float hash21(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(hash21(i),hash21(i+vec2(1,0)),f.x),mix(hash21(i+vec2(0,1)),hash21(i+1.),f.x),f.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int k=0;k<4;k++){v+=a*noise(p);p=mat2(1.6,1.2,-1.2,1.6)*p+2.7;a*=.5;}return v;}
+void mainImage(out vec4 c,in vec2 xy){vec2 uv=xy/iResolution.xy;vec3 col=wmBase(uv);float light=fbm(uv*vec2(2.4,3.)+vec2(iTime*.025*p_speed,-iTime*.018*p_speed));float halo=exp(-dot((uv-vec2(.7,.65))*vec2(1.,.8),(uv-vec2(.7,.65))*vec2(1.,.8))*3.);col+=p_tint*light*halo*p_ambience*.12;col*=1.-p_vignette*pow(length(uv-.5),1.6);c=vec4(col,1);}

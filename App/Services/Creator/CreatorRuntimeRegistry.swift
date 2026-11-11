@@ -70,7 +70,7 @@ actor CreatorRuntimeRegistry {
         guard document.schemaVersion == 1, document.entries.count <= 1000 else { throw CreatorPersistence.Failure.unsupportedVersion }
         for (key, binding) in document.entries {
             try binding.context.validate()
-            guard key == binding.wallpaperID, binding.schemaVersion == 1, [1, 2].contains(binding.bundleVersion),
+            guard key == binding.wallpaperID, binding.schemaVersion == 1, [1, 2, 3].contains(binding.bundleVersion),
                   key == (binding.bundleVersion == 1 ? CreatorTemplate.idPrefix : "ai-") + CreatorPersistence.uuidName(binding.projectID),
                   ["trustedTemplateV1", "generatedOfflineV1"].contains(binding.runtimePolicy),
                   binding.bundleVersion != 1 || binding.runtimePolicy == "trustedTemplateV1", CreatorPersistence.validDigest(binding.bundleDigest)
@@ -95,7 +95,7 @@ actor CreatorRuntimeRegistry {
         guard binding.wallpaperID == snapshot.wallpaperID, binding.bundleDigest == snapshot.digest,
               binding.projectID == snapshot.specification.projectID, binding.bundleVersion == snapshot.bundleVersion,
               binding.context.sameHost(as: context), binding.runtimePolicy == snapshot.specification.runtimePolicy else { throw CreatorPersistence.Failure.staleValidation }
-        if snapshot.bundleVersion == 2 {
+        if [2, 3].contains(snapshot.bundleVersion) {
             guard snapshot.manifest?.packaging == .sealed, let report = binding.report,
                   report.renderDigest == (try snapshot.renderDigest), report.posterDigest == snapshot.manifest?.posterDigest,
                   report.templateRevision == CreatorBundleManifest.templateIdentity(snapshot.specification).revision,
@@ -120,7 +120,7 @@ actor CreatorRuntimeRegistry {
         defer { withExtendedLifetime(lease) {} }
         let document = try read(at: registryURL)
         let snapshot = try CreatorBundleManifest.read(directory, expectedDigest: expectedDigest)
-        if snapshot.bundleVersion == 2, document.entries[directory.lastPathComponent] == nil {
+        if [2, 3].contains(snapshot.bundleVersion), document.entries[directory.lastPathComponent] == nil {
             throw CreatorPersistence.Failure.incompleteBundle
         }
         if let binding = document.entries[directory.lastPathComponent] {
