@@ -20,7 +20,7 @@ struct CreatorBundleManifest: Codable, Equatable, Sendable {
     }
 
     static func parameters(_ specification: CreatorTemplate.Specification) -> [String: CreatorTemplateCatalog.Value] {
-        if specification.kind == .code { return [:] }
+        if specification.kind == .code { return specification.parameters ?? [:] }
         return specification.parameters ?? ["hue": .number(specification.hue), "speed": .number(specification.speed)]
     }
 

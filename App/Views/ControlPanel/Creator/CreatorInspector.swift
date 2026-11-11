@@ -51,6 +51,7 @@ struct CreatorInspector: View {
                             Button("Validate changes") { controller.launch { try await controller.validateCreatorParameters() } }
                                 .disabled(!model.hasParameterChanges || model.isBusy).accessibilityIdentifier("creator-validate-parameters")
                         }
+                        if let schema = detail.parameterSchema { Divider(); CreatorDynamicParameters(schema: schema) }
                         if detail.specification?.kind == .code {
                             Text("Free code · HTML5 / Canvas / WebGL").font(.caption).foregroundStyle(.secondary)
                             Text("Use conversation to revise the code; validated history stays available.").font(.caption).foregroundStyle(.secondary)

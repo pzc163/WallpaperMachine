@@ -17,8 +17,13 @@ final class CreatorWebResources: NSObject, WKURLSchemeHandler {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         }.value
         guard let store = WKContentRuleListStore(url: directory) else { throw CreatorTemplate.Failure.invalidPath }
-        let json = #"[{"trigger":{"url-filter":".*"},"action":{"type":"block"}},{"trigger":{"url-filter":"^wm-creator://bundle/index\\.html$"},"action":{"type":"ignore-previous-rules"}}]"#
-        guard let rules = try await store.compileContentRuleList(forIdentifier: "creator-offline-v1", encodedContentRuleList: json)
+        var json = #"[{"trigger":{"url-filter":".*"},"action":{"type":"block"}},{"trigger":{"url-filter":"^wm-creator://bundle/index\\.html$"},"action":{"type":"ignore-previous-rules"}}]"#
+        var rulesJSON = try JSONSerialization.jsonObject(with: Data(json.utf8)) as! [[String: Any]]
+        for url in CreatorLibrary.assets.keys.sorted() {
+            rulesJSON.append(["trigger": ["url-filter": "^" + NSRegularExpression.escapedPattern(for: url) + "$"], "action": ["type": "ignore-previous-rules"]])
+        }
+        json = String(decoding: try JSONSerialization.data(withJSONObject: rulesJSON), as: UTF8.self)
+        guard let rules = try await store.compileContentRuleList(forIdentifier: "creator-offline-s51-v1", encodedContentRuleList: json)
         else { throw CreatorTemplate.Failure.invalidBundle }
         return rules
     }

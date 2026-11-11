@@ -380,6 +380,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
         configuration.mediaTypesRequiringUserActionForPlayback = isCreator ? .all : []
         if let creatorResources {
             configuration.setURLSchemeHandler(creatorResources, forURLScheme: CreatorWebResources.scheme)
+            configuration.setURLSchemeHandler(CreatorLibrary(), forURLScheme: CreatorLibrary.scheme)
         }
         // Wallpaper Engine loads projects from file:// with sibling-file access;
         // ES modules and fetch() against project assets need the same origin
@@ -931,6 +932,7 @@ final class WebWallpaperPage: NSObject, WKNavigationDelegate {
     /// set, which already carries the new staged bytes.
     private func deliverUserProperties(restaged: Set<String> = []) {
         guard isLoaded, let json = committed.propertiesJSON else { return }
+        if let creatorCode { creatorCode.properties(json); return }
         run(
             WebWallpaperProtocol.hostCall(.applyUserProperties, "JSON.parse(json)", "restaged"),
             arguments: ["json": json, "restaged": restaged.sorted()])

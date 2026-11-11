@@ -3,7 +3,7 @@ import XCTest
 @testable import WallpaperMachine
 
 @MainActor enum CreatorCodeTestFixture {
-    static func preview(root: URL, source: String = CreatorCodeWorkflowTests.html) async throws -> WebWallpaperPreviewSurface {
+    static func preview(root: URL, source: String = CreatorCodeWorkflowTests.html, script: String? = nil) async throws -> WebWallpaperPreviewSurface {
         let store = CreatorRevisionStore(root: root.appendingPathComponent(UUID().uuidString))
         let project = try await store.createProject(title: "Code probe")
         let job = try await store.beginJob(projectID: project.id)
@@ -13,6 +13,7 @@ import XCTest
         let preview = try await CreatorPreview.make(projectID: project.id, revisionID: draft.id, store: store)
         let surface = preview.surface
         surface.view.setFrameSize(NSSize(width: 320, height: 180)); surface.view.layoutSubtreeIfNeeded()
+        if let script { surface.page.addUserScript(WKUserScript(source: script, injectionTime: .atDocumentStart, forMainFrameOnly: false)) }
         try await surface.start()
         let deadline = ContinuousClock.now + .seconds(5)
         while !surface.page.isLoaded && surface.page.creatorCodeFailure == nil && ContinuousClock.now < deadline { try await Task.sleep(for: .milliseconds(10)) }

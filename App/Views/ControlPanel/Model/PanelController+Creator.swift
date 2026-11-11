@@ -143,8 +143,13 @@ extension PanelController {
         }
     }
     func setCreatorParameter(_ id: String, value: CreatorTemplateCatalog.Value) throws {
-        guard let template = creator.detail?.specification?.templateID else { throw CreatorGenerationFailure.invalidRequest }
         var values = creator.parameters; values[id] = value
+        if let schema = creator.detail?.parameterSchema {
+            guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
+            try schema.validate(values); creator.parameters = values
+            try creator.preview?.properties(values); try creator.embedded.properties(values); return
+        }
+        guard let template = creator.detail?.specification?.templateID else { throw CreatorGenerationFailure.invalidRequest }
         try setCreatorParameters(values, templateID: template)
     }
     func applyCreatorPreset(_ id: String, templateID: String) throws {

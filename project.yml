@@ -49,9 +49,13 @@ targets:
       - path: App
         excludes:
           - Resources/Info.plist
+          - Resources/CreatorRuntime
           - Resources/AppIcon.icon
           - Bridge/Generated/WallpaperBridgeFFI.h
           - Bridge/Generated/WallpaperBridgeFFI.modulemap
+      - path: App/Resources/CreatorRuntime
+        type: folder
+        buildPhase: resources
       - path: App/Resources/AppIcon.icon
         type: file
         buildPhase: resources
@@ -62,6 +66,9 @@ targets:
       - path: ThirdParty/mediaremote-adapter/bin/mediaremote-adapter.pl
         buildPhase: resources
       - path: ThirdParty/mediaremote-adapter/LICENSE
+        buildPhase: resources
+      - path: ThirdParty/three
+        type: folder
         buildPhase: resources
     dependencies:
       - target: MediaRemoteAdapter

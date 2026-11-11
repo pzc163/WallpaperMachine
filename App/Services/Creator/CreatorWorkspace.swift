@@ -10,6 +10,7 @@ actor CreatorWorkspace {
         let specification: CreatorTemplate.Specification?
         let installedRevisionID: UUID?
         var source: String? = nil
+        var parameterSchema: CreatorParameterSchema? = nil
     }
     let store: CreatorRevisionStore
     let settings: CreatorSettingsStore
@@ -51,14 +52,16 @@ actor CreatorWorkspace {
         }
         let specification: CreatorTemplate.Specification?
         var source: String?
+        var parameterSchema: CreatorParameterSchema?
         if let revision = project.selectedRevisionID, reports[revision] != nil {
             let snapshot = try await store.snapshot(projectID: id, revisionID: revision)
             specification = snapshot.specification
+            parameterSchema = try snapshot.files["index.html"].flatMap { try CreatorParameterSchema.read(String(decoding: $0, as: UTF8.self)) }
             source = snapshot.files["index.html"].map { LLMStreamText.sanitize(String(decoding: $0, as: UTF8.self)) }
         } else { specification = nil }
         let installed = try await registry.bindings().values.first { $0.projectID == id }
         return Detail(project: project, revisions: revisions, reports: reports,
-                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID, source: source)
+                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID, source: source, parameterSchema: parameterSchema)
     }
     func create(title: String) async throws -> UUID {
         try beforeWrite(); return try await store.createProject(title: title).id
@@ -97,7 +100,13 @@ actor CreatorWorkspace {
     /// Parameters form a new immutable revision and receive real runtime evidence, without an LLM.
     func edit(project: UUID, revision: UUID, parameters: [String: CreatorTemplateCatalog.Value]) async throws -> CreatorRevision {
         try beforeWrite()
-        var spec = try await store.snapshot(projectID: project, revisionID: revision).specification
+        let snapshot = try await store.snapshot(projectID: project, revisionID: revision)
+        var spec = snapshot.specification
+        if spec.kind == .code, let bytes = snapshot.files["index.html"], let schema = try CreatorParameterSchema.read(String(decoding: bytes, as: UTF8.self)) {
+            let html = Data(try schema.replacing(in: String(decoding: bytes, as: UTF8.self), with: parameters).utf8)
+            spec = try CreatorCodeOutput.specification(projectID: project, html: html)
+            return try await rebuild(spec, base: revision, source: html)
+        }
         guard let templateID = spec.templateID else { throw CreatorGenerationFailure.policyViolation }
         try CreatorTemplateCatalog.definition(templateID).validate(parameters)
         spec.parameters = parameters

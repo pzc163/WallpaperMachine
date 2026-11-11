@@ -21,6 +21,7 @@ enum CreatorTemplate {
         var parameters: [String: CreatorTemplateCatalog.Value]? = nil
         var rendererRevision: Int? = nil
         var codeDigest: String? = nil
+        var libraryDigest: String? = nil
         var runtimePolicy: String { kind == .code ? "generatedOfflineV1" : "trustedTemplateV1" }
         var creationMode: CreatorCreationMode { kind == .code ? .code : .template }
 
@@ -30,7 +31,7 @@ enum CreatorTemplate {
     enum Failure: Error { case invalidSpecification, invalidBundle, changedContent, invalidPath, busy, invalidTransaction }
 
     static func files(for spec: Specification) throws -> [String: Data] {
-        guard spec.kind != .code, spec.codeDigest == nil, spec.version == policyVersion, spec.hue.isFinite, (0...360).contains(spec.hue),
+        guard spec.kind != .code, spec.codeDigest == nil, spec.libraryDigest == nil, spec.version == policyVersion, spec.hue.isFinite, (0...360).contains(spec.hue),
               spec.speed.isFinite, (0...2).contains(spec.speed) else { throw Failure.invalidSpecification }
         if spec.templateID != nil || spec.parameters != nil { return try CreatorTemplateRenderer.files(for: spec) }
         guard spec.rendererRevision == nil else { throw Failure.invalidSpecification }

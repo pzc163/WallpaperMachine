@@ -66,6 +66,7 @@ enum CreatorCodeOutput {
         // This check improves feedback. The independently enforced iframe/CSP policy remains the boundary.
         guard source.range(of: #"(?i)<\s*(?:iframe|frame|object|embed|applet|base|form|link|audio|video)\b|(?:https?|wss?|file|ftp)\s*:\s*//|/Users/|/private/|/Volumes/"#, options: .regularExpression) == nil
         else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
+        _ = try CreatorParameterSchema.read(source)
         try checkScriptSyntax(source)
     }
     /// Compiles bounded classic-script bodies without invoking them. The native
@@ -79,7 +80,10 @@ enum CreatorCodeOutput {
         }
         for match in expression.matches(in: html, range: NSRange(location: 0, length: text.length)) {
             let attributes = text.substring(with: match.range(at: 1))
-            guard attributes.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            let trimmed = attributes.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmed == "id=\"wm-params\" type=\"application/json\"" { continue }
+            if trimmed == "src=\"wm-lib://three/bundle.js\"", text.substring(with: match.range(at: 2)).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { continue }
+            guard trimmed.isEmpty else {
                 // V1 author surface is inline classic scripts only; no module,
                 // import map, external source or MIME-dependent execution.
                 throw CreatorRepairIssue.field("$", .unexpected, policy: true)
@@ -91,14 +95,18 @@ enum CreatorCodeOutput {
     }
     static func specification(projectID: UUID, html: Data) throws -> CreatorTemplate.Specification {
         try validateHTML(html)
-        return .init(projectID: projectID, kind: .code, codeDigest: CreatorPersistence.hash(html))
+        let source = String(decoding: html, as: UTF8.self)
+        let schema = try CreatorParameterSchema.read(source)
+        return .init(projectID: projectID, kind: .code, parameters: schema?.values, codeDigest: CreatorPersistence.hash(html), libraryDigest: try CreatorLibrary.digest(for: source))
     }
     static func files(specification: CreatorTemplate.Specification, html: Data?) throws -> [String: Data] {
         guard specification.kind == .code, specification.version == 1, specification.hue == 220, specification.speed == 0.5,
-              specification.templateID == nil, specification.parameters == nil, specification.rendererRevision == nil,
+              specification.templateID == nil, specification.rendererRevision == nil,
               let html, specification.codeDigest == CreatorPersistence.hash(html) else { throw CreatorPersistence.Failure.invalidRecord }
         try validateHTML(html)
+        let source = String(decoding: html, as: UTF8.self), schema = try CreatorParameterSchema.read(source)
+        guard specification.parameters == schema?.values, specification.libraryDigest == (try CreatorLibrary.digest(for: source)) else { throw CreatorPersistence.Failure.invalidRecord }
         return ["index.html": html, "project.json": try JSONSerialization.data(withJSONObject:
-            ["title": "Generated wallpaper", "type": "web", "file": "index.html", "general": ["properties": [:]]], options: [.sortedKeys, .withoutEscapingSlashes])]
+            ["title": "Generated wallpaper", "type": "web", "file": "index.html", "general": ["properties": schema?.properties ?? [:]]], options: [.sortedKeys, .withoutEscapingSlashes])]
     }
 }

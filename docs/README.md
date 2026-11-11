@@ -121,6 +121,8 @@ file; pass `rg -u` to search them deliberately.
 - [Creator connection stability and workspace UX](plans/2026-11-11-creator-connection-ux.md)
 
 - [Creator LAN, native output limits and streaming artifacts](plans/2026-11-11-creator-stream-artifacts.md)
+- [Creator engine foundation](features/creator-engines.md)
+- [S5.1 engines and master gallery](plans/2026-11-11-creator-s51-engines.md)
 
 ## Maintaining these docs
 

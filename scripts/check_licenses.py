@@ -226,6 +226,7 @@ class Entry:
 
 
 COMPONENTS = {
+    "three": Entry("MIT", "pinned offline JavaScript runtime, Three.js r180 and selected addons"),
     "nlohmann-json": Entry("MIT", "header-only"),
     "argparse": Entry("MIT", "header-only"),
     "miniaudio": Entry("Unlicense OR MIT-0", "vendored header; public domain or MIT-0 at the user's choice"),

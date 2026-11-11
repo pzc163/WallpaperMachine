@@ -5,9 +5,9 @@ import WebKit
 /// Used identically for validation, preview and registered desktop playback.
 @MainActor final class CreatorCodeSandbox: NSObject, WKScriptMessageHandler, WKDownloadDelegate {
     static let handler = "creatorCodeHealth"
-    static let policy = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+    static let policy = "default-src 'none'; script-src 'unsafe-inline' wm-lib:; style-src 'unsafe-inline'; connect-src 'none'; img-src 'none'; font-src 'none'; media-src 'none'; frame-src 'none'; child-src 'none'; worker-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
     static let container = """
-    <!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; frame-src about:; child-src about:; connect-src 'none'; base-uri 'none'; form-action 'none'"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}iframe{border:0;width:100%;height:100%;display:block}</style><iframe id="creator-code" sandbox="allow-scripts" allow="camera 'none'; microphone 'none'; geolocation 'none'; display-capture 'none'; clipboard-read 'none'; clipboard-write 'none'; fullscreen 'none'; payment 'none'" referrerpolicy="no-referrer"></iframe>
+    <!doctype html><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' wm-lib:; style-src 'unsafe-inline'; frame-src about:; child-src about:; connect-src 'none'; base-uri 'none'; form-action 'none'"><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}iframe{border:0;width:100%;height:100%;display:block}</style><iframe id="creator-code" sandbox="allow-scripts" allow="camera 'none'; microphone 'none'; geolocation 'none'; display-capture 'none'; clipboard-read 'none'; clipboard-write 'none'; fullscreen 'none'; payment 'none'" referrerpolicy="no-referrer"></iframe>
     """
     let view: WKWebView
     private(set) var frame: WKFrameInfo?
@@ -27,6 +27,7 @@ import WebKit
     private var highCPU = 0
     private var checking = false
     private var hostSuspended = false
+    private var playbackPaused = false
     private var previousUsage: (clock: ContinuousClock.Instant, cpu: UInt64)?
     init(view: WKWebView, timeout: Duration = .seconds(2), interval: Duration = .milliseconds(250), memoryLimit: UInt64 = 512 * 1024 * 1024) {
         self.view = view; self.timeout = timeout; self.interval = interval; self.memoryLimit = min(512 * 1024 * 1024, max(64 * 1024 * 1024, memoryLimit))
@@ -107,8 +108,17 @@ import WebKit
             if case .failure = result { self?.fail(.init(category: .runtime, runtimeReason: .pageFailed)) }
         }
     }
-    func setHostSuspended(_ value: Bool) { hostSuspended = value }
-    func pause(_ value: Bool) { run("window.__creatorNativePaused(value);", arguments: ["value": value]) }
+    func properties(_ json: String) {
+        run("const p=JSON.parse(json);window.__wmParameters?.(p);window.wallpaperPropertyListener?.applyUserProperties?.(p);", arguments: ["json": json])
+    }
+    func setHostSuspended(_ value: Bool) {
+        hostSuspended = value
+        run("window.__creatorNativePaused(value);", arguments: ["value": value || playbackPaused])
+    }
+    func pause(_ value: Bool) {
+        playbackPaused = value
+        run("window.__creatorNativePaused(value);", arguments: ["value": value || hostSuspended])
+    }
     func cursor(x: Double, y: Double, active: Bool) {
         guard x.isFinite, y.isFinite else { return }
         run("window.__creatorCursor(x,y,active);", arguments: ["x": min(1,max(0,x)), "y": min(1,max(0,y)), "active": active])

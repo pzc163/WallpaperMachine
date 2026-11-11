@@ -1,0 +1,3 @@
+
+# Preserve reviewed upstream shader-string whitespace in the generated vendored bundle.
+ThirdParty/three/wm-three-r180.js -whitespace linguist-vendored linguist-generated

@@ -2,7 +2,8 @@ import Foundation
 
 /// Small native-owned author surface. Resource violations are failures, never extra capabilities.
 enum CreatorCodeSDK {
-    static let source = #"""
+    static var source: String { base + CreatorLibrary.hostScript }
+    private static let base = #"""
     (()=>{if(window.top===window)return;
       let paused=false,last=-Infinity,next=0,raf=0;const pending=new Map(),nativeRAF=requestAnimationFrame.bind(window),nativeCancel=cancelAnimationFrame.bind(window);
       const nativeAttribute=Element.prototype.setAttribute;let reported=false;
@@ -13,7 +14,7 @@ enum CreatorCodeSDK {
       function schedule(){if(!paused&&pending.size&&!raf)raf=nativeRAF(frame);}
       Object.defineProperty(window,'requestAnimationFrame',{value:f=>{if(typeof f!=='function')throw TypeError();if(pending.size>=64){report('resource');return 0;}pending.set(++next,f);schedule();return next;},writable:false,configurable:false});
       Object.defineProperty(window,'cancelAnimationFrame',{value:id=>pending.delete(id),writable:false,configurable:false});
-      Object.defineProperty(window,'__creatorNativePaused',{value:value=>{paused=!!value;if(raf)nativeCancel(raf);raf=0;last=-Infinity;window.wallpaperPropertyListener?.setPaused?.(paused);schedule();},writable:false,configurable:false});
+      Object.defineProperty(window,'__creatorNativePaused',{value:value=>{paused=!!value;window.__wmPause?.(paused);if(raf)nativeCancel(raf);raf=0;last=-Infinity;window.wallpaperPropertyListener?.setPaused?.(paused);schedule();},writable:false,configurable:false});
       const descriptors={width:Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,'width'),height:Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype,'height')};
       for(const key of ['width','height']){
         const descriptor=descriptors[key],other=key==='width'?'height':'width';
@@ -50,7 +51,7 @@ enum CreatorCodeSDK {
       addEventListener('pointermove',e=>{cursor=position(e.clientX,e.clientY,true)},true);
       addEventListener('pointerleave',()=>{cursor=position(cursor.x,cursor.y,false)},true);
       Object.defineProperty(window,'__creatorCursor',{value:(nx,ny,active)=>{
-        const x=nx*innerWidth,y=ny*innerHeight;cursor=position(x,y,!!active);if(paused||!active)return;
+        const x=nx*innerWidth,y=ny*innerHeight;cursor=position(x,y,!!active);window.__wmCursor?.(nx,ny,active);if(paused||!active)return;
         const target=document.elementFromPoint(x,y)||window;
         target.dispatchEvent(new PointerEvent('pointermove',{clientX:x,clientY:y,bubbles:true,pointerType:'mouse',isPrimary:true}));
         target.dispatchEvent(new MouseEvent('mousemove',{clientX:x,clientY:y,bubbles:true}));
