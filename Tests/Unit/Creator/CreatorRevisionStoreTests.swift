@@ -147,7 +147,7 @@ final class CreatorRevisionStoreTests: XCTestCase {
         let store = store()
         let project = try await store.createProject(title: "Budgets")
         await rejected { try await store.beginJob(projectID: project.id, requestBudget: 0) }
-        await rejected { try await store.beginJob(projectID: project.id, tokenBudget: 100001) }
+        await rejected { try await store.beginJob(projectID: project.id, tokenBudget: ProviderProfile.Limits.maximumReservedTokens + 1) }
         let job = try await store.beginJob(projectID: project.id, requestBudget: 1)
         try await store.recordAttempt(job)
         await rejected { try await store.recordAttempt(job) }

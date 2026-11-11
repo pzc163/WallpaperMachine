@@ -185,7 +185,7 @@ struct CreatorSettingsSection: View {
     }
     private var savedProfile: ProviderProfile? { controller.creator.configuration.profiles.first { $0.id == draft.id } }
     private func edit(_ profile: ProviderProfile) {
-        key = ""; draft = profile; tokenBudgetText = profile.limits.nativeOutputLimit == true ? "" : String(profile.limits.tokenBudget)
+        key = ""; draft = profile; tokenBudgetText = profile.limits.nativeOutputLimit == true ? "" : String(profile.limits.outputTokensPerRequest)
         expectedRevision = controller.creator.configuration.revision; loaded = true
     }
     private func loadSelected() {

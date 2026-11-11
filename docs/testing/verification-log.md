@@ -25,6 +25,15 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-11 — Creator streaming thoughts and verified artifacts
+
+- Added session-only, bounded and credential-redacted model thinking/source streams, six-language artifact tabs, and publication-validated embedded WebKit previews. Legacy JSON source is checked again after decoding for credential leakage.
+- Targeted stream/artifact/panel/composer suites: 31 passed; follow-up revision/stream/artifact regression suite: 25 passed; final native-output/artifact suite: 11 passed, all with zero failures.
+- Final python3 scripts/test.py: 720 Python checks; 5066 native passed, 0 failed, 69 conditional skips; two system API main-thread runtime warnings.
+- Earlier full runs exposed an obsolete token-limit fixture (corrected), a transient GPU energy-counter threshold failure (13 isolated checks passed without threshold changes), and a replaced-navigation WebKit file-open failure (10 isolated checks passed unchanged). Final full gate passed unchanged after these investigations.
+- Document links, generated project and six-language catalogs checked. Test model traffic used Mock URLProtocol; memory credentials and offscreen WebKit only. Live models, benchmark, soak and visible UI/device acceptance were not run.
+- No personal model Keychain, production app, real wallpaper, main/latest update, Rust or renderer changes. Physical macOS 15 LAN authorization, visible UI, multi-display, sleep and full-process energy remain device acceptance work.
+
 ## 2026-11-11 — Creator native output limits and raw HTML contract
 
 - Protocol/repair/code targeted run: 56 passed; two new test-fixture assertions corrected. Follow-up LLMNativeOutputTests and CreatorModelSettingsTests: 9 passed, 0 failed.
@@ -97,14 +106,3 @@ entry's recorded result is not allowed.
 - Local package uses verified identical-version official macOS 15 bottles; all 567 original exports retained and all 8 Mach-O minimums are 15.0.
 - DMG mount, deep strict signatures, dependency closure and source-app preservation verified; details in docs/testing/creator-macos15-results.json.
 - No Apple notarization, hosted macOS 15 CI run, physical display test, live model request, desktop change or S4 enablement.
-
-## 2026-11-11 — S3 creator JSON mode and native preset controls
-
-- Scope: OpenAI-compatible JSON mode selection, native template presets, six-language strings, typed controller validation and offscreen tests; S4 remains closed.
-- Baseline: local feat/ai-creator at 6b2350d8, initially clean. No push or app installation.
-- Targeted: python3 scripts/test.py --only CreatorControlsTests --only CreatorModelSettingsTests --only CreatorPanelTests --only CreatorWorkspaceTests recorded 26 passed/1 fixture failure; after supplying the fake library snapshot, --only CreatorControlsTests passed 3/3. The full gate covers all 27 cases.
-- python3 scripts/test.py: one final routine run, exit 0; 708 Python passed; native 5,000 passed, 0 failed, 72 skipped, 128s; two runtime warnings.
-- Skips: 62 media/device, 3 Steam network, 1 reference, 3 S0 unrestricted, 3 Creator live/benchmark/soak. Real model and device opt-ins were removed from the runner environment.
-- Additional checks: localization 17/17, document links 11/11, git diff --check; handbook command syntax and all 66 checklist rows/AC coverage checked.
-- Initial build prerequisite: installed Metal toolchain was hidden by a stale xcrun path cache; xcrun --kill-cache restored compiler lookup. No component download.
-- No personal Keychain, visible windows, installed-app quit/launch, desktop application, display/sleep changes or network API calls. Release build is requested after this local commit; real S3 visual/device acceptance remains pending.

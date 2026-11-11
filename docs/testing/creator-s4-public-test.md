@@ -59,7 +59,7 @@ S4 开放不等于所有硬件验收完成；本轮没有再次调用真实模�
 
 ## Connection and composer preview update
 
-Use the newest `creator-ux-preview-20261111` prerelease for the connection/workspace
+Use the newest `creator-artifacts-preview-20261111` prerelease for the connection/workspace
 update. In Settings → AI models, enable Local server mode, enter the server Base URL,
 and choose Fetch models. Confirm the displayed target and select a returned model ID;
 then save. Empty local credentials never require Keychain access. A protected local
@@ -79,3 +79,13 @@ Shift-Enter adds a line; confirming an IME candidate must not send. Paste a long
 and verify three-to-eight-line growth and internal scrolling at narrow window sizes.
 Save and Apply remain separate. Physical visual/focus/LAN and macOS 15 device behavior
 remain manual checks; automated views are hosted offscreen.
+
+
+## 本轮流式产物验收
+
+- 本地服务表单：Base URL、Model ID、可选 API Key 始终可编辑。输入合法 LAN 地址后，不保存即可点击获取模型列表；弹窗确认当前地址后才请求。若系统阻止本地网络，在系统设置的隐私与安全性中允许测试构建。
+- Token 留空为服务器原生最大值；显式输入上限 131,072。每次回退/修复仍占一个请求预算，最多三次；服务器上下文不足时一次适配不能保证所有网关接受。
+- 自由代码直接输出完整 HTML / html 围栏（最大 256 KiB），观察思考折叠面板与源码实时滚动。完成后思考自动折叠，可以展开；只在当前面板会话内保留最多八轮/8 MiB。
+- 完成静态、离屏运行及封面校验后，切换内嵌渲染并测试指针互动。源码/渲染可来回切换，可复制源码，也可打开独立预览。检查源代码行数、字节数与 Token 用量；未返回用量显示未知。
+- 切换到源码、离开创作页、隐藏窗口或切换工程，确认旧预览停止。失败保留上一已验证修订，部分源码绝不运行；保存与应用仍是独立动作。
+- macOS 15 实机 LAN 授权、可见界面/输入法与异构双屏/睡眠/能耗仍需设备验收；常规门禁仅使用 Mock 模型与离屏 WebKit。

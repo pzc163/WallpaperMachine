@@ -17,20 +17,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="Licença: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 ou posterior em Apple silicon">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="Estrelas no GitHub"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Baixar prévia do Criador com IA"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Demonstração do projeto original"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111">Notas da versão e checksums</a></sub>
+  <sub>macOS 15 Sequoia ou posterior&ensp;·&ensp;Apple silicon (M1 ou posterior)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111">Notas da versão e checksums</a></sub>
 </p>
 
 <p align="center">
@@ -59,7 +59,7 @@
 
 ## Início rápido
 
-Baixe a **[prévia S4 para desenvolvedores](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, assinatura Ad-hoc, **sem notarização Apple**. Intel não é suportado. Os pacotes [S3 macOS 15](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) e [S3 original](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) continuam disponíveis para regressão; o original exige macOS 27.2+.
+Baixe a **[prévia S4 para desenvolvedores](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, assinatura Ad-hoc, **sem notarização Apple**. Intel não é suportado. Os pacotes [S3 macOS 15](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) e [S3 original](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) continuam disponíveis para regressão; o original exige macOS 27.2+.
 
 1. Confira o SHA-256 do DMG. Prefira uma conta macOS de teste; não sobrescreva a cópia de produção nem execute ambas na mesma conta.
 2. Após verificar a origem e o checksum, siga a [lista de instalação](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) para aplicar `xattr -cr` apenas à cópia de teste, ou use Privacidade e Segurança → Abrir Mesmo Assim. Não desative a segurança do sistema.
@@ -81,7 +81,8 @@ O site original e o Homebrew não distribuem o Criador com IA deste fork. Cenas,
 
 - **Conexões e espaço de criação:** campos identificados, busca confirmada de modelos locais, exceções ATS restritas à LAN e credenciais em cache de sessão. O streaming usa limites de 25s para primeira resposta, 90s de inatividade e 300s no total, progresso e fallback sem streaming dentro do orçamento. O editor multilinha inclui modelo/modo, Enter/Shift-Enter, nomes automáticos, renomeação e repetição/edição por tentativa.
 - **Modelos WebGL:** gradiente com fluxo e dithering, nebulosa escura com estrelas em camadas e meteoros, relógio nítido com margens medidas. Limites de 30 FPS e 2.073.600 pixels; revisões antigas preservam o renderizador original.
-- **Conexões:** OpenAI-compatible, Anthropic Messages e Gemini GenerateContent. Automatic negocia schema → object → prompt dentro do orçamento; o aviso superior mostra modelo, modo efetivo e tempo. Padrão: até 8.192 tokens de saída por chamada, 24.576 reservados no total; cobrança real depende do provedor.
+- **Conexões:** OpenAI-compatible, Anthropic Messages e Gemini GenerateContent. Automatic negocia schema → object → prompt dentro do orçamento; o aviso superior mostra modelo, modo efetivo e tempo. Novas configurações usam o máximo nativo do servidor ou até 131.072 tokens por chamada; alternativas e reparos compartilham o limite de solicitações.
+- **Estúdio em streaming:** Endereço LAN e chave opcional editáveis; liste modelos antes de salvar. Limite vazio usa o máximo do servidor ou até 131.072 tokens por chamada. Código livre transmite HTML puro (≤256 KiB). Expanda o raciocínio, acompanhe e copie o código e abra a prévia interativa integrada após a validação. O raciocínio fica apenas na memória limitada da sessão.
 - **Modelos locais e LAN:** modo local explícito aceita loopback, IPv4 privado, IPv6 ULA/link-local e .local com HTTP e chave opcional. HTTP público é recusado. Credenciais vinculadas ao Profile, origin e geração da configuração; mudar o host exige novo vínculo.
 - **Código interativo:** um HTML sem dependências recebe coordenadas do ponteiro na prévia e na área de trabalho. Entrega por monitor limitada a 30 Hz, interrompida em pausa, oclusão ou repouso; iframe offline, supervisão nativa e integridade do pacote permanecem ativos.
 - **Reparo e histórico:** erros de sintaxe, parâmetros, primeiro quadro e execução passam novamente pela validação. Geração inicial mais até dois reparos, no máximo três chamadas. Falhas, cancelamento e recuperação preservam a última revisão válida; chaves e erros brutos não entram no log de reparo.
@@ -89,7 +90,7 @@ O site original e o Homebrew não distribuem o Criador com IA deste fork. Cenas,
 
 **LM Studio:** carregue um modelo, inicie o servidor e configure `http://127.0.0.1:1234/v1`, o ID real, modo local e automatic. Em outro Mac, prefira túnel SSH ou LAN confiável como `http://model-host.local:1234/v1`; confira o destino na confirmação. Modelos não são incluídos.
 
-**Limites:** código livre usa um HTML ≤32 KiB, gráficos procedurais e fontes do sistema. Sem recursos/fontes externas, rede, áudio, módulos ou múltiplos arquivos. A supervisão WebKit usa SPI verificada e recusa ambientes incompatíveis; não é cota rígida de GPU do sistema nem auditoria de código hostil arbitrário. Backup/restauração/mudança de armazenamento antigos do Creator continuam bloqueados. Reprodução offline não desativa a rede do Workshop/atualizador.
+**Limites:** código livre usa um HTML ≤256 KiB, gráficos procedurais e fontes do sistema. Sem recursos/fontes externas, rede, áudio, módulos ou múltiplos arquivos. A supervisão WebKit usa SPI verificada e recusa ambientes incompatíveis; não é cota rígida de GPU do sistema nem auditoria de código hostil arbitrário. Backup/restauração/mudança de armazenamento antigos do Creator continuam bloqueados. Reprodução offline não desativa a rede do Workshop/atualizador.
 
 **Verificação:** modelos Mock e WebKit real fora da tela cobrem os três testes S0, falhas de processo, protocolos, monitores simulados, reparo e histórico. O resultado histórico 30/30 e 1.800 segundos refere-se aos modelos anteriores, não aos novos shaders/código livre. macOS 15 físico, DPI/repouso, qualidade visual e energia total/GPU ainda precisam de avaliação.
 
@@ -131,7 +132,7 @@ sem abrir a janela.
 
 ## Por que você pode confiar
 
-Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes S3 deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
+Os atestados de compilação e o fluxo de atualização do projeto original abaixo não se aplicam aos pacotes S3 deste fork. Eles foram empacotados localmente, assinados Ad-hoc, sem notarização ou atestado do GitHub Actions. Use o SHA-256 da [página do Release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111). O Criador envia solicitações ao serviço de IA escolhido quando você pede uma geração, alteração ou teste de conexão.
 
 - **Código aberto, por inteiro.** O app, o renderizador e o motor de cenas estão todos
   neste repositório sob GPL-3.0-only. Não há núcleo fechado nem recursos pagos: o app
@@ -239,7 +240,7 @@ os nomes das contas Steam são substituídos antes.
 <details>
 <summary><b>Como eu consigo o app?</b></summary>
 
-Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
+Baixe o Criador com IA deste fork no [pré-lançamento macOS 15+](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111) e siga o [Início rápido](#início-rápido). É um pacote de aceitação Ad-hoc sem notarização da Apple. As [versões de produção originais](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), o site e o Homebrew são mantidos separadamente e não incluem a criação com IA deste fork.
 
 </details>
 

@@ -42,7 +42,10 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
                 for part in parts {
                     if let thought = part["thought"] {
                         guard let number = thought as? NSNumber, CFGetTypeID(number) == CFBooleanGetTypeID() else { throw LLMFailure.protocolViolation }
-                        if number.boolValue { continue }
+                        if number.boolValue {
+                            if let text = try LLMJSON.string(part["text"]) { answer.appendReasoning(text) }
+                            continue
+                        }
                     }
                     if let text = try LLMJSON.string(part["text"]) { try answer.append(text) }
                     else if part["thoughtSignature"] == nil { throw LLMFailure.refused }
@@ -61,7 +64,7 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
         try consume(.init(name: "message", data: text))
     }
     var progress: LLMStreamProgress {
-        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage)
+        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
     }
     func finish() throws -> LLMResponse {
         guard stopped else { throw LLMFailure.truncated }

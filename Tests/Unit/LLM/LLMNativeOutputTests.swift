@@ -81,6 +81,18 @@ import XCTest
         let oversized = html.replacingOccurrences(of: "</body>", with: String(repeating: "x", count: 256 * 1024) + "</body>")
         XCTAssertThrowsError(try CreatorCodeOutput.parse(oversized))
     }
+    func testEscapedCredentialInLegacyJSONCannotEnterRevisionStorage() async throws {
+        let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
+        let html = CreatorCodeWorkflowTests.html.replacingOccurrences(of: "</body>", with: "<!--" + LLMTestFixtures.key + "--></body>")
+        let json = try JSONSerialization.data(withJSONObject: ["schemaVersion": 2, "title": "Test", "summary": "Legacy", "files": [["path": "index.html", "content": html]]])
+        let escaped = String(decoding: json, as: UTF8.self).replacingOccurrences(of: LLMTestFixtures.key, with: "\\u0066" + LLMTestFixtures.key.dropFirst())
+        XCTAssertFalse(escaped.contains(LLMTestFixtures.key))
+        c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(escaped)])])
+        do { _ = try await CreatorWorkspaceTests.workspace(c).generate(CreatorCodeWorkflowTests.request(c)); XCTFail("Stored decoded credential") }
+        catch let error as CreatorOrchestrator.Failure { XCTAssertEqual(error.issue?.category, .policyViolation) }
+        let project = try await c.store.project(c.ticket.projectID)
+        XCTAssertTrue(project.revisionIDs.isEmpty); XCTAssertEqual(c.route.requests.count, 1)
+    }
     func testLargeHTMLStreamsAcrossSingleCharacterPrefixesAndSupportsLargeBaseRevision() throws {
         let html = CreatorCodeWorkflowTests.html.replacingOccurrences(of: "</body>", with: "<!--" + String(repeating: "星", count: 40_000) + "--></body>")
         var answer = LLMAnswerBuffer(allowsLeadingThought: true, requiresJSON: false)

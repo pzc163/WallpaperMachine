@@ -38,6 +38,7 @@ struct CreatorPage: View {
                             PanelCard {
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text(verbatim: turn.userMessage).textSelection(.enabled)
+                                    if let transcript = model.transcripts[turn.id] { CreatorThoughtPanel(transcript: transcript).id(transcript.id) }
                                     if let issue = turn.failure { Text(verbatim: CreatorLabels.issue(issue.category)).foregroundStyle(.secondary) }
                                     else if turn.state == .completed { Label("Validated · ready to save", systemImage: "checkmark.circle").foregroundStyle(.secondary) }
                                     HStack {
@@ -53,6 +54,10 @@ struct CreatorPage: View {
                                 }.padding(14).frame(maxWidth: .infinity, alignment: .leading)
                             }.id(turn.id)
                         }
+                        if let transcript = model.activeTranscript {
+                            PanelCard { CreatorThoughtPanel(transcript: transcript).id(transcript.id).padding(14) }
+                        }
+                        if model.activeTranscript != nil || model.selectedRevision != nil || !model.artifactSource.isEmpty { CreatorArtifactCard() }
                         if model.isBusy {
                             HStack(spacing: 10) { ProgressView().controlSize(.small); Text(verbatim: CreatorLabels.status(model)) }
                                 .accessibilityIdentifier("creator-stream-progress")
@@ -64,7 +69,11 @@ struct CreatorPage: View {
                         }
                         Color.clear.frame(height: 1).id("creator-bottom")
                     }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
-                }.onChange(of: model.detail?.conversation.turns.last?.id) { _, _ in scroll.scrollTo("creator-bottom", anchor: .bottom) }
+                }
+                .onChange(of: model.activeTranscript?.id) { _, id in
+                    if id != nil { scroll.scrollTo("creator-bottom", anchor: .bottom) }
+                }
+                .onChange(of: model.detail?.conversation.turns.last?.id) { _, _ in scroll.scrollTo("creator-bottom", anchor: .bottom) }
             }
             CreatorComposer()
         }.frame(minWidth: 0, maxWidth: .infinity, maxHeight: .infinity)

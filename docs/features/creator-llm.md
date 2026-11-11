@@ -163,7 +163,7 @@ future corrective attempts must reuse the same budget.
 ## Stream negotiation and progress
 
 All three protocols request streaming first. Explicit HTTP 400/422 rejection of
-`stream`/`stream_options` permits one non-stream fallback. OpenAI/Anthropic use
+`stream` permits one non-stream fallback. A rejected `stream_options` first removes only the usage option. OpenAI/Anthropic use
 `stream:false`; Gemini uses `generateContent` without an SSE query. JSON responses
 are size-bounded, require an explicit successful finish reason, retain usage and
 omit thought blocks. A server that directly returns its valid non-stream response
@@ -175,9 +175,10 @@ negotiation/repair (maximum three wire calls). It does not enable content repair
 when the repair switch is off. Historical conversation records retain their original
 budgets. Cancellation aborts transport and negotiation without refunding sent calls.
 
-Progress contains only connecting/thinking/content phase, accepted character count
-and numeric usage. Content updates are coalesced to at most five per second, with
-phase changes/final usage delivered promptly; raw reasoning never reaches UI or disk.
+Progress includes connecting/thinking/content phase, accepted character count, numeric usage,
+and bounded, credential-redacted model-authored answer/reasoning for session-only display.
+Content updates are coalesced to at most five per second, with phase changes/final usage
+delivered promptly. Reasoning never enters disk, diagnostic logs or follow-up model context.
 A response header completes the connection deadline, allowing local model prefill
 to use the idle interval. Receiving tokens resets idle, never the total deadline.
 
@@ -277,3 +278,5 @@ JSON-mode fallback, 429 and 5xx share the outer limit rather than resetting it.
 Standalone callers retain the S1.2 behavior. A credential Grant can redact its
 current secret without exposing it; generation context then applies bounded
 native text filtering. No new Keychain namespace or external logging is added.
+
+Streaming observation now includes bounded model-provided reasoning and answer text. The credential grant removes full keys and partial-key suffixes before the panel callback; display redaction preserves code line breaks. These values are not Codable; description, debug description and reflection omit text. Only immutable, fully verified source may render. See the [workspace lifecycle](creator-workspace.md#streamed-reasoning-and-artifacts).

@@ -134,14 +134,17 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             do {
                 for event in try parser.append(data) { try decoder.consume(event) }
                 let next = decoder.progress, now = ContinuousClock.now
-                if next != lastProgress && (next.phase != lastProgress.phase || lastEmission.map { $0.duration(to: now) >= .milliseconds(200) } ?? true) {
+                if (next.phase != lastProgress.phase || lastEmission.map { $0.duration(to: now) >= .milliseconds(200) } ?? true) && next != lastProgress {
                     lastEmission = now; lastProgress = next; update = next
                 }
                 return nil
             }
             catch { return LLMFailure.sanitized(error) }
         }
-        if let failure { finish(.failure(failure)) }
+        if let failure {
+            progress(lock.withLock { decoder.progress })
+            finish(.failure(failure))
+        }
         else if let update { progress(update) }
     }
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
@@ -157,7 +160,7 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             catch { return .failure(LLMFailure.sanitized(error)) }
         }
         if let result {
-            if case .success = result { progress(lock.withLock { decoder.progress }) }
+            progress(lock.withLock { decoder.progress })
             finish(result)
         }
     }

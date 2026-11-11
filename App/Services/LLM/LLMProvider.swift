@@ -132,7 +132,7 @@ actor LLMProvider {
             catch { throw LLMFailure.invalidJob }
             log(.started(attempt: job.attemptCount))
             do {
-                var response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile, requiresJSON: input.requiresJSON), progress: progress) { task in
+                var response = try await transport.perform(request, decoder: LLMRequestDescriptor.decoder(for: profile, requiresJSON: input.requiresJSON), progress: { progress(grant.redactingProgress($0)) }) { task in
                     try cancellation.check()
                     do { _ = try await store.generatingJob(ticket) } catch { throw LLMFailure.invalidJob }
                     try await settings.withCurrentProfile(profile) { _ in

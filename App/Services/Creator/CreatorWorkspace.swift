@@ -9,6 +9,7 @@ actor CreatorWorkspace {
         let conversation: CreatorConversation
         let specification: CreatorTemplate.Specification?
         let installedRevisionID: UUID?
+        var source: String? = nil
     }
     let store: CreatorRevisionStore
     let settings: CreatorSettingsStore
@@ -49,12 +50,15 @@ actor CreatorWorkspace {
             if let report = try? await store.report(projectID: id, revisionID: revisionID) { reports[revisionID] = report }
         }
         let specification: CreatorTemplate.Specification?
+        var source: String?
         if let revision = project.selectedRevisionID, reports[revision] != nil {
-            specification = try await store.snapshot(projectID: id, revisionID: revision).specification
+            let snapshot = try await store.snapshot(projectID: id, revisionID: revision)
+            specification = snapshot.specification
+            source = snapshot.files["index.html"].map { LLMStreamText.sanitize(String(decoding: $0, as: UTF8.self)) }
         } else { specification = nil }
         let installed = try await registry.bindings().values.first { $0.projectID == id }
         return Detail(project: project, revisions: revisions, reports: reports,
-                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID)
+                      conversation: try await store.conversation(projectID: id), specification: specification, installedRevisionID: installed?.revisionID, source: source)
     }
     func create(title: String) async throws -> UUID {
         try beforeWrite(); return try await store.createProject(title: title).id

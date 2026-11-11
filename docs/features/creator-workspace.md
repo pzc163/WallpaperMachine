@@ -128,6 +128,29 @@ no response text is saved. Cancelling does not refund an already sent request.
 Classification text and native diagnostic fields exclude secrets and sensitive
 paths. Token output reservations are not a monetary cap; absent usage is Unknown.
 
+## Streamed reasoning and artifacts
+
+The provider exposes bounded model-authored reasoning (native reasoning_content, thinking parts,
+and leading think tags) separately from answer bytes. The credential grant redacts complete keys
+and partial key prefixes before any UI callback; display-only redaction also removes credential
+labels, URLs and sensitive filesystem paths. Descriptions/reflection omit text. No transcript
+enters logs, conversation.json, model follow-up context or exported wallpaper packages.
+
+The workspace keeps at most eight turn transcripts within 8 MiB, with a 1 MiB reasoning display
+limit per attempt and an explicit truncation notice. Closing the panel clears the session. Stream
+updates are coalesced to five per second; native text views append while preserving manual scroll.
+Thinking has an active timer and collapses when generation finishes; it can be expanded again for
+retained turns. A synchronous mailbox preserves final text before async phase transitions.
+
+The artifact switches from streamed source to rendered output only after static/runtime/poster
+validation. Source is selectable/copyable and reports line/byte counts; missing token usage remains
+Unknown. Embedded preview uses the same offline host, publication-validated immutable snapshot,
+digest recheck on every reload, mute and external watchdog as independent preview. Code is never
+executed from the streaming buffer. Source tab, navigation, window hiding, generation, revision
+change and close destroy the embedded surface; there is no hidden preview polling. Preset/property
+changes update the existing verified template preview but still require a new validated revision
+before save/apply. Independent multi-ratio preview remains available.
+
 ## Preview and lifecycle
 
 Only the explicit preview action, with a presenting panel window, creates the

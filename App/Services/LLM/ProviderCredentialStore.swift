@@ -24,6 +24,22 @@ actor ProviderCredentialStore {
             key.isEmpty ? text : text.replacingOccurrences(of: key, with: "[redacted]")
         }
 
+        /// Suppress a secret prefix at the current chunk boundary before it can flash in the UI.
+        func redactingProgress(_ value: LLMStreamProgress) -> LLMStreamProgress {
+            func safe(_ input: String) -> String {
+                var text = redacting(input)
+                if key.count > 1 {
+                    for length in stride(from: min(key.count - 1, text.count), through: 1, by: -1) {
+                        if text.hasSuffix(String(key.prefix(length))) { text.removeLast(length); break }
+                    }
+                }
+                return LLMStreamText.sanitize(text)
+            }
+            var result = value
+            result.content = safe(value.content); result.reasoning = safe(value.reasoning)
+            return result
+        }
+
         func request(_ descriptor: LLMRequestDescriptor) throws -> URLRequest {
             guard var components = URLComponents(url: descriptor.url, resolvingAgainstBaseURL: false),
                   components.fragment == nil, components.user == nil, components.password == nil

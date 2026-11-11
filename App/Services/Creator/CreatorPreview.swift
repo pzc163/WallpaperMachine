@@ -21,6 +21,18 @@ enum CreatorPreview {
         return result
     }
 
+    /// Embedded playback only accepts a fully sealed runtime/poster report, atomically checked with bytes.
+    static func makePublished(projectID: UUID, revisionID: UUID, store: CreatorRevisionStore) async throws
+        -> (snapshot: CreatorDraftStore.Snapshot, surface: WebWallpaperPreviewSurface) {
+        let snapshot = try await store.publication(projectID: projectID, revisionID: revisionID).snapshot
+        try Task.checkCancellation()
+        let result = try makeSurface(snapshot: snapshot, directory: store.bundleURL(projectID: projectID, revisionID: revisionID))
+        result.surface.page.creatorSnapshotLoader = {
+            try await store.publication(projectID: projectID, revisionID: revisionID).snapshot
+        }
+        return result
+    }
+
     private static func makeSurface(snapshot: CreatorDraftStore.Snapshot, directory: URL) throws
         -> (snapshot: CreatorDraftStore.Snapshot, surface: WebWallpaperPreviewSurface) {
         let specification = snapshot.specification

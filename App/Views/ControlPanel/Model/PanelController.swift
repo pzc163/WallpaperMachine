@@ -449,6 +449,7 @@ final class PanelController {
   /// snapshot); tests call it directly after `presentation.show()` or a navigation.
   func refreshVisibilityGatedWork() {
     updateEnergyMonitoring()
+    if !presentation.isVisible { creator.embedded.close() }
     displayOptions.refresh()
     // A day the panel was on screen, for the star prompt; each calendar day counts once.
     if isStarted, presentation.isVisible { store.supportPrompt?.recordPanelUse() }

@@ -9,6 +9,17 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — S3 creator JSON mode and native preset controls
+
+- Scope: OpenAI-compatible JSON mode selection, native template presets, six-language strings, typed controller validation and offscreen tests; S4 remains closed.
+- Baseline: local feat/ai-creator at 6b2350d8, initially clean. No push or app installation.
+- Targeted: python3 scripts/test.py --only CreatorControlsTests --only CreatorModelSettingsTests --only CreatorPanelTests --only CreatorWorkspaceTests recorded 26 passed/1 fixture failure; after supplying the fake library snapshot, --only CreatorControlsTests passed 3/3. The full gate covers all 27 cases.
+- python3 scripts/test.py: one final routine run, exit 0; 708 Python passed; native 5,000 passed, 0 failed, 72 skipped, 128s; two runtime warnings.
+- Skips: 62 media/device, 3 Steam network, 1 reference, 3 S0 unrestricted, 3 Creator live/benchmark/soak. Real model and device opt-ins were removed from the runner environment.
+- Additional checks: localization 17/17, document links 11/11, git diff --check; handbook command syntax and all 66 checklist rows/AC coverage checked.
+- Initial build prerequisite: installed Metal toolchain was hidden by a stale xcrun path cache; xcrun --kill-cache restored compiler lookup. No component download.
+- No personal Keychain, visible windows, installed-app quit/launch, desktop application, display/sleep changes or network API calls. Release build is requested after this local commit; real S3 visual/device acceptance remains pending.
+
 ## 2026-11-11 — Creator S2.3 final acceptance closeout
 
 S2.3 final closeout; durable evidence: [acceptance](../../features/creator-acceptance.md) and [redacted metrics](../creator-s23-results.json).

@@ -39,7 +39,10 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
             case "text":
                 guard let text = block["text"] as? String else { throw LLMFailure.protocolViolation }
                 blocks[index] = .text; try answer.append(text)
-            case "thinking", "redacted_thinking": blocks[index] = .thinking
+            case "thinking":
+                blocks[index] = .thinking
+                if let text = try LLMJSON.string(block["thinking"]) { answer.appendReasoning(text) }
+            case "redacted_thinking": blocks[index] = .thinking
             default: throw LLMFailure.refused
             }
             seen.insert(index)
@@ -50,7 +53,9 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
             case (.text, "text_delta"):
                 guard let text = delta["text"] as? String else { throw LLMFailure.protocolViolation }
                 try answer.append(text)
-            case (.thinking, "thinking_delta"), (.thinking, "signature_delta"): break
+            case (.thinking, "thinking_delta"):
+                if let text = try LLMJSON.string(delta["thinking"]) { answer.appendReasoning(text) }
+            case (.thinking, "signature_delta"): break
             default: throw LLMFailure.protocolViolation
             }
         case "content_block_stop":
@@ -98,7 +103,7 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
         try consume(.init(name: name, data: String(decoding: try LLMRequestDescriptor.encoded(body), as: UTF8.self)))
     }
     var progress: LLMStreamProgress {
-        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage)
+        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
     }
     func finish() throws -> LLMResponse {
         guard done else { throw LLMFailure.truncated }

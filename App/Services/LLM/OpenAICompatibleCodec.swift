@@ -14,7 +14,7 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
             "messages": [["role": "system", "content": input.systemInstruction]] + input.messages.map { ["role": $0.role.rawValue, "content": $0.content] }]
         if !input.nativeOutputLimit { body["max_tokens"] = input.maxOutputTokens }
         let mode = profile.capabilities.jsonMode ?? .automatic
-        if jsonMode, mode != .disabled {
+        if input.requiresJSON, jsonMode, mode != .disabled {
             if mode == .schema || (mode == .automatic && input.structuredOutput != nil) {
                 guard let output = input.structuredOutput else { throw LLMFailure.invalidInput }
                 body["response_format"] = ["type": "json_schema", "json_schema": [
@@ -53,6 +53,7 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
             guard let delta = try LLMJSON.dictionary(choice["delta"]) else { throw LLMFailure.protocolViolation }
             if delta["tool_calls"] != nil || delta["function_call"] != nil { throw LLMFailure.refused }
             if let refusal = try LLMJSON.string(delta["refusal"]), !refusal.isEmpty { throw LLMFailure.refused }
+            if let reasoning = try LLMJSON.string(delta["reasoning_content"]) { answer.appendReasoning(reasoning) }
             if let content = delta["content"], !(content is NSNull) {
                 if let text = content as? String { try answer.append(text) }
                 else if let blocks = content as? [[String: Any]] {
@@ -61,7 +62,9 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
                         case "text":
                             guard let text = block["text"] as? String else { throw LLMFailure.protocolViolation }
                             try answer.append(text)
-                        case "thinking", "reasoning", "redacted_thinking": break
+                        case "thinking", "reasoning":
+                            if let thought = try LLMJSON.string(block["thinking"] ?? block["text"]) { answer.appendReasoning(thought) }
+                        case "redacted_thinking": break
                         default: throw LLMFailure.protocolViolation
                         }
                     }
@@ -87,7 +90,7 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
         try consume(.init(name: "message", data: "[DONE]"))
     }
     var progress: LLMStreamProgress {
-        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage)
+        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
     }
     func finish() throws -> LLMResponse {
         guard done, stopped else { throw LLMFailure.truncated }

@@ -7,17 +7,34 @@ struct LLMAnswerBuffer: Sendable {
     private var marker = ""
     private var text = ""
     private var byteCount = 0
+    private var characterCount = 0
+    private(set) var reasoning = ""
+    private var reasoningBytes = 0
+    private(set) var reasoningTruncated = false
+    var content: String { text }
+    static let maximumReasoningBytes = 1024 * 1024
+
+    mutating func appendReasoning(_ fragment: String) {
+        guard !reasoningTruncated else { return }
+        let remaining = Self.maximumReasoningBytes - reasoningBytes
+        if fragment.utf8.count <= remaining { reasoning.append(fragment); reasoningBytes += fragment.utf8.count }
+        else {
+            var prefix = Data(fragment.utf8.prefix(remaining))
+            while !prefix.isEmpty && String(data: prefix, encoding: .utf8) == nil { prefix.removeLast() }
+            reasoning.append(String(decoding: prefix, as: UTF8.self)); reasoningBytes += prefix.count; reasoningTruncated = true
+        }
+    }
     let allowsLeadingThought: Bool
     var requiresJSON = true
     private var maximumBytes: Int { requiresJSON ? LLMJSONEnvelope.maximumBytes : CreatorCodeOutput.maximumEnvelopeBytes }
 
-    var receivedCharacters: Int { text.count }
+    var receivedCharacters: Int { characterCount }
     var receivingContent: Bool { phase == .answer }
 
     private mutating func appendAnswer(_ value: String) throws {
         let count = value.utf8.count
         guard count <= maximumBytes - byteCount else { throw LLMFailure.outputLimit }
-        text.append(value); byteCount += count
+        text.append(value); byteCount += count; characterCount += value.count
     }
     mutating func append(_ fragment: String) throws {
         var index = fragment.startIndex
@@ -41,8 +58,10 @@ struct LLMAnswerBuffer: Sendable {
                 else { throw LLMFailure.protocolViolation }
             case .thought:
                 marker.append(character)
-                if marker.hasSuffix("</think>") { marker = ""; phase = .prefix }
-                else if marker.count > 8 { marker.removeFirst() }
+                if marker.hasSuffix("</think>") {
+                    appendReasoning(String(marker.dropLast(8))); marker = ""; phase = .prefix
+                }
+                else if marker.count > 8 { appendReasoning(String(marker.removeFirst())) }
             case .answer: break
             }
         }

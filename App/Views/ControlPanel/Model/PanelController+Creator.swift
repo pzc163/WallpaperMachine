@@ -22,7 +22,7 @@ extension PanelController {
         else { detail = nil }
         try Task.checkCancellation()
         if creator.detail?.project.id != detail?.project.id || creator.detail?.project.selectedRevisionID != detail?.project.selectedRevisionID {
-            creator.preview?.close(); creator.preview = nil
+            creator.preview?.close(); creator.preview = nil; creator.embedded.close()
         }
         creator.projects = projects; creator.configuration = configuration; creator.detail = detail
         creator.selectedProjectID = detail?.project.id
@@ -35,7 +35,7 @@ extension PanelController {
     }
     func selectCreatorProject(_ id: UUID?) async throws {
         guard !creator.isBusy else { throw CreatorGenerationFailure.busy }
-        creator.preview?.close(); creator.preview = nil
+        creator.preview?.close(); creator.preview = nil; creator.embedded.close()
         creator.selectedProjectID = id
         try await run(.immediate) { try await loadCreator() }
     }
@@ -64,7 +64,7 @@ extension PanelController {
         guard await dialogs.confirm(L("Delete this draft?"), detail: L("Published wallpapers stay in the library. Local conversation and revision history will be deleted."), button: L("Delete draft")) else { return }
         try await creatorOperation(.editing) {
             try await self.creatorWorkspace.delete(id)
-            if self.creator.selectedProjectID == id { self.creator.preview?.close(); self.creator.preview = nil; self.creator.selectedProjectID = nil }
+            if self.creator.selectedProjectID == id { self.creator.preview?.close(); self.creator.preview = nil; self.creator.embedded.close(); self.creator.selectedProjectID = nil }
         }
     }
     func generateCreator() async throws {
@@ -74,13 +74,18 @@ extension PanelController {
         try await creatorOperation(.generating) {
             if self.creator.selectedProjectID == nil { self.creator.selectedProjectID = try await self.creatorWorkspace.create(title: L("Untitled project")) }
             let token = self.creator.operationID
+            let mailbox = CreatorStreamMailbox()
+            self.creator.activeTranscript = CreatorTranscript()
+            self.creator.artifactTab = .source; self.creator.embedded.close()
             var request = CreatorOrchestrator.Request(projectID: self.creator.selectedProjectID, baseRevisionID: base,
                 profileID: profile.id, configurationID: profile.configurationID, prompt: prompt,
                 maxOutputTokens: profile.limits.outputTokensPerRequest, maxRepairs: repairs, mode: self.creator.mode)
             request.streamProgress = { [weak self] value in
+                mailbox.store(value)
                 Task { @MainActor in
-                    guard let self, self.creator.operationID == token, self.creator.isBusy, self.creator.phase == .generating else { return }
-                    self.creator.streamProgress = value
+                    guard let self, self.creator.operationID == token, self.creator.isBusy, self.creator.phase == .generating,
+                          self.creator.activeTranscript != nil else { return }
+                    self.creator.receiveStream(mailbox.latest)
                 }
             }
             request.progress = { [self] stage, attempt, limit in
@@ -88,9 +93,11 @@ extension PanelController {
                     guard self.creator.operationID == token else { return }
                     self.creator.attempt = attempt; self.creator.attemptLimit = limit
                     switch stage {
-                    case .generating: self.creator.phase = .generating; self.creator.streamProgress = .init()
+                    case .generating:
+                        mailbox.clear(); self.creator.phase = .generating; self.creator.streamProgress = .init()
+                        self.creator.activeTranscript = CreatorTranscript()
                     case .repairPending: self.creator.phase = .repairPending
-                    case .runtime: self.creator.phase = .runtime
+                    case .runtime: self.creator.receiveStream(mailbox.latest); self.creator.activeTranscript?.finish(); self.creator.phase = .runtime
                     case .sealing: self.creator.phase = .sealing
                     case .publishing: self.creator.phase = .saving
                     case .completed: self.creator.phase = .ready
@@ -98,8 +105,18 @@ extension PanelController {
                     self.shell.say(CreatorLabels.phase(self.creator.phase))
                 }
             }
-            _ = try await self.creatorWorkspace.generate(request)
-            if self.creator.prompt == prompt { self.creator.prompt = "" }
+            do {
+                let result = try await self.creatorWorkspace.generate(request)
+                self.creator.receiveStream(mailbox.latest)
+                self.creator.archiveTranscript(for: result.iterationID)
+                self.creator.artifactTab = .render
+                if self.creator.prompt == prompt { self.creator.prompt = "" }
+            } catch {
+                self.creator.receiveStream(mailbox.latest)
+                if let id = (error as? CreatorOrchestrator.Failure)?.iterationID { self.creator.archiveTranscript(for: id) }
+                else { self.creator.activeTranscript = nil }
+                throw error
+            }
         }
     }
     func editCreatorTurn(_ id: UUID) throws {
@@ -121,7 +138,7 @@ extension PanelController {
     func rollbackCreator(_ revision: UUID) async throws {
         guard let project = creator.selectedProjectID else { return }
         try await creatorOperation(.editing) {
-            self.creator.preview?.close(); self.creator.preview = nil
+            self.creator.preview?.close(); self.creator.preview = nil; self.creator.embedded.close()
             try await self.creatorWorkspace.select(project: project, revision: revision)
         }
     }
@@ -142,12 +159,13 @@ extension PanelController {
         try CreatorTemplateCatalog.definition(templateID).validate(values)
         creator.parameters = values
         try creator.preview?.properties(values)
+        try creator.embedded.properties(values)
     }
     func validateCreatorParameters() async throws {
         guard let project = creator.selectedProjectID, let revision = creator.selectedRevision else { return }
         let values = creator.parameters
         try await creatorOperation(.runtime) {
-            self.creator.preview?.close(); self.creator.preview = nil
+            self.creator.preview?.close(); self.creator.preview = nil; self.creator.embedded.close()
             _ = try await self.creatorWorkspace.edit(project: project, revision: revision.id, parameters: values)
         }
     }

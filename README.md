@@ -18,20 +18,20 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/AI_Creator-Developer_preview-0a84ff" alt="AI Creator developer preview"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/WallpaperMachine/WallpaperMachine?color=blue" alt="License: GPL-3.0"></a>
   <img src="https://img.shields.io/badge/macOS_15%2B-Apple_silicon-111111?logo=apple&logoColor=white" alt="macOS 15 or later on Apple silicon">
   <a href="https://github.com/pzc163/WallpaperMachine/stargazers"><img src="https://img.shields.io/github/stars/pzc163/WallpaperMachine" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Download AI Creator preview"></a>
+  <a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111"><img src="https://img.shields.io/badge/Download-AI_Creator_preview-0a84ff?style=for-the-badge&amp;logo=apple&amp;logoColor=white" height="36" alt="Download AI Creator preview"></a>
   &ensp;
   <a href="https://www.wallpapermachine.app/#app"><img src="https://img.shields.io/badge/Upstream-browser_demo-34c759?style=for-the-badge&amp;logo=safari&amp;logoColor=white" height="36" alt="Upstream browser demo"></a>
 </p>
 
 <p align="center">
-  <sub>macOS 15 Sequoia or later&ensp;·&ensp;Apple silicon (M1 or later)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111">Release notes and checksums</a></sub>
+  <sub>macOS 15 Sequoia or later&ensp;·&ensp;Apple silicon (M1 or later)&ensp;·&ensp;<a href="https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111">Release notes and checksums</a></sub>
 </p>
 
 <p align="center">
@@ -63,7 +63,7 @@
 
 ## Quick start
 
-Download the **[S4 developer pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, ad-hoc signed and **not Apple notarized**. Intel is not supported. The earlier [S3 macOS 15 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) and [original S3 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) remain for regression testing; the original requires macOS 27.2+.
+Download the **[S4 developer pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111)**: macOS 15.0+, Apple Silicon / arm64, ad-hoc signed and **not Apple notarized**. Intel is not supported. The earlier [S3 macOS 15 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-macos15-93eb2aa5) and [original S3 package](https://github.com/pzc163/WallpaperMachine/releases/tag/s3-rc-93eb2aa5) remain for regression testing; the original requires macOS 27.2+.
 
 1. Download the DMG and verify the release SHA-256. Prefer a separate macOS test account; do not overwrite your production copy or run both versions in the same account.
 2. After checking the source and checksum, follow the [installation checklist](https://github.com/pzc163/WallpaperMachine/blob/feat/ai-creator/docs/testing/creator-s4-public-test.md) for a scoped `xattr -cr` on the test copy, or use Privacy & Security → Open Anyway. Do not disable system security.
@@ -85,7 +85,8 @@ The upstream website and Homebrew distribute the upstream app without this fork�
 
 - **Connection and workspace update:** labeled settings, confirmed local model discovery, narrow LAN ATS exceptions and lazy credential sessions; streaming uses 25s first-response / 90s idle / 300s total limits, live phase/count progress and budgeted non-stream fallback. The multiline composer adds model/mode selection, Enter/Shift-Enter, prompt-derived project names, inline rename and per-turn retry/edit.
 - **WebGL templates:** a warped gradient with dithering, a dark nebula with layered stars and meteors, and crisp clock typography with measured insets. New templates retain 30 FPS and 2,073,600-pixel limits; historical revisions keep their original renderer.
-- **Model connections:** OpenAI-compatible, Anthropic Messages and Gemini GenerateContent. Automatic output negotiates schema → object → prompt within the real budget. A top success banner shows model, effective mode and elapsed time. Defaults reserve up to 8,192 output tokens per call and 24,576 total; actual billing is provider-specific.
+- **Model connections:** OpenAI-compatible, Anthropic Messages and Gemini GenerateContent. Automatic output negotiates schema → object → prompt within the real budget. A top success banner shows model, effective mode and elapsed time. New settings use the server-native output maximum or an explicit limit up to 131,072 per request; all fallbacks and repairs share the request budget.
+- **Streaming studio:** Editable LAN endpoints and optional keys; discover models before saving. Blank token limit uses the server maximum, or choose up to 131,072 per call. Free-code mode streams raw HTML (≤256 KiB). Expand model-provided thinking, watch source appear, copy it, then switch to an interactive embedded preview after validation. Thinking stays in bounded session memory; source remains immutable after validation.
 - **Local and LAN models:** explicit local mode permits loopback, private IPv4, IPv6 ULA/link-local and .local HTTP with optional empty keys. Public HTTP is rejected. Credentials remain bound to Profile, origin and configuration generation; changing hosts never forwards an old key.
 - **Interactive free code:** one dependency-free HTML file receives pointer coordinates in preview and on the desktop. Per-display desktop delivery is capped at 30 Hz and stops on pause, occlusion or sleep. Offline iframe policy, native supervision and bundle integrity remain enforced.
 - **Bounded repair and history:** syntax, parameter, first-frame and runtime failures require fresh validation. Initial generation plus at most two repairs share a three-call budget. Failures, cancellation and recovery preserve the last valid revision; raw errors and keys do not enter repair logs.
@@ -93,7 +94,7 @@ The upstream website and Homebrew distribute the upstream app without this fork�
 
 **Start with LM Studio:** load a model, start the server, set an OpenAI-compatible Profile to `http://127.0.0.1:1234/v1` and its actual model ID, enable local mode and start with automatic. For another Mac, prefer SSH forwarding or a trusted LAN service such as `http://model-host.local:1234/v1`; check the target confirmation. Models are not bundled.
 
-**Public-test limits:** free code currently means one ≤32 KiB HTML file, procedural graphics and system fonts. No external assets/fonts, network, audio, modules or multiple files. WebKit supervision uses checked SPI and refuses unsupported environments; it is not an OS GPU quota or an audit of arbitrary hostile code. Legacy Creator backup/restore/relocation remains blocked. Offline wallpaper playback does not disable Workshop or updater networking.
+**Public-test limits:** free code currently means one ≤256 KiB HTML file, procedural graphics and system fonts. No external assets/fonts, network, audio, modules or multiple files. WebKit supervision uses checked SPI and refuses unsupported environments; it is not an OS GPU quota or an audit of arbitrary hostile code. Legacy Creator backup/restore/relocation remains blocked. Offline wallpaper playback does not disable Workshop or updater networking.
 
 **Verification:** local Mock models and real offscreen WebKit cover the three original S0 probes, process failures, three protocols, fake dual displays, repair and history. The archived 30/30 model benchmark and 1,800-second soak describe earlier templates, not the new shaders/free code. Physical macOS 15, display DPI/sleep, visual quality and whole-system/GPU energy remain acceptance work.
 
@@ -135,7 +136,7 @@ without opening the window.
 
 ## Why you can trust it
 
-The upstream build attestations and update flow below do not describe this fork’s S3 packages. They were packaged locally, Ad-hoc signed, not notarized, and have no GitHub Actions build attestation. Use the SHA-256 on the [Release page](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111). AI Creator sends requests to your selected model service when you ask it to generate, revise or test a connection.
+The upstream build attestations and update flow below do not describe this fork’s S3 packages. They were packaged locally, Ad-hoc signed, not notarized, and have no GitHub Actions build attestation. Use the SHA-256 on the [Release page](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111). AI Creator sends requests to your selected model service when you ask it to generate, revise or test a connection.
 
 - **Open source, all of it.** The app, its renderer and its scene engine are all in
   this repository under GPL-3.0-only. There is no closed core and no paid features: the app
@@ -243,7 +244,7 @@ Steam account names are replaced first.
 <details>
 <summary><b>How do I get it?</b></summary>
 
-Download this fork’s AI Creator from the [macOS 15+ pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-ux-preview-20261111) and follow [Quick start](#quick-start). It is an Ad-hoc acceptance package without Apple notarization. The upstream [production releases](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), website and Homebrew distribution are maintained separately and do not include this fork’s AI Creator.
+Download this fork’s AI Creator from the [macOS 15+ pre-release](https://github.com/pzc163/WallpaperMachine/releases/tag/creator-artifacts-preview-20261111) and follow [Quick start](#quick-start). It is an Ad-hoc acceptance package without Apple notarization. The upstream [production releases](https://github.com/WallpaperMachine/WallpaperMachine/releases/latest), website and Homebrew distribution are maintained separately and do not include this fork’s AI Creator.
 
 </details>
 

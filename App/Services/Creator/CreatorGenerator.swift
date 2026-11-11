@@ -115,6 +115,8 @@ actor CreatorGenerator {
             if request.mode == .code {
                 let output = try CreatorCodeOutput.parse(completed.response.text)
                 try await provider.checkSourceContainsNoCredential(completed.response.text, profile: profile)
+                // Legacy JSON may escape the key; check the decoded file bytes as well as the envelope.
+                try await provider.checkSourceContainsNoCredential(String(decoding: output.html, as: UTF8.self), profile: profile)
                 specification = try CreatorCodeOutput.specification(projectID: request.projectID, html: output.html)
                 presentation = output.presentation; source = output.html
             } else {
