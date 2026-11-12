@@ -124,6 +124,27 @@ import XCTest
         } catch { await panel.shutdown(); throw error }
         await panel.shutdown()
     }
+    func testEditedConnectionIsSavedBeforeTestingAndUsesNewCredential() async throws {
+        let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
+        let panel = try makeController(creatorWorkspace: CreatorWorkspaceTests.workspace(c))
+        do {
+            panel.controller.creator.configuration = try await c.settings.settings()
+            panel.dialogs.confirmAnswer = true
+            var changed = c.profile; changed.model = "edited-model"
+            c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(#"{"ok":true}"#)])])
+            var accepted: ProviderProfile?
+            try await panel.controller.testCreatorDraft(changed, key: "replacement-fixture-key", expectedRevision: panel.controller.creator.configuration.revision) { accepted = $0 }
+            XCTAssertEqual(accepted?.model, "edited-model")
+            XCTAssertNotEqual(accepted?.configurationID, c.profile.configurationID)
+            XCTAssertEqual(c.route.requests.count, 1)
+            let request = try XCTUnwrap(c.route.requests.first)
+            XCTAssertEqual(request.value(forHTTPHeaderField: "Authorization"), "Bearer replacement-fixture-key")
+            let body = try XCTUnwrap(JSONSerialization.jsonObject(with: request.httpBody!) as? [String: Any])
+            XCTAssertEqual(body["model"] as? String, "edited-model")
+            XCTAssertEqual(panel.controller.creator.connectionNotice?.configurationID, accepted?.configurationID)
+        } catch { await panel.shutdown(); throw error }
+        await panel.shutdown()
+    }
     func testStartupRecoversAbandonedJobWithoutEnteringCreatorTab() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         try await c.store.cancel(c.ticket)

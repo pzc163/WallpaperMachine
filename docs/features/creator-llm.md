@@ -2,6 +2,13 @@
 
 ## S5.2 provider center
 
+Cloud and local forms always expose **Test connection**. New/edited drafts (including
+an entered replacement key) show **Save and test connection** and save the exact
+submitted configuration before displaying the target/model confirmation. Invalid
+address/model/limit fields disable testing with an explanation. Fetching model IDs
+is a separate action. The saved configuration generation is rechecked before sending
+and before showing the success banner; cancellation remains available during testing.
+
 The native directory includes eleven cloud brands, LM Studio, Ollama and separate
 custom cloud/local entries. Endpoint presets remain editable and use the same
 origin policy as discovery, connection checks and generation. Presets are not a

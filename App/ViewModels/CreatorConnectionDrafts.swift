@@ -13,6 +13,13 @@ final class CreatorConnectionDraft: CustomStringConvertible, CustomDebugStringCo
     var id: UUID { profile.id }
     var isModified: Bool { profile != baseline || !key.isEmpty }
     var keyIsOptional: Bool { profile.localMode && profile.protocolKind == .openaiCompatible }
+    var savingProfile: ProviderProfile {
+        var value = profile
+        if value.modelIDs != nil, !value.model.isEmpty, !value.enabledModels.contains(value.model) { value.modelIDs?.append(value.model) }
+        return value
+    }
+    var canTest: Bool { (try? savingProfile.validate()) != nil }
+    func needsSave(comparedTo saved: ProviderProfile?) -> Bool { savingProfile != saved || !key.isEmpty }
     nonisolated var description: String { "CreatorConnectionDraft(<redacted>)" }
     nonisolated var debugDescription: String { description }
     nonisolated var customMirror: Mirror { Mirror(self, children: [:]) }

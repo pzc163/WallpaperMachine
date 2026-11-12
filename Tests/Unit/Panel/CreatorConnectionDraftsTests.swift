@@ -151,6 +151,7 @@ import XCTest
                         }
                         XCTAssertGreaterThan((ys[1] - ys[0]) * (ys[2] - ys[1]), 0, "API key must sit between Base URL and Model ID")
                         XCTAssertEqual(elements.contains { $0.identifier == "creator-fetch-models" }, local)
+                        XCTAssertTrue(elements.contains { $0.identifier == "creator-test-connection" }, "New and unsaved forms keep the connection test visible")
                         XCTAssertFalse(elements.contains { $0.text == L("Local server mode") })
                     }
                 }
@@ -158,5 +159,18 @@ import XCTest
             XCTAssertEqual(c.memory.readCount, 0, "Rendering forms must never read personal credentials")
         } catch { await panel.shutdown(); throw error }
         await panel.shutdown()
+    }
+
+    func testConnectionReadinessUsesEditedAddressModelAndKeyWithoutPersisting() throws {
+        let form = CreatorConnectionDraft(try XCTUnwrap(CreatorProviderCatalog.entry("lmstudio")).profile())
+        XCTAssertFalse(form.canTest)
+        form.profile.baseURL = "http://192.168.90.9:1234/v1"; form.profile.model = "local-model"
+        XCTAssertTrue(form.canTest); XCTAssertTrue(form.needsSave(comparedTo: nil))
+        let saved = form.profile
+        XCTAssertFalse(form.needsSave(comparedTo: saved))
+        form.key = "replacement-fixture-key"
+        XCTAssertTrue(form.needsSave(comparedTo: saved), "Test must not silently ignore a changed key")
+        form.profile.baseURL = "http://public.example/v1"
+        XCTAssertFalse(form.canTest)
     }
 }

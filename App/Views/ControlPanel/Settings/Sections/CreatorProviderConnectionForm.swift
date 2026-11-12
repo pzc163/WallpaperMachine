@@ -8,6 +8,7 @@ struct CreatorProviderConnectionForm: View {
     let didDelete: (UUID) -> Void
     @State private var discovery: Task<Void, Never>?
     @State private var discovering = false
+    @State private var preparingTest = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
@@ -168,14 +169,23 @@ struct CreatorProviderConnectionForm: View {
                         .accessibilityIdentifier("creator-profile-delete")
                 }
             }
-            if let saved = savedProfile, saved == form.profile {
-                HStack {
-                    Button("Test connection") { controller.launch(PanelActionCoordinator.key("creator.connection.test")) { try await controller.testCreatorConnection(saved) } }
-                        .disabled(controller.creator.isTestingConnection).accessibilityIdentifier("creator-test-connection")
-                    if controller.creator.isTestingConnection {
-                        Button("Cancel") { controller.cancelCreatorConnection() }.accessibilityIdentifier("creator-test-cancel")
+            HStack {
+                Button {
+                    let profile = savingProfile, original = form.profile, secret = form.key, revision = controller.creator.configuration.revision
+                    preparingTest = true; form.key = ""
+                    controller.launch(PanelActionCoordinator.key("creator.connection.test")) {
+                        defer { preparingTest = false }
+                        try await controller.testCreatorDraft(profile, key: secret, expectedRevision: revision) { saved in didSave(saved, original) }
                     }
+                } label: { Text(verbatim: form.needsSave(comparedTo: savedProfile) ? L("Save and test connection") : L("Test connection")) }
+                    .disabled(preparingTest || controller.creator.isTestingConnection || !form.canTest).accessibilityIdentifier("creator-test-connection")
+                if controller.creator.isTestingConnection {
+                    Button("Cancel") { controller.cancelCreatorConnection() }.accessibilityIdentifier("creator-test-cancel")
                 }
+            }
+            if !form.canTest { Text("Enter a valid address, model ID and generation limits to test this connection.").font(.caption).foregroundStyle(.secondary) }
+            Text("Tests the address and model shown above. Unsaved changes are saved first.").font(.caption).foregroundStyle(.secondary)
+            if let saved = savedProfile, saved == form.profile {
                 Menu("Use this model") {
                     ForEach(saved.enabledModels, id: \.self) { id in
                         Button { controller.launch { try await controller.selectCreatorProfile(saved.id, modelID: id) } } label: { Text(verbatim: id) }
@@ -187,9 +197,7 @@ struct CreatorProviderConnectionForm: View {
     }
     private var enabledModels: [String] { (form.profile.modelIDs ?? (form.profile.model.isEmpty ? [] : [form.profile.model])) }
     private var savingProfile: ProviderProfile {
-        var value = form.profile
-        if value.modelIDs != nil, !value.model.isEmpty, !value.enabledModels.contains(value.model) { value.modelIDs?.append(value.model) }
-        return value
+        form.savingProfile
     }
     private func enable(_ id: String) {
         var ids = enabledModels

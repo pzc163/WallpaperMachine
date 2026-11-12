@@ -291,6 +291,18 @@ extension PanelController {
         catch { throw CreatorPanelFailure(message: CreatorLabels.issue(CreatorRepairIssue.from(error).category)) }
     }
     func cancelCreatorConnection() { creator.connectionNotice = nil; creator.connection?.cancel() }
+    func testCreatorDraft(_ profile: ProviderProfile, key: String, expectedRevision: Int,
+                          saved: @MainActor (ProviderProfile) -> Void = { _ in }) async throws {
+        guard !creator.isTestingConnection else { return }
+        try profile.validate(); try Task.checkCancellation()
+        if creator.configuration.profiles.first(where: { $0.id == profile.id }) != profile || !key.isEmpty {
+            try await saveCreatorProfile(profile, key: key, expectedRevision: expectedRevision)
+        }
+        guard let current = creator.configuration.profiles.first(where: { $0.id == profile.id }) else { throw LLMFailure.staleProfile }
+        saved(current)
+        try Task.checkCancellation()
+        try await testCreatorConnection(current)
+    }
     func testCreatorConnection(_ profile: ProviderProfile) async throws {
         guard !creator.isTestingConnection else { return }
         let detail = profile.baseURL + "\n" + profile.model + "\n\n" + L("This tests the saved model and may negotiate output modes within your request and token budgets. Requests may incur charges. You can cancel at any time.")
