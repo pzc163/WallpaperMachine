@@ -124,7 +124,8 @@ contract instead of offering OpenAI-specific switches. None of these modes bypas
 the strict native parameter validator. The eight added labels/notes and existing
 preset names cover all six app languages.
 
-Test connection asks for confirmation with the saved target, model and possible
+Test connection is always visible for cloud and local drafts. Edited/new settings
+use Save and test, including replacement keys, with invalid-field guidance. It asks for confirmation with the saved target, model and possible
 charge. It uses the same bounded three-mode negotiation as creation, within the
 saved request/token budget; cancel remains available. Success displays a dismissible
 native top banner with model, effective output mode and elapsed time. New tests and
@@ -145,8 +146,18 @@ enters logs, conversation.json, model follow-up context or exported wallpaper pa
 The workspace keeps at most eight turn transcripts within 8 MiB, with a 1 MiB reasoning display
 limit per attempt and an explicit truncation notice. Closing the panel clears the session. Stream
 updates are coalesced to five per second; native text views append while preserving manual scroll.
-Thinking has an active timer and collapses when generation finishes; it can be expanded again for
+Thinking starts timing only on actual reasoning; response headers display a separate waiting
+state. Cloud/local timeout defaults and Kimi K3 low/high/max controls are documented in
+[model connections](creator-llm.md#streaming-limits-and-errors). Thinking collapses when generation finishes; it can be expanded again for
 retained turns. A synchronous mailbox preserves final text before async phase transitions.
+
+Diagnostics distinguish generation, static source validation, sandbox runtime and cover capture.
+Typed errors include source-relative locations where available, field constraints and timeout
+phase/elapsed/limit/received counts. The report links to the source selection and shows a bounded
+redacted excerpt. Copied diagnostics omit source/model messages entirely. WebKit-hidden locations
+are explicitly unavailable. Code retained after failure can be edited and revalidated without
+another model call, with the same sandbox/poster/digest gates and immutable history. Usage help
+separates provider-reported input/output/thinking counts; the main count is total, not output-only.
 
 The artifact switches from streamed source to rendered output only after static/runtime/poster
 validation. Source is editable/copyable and reports line/byte counts; missing model usage remains

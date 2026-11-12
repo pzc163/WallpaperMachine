@@ -119,4 +119,43 @@ import XCTest
         withExtendedLifetime(shared) {}
     }
 
+    func testRuntimeAndFrameCallbackErrorsRetainRelativeSourceLocations() async throws {
+        for (body, code, line): (String, CreatorSourceDiagnostic.Code, Int) in [
+            ("missingVariable();", .reference, 4),
+            ("requestAnimationFrame(()=>{\nmissingInFrame();\n});", .reference, 5),
+            ("Promise.reject(new Error('private-payload'));", .unhandled, 4)
+        ] {
+            let pair = try await make("<!doctype html><html>\n<body>\n<script>\n" + body + "\n</script></body></html>")
+            let host = CreatorOffscreenMediaWindow(hosting: pair.0.view)
+            defer { pair.0.stop(); host.contentView = nil; host.close(); withExtendedLifetime(pair.1) {} }
+            let end = ContinuousClock.now + .seconds(5)
+            while pair.0.failure == nil && ContinuousClock.now < end { try await Task.sleep(for: .milliseconds(20)) }
+            let issue = try XCTUnwrap(pair.0.failure, "Missing diagnostic for \(code.rawValue) at fixture line \(line)")
+            if body == "missingVariable();" {
+                // Opaque srcdoc can suppress the top-level error name while retaining its line.
+                XCTAssertTrue([CreatorSourceDiagnostic.Code.reference, .script].contains(try XCTUnwrap(issue.diagnostic?.code)))
+            } else { XCTAssertEqual(issue.diagnostic?.code, code) }
+            if body.contains("requestAnimationFrame") || issue.diagnostic?.line != nil {
+                XCTAssertEqual(issue.diagnostic?.line, line)
+                XCTAssertEqual(issue.diagnostic?.source, .indexHTML)
+            } else {
+                // WebKit also redacts some top-level/promise event positions in opaque frames.
+                XCTAssertNil(issue.diagnostic?.source, "Do not invent a location when WebKit provides none")
+            }
+            XCTAssertFalse(String(decoding: try CreatorPersistence.encode(issue), as: UTF8.self).contains("private-payload"))
+        }
+    }
+    func testCanvasResourceErrorIdentifiesActualConstraint() async throws {
+        for (body, code): (String, CreatorSourceDiagnostic.Code) in [
+            ("const c=document.createElement('canvas');c.width=5000;", .canvasDimensions),
+            ("for(let i=0;i<2;i++)document.createElement('canvas').getContext('2d');", .canvasCount),
+            ("for(let i=0;i<300;i++)console.log('private');", .consoleLimit)
+        ] {
+            let pair = try await make("<html><body><script>" + body + "</script></body></html>")
+            defer { pair.0.stop(); withExtendedLifetime(pair.1) {} }
+            try await wait { pair.0.failure != nil }
+            XCTAssertEqual(pair.0.failure?.diagnostic?.code, code)
+        }
+    }
+
 }

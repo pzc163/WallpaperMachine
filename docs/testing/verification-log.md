@@ -25,6 +25,15 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-12 — Creator long generation, connection testing and actionable diagnostics
+
+- Implemented separate response/content/idle/total deadlines, optional per-profile limits and scoped Kimi K3 low/high/max reasoning effort; old optional-field encodings remain readable.
+- Targeted final integration: 93 passed, 0 failed; documentation/localization checks: 28 passed.
+- python3 scripts/test.py: 724 Python tests passed; native 5140 passed, 0 failed, 69 skipped. Live model, benchmark, soak and network opt-ins disabled.
+- Three main-thread runtime warnings arose in unchanged AppUpdate, LockScreenWebMPlayer and WebMFilteredVideoSink tests; no Creator warning or failure.
+- Real offscreen WebKit checked structured runtime/source diagnostics and full revalidation without another model call. Opaque-frame redaction remains explicitly unavailable rather than guessed.
+- No personal model Keychain, visible app, installed app or real desktop operation. Physical macOS 15 and real long model generation remain manual acceptance items.
+
 ## 2026-11-12 — Creator cloud/local connection isolation
 
 Separate cloud provider and local/LAN editors, draft identities and credential namespaces; preserve legacy records without UI Keychain access.
@@ -98,9 +107,3 @@ Native Shader/Three shells, an offline pinned library, declarative parameters an
 - Full python3 scripts/test.py: 720 Python checks, 5048 native passed, 0 failed, 69 skipped; 2 runtime warnings. First run exposed two old deadline assertions; updated contract checks and full rerun passed.
 - No live API, personal model Keychain, visible window, production app or desktop access. Physical macOS 15/LAN privacy, visible IME/UX and hardware acceptance remain manual.
 - Feature branch only; Release and Ad-hoc macOS 15 packaging requested. Package-specific signatures, dependency minima and hash are attached to creator-ux-preview-20261111, outside the source verification record.
-
-## 2026-11-11 — Creator streaming deadlines and progress
-
-- Three-protocol codec, transport, bounded repair and code workflow checks: 53 passed, 0 failed. Final response-header/idle boundary rerun: 12 passed, 0 failed.
-- Added independent first-response/idle/total deadlines, redacted phase/count updates, and bounded non-stream negotiation using the existing ledger. Documentation (11), localization catalog (8) and panel localization (9) checks passed.
-- Only deterministic Mock flows and offscreen WebKit; no real APIs, personal Keychain, visible windows or desktop changes. Full routine gate remains scheduled after workspace UX.

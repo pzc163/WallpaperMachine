@@ -6,9 +6,11 @@ struct CreatorStreamTextView: NSViewRepresentable {
     let text: String
     var monospaced = true
     var onEdit: ((String) -> Void)? = nil
+    var focus: CreatorModel.SourceFocus? = nil
     func makeCoordinator() -> Coordinator { Coordinator(self) }
     final class Coordinator: NSObject, NSTextViewDelegate {
         var parent: CreatorStreamTextView
+        var lastFocus: UUID?
         init(_ parent: CreatorStreamTextView) { self.parent = parent }
         func textDidChange(_ notification: Notification) {
             guard let editor = notification.object as? NSTextView else { return }
@@ -43,7 +45,7 @@ struct CreatorStreamTextView: NSViewRepresentable {
         context.coordinator.parent = self
         guard let editor = scroll.documentView as? NSTextView else { return }
         editor.isEditable = onEdit != nil
-        guard editor.string != text else { return }
+        if editor.string != text {
         let previous = editor.string
         let follows = previous.isEmpty || scroll.contentView.bounds.maxY >= editor.bounds.height - 28
         if text.hasPrefix(previous), let storage = editor.textStorage {
@@ -51,5 +53,16 @@ struct CreatorStreamTextView: NSViewRepresentable {
             storage.append(NSAttributedString(string: tail, attributes: [.font: editor.font!, .foregroundColor: NSColor.labelColor]))
         } else { editor.string = text }
         if follows { editor.scrollRangeToVisible(NSRange(location: (text as NSString).length, length: 0)) }
+        }
+        if let focus, context.coordinator.lastFocus != focus.id, let range = Self.range(line: focus.line, in: text) {
+            context.coordinator.lastFocus = focus.id
+            editor.setSelectedRange(range); editor.scrollRangeToVisible(range)
+        }
+    }
+    static func range(line: Int, in text: String) -> NSRange? {
+        let lines = text.components(separatedBy: "\n")
+        guard (1...lines.count).contains(line) else { return nil }
+        let location = lines.prefix(line - 1).reduce(0) { $0 + $1.utf16.count + 1 }
+        return NSRange(location: location, length: lines[line - 1].utf16.count)
     }
 }

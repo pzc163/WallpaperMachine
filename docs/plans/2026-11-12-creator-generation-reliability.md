@@ -14,7 +14,7 @@
 - 只对支持的 Kimi K3 模型发送顶层 `reasoning_effort`，提供 low/high/max，缺省 low；不对其他模型发送该字段，不使用 K2 的关闭思考参数。
 - 精确区分首响应、首内容、空闲、总时限与服务端超时；记录有界耗时/最后数据间隔，不记录端点/密钥。超时、断网及截断不触发代码自动修复，实际请求预算仍逐次计数。
 - 进度分别显示等待/思考/正文；思考计时从实际思考片段开始，接收字符不冒充 token。
-- 测试：`LLMStreamingUXTests`、新增长生成/策略合同测试、Provider/Profile/Repair 回归；使用注入时钟和短时 Mock，不等待真实长时限或发起真实模型请求。
+- 测试：`LLMStreamingUXTests`、新增长生成/策略合同测试、Provider/Profile/Repair 回归；向纯状态机提供单调时间戳模拟小时级等待，并运行短时 Mock，不发起真实模型请求。
 
 ## 2. 连接测试入口（原子提交二）
 
@@ -36,3 +36,12 @@
 - 门禁通过后按上述目的分三次提交；共享文件用暂存补丁拆分，不提交测试产物或个人配置。仅推送 `feat/ai-creator`。
 - 构建 Release；在临时副本中使用经 SHA-256/ABI/导出符号验证的同版本 macOS 15 官方依赖打包，校验签名、DMG 挂载与最低系统版本。
 - 新建独立 GitHub Pre-release，显式 `--prerelease --latest=false`，回下载核对 SHA-256；不修改 main、正式 latest 或本机正式版。清理本轮临时产物，保留构建应用。
+
+## 实施与验证结果（2026-11-12）
+
+- 三项修复与 Kimi 设置已实现，新增 19 项原生回归。最终整合定向测试 93 passed，0 failed；文档/六语言检查 28 passed。
+- 完整 `python3 scripts/test.py`：724 项 Python 测试通过；原生 5140 passed、0 failed、69 skipped。Live LLM、Benchmark、Soak 与外网 opt-in 均未开启。
+- 完整门禁的 3 条主线程运行警告来自未修改的 AppUpdate、LockScreenWebMPlayer、WebMFilteredVideoSink 测试，非本轮 Creator 测试失败。
+- 小时级等待通过单调时间戳状态机验证，并以短时真实 URLSession/Mock 验证分段超时和取消；未重新执行真实付费模型长生成或物理显示器验收。
+- 实际离屏 WebKit 覆盖 JS 静态语法行号、rAF 异常、Promise 拒绝、资源分类、黑帧/透明帧，以及旧有效修订保留。WebKit 隐藏顶层异常类型/位置时诚实显示不可用；复制诊断不含源码或原始错误正文。
+- macOS 15+ 发布继续使用同版本官方 arm64_sequoia 依赖及 Ad-hoc 签名；部署版本、ABI/导出符号、签名和挂载检查属于打包门禁，不替代 macOS 15 真机验收。

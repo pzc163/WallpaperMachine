@@ -28,6 +28,7 @@ extension PanelController {
         if creator.detail?.project.id != detail?.project.id || creator.detail?.project.selectedRevisionID != detail?.project.selectedRevisionID {
             creator.preview?.close(); creator.preview = nil; creator.embedded.close()
             creator.sourceDraft = nil
+            creator.sourceFocus = nil
         }
         creator.projects = projects; creator.configuration = configuration; creator.detail = detail
         creator.selectedProjectID = detail?.project.id
@@ -35,7 +36,7 @@ extension PanelController {
         if let mode = detail?.specification?.creationMode ?? detail?.conversation.turns.last?.creationMode { creator.mode = mode }
         if let engine = detail?.engine { creator.engine = engine }
         if !creator.isBusy {
-            creator.issue = detail?.conversation.turns.last?.failure
+            creator.issue = creator.unresolvedTurn?.failure
             creator.phase = creator.issue == nil ? (creator.selectedRevision == nil ? .idle : .ready) : .failed
         }
     }
@@ -238,12 +239,19 @@ extension PanelController {
         }
     }
     func runCreatorSource() async throws {
-        guard !creator.isBusy, creator.hasSourceChanges, let source = creator.sourceDraft,
-              let project = creator.selectedProjectID, let revision = creator.selectedRevision else { throw CreatorGenerationFailure.invalidRequest }
-        try await creatorOperation(.runtime) {
-            _ = try await self.creatorWorkspace.editSource(project: project, revision: revision.id, source: source)
-            self.creator.sourceDraft = nil; self.creator.artifactTab = .render
-        }
+        guard creator.hasSourceChanges else { throw CreatorGenerationFailure.invalidRequest }
+        try await validateCreatorSource()
+    }
+    func validateCreatorSource() async throws {
+        guard creator.canValidateSource, let project = creator.selectedProjectID else { throw CreatorGenerationFailure.invalidRequest }
+        let source = creator.diagnosticSource, base = creator.selectedRevision?.id, engine = creator.detail?.engine ?? creator.engine
+        creator.sourceDraft = source
+        do {
+            try await creatorOperation(.runtime) {
+                _ = try await self.creatorWorkspace.validateSource(project: project, base: base, source: source, engine: engine)
+                self.creator.sourceDraft = nil; self.creator.artifactTab = .render; self.creator.sourceFocus = nil
+            }
+        } catch { creator.sourceDraft = source; throw error }
     }
     var creatorSelectedPoster: PanelImageSource? {
         guard let revision = creator.selectedRevision, revision.posterDigest != nil else { return nil }
@@ -322,8 +330,8 @@ extension PanelController {
             creator.connectionNotice = result
         } catch {
             let issue = CreatorRepairIssue.from(error)
-            creator.connectionStatus = CreatorLabels.issue(issue.category)
-            throw CreatorPanelFailure(message: CreatorLabels.issue(issue.category))
+            creator.connectionStatus = CreatorDiagnosticPresentation.summary(issue)
+            throw CreatorPanelFailure(message: CreatorDiagnosticPresentation.summary(issue))
         }
     }
     func creatorOperation(_ phase: CreatorModel.Phase, operation: @escaping @MainActor () async throws -> Void) async throws {
@@ -345,11 +353,11 @@ extension PanelController {
             }
         } catch {
             let issue = (error as? CreatorOrchestrator.Failure)?.issue ?? CreatorRepairIssue.from(error)
-            creator.issue = issue; creator.phase = issue.category == .cancelled ? .cancelled : .failed
+            creator.issue = issue; creator.showsReport = true; creator.phase = issue.category == .cancelled ? .cancelled : .failed
             // Reload the last usable selection without inheriting the operation's cancellation.
             let reload = Task { try await self.loadCreator() }
             do { try await reload.value } catch { creator.issue = .init(category: .storage) }
-            throw CreatorPanelFailure(message: CreatorLabels.issue(creator.issue?.category ?? .storage))
+            throw CreatorPanelFailure(message: CreatorDiagnosticPresentation.summary(creator.issue ?? .init(category: .storage)))
         }
     }
 }

@@ -150,6 +150,16 @@ actor CreatorWorkspace {
         let spec = try CreatorCodeOutput.specification(projectID: project, html: output.html)
         return try await rebuild(spec, base: revision, source: output.html, assets: snapshot.assets)
     }
+    /// Revalidates a retained draft without contacting any model; all normal static/runtime gates apply.
+    func validateSource(project: UUID, base: UUID?, source: String, engine: CreatorEngine) async throws -> CreatorRevision {
+        try beforeWrite(); try Task.checkCancellation()
+        let snapshot: CreatorDraftStore.Snapshot?
+        if let base { snapshot = try await store.snapshot(projectID: project, revisionID: base) } else { snapshot = nil }
+        let reference = try snapshot?.files["index.html"].flatMap { try CreatorEngineDocument.read(String(decoding: $0, as: UTF8.self)) }
+        let output = try CreatorEnginePrompt.output(source, engine: engine, reference: reference)
+        let spec = try CreatorCodeOutput.specification(projectID: project, html: output.html)
+        return try await rebuild(spec, base: base, source: output.html, assets: snapshot?.assets)
+    }
     func duplicate(_ id: UUID, title: String) async throws -> UUID {
         try beforeWrite()
         let project = try await store.project(id)

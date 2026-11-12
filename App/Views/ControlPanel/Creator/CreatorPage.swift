@@ -46,7 +46,7 @@ struct CreatorPage: View {
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text(verbatim: turn.userMessage).textSelection(.enabled)
                                     if let transcript = model.transcripts[turn.id] { CreatorThoughtPanel(transcript: transcript).id(transcript.id) }
-                                    if let issue = turn.failure { Text(verbatim: CreatorLabels.issue(issue.category)).foregroundStyle(.secondary) }
+                                    if let issue = turn.failure { Text(verbatim: CreatorDiagnosticPresentation.summary(issue)).foregroundStyle(.secondary) }
                                     else if turn.state == .completed { Label("Validated · ready to save", systemImage: "checkmark.circle").foregroundStyle(.secondary) }
                                     HStack {
                                         Text(verbatim: "\(turn.requestCount)/\(turn.requestBudget)").font(.caption.monospacedDigit()).foregroundStyle(.secondary).accessibilityLabel(Text("Attempts"))
@@ -72,7 +72,7 @@ struct CreatorPage: View {
             }.padding(.horizontal, 16).padding(.top, 8)
             CreatorFailureActions().padding(.horizontal, 16)
             if model.issue != nil || model.showsReport {
-                DisclosureGroup("Validation diagnostics", isExpanded: Binding(get: { model.showsReport }, set: { model.showsReport = $0 })) { ScrollView { CreatorReport() }.frame(maxHeight: 120) }
+                DisclosureGroup("Validation diagnostics", isExpanded: Binding(get: { model.showsReport }, set: { model.showsReport = $0 })) { ScrollView { CreatorReport() }.frame(maxHeight: 260) }
                     .padding(.horizontal, 16).accessibilityIdentifier("creator-report")
             }
             CreatorComposer()
@@ -93,7 +93,7 @@ private struct CreatorFailureActions: View {
     var body: some View {
         if let issue = controller.creator.issue {
             VStack(alignment: .leading, spacing: 8) {
-                Text(verbatim: CreatorLabels.issue(issue.category))
+                Text(verbatim: CreatorDiagnosticPresentation.summary(issue))
                 ViewThatFits(in: .horizontal) { HStack { buttons }; VStack(alignment: .leading) { buttons } }
             }.accessibilityIdentifier("creator-failure")
         }
@@ -102,6 +102,10 @@ private struct CreatorFailureActions: View {
         Button("Retry") { controller.launch { try await controller.generateCreator() } }.disabled(!controller.creator.canGenerate)
         Button("Change model") { controller.launch { try await controller.openSettings(.models) } }
         Button("View report") { controller.creator.showsReport = true }
+        if controller.creator.canValidateSource {
+            Button("Validate code again · no model call") { controller.launch { try await controller.validateCreatorSource() } }
+                .accessibilityIdentifier("creator-revalidate-source")
+        }
         if let revision = controller.creator.detail?.project.lastValidatedRevisionID {
             Button("Return to valid version") { controller.launch { try await controller.rollbackCreator(revision) } }.disabled(controller.creator.isBusy)
         }
@@ -113,23 +117,41 @@ struct CreatorReport: View {
     var body: some View {
         let model = controller.creator
         VStack(alignment: .leading, spacing: 6) {
-            if let revision = model.selectedRevision, let report = model.detail?.reports[revision.id] {
+            if model.issue == nil, let revision = model.selectedRevision, let report = model.detail?.reports[revision.id] {
                 Text(verbatim: report.bundleDigest).font(.caption.monospaced()).textSelection(.enabled)
                 ForEach(report.measuredMetrics.keys.sorted(), id: \.self) { key in
                     Text(verbatim: "\(key): \(report.measuredMetrics[key] ?? 0)").font(.caption.monospaced())
                 }
             }
             if let issue = model.issue {
-                Text(verbatim: issue.category.rawValue).font(.caption.monospaced())
-                if let diagnostics = issue.shaderDiagnostics {
-                    ForEach(diagnostics.indices, id: \.self) { index in
-                        let item = diagnostics[index]
-                        Text(verbatim: "\(item.pass.rawValue) · \(item.line) · \(item.code.rawValue)").font(.caption.monospaced())
+                Text(verbatim: CreatorDiagnosticPresentation.stage(issue)).font(.caption.bold())
+                Text(verbatim: CreatorDiagnosticPresentation.summary(issue)).textSelection(.enabled)
+                Text(verbatim: CreatorDiagnosticPresentation.advice(issue)).font(.caption).foregroundStyle(.secondary)
+                if let timing = issue.timeoutEvidence {
+                    Text(verbatim: String(format: L("Elapsed %@ s · limit %@ s · received %lld bytes / %lld content characters"), timing.elapsed.formatted(.number.precision(.fractionLength(1))), timing.limit.formatted(.number.precision(.fractionLength(1))), timing.receivedBytes, timing.receivedCharacters))
+                        .font(.caption.monospacedDigit())
+                }
+                let diagnostics = CreatorDiagnosticPresentation.diagnostics(issue)
+                ForEach(diagnostics.indices, id: \.self) { index in
+                    let item = diagnostics[index]
+                    if let filename = item.safeFilename, let line = item.line {
+                        HStack {
+                            Text(verbatim: "\(filename):\(line)" + (item.column.map { ":\($0)" } ?? "")).font(.caption.monospaced())
+                            Button("Show source location") { controller.revealCreatorDiagnostic(item) }
+                                .disabled(CreatorDiagnosticPresentation.displayLine(item, in: model.diagnosticSource) == nil)
+                        }
+                        if let snippet = CreatorDiagnosticPresentation.excerpt(item, source: model.diagnosticSource) {
+                            Text(verbatim: snippet).font(.caption.monospaced()).textSelection(.enabled)
+                        }
+                    } else {
+                        Text("Source position unavailable. WebKit may hide details from isolated pages.").font(.caption).foregroundStyle(.secondary)
                     }
                 }
                 ForEach(issue.fields.indices, id: \.self) { index in
-                    Text(verbatim: issue.fields[index].path + ": " + issue.fields[index].rule.rawValue).font(.caption.monospaced())
+                    Text(verbatim: CreatorDiagnosticPresentation.field(issue.fields[index])).font(.caption.monospaced())
                 }
+                Text(verbatim: "code: " + issue.category.rawValue + (issue.runtimeReason.map { "/" + $0.rawValue } ?? "")).font(.caption.monospaced()).foregroundStyle(.secondary)
+                Button("Copy diagnostic report") { controller.copyCreatorDiagnostic() }.accessibilityIdentifier("creator-copy-diagnostic")
             }
             Text("Reports contain native validation details only. Keys, raw responses and system paths are excluded.").font(.caption).foregroundStyle(.secondary)
         }.padding(.vertical, 8)

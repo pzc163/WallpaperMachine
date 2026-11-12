@@ -84,8 +84,9 @@ The native catalog supplies all parameter types/ranges/enums, presets and
 resource limits. Detailed static validation reports missing/extra fields,
 types, ranges, enums and default conflicts without returning untrusted values.
 Unknown field names are represented by the known parent (`$`, parameters or
-properties), never echoed. Runtime diagnostics use timeout/pageFailed/
-invalidCapture, not page logs or WebKit descriptions.
+properties), never echoed. Runtime diagnostics carry fixed reason/constraint codes,
+an optional relative source position and stage, not page logs, exception text or WebKit
+descriptions. These optional fields preserve historical records when absent.
 
 A repair sends at most 240 Unicode scalars of sanitized input summary, the native
 diagnostic and the same allowed catalog. It may include a validated base's

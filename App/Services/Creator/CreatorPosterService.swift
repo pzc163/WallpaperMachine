@@ -173,7 +173,10 @@ final class CreatorPosterService {
                 let capture = CreatorRuntimeCapture(sourceReport: report, jpeg: encoded.jpeg, metrics: encoded.metrics)
                 try capture.validate()
                 finish(.success(capture))
-            } catch { finish(.failure(CreatorRuntimeFailure.invalidCapture)) }
+            } catch {
+                if let issue = error as? CreatorRepairIssue { finish(.failure(issue)) }
+                else { finish(.failure(CreatorRuntimeFailure.invalidCapture)) }
+            }
         }
         func finish(_ result: Result<CreatorRuntimeCapture, Error>) {
             guard !stopped else { return }

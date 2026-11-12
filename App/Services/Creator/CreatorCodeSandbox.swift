@@ -30,6 +30,7 @@ import WebKit
     private var hostSuspended = false
     private var playbackPaused = false
     private var previousUsage: (clock: ContinuousClock.Instant, cpu: UInt64)?
+    private var authorHTML = ""
     init(view: WKWebView, timeout: Duration = .seconds(2), interval: Duration = .milliseconds(250), memoryLimit: UInt64 = 512 * 1024 * 1024, startupTimeout: Duration? = nil) {
         self.view = view; self.timeout = timeout; self.interval = interval; self.memoryLimit = min(512 * 1024 * 1024, max(64 * 1024 * 1024, memoryLimit))
         self.startupTimeout = min(.seconds(5), max(timeout, startupTimeout ?? timeout))
@@ -44,6 +45,7 @@ import WebKit
     func start(source: String) throws {
         guard !stopped, monitor == nil, CreatorCodeProcess.supported else { throw CreatorRuntimeFailure.pageFailed }
         frame = nil
+        authorHTML = source
         processID = try CreatorCodeProcess.claim(view)
         pendingSince = .now
         let epoch = epoch
@@ -54,7 +56,7 @@ import WebKit
                 do { try await Task.sleep(for: self.interval) } catch { return }
             }
         }
-        let html = "<!doctype html><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"" + Self.policy + "\">" + source
+        let html = "<!doctype html><meta charset=\"utf-8\"><meta http-equiv=\"Content-Security-Policy\" content=\"" + Self.policy + "\">\n" + source
         view.callAsyncJavaScript("document.getElementById('creator-code').srcdoc=html;", arguments: ["html": html], in: nil, in: .page) { [weak self] result in
             if case .failure = result { self?.fail(.init(category: .runtime, runtimeReason: .pageFailed)) }
         }
@@ -69,14 +71,14 @@ import WebKit
         guard let pid = processID, CreatorCodeProcess.identifier(view) == pid else { fail(.init(category: .runtime, runtimeReason: .pageFailed)); return }
         if let since = pendingSince, since.duration(to: .now) >= (ready ? timeout : startupTimeout) { fail(.init(category: .runtime, runtimeReason: .timeout)); return }
         if let usage = CreatorCodeProcess.usage(pid) {
-            if usage.ri_phys_footprint > memoryLimit { fail(.field("$", .resourceBudget, policy: true)); return }
+            if usage.ri_phys_footprint > memoryLimit { fail(resource(.processMemory)); return }
             let cpu = usage.ri_user_time + usage.ri_system_time
             if let previous = previousUsage {
                 let elapsed = previous.clock.duration(to: .now).components
                 let seconds = Double(elapsed.seconds) + Double(elapsed.attoseconds)/1e18
                 let ratio = Double(cpu >= previous.cpu ? cpu-previous.cpu : 0) / 1e9 / max(0.001, seconds)
                 highCPU = ratio > 0.9 ? highCPU+1 : 0
-                if highCPU >= 12 { fail(.field("$", .resourceBudget, policy: true)); return }
+                if highCPU >= 12 { fail(resource(.cpuBudget)); return }
             }
             previousUsage = (.now, cpu)
         } else { fail(.init(category: .runtime, runtimeReason: .pageFailed)); return }
@@ -87,7 +89,7 @@ import WebKit
         checking = true
         if pendingSince == nil { pendingSince = .now }
         let epoch = epoch
-        view.evaluateJavaScript("({ready:document.readyState!=='loading'&&document.documentElement.getAttribute('data-wm-media')!=='loading',errors:window.__creatorCodeErrors||0,reason:window.__creatorCodeReason||'script',diagnostics:document.documentElement.getAttribute('data-wm-diagnostics')||''})", in: frame, in: .defaultClient) { [weak self] result in
+        view.evaluateJavaScript("({ready:document.readyState!=='loading'&&document.documentElement.getAttribute('data-wm-media')!=='loading',errors:window.__creatorCodeErrors||0,reason:window.__creatorCodeReason||'script',diagnostics:document.documentElement.getAttribute('data-wm-diagnostics')||'',detail:(document.documentElement.getAttribute('data-creator-detail')||'').slice(0,1025)})", in: frame, in: .defaultClient) { [weak self] result in
             guard let self, !self.stopped, self.epoch == epoch else { return }
             guard case .success(let value) = result, let result = value as? [String: Any] else {
                 self.fail(.init(category: .runtime, runtimeReason: .pageFailed)); return
@@ -95,6 +97,8 @@ import WebKit
             if (result["errors"] as? Int ?? 1) > 0 {
                 let reason = (result["reason"] as? String).flatMap(CreatorRepairIssue.RuntimeReason.init(rawValue:)) ?? .pageFailed
                 var issue = CreatorRepairIssue(category: .runtime, runtimeReason: reason)
+                issue.stage = .runtime
+                issue.diagnostic = (result["detail"] as? String).flatMap { CreatorSourceDiagnostic.fromPage($0, html: self.authorHTML) }
                 if reason == .shader, let text = result["diagnostics"] as? String, text.utf8.count <= 1024,
                    let decoded = try? JSONDecoder().decode([CreatorRepairIssue.ShaderDiagnostic].self, from: Data(text.utf8)) {
                     issue.shaderDiagnostics = decoded
@@ -135,12 +139,17 @@ import WebKit
         guard !stopped else { return }
         failure = issue; stop(); onFailure?(issue)
     }
+    private func resource(_ code: CreatorSourceDiagnostic.Code) -> CreatorRepairIssue {
+        var issue = CreatorRepairIssue.field("$", .resourceBudget, policy: true)
+        issue.stage = .runtime; issue.diagnostic = .init(code: code)
+        return issue
+    }
     func stop() {
         guard !stopped else { return }
         stopped = true; epoch = UUID(); monitor?.cancel(); monitor = nil
         view.configuration.userContentController.removeScriptMessageHandler(forName: Self.handler, contentWorld: .defaultClient)
         if let processID { CreatorCodeProcess.terminate(view, owned: processID) }
-        frame = nil; pendingSince = nil
+        frame = nil; pendingSince = nil; authorHTML = ""
     }
     func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String,
                   completionHandler: @escaping (URL?) -> Void) { completionHandler(nil); download.cancel { _ in } }

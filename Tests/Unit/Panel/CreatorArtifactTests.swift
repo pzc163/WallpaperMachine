@@ -40,6 +40,36 @@ import XCTest
         XCTAssertLessThanOrEqual(model.transcripts.values.reduce(0) { $0 + $1.byteCount }, 8 * 1024 * 1024)
         model.close(); XCTAssertTrue(model.transcripts.isEmpty); XCTAssertNil(model.embedded.view)
     }
+    func testFailedCodeCanBeLocatedCopiedAndRevalidatedWithoutAnotherModelRequest() async throws {
+        let c = try await LLMTestContext(tokens: 24_576); defer { c.cleanup() }
+        let panel = try makeController(creatorWorkspace: CreatorWorkspaceTests.workspace(c))
+        do {
+            let controller = panel.controller
+            try await controller.recoverCreator(); try await controller.selectCreatorProfile(c.profile.id)
+            try await controller.setCreatorEngine(.htmlCanvas); controller.creator.prompt = "Create a field"
+            let invalid = "<!doctype html><html><body>\n<script>\nconst broken = ;\n</script></body></html>"
+            c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(invalid)])])
+            do { try await controller.generateCreator(); XCTFail("Invalid code passed") } catch {}
+            let issue = try XCTUnwrap(controller.creator.issue), diagnostic = try XCTUnwrap(issue.diagnostic)
+            XCTAssertEqual(diagnostic.line, 3); XCTAssertTrue(controller.creator.showsReport)
+            XCTAssertEqual(controller.creator.diagnosticSource, invalid)
+            controller.revealCreatorDiagnostic(diagnostic)
+            XCTAssertEqual(controller.creator.artifactTab, .source); XCTAssertEqual(controller.creator.sourceFocus?.line, 3)
+            let pasteboard = NSPasteboard.withUniqueName(); defer { pasteboard.releaseGlobally() }
+            controller.copyCreatorDiagnostic(to: pasteboard)
+            let copied = try XCTUnwrap(pasteboard.string(forType: .string))
+            XCTAssertTrue(copied.contains("syntax")); XCTAssertFalse(copied.contains("const broken")); XCTAssertFalse(copied.contains(LLMTestFixtures.key))
+            controller.creator.sourceDraft = CreatorCodeWorkflowTests.html
+            try await controller.validateCreatorSource()
+            XCTAssertTrue(controller.creator.canSave); XCTAssertNil(controller.creator.issue)
+            XCTAssertEqual(controller.creator.artifactSource, CreatorCodeWorkflowTests.html)
+            try await controller.loadCreator()
+            XCTAssertNil(controller.creator.issue, "An old failed conversation must not invalidate a manually repaired revision")
+            XCTAssertEqual(c.route.requests.count, 1)
+            XCTAssertFalse(FileManager.default.fileExists(atPath: c.root.appendingPathComponent("Library").path))
+        } catch { await panel.shutdown(); throw error }
+        await panel.shutdown()
+    }
     func testEmbeddedPreviewRequiresSealedUntamperedRevisionAndStopsWithoutWindow() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         c.route.replace([.init(chunks: [try LLMTestFixtures.openAI(CreatorCodeWorkflowTests.html)])])
@@ -62,9 +92,12 @@ import XCTest
         try await withPanel { panel in
             let controller = panel.controller
             controller.creator.showsGallery = false; controller.creator.conversationExpanded = true
+            controller.creator.isBusy = true; controller.creator.phase = .generating
             controller.creator.activeTranscript = CreatorTranscript()
             controller.creator.receiveStream(.init(phase: .content, characters: 60, content: "```html\n<html>\n<body>test</body></html>", reasoning: "Model plan"))
             controller.creator.artifactTab = .source
+            controller.creator.issue = .init(category: .timeout, timeoutEvidence: .init(kind: .total, elapsed: 1200, limit: 1200, receivedBytes: 20000, receivedCharacters: 10000), stage: .generation)
+            controller.creator.showsReport = true
             for language in AppLanguage.supported {
                 PanelLocale.shared.bind(to: AppLanguageStore(defaults: panel.defaults, systemLanguages: [language.tag]))
                 let hosting = NSHostingController(rootView: CreatorPage().environment(controller).panelTheme(theme: controller.theme, locale: PanelLocale.shared))
@@ -78,6 +111,7 @@ import XCTest
                     let elements = AccessibilityElement.everything(in: hosting.view)
                     XCTAssertTrue(elements.contains { $0.identifier == "creator-artifact" })
                     XCTAssertTrue(elements.contains { $0.identifier == "creator-thinking" })
+                    XCTAssertTrue(elements.contains { $0.identifier == "creator-copy-diagnostic" })
                 }
                 XCTAssertFalse(window.isVisible); XCTAssertNil(controller.creator.embedded.view)
             }

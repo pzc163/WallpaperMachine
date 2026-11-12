@@ -14,7 +14,7 @@ struct CreatorArtifactCard: View {
                 ViewThatFits(in: .horizontal) { HStack { toolbar }; VStack(alignment: .leading, spacing: 8) { toolbar } }
                 Group {
                     if model.artifactTab == .source {
-                        CreatorStreamTextView(text: model.artifactSource, onEdit: !model.isBusy && model.detail?.specification?.kind == .code ? { model.sourceDraft = $0 } : nil)
+                        CreatorStreamTextView(text: model.artifactSource, onEdit: !model.isBusy && model.mode == .code ? { model.sourceDraft = $0 } : nil, focus: model.sourceFocus)
                             .clipShape(RoundedRectangle(cornerRadius: 6)).accessibilityIdentifier("creator-source")
                     } else if model.embedded.state == .failed {
                         VStack { Text("Preview failed. Close the window and try again.").foregroundStyle(.secondary); Button("Retry") { model.embedded.close(); refresh() } }
@@ -78,6 +78,7 @@ struct CreatorArtifactCard: View {
             let usage = model.artifactUsage
             Text(verbatim: L("Tokens") + ": " + ((usage?.totalTokens ?? usage?.inputTokens.flatMap { input in usage?.outputTokens.map { input + $0 } }).map(String.init) ?? L("Unknown")))
                 .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                .help(Text(verbatim: String(format: L("Input %@ · output %@ · thinking %@ (provider reported; may overlap output)"), usage?.inputTokens.map(String.init) ?? L("Unknown"), usage?.outputTokens.map(String.init) ?? L("Unknown"), usage?.thinkingTokens.map(String.init) ?? L("Unknown"))))
         }
     }
 

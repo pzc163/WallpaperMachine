@@ -25,7 +25,13 @@ enum CreatorPosterImage {
             if max(bytes[offset], bytes[offset + 1], bytes[offset + 2]) >= 12 { lit += 1 }
             colors.insert(UInt32(bytes[offset] / 4) << 16 | UInt32(bytes[offset + 1] / 4) << 8 | UInt32(bytes[offset + 2] / 4))
         } }
-        guard opaque >= 922, lit >= 4, colors.count >= 2, let pixels = bitmap.makeImage() else { throw CreatorRuntimeFailure.invalidCapture }
+        guard opaque >= 922 else {
+            throw CreatorRepairIssue(category: .runtime, runtimeReason: .invalidCapture, stage: .capture, diagnostic: .init(code: .transparentFrame))
+        }
+        guard lit >= 4, colors.count >= 2 else {
+            throw CreatorRepairIssue(category: .runtime, runtimeReason: .invalidCapture, stage: .capture, diagnostic: .init(code: .blankFrame))
+        }
+        guard let pixels = bitmap.makeImage() else { throw CreatorRuntimeFailure.invalidCapture }
         let metrics = ["posterWidth": Double(width), "posterHeight": Double(height), "opaqueSamples": Double(opaque),
                        "pixelSamples": 1024.0, "distinctColors": Double(colors.count)]
         for quality in [0.86, 0.68] {

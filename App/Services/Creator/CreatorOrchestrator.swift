@@ -130,7 +130,7 @@ actor CreatorOrchestrator {
                         return Prepared(projectID: projectID, draft: draft, sealed: sealed, iterationID: iteration.id, installedDirectory: installed)
                     } catch {
                         try Task.checkCancellation()
-                        let issue = CreatorRepairIssue.from(error)
+                        let issue = CreatorRepairIssue.from(error).at(stage == .runtime ? .runtime : .generation)
                         guard [.generating, .runtime].contains(stage), issue.repairable,
                               try await store.pendingRepair(iteration, issue: issue, outputTokens: request.maxOutputTokens)
                         else { throw error }
@@ -146,7 +146,8 @@ actor CreatorOrchestrator {
                     }
                 }
             } catch {
-                let issue = Task.isCancelled ? CreatorRepairIssue(category: .cancelled) : CreatorRepairIssue.from(error)
+                let issue = (Task.isCancelled ? CreatorRepairIssue(category: .cancelled) : CreatorRepairIssue.from(error))
+                    .at(stage == .runtime ? .runtime : stage == .sealing ? .capture : stage == .publishing ? .publication : .generation)
                 var count = 0, exhausted = false
                 if let ticket {
                     do {

@@ -1,6 +1,14 @@
 import AppKit
 
 extension PanelController {
+    func revealCreatorDiagnostic(_ diagnostic: CreatorSourceDiagnostic) {
+        guard !creator.isBusy, let line = CreatorDiagnosticPresentation.displayLine(diagnostic, in: creator.diagnosticSource) else { return }
+        creator.artifactTab = .source; creator.sourceFocus = .init(line: line); creator.embedded.close()
+    }
+    func copyCreatorDiagnostic(to pasteboard: NSPasteboard = .general) {
+        guard let issue = creator.issue else { return }
+        pasteboard.clearContents(); pasteboard.setString(CreatorDiagnosticPresentation.copiedReport(issue), forType: .string)
+    }
     func refreshCreatorArtifact() async throws {
         if creator.isBusy && creator.phase == .saving && creator.artifactVisible { return }
         guard creator.artifactVisible, presentation.isVisible, !creator.isBusy, creator.artifactTab == .render,

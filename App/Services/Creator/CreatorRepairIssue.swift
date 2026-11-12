@@ -23,6 +23,9 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
     var runtimeReason: RuntimeReason? = nil
     var shaderDiagnostics: [ShaderDiagnostic]? = nil
     var timeoutEvidence: LLMTimeoutEvidence? = nil
+    enum Stage: String, Codable, Sendable { case generation, staticValidation, runtime, capture, publication }
+    var stage: Stage? = nil
+    var diagnostic: CreatorSourceDiagnostic? = nil
     var description: String { category.rawValue }
 
     var repairable: Bool {
@@ -31,6 +34,8 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
     }
     func validate() throws {
         try timeoutEvidence?.validate()
+        try diagnostic?.validate()
+        guard diagnostic == nil || [.runtime, .malformedOutput, .policyViolation].contains(category) else { throw CreatorPersistence.Failure.invalidRecord }
         guard timeoutEvidence == nil || category == .timeout else { throw CreatorPersistence.Failure.invalidRecord }
         var allowed: Set<String> = ["$", "schemaVersion", "templateID", "title", "summary", "parameters", "properties"]
         for parameter in CreatorTemplateCatalog.all.flatMap(\.parameters) {
@@ -45,7 +50,12 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
         else { throw CreatorPersistence.Failure.invalidRecord }
     }
     static func field(_ path: String, _ rule: Rule, policy: Bool = false) -> Self {
-        Self(category: policy ? .policyViolation : .malformedOutput, fields: [.init(path: path, rule: rule)])
+        Self(category: policy ? .policyViolation : .malformedOutput, fields: [.init(path: path, rule: rule)], stage: .staticValidation)
+    }
+    func at(_ stage: Stage) -> Self {
+        var value = self
+        if value.stage == nil { value.stage = stage }
+        return value
     }
     static func from(_ error: Error) -> Self {
         if let issue = error as? Self { return issue }
@@ -53,7 +63,7 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
         if (error as? LLMFailure) == .refused { return .init(category: .refused) }
         if error is CancellationError || (error as? CreatorRuntimeFailure) == .cancelled { return .init(category: .cancelled) }
         if let error = error as? CreatorRuntimeFailure {
-            if let reason = RuntimeReason(rawValue: error.rawValue) { return .init(category: .runtime, runtimeReason: reason) }
+            if let reason = RuntimeReason(rawValue: error.rawValue) { return .init(category: .runtime, runtimeReason: reason, stage: reason == .invalidCapture ? .capture : .runtime) }
             return .init(category: .staleInput)
         }
         let failure = CreatorGenerationFailure.sanitized(error)

@@ -58,14 +58,15 @@ enum CreatorCodeOutput {
         return Output(presentation: .init(title: title, summary: "Procedural HTML wallpaper"), html: html)
     }
     static func validateHTML(_ data: Data) throws {
+        guard data.count <= maximumSourceBytes else { throw invalid(.sourceLimit, policy: true) }
         guard (32...maximumSourceBytes).contains(data.count), let source = String(data: data, encoding: .utf8),
               !source.unicodeScalars.contains(where: { $0.value == 0 || $0.value == 27 }),
               source.range(of: #"(?i)<html(?:\s|>)"#, options: .regularExpression) != nil,
               source.trimmingCharacters(in: .whitespacesAndNewlines).lowercased().hasSuffix("</html>")
-        else { throw CreatorRepairIssue.field("$", .syntax) }
+        else { throw invalid(.invalidHTML) }
         // This check improves feedback. The independently enforced iframe/CSP policy remains the boundary.
         guard source.range(of: #"(?i)<\s*(?:iframe|frame|object|embed|applet|base|form|link|audio|video)\b|(?:https?|wss?|file|ftp)\s*:\s*//|/Users/|/private/|/Volumes/"#, options: .regularExpression) == nil
-        else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
+        else { throw invalid(.externalResource, policy: true) }
         _ = try CreatorParameterSchema.read(source)
         if let document = try CreatorEngineDocument.read(source) {
             guard try document.html() == source else { throw CreatorRepairIssue.field("$", .unexpected, policy: true) }
@@ -78,7 +79,7 @@ enum CreatorCodeOutput {
     private static func checkScriptSyntax(_ html: String) throws {
         let expression = try NSRegularExpression(pattern: #"(?is)<script\b([^>]*)>(.*?)</script\s*>"#)
         let text = html as NSString
-        guard let context = JSContext(), let constructor = context.objectForKeyedSubscript("Function") else {
+        guard let context = JSContext() else {
             throw CreatorRepairIssue.field("$", .syntax)
         }
         for match in expression.matches(in: html, range: NSRange(location: 0, length: text.length)) {
@@ -90,12 +91,28 @@ enum CreatorCodeOutput {
             guard trimmed.isEmpty || trimmed == "id=\"wm-source\"" else {
                 // V1 author surface is inline classic scripts only; no module,
                 // import map, external source or MIME-dependent execution.
-                throw CreatorRepairIssue.field("$", .unexpected, policy: true)
+                throw invalid(.unsupportedScript, policy: true)
             }
-            context.exception = nil
-            _ = constructor.construct(withArguments: [text.substring(with: match.range(at: 2))])
-            guard context.exception == nil else { throw CreatorRepairIssue.field("$", .syntax) }
+            let body = text.substring(with: match.range(at: 2))
+            let script = JSStringCreateWithUTF8CString(body)
+            defer { JSStringRelease(script) }
+            var exception: JSValueRef?
+            guard JSCheckScriptSyntax(context.jsGlobalContextRef, script, nil, 1, &exception) else {
+                let value = exception.flatMap { JSValue(jsValueRef: $0, in: context) }
+                let relative = value?.forProperty("line")?.toInt32() ?? 0
+                let before = text.substring(to: match.range(at: 2).location)
+                let line = relative > 0 ? before.filter { $0 == "\n" }.count + Int(relative) : nil
+                var issue = CreatorRepairIssue.field("$", .syntax)
+                issue.stage = .staticValidation
+                issue.diagnostic = .location(code: .syntax, html: html, line: line, column: nil)
+                throw issue
+            }
         }
+    }
+    private static func invalid(_ code: CreatorSourceDiagnostic.Code, policy: Bool = false) -> CreatorRepairIssue {
+        var issue = CreatorRepairIssue.field("$", policy ? .unexpected : .syntax, policy: policy)
+        issue.diagnostic = .init(code: code)
+        return issue
     }
     static func specification(projectID: UUID, html: Data) throws -> CreatorTemplate.Specification {
         try validateHTML(html)

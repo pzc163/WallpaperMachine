@@ -31,19 +31,37 @@ final class CreatorModel {
     var artifactTab = ArtifactTab.render
     var artifactVisible = false
     var sourceDraft: String? = nil
+    struct SourceFocus: Equatable { let line: Int; var id = UUID() }
+    var sourceFocus: SourceFocus?
+    var diagnosticSource: String {
+        if let sourceDraft { return sourceDraft }
+        if let turn = unresolvedTurn {
+            if let text = transcripts[turn.id]?.progress.content, !text.isEmpty { return Self.displaySource(text) }
+            if turn.attempts.last?.draftRevisionID == selectedRevision?.id { return detail?.authorSource ?? detail?.source ?? "" }
+            return ""
+        }
+        return artifactSource
+    }
+    var canValidateSource: Bool { !isBusy && mode == .code && selectedProjectID != nil && !diagnosticSource.isEmpty }
+    var unresolvedTurn: CreatorConversation.Turn? {
+        guard let turn = detail?.conversation.turns.last, turn.state != .completed else { return nil }
+        if let selectedRevision, detail?.reports[selectedRevision.id]?.allowsPublication == true,
+           selectedRevision.createdAt >= turn.createdAt, selectedRevision.generation == nil { return nil }
+        return turn
+    }
     var stageAspect = CreatorPreviewWindow.Aspect.wide
     var conversationExpanded = false
     let embedded = CreatorEmbeddedPreview()
     var artifactSource: String {
         if let activeTranscript { return Self.displaySource(activeTranscript.progress.content) }
         if let sourceDraft { return sourceDraft }
-        if let turn = detail?.conversation.turns.last, turn.state != .completed,
+        if let turn = unresolvedTurn,
            let text = transcripts[turn.id]?.progress.content, !text.isEmpty { return Self.displaySource(text) }
         return detail?.authorSource ?? detail?.source ?? ""
     }
     var artifactUsage: LLMResponse.Usage? {
         if let activeTranscript { return activeTranscript.progress.usage }
-        if artifactTab == .source, let turn = detail?.conversation.turns.last, turn.state != .completed {
+        if artifactTab == .source, let turn = unresolvedTurn {
             return transcripts[turn.id]?.progress.usage ?? turn.attempts.last?.usage
         }
         return selectedRevision?.generation?.usage
