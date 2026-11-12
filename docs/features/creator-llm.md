@@ -8,6 +8,27 @@ origin policy as discovery, connection checks and generation. Presets are not a
 claim that an account supports a particular model; enable explicit model IDs or
 discover them from the current local endpoint.
 
+Cloud providers and local/LAN services are separate directory groups and connection
+types. Each connection owns its own in-memory form, address, model list and entered
+key. Switching groups preserves that connection's unsaved input without copying it
+to another connection; leaving settings erases all entered keys from the editors.
+Saving an unchanged local connection with an empty input preserves its previously
+saved optional key; it does not silently disable authentication.
+The provider API key immediately follows Base URL. Local services always show a
+separate editable Local Base URL and Local API key; OpenAI-compatible local services
+allow an empty key and model discovery before saving. Other protocols retain their
+required-key contract. A cloud form has no local-mode checkbox. Selecting a local
+service is the explicit opt-in to local endpoint policy; changing protocol does not
+silently turn that service into a cloud connection.
+
+Settings retain one atomic document for selection and optimistic concurrency, with
+independent UUID records for each connection. An existing UUID cannot change between
+cloud and local types. New records carry a credential namespace matching their type;
+cloud and local secrets use separate Keychain services. Legacy records keep their
+original UUID, type, byte encoding and credential namespace, with no Keychain reads
+or migration during UI loading. A legacy local record using a cloud brand ID is
+listed under local services and cannot be reused by that cloud preset.
+
 A Profile owns one credential binding and up to 64 enabled model IDs. Selecting a
 model is persisted separately in settings and does not change the Profile's
 configuration generation or reread Keychain. Each outgoing request checks that its
@@ -83,9 +104,13 @@ valid JSON object from this service is not permission to run or publish it.
 
 ## Credentials and target changes
 
-`ProviderCredentialStore` reuses `KeychainGenericPassword`. Its service identifier
-is `WallpaperMachine.Creator.ProviderCredentials.v1`; each account is the stable
-Profile UUID in lowercase. The Keychain payload binds the key to the Profile ID,
+`ProviderCredentialStore` reuses `KeychainGenericPassword`. New cloud profiles use
+`WallpaperMachine.Creator.CloudProviderCredentials.v1`, and new local profiles use
+`WallpaperMachine.Creator.LocalServiceCredentials.v1`. Legacy profiles with no
+`credentialNamespace` retain `WallpaperMachine.Creator.ProviderCredentials.v1`;
+there is no fallback that probes another namespace. Each account is the stable
+Profile UUID in lowercase. The namespace cannot be changed on an existing record.
+The Keychain payload binds the key to the Profile ID,
 normalized origin (scheme/host/effective port), configuration UUID/revision, and
 canonical Profile digest. Binding is an explicit native operation; saving or
 copying a Profile never binds a key automatically.

@@ -2,6 +2,7 @@ import Foundation
 
 /// Nonsecret provider configuration; credential ownership and approval live outside this record.
 struct ProviderProfile: Codable, Equatable, Sendable {
+    enum ConnectionKind: String, Codable, Sendable { case cloud, local }
     enum ProtocolKind: String, Codable, CaseIterable, Sendable {
         case openaiCompatible, anthropicMessages, geminiGenerateContent
     }
@@ -62,11 +63,14 @@ struct ProviderProfile: Codable, Equatable, Sendable {
     var visionModelIDs: [String]? = nil
     // Nil preserves legacy records. Local legacy profiles default to no credential lookup.
     var usesCredential: Bool? = nil
+    // Nil keeps legacy credential records readable without probing or moving Keychain items.
+    var credentialNamespace: ConnectionKind? = nil
     var localMode = false
     var capabilities = Capabilities()
     var limits = Limits()
 
     var enabledModels: [String] { modelIDs ?? [model] }
+    var connectionKind: ConnectionKind { localMode ? .local : .cloud }
     func permitsModel(_ id: String) -> Bool { enabledModels.contains(id) }
     static func validModel(_ value: String, protocolKind: ProtocolKind) -> Bool {
         guard !value.isEmpty, value.utf8.count <= 128,
@@ -83,6 +87,7 @@ struct ProviderProfile: Codable, Equatable, Sendable {
 
     func validate() throws {
         guard schemaVersion == 1 else { throw CreatorPersistence.Failure.unsupportedVersion }
+        guard credentialNamespace.map({ $0 == connectionKind }) ?? true else { throw CreatorPersistence.Failure.invalidRecord }
         guard configurationRevision >= 0,
               !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, name.count <= 60,
               !name.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains),

@@ -9,6 +9,12 @@ level.
 These are historical results about the trees they were taken on. They are not
 evidence about the current tree and must never be cited as such.
 
+## 2026-11-11 — Creator connection form and local credential sessions
+
+- Targeted LLMConnectionUXTests, ProviderCredentialStoreTests, CreatorModelSettingsTests and LLMStreamTransportTests: 21 passed, 0 failed, 0 skipped.
+- Documentation links (11), panel localization (9) and localization catalog (8) checks passed. Full routine gate follows after all three atomic changes.
+- Memory Keychain and Mock URLProtocol only; offscreen six-language form checks. No production app, LAN host, personal Keychain or model API accessed. macOS 15 physical LAN authorization remains a device check.
+
 ## 2026-11-11 — S4 offline code creation and developer preview
 
 - Stage 1 commit 8fccf4b9: bounded schema/object/prompt negotiation, LAN endpoints and native success banner; 720 script and 5006 native passed, 72 skipped.

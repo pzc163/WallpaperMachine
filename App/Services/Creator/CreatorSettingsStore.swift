@@ -2,7 +2,7 @@ import Foundation
 
 /// Atomic metadata updates with optimistic revision checks and a lock shared by all store instances.
 actor CreatorSettingsStore {
-    enum Failure: Error, Equatable { case staleSettings, staleProfile, profileMissing, revisionLimit }
+    enum Failure: Error, Equatable { case staleSettings, staleProfile, profileMissing, revisionLimit, connectionKindChanged }
     nonisolated let url: URL
     private let beforeCommit: @Sendable () throws -> Void
 
@@ -46,8 +46,10 @@ actor CreatorSettingsStore {
             var next = profile
             if let index = settings.profiles.firstIndex(where: { $0.id == profile.id }) {
                 let previous = settings.profiles[index]
+                guard previous.connectionKind == profile.connectionKind else { throw Failure.connectionKindChanged }
                 guard profile.configurationRevision == previous.configurationRevision,
-                      profile.configurationID == previous.configurationID else { throw Failure.staleProfile }
+                      profile.configurationID == previous.configurationID,
+                      profile.credentialNamespace == previous.credentialNamespace else { throw Failure.staleProfile }
                 if previous == profile { return }
                 guard previous.configurationRevision < Int.max else { throw Failure.revisionLimit }
                 next.configurationRevision = previous.configurationRevision + 1
@@ -58,6 +60,7 @@ actor CreatorSettingsStore {
                 guard profile.configurationRevision == 0 else { throw Failure.staleProfile }
                 next.configurationRevision = 1
                 next.configurationID = UUID()
+                next.credentialNamespace = next.connectionKind
                 settings.profiles.append(next)
             }
         }

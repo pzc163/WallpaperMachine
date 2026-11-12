@@ -70,7 +70,7 @@ final class ProviderCredentialStoreTests: XCTestCase {
         saved = try await c.settings.saveProfile(replacement, expectedRevision: saved.revision)
         do { _ = try await c.credentials.resolve(for: saved.profiles[0], settings: c.settings); XCTFail("Revived an old key") }
         catch { XCTAssertEqual(error as? LLMFailure, .credentialsUnavailable) }
-        XCTAssertNotNil(c.memory.data(service: ProviderCredentialStore.service, account: c.profile.id.uuidString.lowercased()))
+        XCTAssertNotNil(c.memory.data(service: ProviderCredentialStore.service(for: c.profile), account: c.profile.id.uuidString.lowercased()))
     }
     func testOnlyExplicitExactLocalOpenAIAllowsMissingKey() async throws {
         let c = try await LLMTestContext(bind: false); defer { c.cleanup() }

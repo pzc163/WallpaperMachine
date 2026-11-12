@@ -25,6 +25,15 @@ and moves whatever falls past ten verbatim into a monthly file under
 [archive/](archive/); promote anything durable before it goes. Editing an
 entry's recorded result is not allowed.
 
+## 2026-11-12 — Creator cloud/local connection isolation
+
+Separate cloud provider and local/LAN editors, draft identities and credential namespaces; preserve legacy records without UI Keychain access.
+
+- Targeted CreatorConnectionIsolationTests: 5 passed; CreatorConnectionDraftsTests: 7 passed, including six-language wide/narrow offscreen form assertions and consecutive custom connection creation.
+- python3 scripts/test.py: 724 Python checks; final 5121 native passed, 0 failed, 69 conditional skips, 119s; 2 runtime warnings.
+- An earlier full run hit Cannot open file in the unchanged WebWallpaperPageTests refused/replaced navigation case; that suite passed 10/10 alone and the final full gate passed. No navigation code or assertions were relaxed.
+- No real LLM requests, personal Keychain reads/writes, visible UI, installed-app restart or desktop changes. macOS 15 visible-device acceptance remains manual.
+
 ## 2026-11-12 — S5.2 provider center, single stage and offline media
 
 - Full gate: python3 scripts/test.py — 724 Python checks; 5,109 native passed, 0 failed, 69 skipped (155s). Initial three failures repaired and targeted rerun passed.
@@ -95,9 +104,3 @@ Native Shader/Three shells, an offline pinned library, declarative parameters an
 - Three-protocol codec, transport, bounded repair and code workflow checks: 53 passed, 0 failed. Final response-header/idle boundary rerun: 12 passed, 0 failed.
 - Added independent first-response/idle/total deadlines, redacted phase/count updates, and bounded non-stream negotiation using the existing ledger. Documentation (11), localization catalog (8) and panel localization (9) checks passed.
 - Only deterministic Mock flows and offscreen WebKit; no real APIs, personal Keychain, visible windows or desktop changes. Full routine gate remains scheduled after workspace UX.
-
-## 2026-11-11 — Creator connection form and local credential sessions
-
-- Targeted LLMConnectionUXTests, ProviderCredentialStoreTests, CreatorModelSettingsTests and LLMStreamTransportTests: 21 passed, 0 failed, 0 skipped.
-- Documentation links (11), panel localization (9) and localization catalog (8) checks passed. Full routine gate follows after all three atomic changes.
-- Memory Keychain and Mock URLProtocol only; offscreen six-language form checks. No production app, LAN host, personal Keychain or model API accessed. macOS 15 physical LAN authorization remains a device check.

@@ -3,6 +3,13 @@ import Foundation
 /// Credentials are bound to a saved configuration, never recovered from profile metadata alone.
 actor ProviderCredentialStore {
     static let service = "WallpaperMachine.Creator.ProviderCredentials.v1"
+    static func service(for profile: ProviderProfile) -> String {
+        switch profile.credentialNamespace {
+        case .cloud: "WallpaperMachine.Creator.CloudProviderCredentials.v1"
+        case .local: "WallpaperMachine.Creator.LocalServiceCredentials.v1"
+        case nil: service
+        }
+    }
     private struct Binding: Codable {
         let schemaVersion: Int
         let profileID: UUID
@@ -88,7 +95,7 @@ actor ProviderCredentialStore {
             let binding = Binding(schemaVersion: 1, profileID: profile.id, origin: try profile.origin(),
                 configurationID: profile.configurationID, configurationRevision: profile.configurationRevision,
                 profileDigest: try Self.digest(profile), key: key)
-            try item(profile.id).write(CreatorPersistence.record(binding))
+            try item(profile).write(CreatorPersistence.record(binding))
         } catch { throw LLMFailure.credentialsUnavailable }
         LLMRequestCoordinator.shared.credentialChanged(at: settings.url, profileID: profile.id)
         let cache = cache
@@ -106,7 +113,7 @@ actor ProviderCredentialStore {
         }
         let key: String
         do {
-            if let data = try item(profile.id).read() {
+            if let data = try item(profile).read() {
                 guard data.count <= 16 * 1024 else { throw LLMFailure.credentialsUnavailable }
                 let binding = try CreatorPersistence.decode(Binding.self, from: data)
                 guard binding.schemaVersion == 1, binding.profileID == profile.id, binding.origin == (try profile.origin()),
@@ -127,11 +134,12 @@ actor ProviderCredentialStore {
         try await settings.withCurrentProfile(profile) { _ in }
         cache.invalidate(profileID: profile.id)
         if profile.allowsEmptyKey && profile.usesCredential != true { return }
-        do { try item(profile.id).delete() } catch { throw LLMFailure.credentialsUnavailable }
+        do { try item(profile).delete() } catch { throw LLMFailure.credentialsUnavailable }
         LLMRequestCoordinator.shared.credentialChanged(at: settings.url, profileID: profile.id)
     }
-    private func item(_ id: UUID) -> KeychainGenericPassword {
-        KeychainGenericPassword(service: Self.service, account: id.uuidString.lowercased(), label: Self.service, calls: calls)
+    private func item(_ profile: ProviderProfile) -> KeychainGenericPassword {
+        let service = Self.service(for: profile)
+        return KeychainGenericPassword(service: service, account: profile.id.uuidString.lowercased(), label: service, calls: calls)
     }
     private static func digest(_ profile: ProviderProfile) throws -> String { CreatorPersistence.hash(try CreatorPersistence.encode(profile)) }
     private static func validateKey(_ key: String, for profile: ProviderProfile) throws {

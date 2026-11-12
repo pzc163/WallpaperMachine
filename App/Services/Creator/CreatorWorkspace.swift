@@ -192,11 +192,13 @@ actor CreatorWorkspace {
         try beforeWrite()
         var draft = profile
         if !key.isEmpty && draft.allowsEmptyKey { draft.usesCredential = true }
-        else if draft.allowsEmptyKey { draft.usesCredential = false }
+        else if draft.allowsEmptyKey, draft.configurationRevision == 0 { draft.usesCredential = false }
         var result = try await settings.saveProfile(draft, expectedRevision: expectedRevision)
         guard let saved = result.profiles.first(where: { $0.id == profile.id }) else { throw LLMFailure.staleProfile }
         // Blank input means no credential action. Old bindings cannot authorize a new generation.
-        if !key.isEmpty || saved.allowsEmptyKey { try await credentials.bind(key, to: saved, settings: settings) }
+        if !key.isEmpty || (saved.allowsEmptyKey && saved.usesCredential != true) {
+            try await credentials.bind(key, to: saved, settings: settings)
+        }
         if result.selectedProfileID == nil { result = try await settings.selectProfile(saved.id, expectedRevision: result.revision) }
         return result
     }
