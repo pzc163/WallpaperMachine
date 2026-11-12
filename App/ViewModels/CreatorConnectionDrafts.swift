@@ -32,6 +32,7 @@ final class CreatorConnectionDraft: CustomStringConvertible, CustomDebugStringCo
     func changeProtocol(to kind: ProviderProfile.ProtocolKind) {
         key = ""; models = []
         profile.protocolKind = kind; profile.capabilities = .init()
+        profile.reasoningEffort = nil
     }
 }
 

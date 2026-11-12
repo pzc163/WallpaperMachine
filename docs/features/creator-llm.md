@@ -192,9 +192,10 @@ or invalid UTF-8 are rejected. Parsing `[DONE]` does not ignore a malformed tail
 | Error body inspected for JSON-mode fallback | 4 KiB; never logged |
 | Input text | Template 16 KiB total; code 280 KiB total / 264 KiB per message; 1–32 messages ending in a user message |
 | Request body | 2 MiB after native JSON encoding |
-| First response | 25 seconds until response headers; unreachable endpoints fail promptly |
-| Stream idle | 90 seconds since response headers or last received bytes, including reasoning/heartbeat data |
-| Request total | 300 seconds by default (including code generation); injected deadlines must be positive and at most 600 seconds |
+| First response | Cloud 60 seconds / local 300 seconds until headers |
+| First content | Cloud 180 seconds / local 600 seconds after headers; SSE comments and usage-only frames do not count as content |
+| Stream idle | Cloud 120 seconds / local 300 seconds after effective reasoning/content begins; subsequent bytes, including heartbeats, reset idle |
+| Request total | Cloud 1200 seconds / local 3600 seconds; per-profile custom total up to 7200 seconds |
 | Concurrency | 4 jobs per provider, 32 coordinator registrations; one in-process request owner per job |
 
 Swift task cancellation immediately cancels/invalidate the session and completes
@@ -210,7 +211,7 @@ app diagnostics, not arbitrary operating-system tracing enabled outside the app.
 401/403 do not retry. 429 accepts delta-seconds or HTTP-date Retry-After, defaults
 to one second when absent/invalid, and returns an error when the requested wait
 exceeds 30 seconds rather than retrying sooner. 5xx retries use bounded backoff.
-Timeout, truncated stream, refusal and network failure do not internally retry. Complete
+Timeout, truncated stream, refusal and network failure do not internally retry or enter automatic code repair. Explicit user retry starts another task. Complete
 format violations may negotiate only in automatic OpenAI mode.
 
 Each attempt atomically consumes the native job's request budget (at most three)
@@ -239,12 +240,22 @@ negotiation/repair (maximum three wire calls). It does not enable content repair
 when the repair switch is off. Historical conversation records retain their original
 budgets. Cancellation aborts transport and negotiation without refunding sent calls.
 
-Progress includes connecting/thinking/content phase, accepted character count, numeric usage,
+Progress includes connecting/waiting/thinking/content phase, accepted character count, numeric usage,
 and bounded, credential-redacted model-authored answer/reasoning for session-only display.
 Content updates are coalesced to at most five per second, with phase changes/final usage
 delivered promptly. Reasoning never enters disk, diagnostic logs or follow-up model context.
-A response header completes the connection deadline, allowing local model prefill
-to use the idle interval. Receiving tokens resets idle, never the total deadline.
+A response header completes the connection deadline. Prefill has a separate first-content
+deadline. Actual reasoning starts the thinking clock; waiting for headers or model load is
+not reported as thinking. Receiving tokens resets idle, never the total deadline.
+Timeout reports carry only a phase enum, elapsed/limit seconds and byte/character counts.
+Custom limits are validated and stored as optional profile metadata. Absent fields preserve
+legacy canonical credential bindings. Changing configuration follows existing rebinding rules.
+
+Recognized Kimi K3 models (`kimi-k3`, `kimi-k3.1-pro`, `kimi-k3.1-pro-highspeed`) send
+`reasoning_effort=low` by default. Settings expose low/high/max; other models/protocols
+never receive this extension. K3 reasoning cannot be disabled. See the official
+[K3 guide](https://platform.kimi.com/docs/guide/kimi-k3-quickstart) and
+[reasoning effort guide](https://platform.kimi.com/docs/guide/use-reasoning-effort).
 
 ## Protocol-specific behavior
 

@@ -19,10 +19,10 @@ struct CreatorThoughtPanel: View {
                     Image(systemName: transcript.isThinking ? "sparkle" : "text.bubble")
                     if transcript.isThinking {
                         Text("Thinking deeply…")
-                        Text(transcript.startedAt, style: .timer).monospacedDigit()
+                        Text(transcript.thinkingStartedAt ?? transcript.startedAt, style: .timer).monospacedDigit()
                     } else {
                         Text("Thinking process")
-                        Text(verbatim: String(format: L("Thought for %lld s"), max(0, Int((transcript.thinkingEndedAt ?? transcript.startedAt).timeIntervalSince(transcript.startedAt)))))
+                        Text(verbatim: String(format: L("Thought for %lld s"), max(0, Int((transcript.thinkingEndedAt ?? transcript.startedAt).timeIntervalSince(transcript.thinkingStartedAt ?? transcript.startedAt)))))
                             .foregroundStyle(.secondary)
                     }
                     Spacer(minLength: 0)

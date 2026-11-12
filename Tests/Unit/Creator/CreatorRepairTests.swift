@@ -211,29 +211,30 @@ final class CreatorRepairTests: XCTestCase {
         }
     }
 
-    func testTimeoutNetworkAndTruncatedStreamsConsumeTheSameRepairBudget() async throws {
+    func testTimeoutNetworkAndTruncatedStreamsStopWithoutRepeatingPaidGeneration() async throws {
         let failures: [LLMMockURLProtocol.Reply] = [.init(failure: URLError(.timedOut)), .init(failure: URLError(.networkConnectionLost)),
             .init(chunks: [Data("data: {\"choices\":[".utf8)])]
         for response in failures {
             let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
             c.route.replace([response, try reply(CreatorGenerationFixtures.output())])
-            let result = try await flow(c).createAndSave(request(c))
-            let document = try await c.store.conversation(projectID: result.projectID)
-            XCTAssertEqual(document.turns.last?.requestCount, 2)
-            XCTAssertEqual(document.turns.last?.reservedOutputTokens, 4096)
+            let failure = await failed { try await flow(c).createAndSave(request(c)) }
+            XCTAssertNotNil(failure)
+            let document = try await c.store.conversation(projectID: c.ticket.projectID)
+            XCTAssertEqual(document.turns.last?.requestCount, 1)
+            XCTAssertEqual(document.turns.last?.reservedOutputTokens, 2048)
             XCTAssertNotNil(document.turns.last?.attempts.first?.issue)
-            XCTAssertEqual(c.route.requests.count, 2)
+            XCTAssertEqual(c.route.requests.count, 1)
         }
     }
 
-    func testRepeatedTimeoutsStopAtThreeAndExposeLastFailure() async throws {
+    func testTimeoutPreservesRemainingBudgetForExplicitUserRetry() async throws {
         let c = try await LLMTestContext(tokens: 8192); defer { c.cleanup() }
         c.route.replace([.init(failure: URLError(.timedOut))])
         let failure = await failed { try await flow(c).createAndSave(request(c)) }
-        XCTAssertEqual(failure?.issue?.category, .timeout); XCTAssertTrue(failure?.budgetExhausted == true)
-        XCTAssertEqual(c.route.requests.count, 3)
+        XCTAssertEqual(failure?.issue?.category, .timeout); XCTAssertFalse(failure?.budgetExhausted == true)
+        XCTAssertEqual(c.route.requests.count, 1)
         let document = try await c.store.conversation(projectID: c.ticket.projectID)
-        XCTAssertEqual(document.turns.last?.attempts.map { $0.issue?.category }, [.timeout, .timeout, .timeout])
+        XCTAssertEqual(document.turns.last?.attempts.map { $0.issue?.category }, [.timeout])
     }
 
     func testRateLimitWaitsAndServerRetryNeverCreateAnInnerBudget() async throws {

@@ -72,10 +72,10 @@ final class CreatorBenchmarkTests: XCTestCase {
             XCTAssertEqual(timing.executionAllowance, allowance); XCTAssertEqual(timing.requestTimeout, timeout)
             XCTAssertNoThrow(try LLMStreamTransport.Limits(timeout: timing.requestTimeout).validate())
         }
-        XCTAssertThrowsError(try LLMStreamTransport.Limits(timeout: 601).validate())
-        XCTAssertEqual(LLMStreamTransport.Limits().timeout, 300)
-        XCTAssertEqual(LLMStreamTransport.Limits().firstResponseTimeout, 25)
-        XCTAssertEqual(LLMStreamTransport.Limits().idleTimeout, 90)
+        XCTAssertThrowsError(try LLMStreamTransport.Limits(timeout: 7201).validate())
+        XCTAssertEqual(LLMStreamTransport.Limits().timeout, 1200)
+        XCTAssertEqual(LLMStreamTransport.Limits().firstResponseTimeout, 60)
+        XCTAssertEqual(LLMStreamTransport.Limits().idleTimeout, 120)
     }
     func testLiveTimingRejectsNonFiniteMalformedAndOutOfRangeValues() {
         for field in ["CREATOR_BENCHMARK_ALLOWANCE", "CREATOR_LIVE_TIMEOUT"] {
@@ -105,7 +105,7 @@ final class CreatorBenchmarkTests: XCTestCase {
                 let c = try await LLMTestContext(kind: kind, timeout: timeout); defer { c.cleanup() }
                 _ = try await c.run()
                 XCTAssertEqual(c.route.requests.count, 1)
-                XCTAssertEqual(try XCTUnwrap(c.route.requests.first).timeoutInterval, 90, "URLSession request timeout is idle, not total; transport independently enforces total")
+                XCTAssertEqual(try XCTUnwrap(c.route.requests.first).timeoutInterval, 120, "URLSession request timeout is idle, not total; transport independently enforces total")
             }
         }
     }

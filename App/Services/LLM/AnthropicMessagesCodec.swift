@@ -106,7 +106,7 @@ struct AnthropicMessagesCodec: LLMProtocolCodec {
         try consume(.init(name: name, data: String(decoding: try LLMRequestDescriptor.encoded(body), as: UTF8.self)))
     }
     var progress: LLMStreamProgress {
-        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
+        .init(phase: answer.receivingContent ? .content : (answer.reasoning.isEmpty ? .waiting : .thinking), characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
     }
     func finish() throws -> LLMResponse {
         guard done else { throw LLMFailure.truncated }

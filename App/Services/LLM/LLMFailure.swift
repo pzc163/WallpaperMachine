@@ -2,6 +2,7 @@ import Foundation
 
 /// Only allowlisted codes cross the transport boundary; never carry response bodies, URLs or keys.
 enum LLMFailure: Error, Equatable, Sendable, CustomStringConvertible, CustomDebugStringConvertible {
+    case deadline(LLMTimeoutEvidence)
     case connectionTimeout, streamUnsupported, usageUnsupported, contextWindow
     case invalidInput, credentialsUnavailable, staleProfile, invalidJob, busy, cancelled, timeout, network
     case unauthorized, rateLimited(retryAfter: Double?), server(Int), http(Int), redirectRejected
@@ -9,6 +10,7 @@ enum LLMFailure: Error, Equatable, Sendable, CustomStringConvertible, CustomDebu
 
     var description: String {
         switch self {
+        case .deadline(let evidence): return "timeout_\(evidence.kind.rawValue)"
         case .usageUnsupported: return "usage_unsupported"
         case .contextWindow: return "context_window"
         case .connectionTimeout: return "connection_timeout"

@@ -58,6 +58,9 @@ that boundary and verify zero packets, one retained reservation and no replay
 after restart. Reusing a child ticket or calling the legacy counter helper
 cannot bypass the ledger.
 
+Timeouts, interrupted networks and truncated streams retain the attempt charge but
+stop without repeating the entire generation automatically. The UI keeps bounded
+partial source in memory for inspection; it is never treated as a validated revision.
 401/403, provider refusal, stale/missing configuration, invalid local input and
 cancellation stop immediately. Storage, sealing and publication failures do not
 call the model again. Retry-After is respected up to 30 seconds; a longer delay

@@ -101,6 +101,7 @@ struct CreatorProviderConnectionForm: View {
                 Picker("Request budget", selection: $form.profile.limits.requestBudget) { ForEach(1...3, id: \.self) { Text(verbatim: String($0)).tag($0) } }
                     .labelsHidden().accessibilityIdentifier("creator-request-budget")
             }
+            CreatorGenerationOptions(profile: $form.profile)
             Toggle("Manual context and output limits", isOn: Binding(get: { form.profile.limits.nativeOutputLimit != true }, set: { manual in
                 form.profile.limits.nativeOutputLimit = !manual
                 form.profile.limits.contextWindow = manual ? 131_072 : nil

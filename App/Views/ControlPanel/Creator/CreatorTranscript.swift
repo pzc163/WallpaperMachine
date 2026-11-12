@@ -5,12 +5,14 @@ struct CreatorTranscript: Identifiable {
     let id = UUID()
     var progress = LLMStreamProgress()
     var startedAt = Date()
+    var thinkingStartedAt: Date?
     var thinkingEndedAt: Date?
     var completed = false
-    var isThinking: Bool { !completed && thinkingEndedAt == nil }
+    var isThinking: Bool { !completed && thinkingStartedAt != nil && thinkingEndedAt == nil }
     var byteCount: Int { progress.content.utf8.count + progress.reasoning.utf8.count }
     mutating func receive(_ value: LLMStreamProgress) {
         progress = value
+        if !value.reasoning.isEmpty && thinkingStartedAt == nil { thinkingStartedAt = Date() }
         if value.phase == .content && thinkingEndedAt == nil { thinkingEndedAt = Date() }
     }
     mutating func finish() { completed = true; if thinkingEndedAt == nil { thinkingEndedAt = Date() } }

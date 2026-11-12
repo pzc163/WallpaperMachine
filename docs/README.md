@@ -119,6 +119,7 @@ file; pass `rg -u` to search them deliberately.
 | [features/diagnostics.md](features/diagnostics.md) | Application log format, load tagging and the line each wallpaper activation leaves, detailed logging, retention, how the log says the previous session ended, and the diagnostics report users attach to bug reports |
 
 - [Creator connection stability and workspace UX](plans/2026-11-11-creator-connection-ux.md)
+- [Creator long generation, connection testing and diagnostics](plans/2026-11-12-creator-generation-reliability.md)
 
 - [Creator LAN, native output limits and streaming artifacts](plans/2026-11-11-creator-stream-artifacts.md)
 - [Creator engine foundation](features/creator-engines.md)

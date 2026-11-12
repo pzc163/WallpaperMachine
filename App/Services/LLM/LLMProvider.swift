@@ -90,6 +90,7 @@ actor LLMProvider {
         let profile: ProviderProfile
         do { profile = try await settings.profile(id: profileID, configurationID: configurationID) }
         catch { throw LLMFailure.staleProfile }
+        let transport = transport.resolved(for: profile)
         do { _ = try await store.generatingJob(ticket) } catch { throw LLMFailure.invalidJob }
         let registration = try await settings.withCurrentProfile(profile) { _ in
             try cancellation.check()

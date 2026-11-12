@@ -32,16 +32,20 @@ import XCTest
     }
     func testFirstDataIdleAndTotalDeadlinesAreIndependent() async throws {
         let c = try await LLMTestContext(); defer { c.cleanup() }
-        for (reply, limits, expected): (LLMMockURLProtocol.Reply, LLMStreamTransport.Limits, LLMFailure) in [
-            (.init(hold: true, responseDelay: 1), .init(timeout: 2, firstResponseTimeout: 0.08, idleTimeout: 1), .connectionTimeout),
-            (.init(chunks: [Data(": ping\n\n".utf8)], hold: true), .init(timeout: 2, firstResponseTimeout: 1, idleTimeout: 0.08), .timeout),
-            (.init(chunks: Array(repeating: Data(": ping\n\n".utf8), count: 20), hold: true, chunkInterval: 0.03), .init(timeout: 0.2, firstResponseTimeout: 1, idleTimeout: 0.12), .timeout)
+        for (reply, limits, expected): (LLMMockURLProtocol.Reply, LLMStreamTransport.Limits, LLMTimeoutEvidence.Kind) in [
+            (.init(hold: true, responseDelay: 1), .init(timeout: 2, firstResponseTimeout: 0.08, idleTimeout: 1), .firstResponse),
+            (.init(chunks: [Data(": ping\n\n".utf8)], hold: true), .init(timeout: 2, firstResponseTimeout: 1, idleTimeout: 0.08), .idle),
+            (.init(chunks: Array(repeating: Data(": ping\n\n".utf8), count: 20), hold: true, chunkInterval: 0.03), .init(timeout: 0.2, firstResponseTimeout: 1, idleTimeout: 0.12), .total),
+            (.init(chunks: Array(repeating: Data(": ping\n\n".utf8), count: 20), hold: true, chunkInterval: 0.02), .init(timeout: 2, firstResponseTimeout: 1, idleTimeout: 0.08, firstContentTimeout: 0.15), .firstContent)
         ] {
             c.route.replace([reply])
             let transport = LLMStreamTransport(configuration: LLMMockURLProtocol.configuration(), limits: limits)
             let started = ContinuousClock.now
             do { _ = try await transport.perform(URLRequest(url: c.url), decoder: OpenAICompatibleCodec(allowsLeadingThought: true)) { $0.resume() }; XCTFail("Deadline ignored") }
-            catch { XCTAssertEqual(error as? LLMFailure, expected) }
+            catch {
+                guard case .deadline(let evidence) = error as? LLMFailure else { XCTFail("Missing deadline evidence"); continue }
+                XCTAssertEqual(evidence.kind, expected); XCTAssertNoThrow(try evidence.validate())
+            }
             XCTAssertLessThan(started.duration(to: .now), .seconds(1))
         }
     }

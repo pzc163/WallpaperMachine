@@ -172,7 +172,10 @@ final class LLMProviderTests: XCTestCase {
             let c = try await LLMTestContext(timeout: timeout ? 0.1 : 3); defer { c.cleanup() }
             c.route.replace([.init(chunks: timeout ? [] : [try LLMTestFixtures.openAI(done: false)], hold: timeout)])
             let result = await failure { try await c.run() }
-            XCTAssertEqual(result, timeout ? .timeout : .truncated)
+            if timeout {
+                guard case .deadline(let evidence) = result else { XCTFail("Missing deadline evidence"); continue }
+                XCTAssertEqual(evidence.kind, .total)
+            } else { XCTAssertEqual(result, .truncated) }
             XCTAssertEqual(c.route.requests.count, 1)
             let job = try await c.store.job(c.ticket.id)
             XCTAssertEqual(job.state, .cancelled)

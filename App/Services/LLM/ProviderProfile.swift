@@ -68,6 +68,11 @@ struct ProviderProfile: Codable, Equatable, Sendable {
     var localMode = false
     var capabilities = Capabilities()
     var limits = Limits()
+    var timeoutPolicy: LLMTimeoutPolicy? = nil
+    var reasoningEffort: LLMReasoningEffort? = nil
+
+    var effectiveTimeoutPolicy: LLMTimeoutPolicy { timeoutPolicy ?? (localMode ? .local : .cloud) }
+    var supportsReasoningEffort: Bool { enabledModels.contains { LLMReasoningEffort.supports($0, protocolKind: protocolKind) } }
 
     var enabledModels: [String] { modelIDs ?? [model] }
     var connectionKind: ConnectionKind { localMode ? .local : .cloud }
@@ -86,6 +91,8 @@ struct ProviderProfile: Codable, Equatable, Sendable {
     }
 
     func validate() throws {
+        try effectiveTimeoutPolicy.validate()
+        guard reasoningEffort == nil || supportsReasoningEffort else { throw CreatorPersistence.Failure.invalidRecord }
         guard schemaVersion == 1 else { throw CreatorPersistence.Failure.unsupportedVersion }
         guard credentialNamespace.map({ $0 == connectionKind }) ?? true else { throw CreatorPersistence.Failure.invalidRecord }
         guard configurationRevision >= 0,

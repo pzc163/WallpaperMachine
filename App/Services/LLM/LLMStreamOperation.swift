@@ -18,11 +18,10 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
     private var task: URLSessionDataTask?
     private var launch: Task<Void, Never>?
     private let progress: @Sendable (LLMStreamProgress) -> Void
-    private var lastActivity: ContinuousClock.Instant?
+    private var tracker: LLMDeadlineTracker?
     private var lastEmission: ContinuousClock.Instant?
     private var lastProgress = LLMStreamProgress()
     private var activityDeadline: Task<Void, Never>?
-    private var deadline: Task<Void, Never>?
 
     init(request: URLRequest, decoder: any LLMProtocolCodec, configuration: URLSessionConfiguration, limits: LLMStreamTransport.Limits,
          progress: @escaping @Sendable (LLMStreamProgress) -> Void = { _ in }) {
@@ -46,12 +45,13 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
                 configuration.httpAdditionalHeaders = nil
                 configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
                 configuration.waitsForConnectivity = false
-                configuration.timeoutIntervalForRequest = max(limits.idleTimeout, limits.firstResponseTimeout)
+                // Native phase deadlines below own the policy. URLSession must not cut off prefill.
+                configuration.timeoutIntervalForRequest = max(limits.idleTimeout, limits.firstResponseTimeout, limits.firstContentTimeout ?? 0)
                 configuration.timeoutIntervalForResource = limits.timeout
                 let queue = OperationQueue(); queue.maxConcurrentOperationCount = 1
                 let session = URLSession(configuration: configuration, delegate: self, delegateQueue: queue)
                 var timedRequest = request
-                timedRequest.timeoutInterval = max(limits.idleTimeout, limits.firstResponseTimeout)
+                timedRequest.timeoutInterval = configuration.timeoutIntervalForRequest
                 let task = session.dataTask(with: timedRequest)
                 let accepted = lock.withLock { () -> Bool in
                     guard outcome == nil else { return false }
@@ -60,12 +60,8 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
                         do { try Task.checkCancellation(); try await start(task) }
                         catch { self.finish(.failure(LLMFailure.sanitized(error))) }
                     }
-                    let began = ContinuousClock.now
-                    activityDeadline = Task { await self.watchActivity(since: began) }
-                    deadline = Task {
-                        do { try await Task.sleep(for: .seconds(limits.timeout)); self.finish(.failure(.timeout)) }
-                        catch {}
-                    }
+                    tracker = .init(began: ProcessInfo.processInfo.systemUptime, limits: limits)
+                    restartDeadline()
                     return true
                 }
                 if !accepted { session.invalidateAndCancel() }
@@ -105,7 +101,8 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             guard responseCode == nil, let http = response as? HTTPURLResponse,
                   http.url == request.url else { return (false, .protocolViolation) }
             responseCode = http.statusCode
-            receivedActivity()
+            tracker?.response(at: ProcessInfo.processInfo.systemUptime)
+            restartDeadline()
             if [400, 422].contains(http.statusCode) { return (true, nil) }
             if let failure = LLMHTTPPolicy.failure(for: http) { return (false, failure) }
             let mime = http.value(forHTTPHeaderField: "Content-Type")?.split(separator: ";").first?.trimmingCharacters(in: .whitespaces).lowercased()
@@ -114,14 +111,13 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             return (true, nil)
         }
         if let failure = result.1 { finish(.failure(failure)) }
-        if result.0 { progress(.init(phase: .thinking)) }
+        if result.0 { progress(.init(phase: .waiting)) }
         completionHandler(result.0 ? .allow : .cancel)
     }
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         var update: LLMStreamProgress?
         let failure: LLMFailure? = lock.withLock {
             guard outcome == nil else { return nil }
-            if !data.isEmpty { receivedActivity() }
             guard let responseCode else { return .protocolViolation }
             if [400, 422].contains(responseCode) {
                 guard data.count <= 4096 - errorBody.count else { return .http(responseCode) }
@@ -129,11 +125,13 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             }
             if isJSON {
                 guard data.count <= limits.maximumBytes - jsonBody.count else { return .streamLimit }
+                receivedActivity(bytes: data.count, value: nil, effective: !data.isEmpty)
                 jsonBody.append(data); return nil
             }
             do {
                 for event in try parser.append(data) { try decoder.consume(event) }
                 let next = decoder.progress, now = ContinuousClock.now
+                receivedActivity(bytes: data.count, value: next, effective: next.characters > 0 || !next.reasoning.isEmpty)
                 if (next.phase != lastProgress.phase || lastEmission.map { $0.duration(to: now) >= .milliseconds(200) } ?? true) && next != lastProgress {
                     lastEmission = now; lastProgress = next; update = next
                 }
@@ -150,7 +148,11 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let result: Result<LLMResponse, LLMFailure>? = lock.withLock {
             guard outcome == nil else { return nil }
-            if let error { return .failure(LLMFailure.sanitized(error)) }
+            if let error {
+                if (error as? URLError)?.code == .timedOut,
+                   let evidence = tracker?.failure(at: ProcessInfo.processInfo.systemUptime) { return .failure(.deadline(evidence)) }
+                return .failure(LLMFailure.sanitized(error))
+            }
             if let responseCode, [400, 422].contains(responseCode) { return .failure(LLMHTTPPolicy.rejectedOutputLimit(errorBody) ? .contextWindow : LLMHTTPPolicy.unsupportedUsage(errorBody) ? .usageUnsupported : LLMHTTPPolicy.unsupportedJSONMode(errorBody) ? .jsonModeUnsupported : LLMHTTPPolicy.unsupportedStream(errorBody) ? .streamUnsupported : .http(responseCode)) }
             guard responseCode != nil else { return .failure(.network) }
             do {
@@ -164,41 +166,44 @@ final class LLMStreamOperation: NSObject, URLSessionDataDelegate, @unchecked Sen
             finish(result)
         }
     }
-    // Called under lock. A response header is the first packet; prefill then uses the idle limit.
-    private func receivedActivity() {
-        let first = lastActivity == nil
-        lastActivity = .now
-        if first {
-            activityDeadline?.cancel()
-            activityDeadline = Task { await self.watchActivity(since: .now) }
-        }
+    // Called under lock. Heartbeats count as activity, never as the first useful model output.
+    private func receivedActivity(bytes: Int, value: LLMStreamProgress?, effective: Bool) {
+        let wasWaiting = tracker?.contentAt == nil
+        tracker?.received(bytes: bytes, characters: value?.characters ?? 0, effectiveContent: effective, at: ProcessInfo.processInfo.systemUptime)
+        if wasWaiting && tracker?.contentAt != nil { restartDeadline() }
     }
-    private func watchActivity(since began: ContinuousClock.Instant) async {
+    private func restartDeadline() {
+        activityDeadline?.cancel()
+        activityDeadline = Task { await self.watchActivity() }
+    }
+    private func watchActivity() async {
         while !Task.isCancelled {
-            let next = lock.withLock { () -> ContinuousClock.Instant? in
+            let next = lock.withLock { () -> TimeInterval? in
                 guard outcome == nil else { return nil }
-                return lastActivity.map { $0 + .seconds(limits.idleTimeout) } ?? began + .seconds(limits.firstResponseTimeout)
+                return tracker?.nextDeadline
             }
             guard let next else { return }
-            do { try await Task.sleep(until: next, clock: .continuous); try Task.checkCancellation() } catch { return }
+            do { try await Task.sleep(for: .seconds(max(0, next - ProcessInfo.processInfo.systemUptime))); try Task.checkCancellation() } catch { return }
             let failure = lock.withLock { () -> LLMFailure? in
                 guard outcome == nil else { return nil }
-                if let lastActivity { return lastActivity.duration(to: .now) >= .seconds(limits.idleTimeout) ? .timeout : nil }
-                return .connectionTimeout
+                return tracker?.failure(at: ProcessInfo.processInfo.systemUptime).map { .deadline($0) }
             }
             if let failure { finish(.failure(failure)); return }
         }
     }
     private func finish(_ result: Result<LLMResponse, LLMFailure>) {
-        let cleanup = lock.withLock { () -> (CheckedContinuation<LLMResponse, Error>?, URLSession?, Task<Void, Never>?, Task<Void, Never>?, Task<Void, Never>?)? in
+        var terminalProgress: LLMStreamProgress?
+        let cleanup = lock.withLock { () -> (CheckedContinuation<LLMResponse, Error>?, URLSession?, Task<Void, Never>?, Task<Void, Never>?)? in
             guard outcome == nil else { return nil }
             outcome = result
-            let values = (continuation, session, launch, deadline, activityDeadline)
-            continuation = nil; session = nil; task = nil; launch = nil; deadline = nil; activityDeadline = nil; errorBody.removeAll(); jsonBody.removeAll()
+            terminalProgress = decoder.progress
+            let values = (continuation, session, launch, activityDeadline)
+            continuation = nil; session = nil; task = nil; launch = nil; activityDeadline = nil; errorBody.removeAll(); jsonBody.removeAll()
             return values
         }
         guard let cleanup else { return }
-        cleanup.2?.cancel(); cleanup.3?.cancel(); cleanup.4?.cancel(); cleanup.1?.invalidateAndCancel()
+        if case .failure = result, let terminalProgress { progress(terminalProgress) }
+        cleanup.2?.cancel(); cleanup.3?.cancel(); cleanup.1?.invalidateAndCancel()
         cleanup.0?.resume(with: result.mapError { $0 as Error })
     }
 }

@@ -3,7 +3,7 @@ import Foundation
 /// Only native categories and catalog field names can enter a repair prompt or durable failure record.
 struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConvertible {
     enum Category: String, Codable, Sendable {
-        case connection, streamUnsupported, usageUnsupported, contextWindow
+        case connection, streamUnsupported, usageUnsupported, contextWindow, incompleteOutput
         case malformedOutput, policyViolation, timeout, network, rateLimited, server, runtime, jsonModeUnsupported
         case unauthorized, refused, cancelled, interrupted, staleInput, budgetExhausted, storage, invalidRequest
     }
@@ -22,13 +22,16 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
     var retryAfter: Double? = nil
     var runtimeReason: RuntimeReason? = nil
     var shaderDiagnostics: [ShaderDiagnostic]? = nil
+    var timeoutEvidence: LLMTimeoutEvidence? = nil
     var description: String { category.rawValue }
 
     var repairable: Bool {
-        [.connection, .streamUnsupported, .usageUnsupported, .contextWindow, .malformedOutput, .policyViolation, .timeout, .network, .rateLimited, .server, .runtime, .jsonModeUnsupported].contains(category)
+        [.streamUnsupported, .usageUnsupported, .contextWindow, .malformedOutput, .policyViolation, .rateLimited, .server, .runtime, .jsonModeUnsupported].contains(category)
             && (retryAfter.map { $0 <= 30 } ?? true)
     }
     func validate() throws {
+        try timeoutEvidence?.validate()
+        guard timeoutEvidence == nil || category == .timeout else { throw CreatorPersistence.Failure.invalidRecord }
         var allowed: Set<String> = ["$", "schemaVersion", "templateID", "title", "summary", "parameters", "properties"]
         for parameter in CreatorTemplateCatalog.all.flatMap(\.parameters) {
             allowed.insert("parameters." + parameter.id)
@@ -46,6 +49,7 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
     }
     static func from(_ error: Error) -> Self {
         if let issue = error as? Self { return issue }
+        if (error as? LLMFailure) == .truncated { return .init(category: .incompleteOutput) }
         if (error as? LLMFailure) == .refused { return .init(category: .refused) }
         if error is CancellationError || (error as? CreatorRuntimeFailure) == .cancelled { return .init(category: .cancelled) }
         if let error = error as? CreatorRuntimeFailure {
@@ -61,6 +65,7 @@ struct CreatorRepairIssue: Codable, Equatable, Error, Sendable, CustomStringConv
         case .staleInput: return .init(category: .staleInput)
         case .transport(let transport):
             switch transport {
+            case .deadline(let evidence): return .init(category: .timeout, timeoutEvidence: evidence)
             case .unauthorized, .credentialsUnavailable: return .init(category: .unauthorized)
             case .connectionTimeout: return .init(category: .connection)
             case .usageUnsupported: return .init(category: .usageUnsupported)

@@ -19,6 +19,7 @@ import Foundation
         guard model.phase == .generating else { return phase(model.phase) }
         switch model.streamProgress.phase {
         case .connecting: return L("Connecting to model…")
+        case .waiting: return L("Connected · waiting for model output…")
         case .thinking: return L("Thinking…")
         case .content:
             return String(format: model.mode == .code ? L("Generating code · %lld characters received") : L("Generating parameters · %lld characters received"), model.streamProgress.characters)
@@ -41,6 +42,7 @@ import Foundation
     }
     static func issue(_ category: CreatorRepairIssue.Category) -> String {
         switch category {
+        case .incompleteOutput: L("The model stopped before completing the output. No automatic retry was sent.")
         case .unauthorized: L("Authentication failed. Check the saved key.")
         case .rateLimited: L("The provider is rate limited. Try again later.")
         case .connection: L("Cannot connect to the model server.")

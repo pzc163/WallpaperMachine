@@ -16,6 +16,9 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
                 return ["role": message.role.rawValue, "content": message.content]
             }]
         if !input.nativeOutputLimit { body["max_tokens"] = input.maxOutputTokens }
+        if LLMReasoningEffort.supports(try input.model(for: profile), protocolKind: profile.protocolKind) {
+            body["reasoning_effort"] = (profile.reasoningEffort ?? .low).rawValue
+        }
         let mode = profile.capabilities.jsonMode ?? .automatic
         if input.requiresJSON, jsonMode, mode != .disabled {
             if mode == .schema || (mode == .automatic && input.structuredOutput != nil) {
@@ -93,7 +96,7 @@ struct OpenAICompatibleCodec: LLMProtocolCodec {
         try consume(.init(name: "message", data: "[DONE]"))
     }
     var progress: LLMStreamProgress {
-        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
+        .init(phase: answer.receivingContent ? .content : (answer.reasoning.isEmpty ? .waiting : .thinking), characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
     }
     func finish() throws -> LLMResponse {
         guard done, stopped else { throw LLMFailure.truncated }

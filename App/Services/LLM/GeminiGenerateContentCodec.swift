@@ -68,7 +68,7 @@ struct GeminiGenerateContentCodec: LLMProtocolCodec {
         try consume(.init(name: "message", data: text))
     }
     var progress: LLMStreamProgress {
-        .init(phase: answer.receivingContent ? .content : .thinking, characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
+        .init(phase: answer.receivingContent ? .content : (answer.reasoning.isEmpty ? .waiting : .thinking), characters: answer.receivedCharacters, usage: usage, content: answer.content, reasoning: answer.reasoning, reasoningTruncated: answer.reasoningTruncated)
     }
     func finish() throws -> LLMResponse {
         guard stopped else { throw LLMFailure.truncated }
